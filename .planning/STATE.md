@@ -5,34 +5,34 @@
 See: .planning/PROJECT.md (updated 2026-01-16)
 
 **Core value:** KEWA AG hat jederzeit volle Transparenz darüber, welche Arbeiten Imeri erledigt hat — mit Fotobeweis und Zeitstempel.
-**Current focus:** Phase 2 — Task Management (IN PROGRESS)
+**Current focus:** Phase 2 — Task Management (COMPLETE)
 
 ## Current Position
 
 Phase: 2 of 6 (Task Management)
-Plan: 2 of 3 complete
-Status: In progress
-Last activity: 2026-01-16 — Completed 02-02-PLAN.md (Task Management UI)
+Plan: 3 of 3 complete
+Status: Phase complete
+Last activity: 2026-01-16 — Completed 02-03-PLAN.md (Task UI Components)
 
-Progress: █████░░░░░ 31% (5/16 plans)
+Progress: ██████░░░░ 38% (6/16 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 5
+- Total plans completed: 6
 - Average duration: 11 min
-- Total execution time: 0.92 hours
+- Total execution time: 1.12 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 1. Foundation | 3/3 | 43 min | 14 min |
-| 2. Task Management | 2/3 | 12 min | 6 min |
+| 2. Task Management | 3/3 | 24 min | 8 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-02 (6 min), 01-03 (29 min), 02-01 (3 min), 02-02 (9 min)
-- Trend: Phase 2 executing faster (API + UI plans, no checkpoints)
+- Last 5 plans: 01-03 (29 min), 02-01 (3 min), 02-02 (9 min), 02-03 (12 min)
+- Trend: Phase 2 completed efficiently, UI plan took slightly longer due to Turbopack issues
 
 ## Accumulated Context
 
@@ -56,6 +56,9 @@ Recent decisions affecting current work:
 | Auto-set completed_at on status change | 02-01 | PUT endpoint handles timestamp automatically |
 | Slide-up modal for mobile forms | 02-02 | Native mobile pattern, items-end on mobile, items-center on desktop |
 | Status toggle in edit form | 02-02 | Cleaner UI, prevents accidental status changes |
+| Task grouping by due date | 02-03 | 5 categories (Ueberfaellig, Heute, Diese Woche, Spaeter, Ohne Datum) |
+| Expandable cards on mobile | 02-03 | Tap to expand shows details, desktop has hover-reveal complete button |
+| Parallel API fetching for dashboard | 02-03 | Promise.all for open + completed tasks, faster load time |
 
 ### Pending Todos
 
@@ -67,14 +70,14 @@ Recent decisions affecting current work:
 
 - Supabase project needs to be created and migration applied before testing API endpoints
 - Next.js 16 middleware deprecation warning (works but may need migration to proxy pattern)
-- Next.js Turbopack has intermittent build race conditions (cache clear resolves)
+- Next.js Turbopack has intermittent build race conditions (use NEXT_TURBOPACK=0 for reliable builds)
 
-## Phase 2 Progress
+## Phase 2 Summary
 
-Phase 2 (Task Management) progress:
+Phase 2 (Task Management) COMPLETE:
 1. **02-01:** (COMPLETE) TypeScript types + Units API + Tasks CRUD API
-2. **02-02:** (COMPLETE) Task Management UI + Projects API
-3. **02-03:** (PENDING) Task UI refinements
+2. **02-02:** (COMPLETE) Projects API + Gebaude/Aufgaben pages
+3. **02-03:** (COMPLETE) Imeri task list + Completion modal + Real dashboard data
 
 **API endpoints delivered:**
 - GET /api/units (with task counts)
@@ -83,11 +86,18 @@ Phase 2 (Task Management) progress:
 - GET/POST /api/projects
 
 **UI pages delivered:**
-- /dashboard/gebaude (unit overview with task counts)
-- /dashboard/aufgaben (task list with CRUD)
+- /dashboard - Real task stats and activity (role-based)
+- /dashboard/gebaude - Unit overview with task counts
+- /dashboard/aufgaben - Task list with CRUD (KEWA)
+- /dashboard/tasks - Imeri task list with completion flow
+
+**Key components:**
+- ImeriTaskCard - Touch-optimized expandable task card
+- CompleteTaskModal - Completion confirmation with optional note
+- TaskList, TaskForm - Task management components
 
 ## Session Continuity
 
-Last session: 2026-01-16 12:38
-Stopped at: Completed 02-02-PLAN.md
-Resume file: None - ready for 02-03-PLAN.md
+Last session: 2026-01-16 12:40
+Stopped at: Completed 02-03-PLAN.md (Phase 2 complete)
+Resume file: None - ready for Phase 3 (Photo Evidence)
