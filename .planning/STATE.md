@@ -10,29 +10,29 @@ See: .planning/PROJECT.md (updated 2026-01-16)
 ## Current Position
 
 Phase: 2 of 6 (Task Management)
-Plan: 1 of 3 complete
+Plan: 2 of 3 complete
 Status: In progress
-Last activity: 2026-01-16 — Completed 02-01-PLAN.md (Task Management API)
+Last activity: 2026-01-16 — Completed 02-02-PLAN.md (Task Management UI)
 
-Progress: ████░░░░░░ 25% (4/16 plans)
+Progress: █████░░░░░ 31% (5/16 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 4
+- Total plans completed: 5
 - Average duration: 11 min
-- Total execution time: 0.77 hours
+- Total execution time: 0.92 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 1. Foundation | 3/3 | 43 min | 14 min |
-| 2. Task Management | 1/3 | 3 min | 3 min |
+| 2. Task Management | 2/3 | 12 min | 6 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (8 min), 01-02 (6 min), 01-03 (29 min), 02-01 (3 min)
-- Trend: 02-01 fast execution (no checkpoints, API-only plan)
+- Last 5 plans: 01-02 (6 min), 01-03 (29 min), 02-01 (3 min), 02-02 (9 min)
+- Trend: Phase 2 executing faster (API + UI plans, no checkpoints)
 
 ## Accumulated Context
 
@@ -54,6 +54,8 @@ Recent decisions affecting current work:
 | Manual aggregation for task counts | 02-01 | Supabase nested select + JS aggregation, simpler than RPC |
 | Task sorting order | 02-01 | due_date (nulls last), priority (urgent first), created_at |
 | Auto-set completed_at on status change | 02-01 | PUT endpoint handles timestamp automatically |
+| Slide-up modal for mobile forms | 02-02 | Native mobile pattern, items-end on mobile, items-center on desktop |
+| Status toggle in edit form | 02-02 | Cleaner UI, prevents accidental status changes |
 
 ### Pending Todos
 
@@ -65,22 +67,27 @@ Recent decisions affecting current work:
 
 - Supabase project needs to be created and migration applied before testing API endpoints
 - Next.js 16 middleware deprecation warning (works but may need migration to proxy pattern)
-- Subpages (Gebaude, Aufgaben, Audio) are placeholders - implemented in later phases
+- Next.js Turbopack has intermittent build race conditions (cache clear resolves)
 
 ## Phase 2 Progress
 
 Phase 2 (Task Management) progress:
 1. **02-01:** (COMPLETE) TypeScript types + Units API + Tasks CRUD API
-2. **02-02:** (PENDING) Projects CRUD API
-3. **02-03:** (PENDING) Task UI components
+2. **02-02:** (COMPLETE) Task Management UI + Projects API
+3. **02-03:** (PENDING) Task UI refinements
 
 **API endpoints delivered:**
 - GET /api/units (with task counts)
 - GET/POST /api/tasks
 - GET/PUT/DELETE /api/tasks/[id]
+- GET/POST /api/projects
+
+**UI pages delivered:**
+- /dashboard/gebaude (unit overview with task counts)
+- /dashboard/aufgaben (task list with CRUD)
 
 ## Session Continuity
 
-Last session: 2026-01-16 12:27
-Stopped at: Completed 02-01-PLAN.md
-Resume file: None - ready for 02-02-PLAN.md
+Last session: 2026-01-16 12:38
+Stopped at: Completed 02-02-PLAN.md
+Resume file: None - ready for 02-03-PLAN.md
