@@ -23,12 +23,12 @@ Requirements für Initial-Release. Jedes mappt auf Roadmap-Phasen.
 
 ### Aufgaben
 
-- [ ] **TASK-01**: User kann Aufgaben erstellen, lesen, bearbeiten und löschen
-- [ ] **TASK-02**: User kann Aufgabenstatus setzen (offen / erledigt)
-- [ ] **TASK-03**: User kann Fälligkeitsdatum pro Aufgabe setzen
-- [ ] **TASK-04**: User kann Priorität pro Aufgabe setzen
+- [x] **TASK-01**: User kann Aufgaben erstellen, lesen, bearbeiten und löschen ✓
+- [x] **TASK-02**: User kann Aufgabenstatus setzen (offen / erledigt) ✓
+- [x] **TASK-03**: User kann Fälligkeitsdatum pro Aufgabe setzen ✓
+- [x] **TASK-04**: User kann Priorität pro Aufgabe setzen ✓
 - [ ] **TASK-05**: KEWA AG kann wiederkehrende Aufgaben erstellen (wöchentlich/monatlich)
-- [ ] **TASK-06**: Imeri kann Kurznotiz bei Erledigung hinzufügen
+- [x] **TASK-06**: Imeri kann Kurznotiz bei Erledigung hinzufügen ✓
 
 ### Fotos
 
@@ -45,9 +45,9 @@ Requirements für Initial-Release. Jedes mappt auf Roadmap-Phasen.
 
 ### Dashboards
 
-- [ ] **DASH-01**: KEWA AG sieht Übersicht aller Einheiten mit Status
-- [ ] **DASH-02**: KEWA AG kann Projekte und Aufgaben erstellen und bearbeiten
-- [ ] **DASH-03**: Imeri sieht Liste seiner offenen Aufgaben
+- [x] **DASH-01**: KEWA AG sieht Übersicht aller Einheiten mit Status ✓
+- [x] **DASH-02**: KEWA AG kann Projekte und Aufgaben erstellen und bearbeiten ✓
+- [x] **DASH-03**: Imeri sieht Liste seiner offenen Aufgaben ✓
 - [ ] **DASH-04**: Imeri kann Aufgaben als erledigt markieren mit Foto-Upload
 - [ ] **DASH-05**: KEWA AG kann Sichtbarkeit einstellen (Imeri sieht Projekte+Aufgaben oder nur Aufgaben)
 - [ ] **DASH-06**: KEWA AG sieht Übersicht aller Audio-Dateien (inkl. Imeris Notfall-Audios)
@@ -100,12 +100,12 @@ Welche Phasen decken welche Requirements ab.
 | STRUC-03 | Phase 5 | Pending |
 | STRUC-04 | Phase 5 | Pending |
 | STRUC-05 | Phase 5 | Pending |
-| TASK-01 | Phase 2 | Pending |
-| TASK-02 | Phase 2 | Pending |
-| TASK-03 | Phase 2 | Pending |
-| TASK-04 | Phase 2 | Pending |
+| TASK-01 | Phase 2 | Complete ✓ |
+| TASK-02 | Phase 2 | Complete ✓ |
+| TASK-03 | Phase 2 | Complete ✓ |
+| TASK-04 | Phase 2 | Complete ✓ |
 | TASK-05 | Phase 6 | Pending |
-| TASK-06 | Phase 6 | Pending |
+| TASK-06 | Phase 2 | Complete ✓ |
 | PHOTO-01 | Phase 3 | Pending |
 | PHOTO-02 | Phase 3 | Pending |
 | PHOTO-03 | Phase 3 | Pending |
@@ -113,9 +113,9 @@ Welche Phasen decken welche Requirements ab.
 | AUDIO-02 | Phase 4 | Pending |
 | AUDIO-03 | Phase 4 | Pending |
 | AUDIO-04 | Phase 4 | Pending |
-| DASH-01 | Phase 2 | Pending |
-| DASH-02 | Phase 2 | Pending |
-| DASH-03 | Phase 2 | Pending |
+| DASH-01 | Phase 2 | Complete ✓ |
+| DASH-02 | Phase 2 | Complete ✓ |
+| DASH-03 | Phase 2 | Complete ✓ |
 | DASH-04 | Phase 2 | Pending |
 | DASH-05 | Phase 5 | Pending |
 | DASH-06 | Phase 4 | Pending |

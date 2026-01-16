@@ -11,7 +11,7 @@ Von Null zur vollständigen Task-Management-App für KEWA AG und Handwerker Imer
 - Decimal phases (2.1, 2.2): Urgent insertions (marked with INSERTED)
 
 - [x] **Phase 1: Foundation** - Auth, Datenstruktur, Mobile-First Basis ✓
-- [ ] **Phase 2: Task Management** - Aufgaben-CRUD, Dashboards, Kernfunktionalität
+- [x] **Phase 2: Task Management** - Aufgaben-CRUD, Dashboards, Kernfunktionalität ✓
 - [ ] **Phase 3: Photo Documentation** - Fotobeweis für erledigte Arbeiten
 - [ ] **Phase 4: Voice Notes** - Sprachnotizen mit Transkription für KEWA AG
 - [ ] **Phase 5: Building Visualization** - Grafische Gebäudeansicht, Fortschrittsbalken
@@ -51,9 +51,9 @@ Plans:
 **Plans**: TBD
 
 Plans:
-- [ ] 02-01: Task CRUD API + Database
-- [ ] 02-02: KEWA Dashboard
-- [ ] 02-03: Imeri Dashboard
+- [x] 02-01: Task CRUD API + Database ✓
+- [x] 02-02: KEWA Dashboard ✓
+- [x] 02-03: Imeri Dashboard ✓
 
 ### Phase 3: Photo Documentation
 **Goal**: Fotobeweis für erledigte Arbeiten — der Kernwert der App
@@ -134,7 +134,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation | 3/3 | ✓ Complete | 2026-01-16 |
-| 2. Task Management | 0/3 | Not started | - |
+| 2. Task Management | 3/3 | ✓ Complete | 2026-01-16 |
 | 3. Photo Documentation | 0/2 | Not started | - |
 | 4. Voice Notes | 0/3 | Not started | - |
 | 5. Building Visualization | 0/2 | Not started | - |
