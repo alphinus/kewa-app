@@ -220,3 +220,56 @@ export interface SuccessResponse {
 export interface ErrorResponse {
   error: string
 }
+
+// =============================================
+// PHOTO TYPES
+// =============================================
+
+/**
+ * Photo type distinguishing explanation from completion photos
+ */
+export type PhotoType = 'explanation' | 'completion'
+
+/**
+ * Photo attachment for task documentation
+ */
+export interface TaskPhoto {
+  id: string
+  task_id: string
+  photo_type: PhotoType
+  storage_path: string
+  file_name: string
+  file_size: number
+  uploaded_by: string
+  created_at: string
+}
+
+/**
+ * TaskPhoto with resolved storage URL
+ */
+export interface TaskPhotoWithUrl extends TaskPhoto {
+  url: string
+}
+
+/**
+ * Input for creating a photo (client-side)
+ */
+export interface CreatePhotoInput {
+  task_id: string
+  photo_type: PhotoType
+  file: File
+}
+
+/**
+ * Response for GET /api/photos
+ */
+export interface PhotosResponse {
+  photos: TaskPhotoWithUrl[]
+}
+
+/**
+ * Response for single photo operations
+ */
+export interface PhotoResponse {
+  photo: TaskPhotoWithUrl
+}
