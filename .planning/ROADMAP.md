@@ -10,7 +10,7 @@ Von Null zur vollständigen Task-Management-App für KEWA AG und Handwerker Imer
 - Integer phases (1, 2, 3): Planned milestone work
 - Decimal phases (2.1, 2.2): Urgent insertions (marked with INSERTED)
 
-- [ ] **Phase 1: Foundation** - Auth, Datenstruktur, Mobile-First Basis
+- [x] **Phase 1: Foundation** - Auth, Datenstruktur, Mobile-First Basis ✓
 - [ ] **Phase 2: Task Management** - Aufgaben-CRUD, Dashboards, Kernfunktionalität
 - [ ] **Phase 3: Photo Documentation** - Fotobeweis für erledigte Arbeiten
 - [ ] **Phase 4: Voice Notes** - Sprachnotizen mit Transkription für KEWA AG
@@ -33,9 +33,9 @@ Von Null zur vollständigen Task-Management-App für KEWA AG und Handwerker Imer
 **Plans**: TBD
 
 Plans:
-- [ ] 01-01: Supabase Setup + Schema
-- [ ] 01-02: PIN Auth + Sessions
-- [ ] 01-03: Base Layout + Mobile Components
+- [x] 01-01: Supabase Setup + Schema ✓
+- [x] 01-02: PIN Auth + Sessions ✓
+- [x] 01-03: Base Layout + Mobile Components ✓
 
 ### Phase 2: Task Management
 **Goal**: Kernfunktionalität — KEWA erstellt Tasks, Imeri erledigt sie
@@ -133,7 +133,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation | 0/3 | Not started | - |
+| 1. Foundation | 3/3 | ✓ Complete | 2026-01-16 |
 | 2. Task Management | 0/3 | Not started | - |
 | 3. Photo Documentation | 0/2 | Not started | - |
 | 4. Voice Notes | 0/3 | Not started | - |
