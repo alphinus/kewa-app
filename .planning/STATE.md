@@ -5,33 +5,34 @@
 See: .planning/PROJECT.md (updated 2026-01-16)
 
 **Core value:** KEWA AG hat jederzeit volle Transparenz darüber, welche Arbeiten Imeri erledigt hat — mit Fotobeweis und Zeitstempel.
-**Current focus:** Phase 1 — Foundation (COMPLETE)
+**Current focus:** Phase 2 — Task Management (IN PROGRESS)
 
 ## Current Position
 
-Phase: 1 of 6 (Foundation) - COMPLETE
-Plan: 3 of 3 complete
-Status: Phase complete, ready for Phase 2
-Last activity: 2026-01-16 — Completed 01-03-PLAN.md (Dashboard Layout & Navigation)
+Phase: 2 of 6 (Task Management)
+Plan: 1 of 3 complete
+Status: In progress
+Last activity: 2026-01-16 — Completed 02-01-PLAN.md (Task Management API)
 
-Progress: ███░░░░░░░ 19% (3/16 plans)
+Progress: ████░░░░░░ 25% (4/16 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 3
-- Average duration: 14 min
-- Total execution time: 0.72 hours
+- Total plans completed: 4
+- Average duration: 11 min
+- Total execution time: 0.77 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 1. Foundation | 3/3 | 43 min | 14 min |
+| 2. Task Management | 1/3 | 3 min | 3 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (8 min), 01-02 (6 min), 01-03 (29 min)
-- Trend: Plan 03 longer due to checkpoint verification wait
+- Last 5 plans: 01-01 (8 min), 01-02 (6 min), 01-03 (29 min), 02-01 (3 min)
+- Trend: 02-01 fast execution (no checkpoints, API-only plan)
 
 ## Accumulated Context
 
@@ -50,6 +51,9 @@ Recent decisions affecting current work:
 | 48px touch targets | 01-03 | All interactive elements min 48px height for mobile usability |
 | Bottom navigation pattern | 01-03 | Mobile-native pattern, more accessible than hamburger menu |
 | Dashboard at /dashboard path | 01-03 | Route group caused routing conflicts, simpler as actual path |
+| Manual aggregation for task counts | 02-01 | Supabase nested select + JS aggregation, simpler than RPC |
+| Task sorting order | 02-01 | due_date (nulls last), priority (urgent first), created_at |
+| Auto-set completed_at on status change | 02-01 | PUT endpoint handles timestamp automatically |
 
 ### Pending Todos
 
@@ -59,21 +63,24 @@ Recent decisions affecting current work:
 
 ### Blockers/Concerns
 
-- Supabase project needs to be created and migration applied before testing auth flow
+- Supabase project needs to be created and migration applied before testing API endpoints
 - Next.js 16 middleware deprecation warning (works but may need migration to proxy pattern)
 - Subpages (Gebaude, Aufgaben, Audio) are placeholders - implemented in later phases
 
-## Phase 1 Completion Summary
+## Phase 2 Progress
 
-Phase 1 (Foundation) delivered:
-1. **01-01:** Next.js 16 project with Supabase schema (buildings, units, tasks, users)
-2. **01-02:** PIN authentication with bcrypt, JWT sessions (jose), Edge middleware
-3. **01-03:** Touch-optimized UI components, role-based navigation, dashboard layout
+Phase 2 (Task Management) progress:
+1. **02-01:** (COMPLETE) TypeScript types + Units API + Tasks CRUD API
+2. **02-02:** (PENDING) Projects CRUD API
+3. **02-03:** (PENDING) Task UI components
 
-**Ready for Phase 2:** Building management features (CRUD for buildings/units)
+**API endpoints delivered:**
+- GET /api/units (with task counts)
+- GET/POST /api/tasks
+- GET/PUT/DELETE /api/tasks/[id]
 
 ## Session Continuity
 
-Last session: 2026-01-16 12:30
-Stopped at: Completed 01-03-PLAN.md (Phase 1 complete)
-Resume file: None - ready for Phase 2
+Last session: 2026-01-16 12:27
+Stopped at: Completed 02-01-PLAN.md
+Resume file: None - ready for 02-02-PLAN.md
