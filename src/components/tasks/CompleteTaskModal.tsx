@@ -1,8 +1,9 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { Button } from '@/components/ui/button'
-import type { TaskWithProject } from '@/types/database'
+import { PhotoUpload } from '@/components/photos/PhotoUpload'
+import type { TaskWithProject, TaskPhotoWithUrl } from '@/types/database'
 
 interface CompleteTaskModalProps {
   task: TaskWithProject
@@ -14,21 +15,52 @@ const MAX_NOTE_LENGTH = 200
 
 /**
  * Task completion confirmation modal
- * Shows task details, optional note input, and confirm/cancel buttons
+ * Requires at least 1 photo before completion is allowed
+ * Shows task details, photo upload, optional note input, and confirm/cancel buttons
  * Accessible: focus trap, escape to close, proper ARIA
  */
 export function CompleteTaskModal({ task, onClose, onComplete }: CompleteTaskModalProps) {
   const [note, setNote] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [completionPhotos, setCompletionPhotos] = useState<TaskPhotoWithUrl[]>([])
+  const [photosLoading, setPhotosLoading] = useState(true)
 
   const modalRef = useRef<HTMLDivElement>(null)
   const cancelButtonRef = useRef<HTMLButtonElement>(null)
 
+  // Check if completion is allowed (at least 1 photo)
+  const canComplete = completionPhotos.length > 0
+
+  // Fetch existing completion photos on mount
+  useEffect(() => {
+    async function fetchPhotos() {
+      try {
+        const response = await fetch(`/api/photos?task_id=${task.id}`)
+        if (response.ok) {
+          const data = await response.json()
+          // Filter for completion photos only
+          const existing = data.photos.filter(
+            (p: TaskPhotoWithUrl) => p.photo_type === 'completion'
+          )
+          setCompletionPhotos(existing)
+        }
+      } catch (err) {
+        console.error('Error fetching photos:', err)
+      } finally {
+        setPhotosLoading(false)
+      }
+    }
+
+    fetchPhotos()
+  }, [task.id])
+
   // Focus trap and escape key handling
   useEffect(() => {
-    // Focus the cancel button on open
-    cancelButtonRef.current?.focus()
+    // Focus the cancel button on open (after photos loaded)
+    if (!photosLoading) {
+      cancelButtonRef.current?.focus()
+    }
 
     // Handle escape key
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -42,7 +74,7 @@ export function CompleteTaskModal({ task, onClose, onComplete }: CompleteTaskMod
       if (e.key !== 'Tab' || !modalRef.current) return
 
       const focusableElements = modalRef.current.querySelectorAll<HTMLElement>(
-        'button:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        'button:not([disabled]), textarea:not([disabled]), input:not([disabled]), [tabindex]:not([tabindex="-1"])'
       )
 
       const firstElement = focusableElements[0]
@@ -68,10 +100,28 @@ export function CompleteTaskModal({ task, onClose, onComplete }: CompleteTaskMod
       document.removeEventListener('keydown', handleFocusTrap)
       document.body.style.overflow = ''
     }
-  }, [loading, onClose])
+  }, [loading, onClose, photosLoading])
 
-  // Handle confirmation
+  /**
+   * Handle photo upload complete
+   */
+  const handleUploadComplete = useCallback((photo: TaskPhotoWithUrl) => {
+    setCompletionPhotos((prev) => [...prev, photo])
+  }, [])
+
+  /**
+   * Handle photo delete
+   */
+  const handlePhotoDelete = useCallback((photoId: string) => {
+    setCompletionPhotos((prev) => prev.filter((p) => p.id !== photoId))
+  }, [])
+
+  /**
+   * Handle confirmation
+   */
   const handleConfirm = async () => {
+    if (!canComplete) return
+
     try {
       setLoading(true)
       setError(null)
@@ -99,7 +149,9 @@ export function CompleteTaskModal({ task, onClose, onComplete }: CompleteTaskMod
     }
   }
 
-  // Handle backdrop click
+  /**
+   * Handle backdrop click
+   */
   const handleBackdropClick = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget && !loading) {
       onClose()
@@ -119,7 +171,7 @@ export function CompleteTaskModal({ task, onClose, onComplete }: CompleteTaskMod
     >
       <div
         ref={modalRef}
-        className="bg-white dark:bg-gray-900 rounded-t-2xl sm:rounded-xl w-full sm:max-w-md mx-0 sm:mx-4 p-6 shadow-xl"
+        className="bg-white dark:bg-gray-900 rounded-t-2xl sm:rounded-xl w-full sm:max-w-md mx-0 sm:mx-4 p-6 shadow-xl max-h-[90vh] overflow-y-auto"
       >
         {/* Header */}
         <h2
@@ -137,6 +189,38 @@ export function CompleteTaskModal({ task, onClose, onComplete }: CompleteTaskMod
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
             {location}
           </p>
+        </div>
+
+        {/* Photo documentation section */}
+        <div className="mt-4">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            Foto-Dokumentation
+            <span className="text-red-500 ml-1">*</span>
+          </label>
+
+          {photosLoading ? (
+            <div className="flex items-center justify-center py-6">
+              <LoadingSpinner />
+              <span className="ml-2 text-gray-500 dark:text-gray-400">Fotos werden geladen...</span>
+            </div>
+          ) : (
+            <PhotoUpload
+              taskId={task.id}
+              photoType="completion"
+              maxPhotos={2}
+              existingPhotos={completionPhotos}
+              onUploadComplete={handleUploadComplete}
+              onDelete={handlePhotoDelete}
+              disabled={loading}
+            />
+          )}
+
+          {/* Photo requirement hint */}
+          {!canComplete && !photosLoading && (
+            <p className="mt-2 text-sm text-amber-600 dark:text-amber-400">
+              Mindestens 1 Foto erforderlich
+            </p>
+          )}
         </div>
 
         {/* Note input */}
@@ -187,12 +271,38 @@ export function CompleteTaskModal({ task, onClose, onComplete }: CompleteTaskMod
             fullWidth
             onClick={handleConfirm}
             loading={loading}
-            className="bg-green-600 hover:bg-green-700"
+            disabled={!canComplete || photosLoading}
+            className="bg-green-600 hover:bg-green-700 disabled:bg-gray-400"
           >
             Als erledigt markieren
           </Button>
         </div>
       </div>
     </div>
+  )
+}
+
+function LoadingSpinner() {
+  return (
+    <svg
+      className="animate-spin h-5 w-5 text-gray-500"
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 24 24"
+    >
+      <circle
+        className="opacity-25"
+        cx="12"
+        cy="12"
+        r="10"
+        stroke="currentColor"
+        strokeWidth="4"
+      />
+      <path
+        className="opacity-75"
+        fill="currentColor"
+        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+      />
+    </svg>
   )
 }
