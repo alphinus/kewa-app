@@ -2,69 +2,68 @@
 
 ## What This Is
 
-Eine Web-App zur Verwaltung von Handwerker-Aufgaben für eine Wohnliegenschaft. Die KEWA AG (Eigentümerin) weist dem Handwerker Imeri Arbeiten zu, dieser dokumentiert die Erledigung mit Fotos. Grafische Gebäudeansicht, Sprachnotizen und wöchentliche Berichte inklusive.
+Eine Web-App zur Verwaltung von Handwerker-Aufgaben für eine Wohnliegenschaft. Die KEWA AG (Eigentümerin) weist dem Handwerker Imeri Arbeiten zu, dieser dokumentiert die Erledigung mit Fotos. Grafische Gebäudeansicht, Sprachnotizen mit automatischer Transkription, und wöchentliche Berichte inklusive.
 
 ## Core Value
 
 KEWA AG hat jederzeit volle Transparenz darüber, welche Arbeiten Imeri erledigt hat — mit Fotobeweis und Zeitstempel.
 
+## Current State (v1 Shipped)
+
+**Tech Stack:** Next.js 16 + React 19 + Supabase + Tailwind CSS 4
+**Codebase:** 12,116 LOC TypeScript, 117 files
+**Status:** Ready for production deployment
+
 ## Requirements
 
 ### Validated
 
-(None yet — ship to validate)
+**Authentifizierung (v1):**
+- ✓ PIN-basierte Anmeldung (ein PIN für KEWA AG, ein PIN für Imeri) — v1
+- ✓ Unterschiedliche Berechtigungen je nach Rolle — v1
+- ✓ 7-Tage Session-Persistenz mit httpOnly Cookie — v1
+
+**Gebäudestruktur (v1):**
+- ✓ Grafische Gebäudeansicht (4 Stockwerke + Dach, je 3 Wohnungen) — v1
+- ✓ 13 Wohnungen als Einheiten + 9 Gemeinschaftsräume — v1
+- ✓ Mieternamen pro Wohnung hinterlegbar (durch KEWA AG) — v1
+- ✓ Farbkodierte Fortschrittsbalken pro Einheit — v1
+- ✓ Sichtbarkeitseinstellung pro Einheit für Imeri — v1
+
+**Projektstruktur (v1):**
+- ✓ Projekte pro Einheit — v1
+- ✓ Aufgaben innerhalb von Projekten — v1
+- ✓ Hierarchie: Gebäude → Einheit → Projekt → Aufgabe — v1
+
+**Aufgaben (v1):**
+- ✓ Titel, Beschreibung, Fälligkeitsdatum, Priorität — v1
+- ✓ Status: offen / erledigt — v1
+- ✓ KEWA AG kann bis zu 2 Erklärungsbilder pro Aufgabe anhängen — v1
+- ✓ Imeri kann bis zu 2 Erledigungsfotos pro Aufgabe hochladen — v1
+- ✓ Kurznotiz bei Erledigung möglich — v1
+- ✓ Wiederkehrende Aufgaben (wöchentlich/monatlich) — v1
+- ✓ Vorher/Nachher Fotovergleich — v1
+
+**Sprachnotizen (v1):**
+- ✓ KEWA AG: Audio aufnehmen (max 1 Min) + automatische Transkription — v1
+- ✓ Imeri kann Audio abspielen und Transkription lesen — v1
+- ✓ Imeri: Notfall-Audio aufnehmen (nur Speicherung, keine Transkription) — v1
+- ✓ KEWA AG sieht Übersicht aller Audio-Dateien — v1
+
+**Dashboards (v1):**
+- ✓ KEWA AG: Übersicht aller Einheiten mit Status — v1
+- ✓ KEWA AG: Projekte und Aufgaben erstellen/bearbeiten — v1
+- ✓ Imeri: Liste seiner offenen Aufgaben — v1
+- ✓ Imeri: Aufgaben als erledigt markieren mit Foto-Upload — v1
+- ✓ Mobile-optimiert (Touch-Targets ≥48px) — v1
+
+**Berichte & Archivierung (v1):**
+- ✓ Wöchentlicher Bericht mit erledigten Arbeiten und Fotos — v1
+- ✓ Projekt-Archivierung nach Abschluss aller Aufgaben — v1
 
 ### Active
 
-**Authentifizierung:**
-- [ ] PIN-basierte Anmeldung (ein PIN für KEWA AG, ein PIN für Imeri)
-- [ ] Unterschiedliche Berechtigungen je nach Rolle
-
-**Gebäudestruktur:**
-- [ ] Grafische Gebäudeansicht (4 Stockwerke + Dach, je 3 Wohnungen)
-- [ ] 13 Wohnungen als Einheiten (EG: 3, 1.OG: 3, 2.OG: 3, 3.OG: 3, Dach: 1)
-- [ ] Gemeinschaftsräume: Keller, Waschküche, Veloraum, Heizungsraum, Pelletraum, Treppenhaus, Trockenraum, Magazin, Gartenbereich
-- [ ] Gesamtes Objekt als eigene Einheit für gebäudeweite Aufgaben
-- [ ] Mieternamen pro Wohnung hinterlegbar (durch KEWA AG)
-
-**Projektstruktur:**
-- [ ] Projekte pro Einheit (z.B. "Badezimmer", "Küche", "Balkon")
-- [ ] Aufgaben innerhalb von Projekten
-- [ ] Hierarchie: Gebäude → Einheit → Projekt → Aufgabe
-
-**Aufgaben (Tasks):**
-- [ ] Titel, Beschreibung, Fälligkeitsdatum, Priorität
-- [ ] Status: offen / erledigt
-- [ ] KEWA AG kann bis zu 2 Bilder pro Aufgabe anhängen (zur Erklärung)
-- [ ] Imeri kann bis zu 2 Fotos pro Aufgabe hochladen (Dokumentation der Erledigung)
-- [ ] Kurznotiz bei Erledigung möglich (optional)
-- [ ] Wiederkehrende Aufgaben (wöchentlich/monatlich)
-
-**Sprachnotizen:**
-- [ ] KEWA AG: Audio aufnehmen (max 1 Min) + automatische Transkription
-- [ ] Transkription wird Aufgabenbeschreibung
-- [ ] Audio-Datei wird gespeichert
-- [ ] Imeri kann Audio abspielen und Text lesen
-- [ ] Imeri: Audio aufnehmen nur in Ausnahmefällen (max 1 Min, nur Speicherung, keine Transkription)
-
-**KEWA AG Dashboard:**
-- [ ] Übersicht aller Einheiten mit Fortschrittsbalken
-- [ ] Projekte und Aufgaben erstellen/bearbeiten
-- [ ] Wöchentlicher Bericht (automatisch generiert) — welche Arbeiten erledigt
-- [ ] Sichtbarkeitseinstellung: Imeri sieht Projekte+Aufgaben oder nur Aufgaben
-- [ ] Übersicht aller Audio-Dateien (inkl. Imeris Notfall-Audios)
-
-**Imeri Dashboard:**
-- [ ] Liste seiner offenen Aufgaben (einfach und übersichtlich)
-- [ ] Aufgaben als erledigt markieren
-- [ ] Foto-Upload bei Erledigung
-- [ ] Audio abspielen von KEWA AG
-- [ ] Notfall-Audio aufnehmen (Ausnahme, nicht Standard)
-
-**Archivierung:**
-- [ ] Erledigte Aufgaben bleiben sichtbar bis alle Projekte einer Einheit abgeschlossen
-- [ ] Dann Archivierung
-- [ ] Wöchentliche Berichte für KEWA AG
+(None — v1.1 features to be defined)
 
 ### Out of Scope
 
@@ -73,7 +72,8 @@ KEWA AG hat jederzeit volle Transparenz darüber, welche Arbeiten Imeri erledigt
 - Komplexe Benutzerverwaltung — nur zwei PINs
 - Mehrere Liegenschaften — nur dieses eine Gebäude
 - Zahlungsabwicklung/Rechnungen — nicht Teil dieser App
-- Transkription von Imeris Audio — Dialekt zu schwierig
+- Transkription von Imeris Audio — Dialekt zu schwierig (15-30% WER)
+- Vollständiger Offline-Mode — später mit Sync
 
 ## Context
 
@@ -94,21 +94,25 @@ KEWA AG hat jederzeit volle Transparenz darüber, welche Arbeiten Imeri erledigt
 
 ## Constraints
 
-- **Tech Stack**: Next.js + Supabase + Vercel — bereits entschieden
+- **Tech Stack**: Next.js 16 + Supabase + Vercel
 - **Authentifizierung**: Simpel mit PIN, keine komplexe User-Verwaltung
-- **Audio**: Max 1 Minute pro Aufnahme
-- **Fotos**: Max 2 pro Aufgabe (je Richtung)
-- **Speech-to-Text**: Nur für KEWA AG (Hochdeutsch), nicht für Imeri
+- **Audio**: Max 1 Minute pro Aufnahme, 10MB max
+- **Fotos**: Max 2 pro Aufgabe (je Richtung), 720px komprimiert
+- **Speech-to-Text**: Nur für KEWA AG (Hochdeutsch via OpenAI Whisper)
 
 ## Key Decisions
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| PIN statt Login | Zwei Nutzer, maximale Einfachheit | — Pending |
-| Supabase für Backend | Datenbank + Storage + ggf. Auth in einem | — Pending |
-| Next.js + Vercel | Moderne Stack, einfaches Deployment | — Pending |
-| Keine Transkription für Imeri | Dialekt schwer zu transkribieren | — Pending |
-| Grafische Gebäudeansicht als Kernfeature | Wichtig für KEWA AG Übersicht | — Pending |
+| PIN statt Login | Zwei Nutzer, maximale Einfachheit | ✓ Funktioniert gut |
+| Supabase für Backend | Datenbank + Storage in einem | ✓ Gute Developer Experience |
+| Next.js 16 + Vercel | Moderne Stack, einfaches Deployment | ✓ create-next-app installierte v16 |
+| Keine Transkription für Imeri | Schweizerdeutsch zu fehlerhaft | ✓ Imeri kann Audio aufnehmen ohne Transkription |
+| Grafische Gebäudeansicht | Wichtig für KEWA AG Übersicht | ✓ 5-Stockwerk Grid mit Fortschrittsbalken |
+| jose statt jsonwebtoken | Edge Runtime kompatibel | ✓ Middleware funktioniert |
+| Canvas API für Bildkompression | Keine externen Dependencies | ✓ 720px WebP, ~50-100KB |
+| OpenAI Whisper für Transkription | Beste Deutsch-Unterstützung | ✓ Fire-and-forget Pattern |
+| Fire-and-forget für async Tasks | Nicht blockierend | ✓ Recurring + Transcription nutzen Pattern |
 
 ---
-*Last updated: 2025-01-16 after initialization*
+*Last updated: 2026-01-17 after v1 milestone*

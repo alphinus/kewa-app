@@ -1,3 +1,13 @@
+# Requirements Archive: v1 MVP
+
+**Archived:** 2026-01-17
+**Status:** ✅ SHIPPED
+
+This is the archived requirements specification for v1.
+For current requirements, see `.planning/REQUIREMENTS.md` (created for next milestone).
+
+---
+
 # Requirements: KEWA Liegenschafts-Aufgabenverwaltung
 
 **Defined:** 2025-01-16
@@ -58,9 +68,9 @@ Requirements für Initial-Release. Jedes mappt auf Roadmap-Phasen.
 - [x] **REPORT-01**: System generiert wöchentlichen Bericht (erledigte Arbeiten mit Fotos/Zeitstempel) ✓
 - [x] **REPORT-02**: Erledigte Projekte werden archiviert nach Abschluss aller Aufgaben ✓
 
-## v2 Requirements
+## v2 Requirements (Deferred)
 
-Deferred für spätere Releases. Nicht in aktueller Roadmap.
+Deferred für spätere Releases. Nicht in v1 Roadmap.
 
 ### Benachrichtigungen
 
@@ -129,5 +139,12 @@ Welche Phasen decken welche Requirements ab.
 - Unmapped: 0 ✓
 
 ---
-*Requirements defined: 2025-01-16*
-*Last updated: 2026-01-16 after roadmap creation*
+
+## Milestone Summary
+
+**Shipped:** 30 of 30 v1 requirements
+**Adjusted:** None — all requirements implemented as specified
+**Dropped:** None
+
+---
+*Archived: 2026-01-17 as part of v1 milestone completion*
