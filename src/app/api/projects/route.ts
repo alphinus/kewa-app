@@ -15,7 +15,9 @@ import type { Role } from '@/types'
  *
  * Returns all projects with unit info.
  * For Imeri role: filters to visible_to_imeri=true projects only
- * Supports query param: ?unit_id=uuid to filter by unit
+ * Supports query params:
+ * - ?unit_id=uuid to filter by unit
+ * - ?include_archived=true to include archived projects (default: false)
  */
 export async function GET(
   request: NextRequest
@@ -37,6 +39,7 @@ export async function GET(
     // Parse query params
     const { searchParams } = new URL(request.url)
     const unitIdFilter = searchParams.get('unit_id')
+    const includeArchived = searchParams.get('include_archived') === 'true'
 
     // Build query for projects with unit info
     let query = supabase
@@ -50,8 +53,12 @@ export async function GET(
           floor
         )
       `)
-      .neq('status', 'archived') // Exclude archived projects
       .order('name', { ascending: true })
+
+    // Filter archived projects unless explicitly requested
+    if (!includeArchived) {
+      query = query.neq('status', 'archived')
+    }
 
     // Apply filters
     if (unitIdFilter) {
@@ -81,6 +88,7 @@ export async function GET(
       description: project.description,
       status: project.status,
       visible_to_imeri: project.visible_to_imeri,
+      archived_at: project.archived_at ?? null,
       created_at: project.created_at,
       unit: {
         id: project.unit?.id || '',
