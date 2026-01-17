@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import type { TaskWithProject } from '@/types/database'
@@ -82,6 +83,7 @@ function getDueDateDisplay(dueDate: string | null): {
  * Shows task title, location, due date, priority, and completion button
  */
 export function ImeriTaskCard({ task, onComplete }: ImeriTaskCardProps) {
+  const router = useRouter()
   const [expanded, setExpanded] = useState(false)
 
   const priorityBadge = getPriorityBadge(task.priority)
@@ -163,8 +165,19 @@ export function ImeriTaskCard({ task, onComplete }: ImeriTaskCardProps) {
               </p>
             )}
 
-            {/* Complete button */}
-            <div className="mt-4">
+            {/* Action buttons */}
+            <div className="mt-4 flex gap-3">
+              <Button
+                variant="secondary"
+                size="lg"
+                fullWidth
+                onClick={(e) => {
+                  e.stopPropagation()
+                  router.push(`/dashboard/aufgaben/${task.id}`)
+                }}
+              >
+                Details
+              </Button>
               <Button
                 variant="primary"
                 size="lg"

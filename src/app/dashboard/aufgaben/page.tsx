@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback, Suspense } from 'react'
-import { useSearchParams } from 'next/navigation'
+import { useSearchParams, useRouter } from 'next/navigation'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { TaskList } from '@/components/tasks/TaskList'
@@ -15,6 +15,7 @@ import type { TaskStatus } from '@/types'
  */
 function AufgabenPageContent() {
   const searchParams = useSearchParams()
+  const router = useRouter()
   const unitIdFromUrl = searchParams.get('unit_id')
 
   // State
@@ -88,10 +89,9 @@ function AufgabenPageContent() {
     }
   }, [unitIdFromUrl])
 
-  // Handle task click (edit)
+  // Handle task click (navigate to detail page)
   const handleTaskClick = (task: TaskWithProject) => {
-    setEditingTask(task)
-    setShowForm(true)
+    router.push(`/dashboard/aufgaben/${task.id}`)
   }
 
   // Handle delete click

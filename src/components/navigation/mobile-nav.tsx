@@ -20,17 +20,18 @@ interface NavItem {
 
 // Navigation items for KEWA AG (admin role)
 const kewaNavItems: NavItem[] = [
-  { href: '/', label: 'Uebersicht', icon: LayoutDashboard },
-  { href: '/buildings', label: 'Gebaeude', icon: Building2 },
-  { href: '/tasks', label: 'Aufgaben', icon: CheckSquare },
-  { href: '/audio', label: 'Audio', icon: Mic },
-  { href: '/settings', label: 'Einstellungen', icon: Settings }
+  { href: '/dashboard', label: 'Uebersicht', icon: LayoutDashboard },
+  { href: '/dashboard/gebaude', label: 'Gebaeude', icon: Building2 },
+  { href: '/dashboard/aufgaben', label: 'Aufgaben', icon: CheckSquare },
+  { href: '/dashboard/audio', label: 'Audio', icon: Mic },
+  { href: '/dashboard/settings', label: 'Einstellungen', icon: Settings }
 ]
 
 // Navigation items for Imeri (worker role)
 const imeriNavItems: NavItem[] = [
-  { href: '/tasks', label: 'Aufgaben', icon: CheckSquare },
-  { href: '/audio', label: 'Audio', icon: Mic }
+  { href: '/dashboard', label: 'Uebersicht', icon: LayoutDashboard },
+  { href: '/dashboard/tasks', label: 'Aufgaben', icon: CheckSquare },
+  { href: '/dashboard/audio', label: 'Audio', icon: Mic }
 ]
 
 interface MobileNavProps {
@@ -52,7 +53,10 @@ export function MobileNav({ role }: MobileNavProps) {
     <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 safe-area-bottom">
       <div className="flex items-center justify-around h-16">
         {navItems.map((item) => {
-          const isActive = pathname === item.href
+          // Check if path matches exactly or starts with item.href for nested routes
+          const isActive = item.href === '/dashboard'
+            ? pathname === '/dashboard'
+            : pathname === item.href || pathname.startsWith(item.href + '/')
           const Icon = item.icon
 
           return (
