@@ -321,9 +321,16 @@ export async function POST(
 
     if (uploadError) {
       console.error('Error uploading to storage:', uploadError)
+      // Return detailed error for debugging - bucket may not exist
+      const errorMessage = uploadError.message || 'Failed to upload audio file'
+      const statusCode = uploadError.message?.includes('not found') ? 404 : 500
       return NextResponse.json(
-        { error: 'Failed to upload audio file' },
-        { status: 500 }
+        {
+          error: errorMessage.includes('Bucket not found')
+            ? 'Storage bucket "task-audio" nicht gefunden. Bitte in Supabase Dashboard erstellen.'
+            : `Upload fehlgeschlagen: ${errorMessage}`
+        },
+        { status: statusCode }
       )
     }
 
