@@ -167,7 +167,7 @@ export default function TaskDetailPage() {
       const response = await fetch('/api/auth/session')
       if (response.ok) {
         const data = await response.json()
-        setUserRole(data.user?.role || null)
+        setUserRole(data.role || null)
       }
     } catch (err) {
       console.error('Error fetching user role:', err)
