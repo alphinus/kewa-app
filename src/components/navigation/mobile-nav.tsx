@@ -7,6 +7,7 @@ import {
   Building2,
   CheckSquare,
   FileText,
+  Archive,
   Mic,
   Settings
 } from 'lucide-react'
@@ -24,8 +25,8 @@ const kewaNavItems: NavItem[] = [
   { href: '/dashboard', label: 'Uebersicht', icon: LayoutDashboard },
   { href: '/dashboard/gebaude', label: 'Gebaeude', icon: Building2 },
   { href: '/dashboard/aufgaben', label: 'Aufgaben', icon: CheckSquare },
+  { href: '/dashboard/projekte', label: 'Projekte', icon: Archive },
   { href: '/dashboard/berichte', label: 'Berichte', icon: FileText },
-  { href: '/dashboard/audio', label: 'Audio', icon: Mic },
   { href: '/dashboard/settings', label: 'Einstellungen', icon: Settings }
 ]
 
