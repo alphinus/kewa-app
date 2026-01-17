@@ -17,9 +17,9 @@ Requirements für Initial-Release. Jedes mappt auf Roadmap-Phasen.
 
 - [x] **STRUC-01**: System bildet Hierarchie ab: Gebäude → Einheit → Projekt → Aufgabe ✓
 - [x] **STRUC-02**: System enthält alle 13 Wohnungen (EG-Dach) und 9 Gemeinschaftsräume ✓
-- [ ] **STRUC-03**: KEWA AG kann Mieternamen pro Wohnung hinterlegen
-- [ ] **STRUC-04**: KEWA AG sieht grafische Gebäudeansicht (4 Stockwerke + Dach visuell)
-- [ ] **STRUC-05**: KEWA AG sieht Fortschrittsbalken pro Einheit (Farb-Kodierung nach Status)
+- [x] **STRUC-03**: KEWA AG kann Mieternamen pro Wohnung hinterlegen ✓
+- [x] **STRUC-04**: KEWA AG sieht grafische Gebäudeansicht (4 Stockwerke + Dach visuell) ✓
+- [x] **STRUC-05**: KEWA AG sieht Fortschrittsbalken pro Einheit (Farb-Kodierung nach Status) ✓
 
 ### Aufgaben
 
@@ -38,10 +38,10 @@ Requirements für Initial-Release. Jedes mappt auf Roadmap-Phasen.
 
 ### Sprachnotizen
 
-- [ ] **AUDIO-01**: KEWA AG kann Audio aufnehmen (max 1 Minute pro Aufnahme)
-- [ ] **AUDIO-02**: KEWA AG's Audio wird automatisch transkribiert (Hochdeutsch → Text)
-- [ ] **AUDIO-03**: Imeri kann Audio aufnehmen in Ausnahmefällen (nur Speicherung, keine Transkription)
-- [ ] **AUDIO-04**: Imeri kann KEWA AG's Audio abspielen und Transkription lesen
+- [x] **AUDIO-01**: KEWA AG kann Audio aufnehmen (max 1 Minute pro Aufnahme) ✓
+- [x] **AUDIO-02**: KEWA AG's Audio wird automatisch transkribiert (Hochdeutsch → Text) ✓
+- [x] **AUDIO-03**: Imeri kann Audio aufnehmen in Ausnahmefällen (nur Speicherung, keine Transkription) ✓
+- [x] **AUDIO-04**: Imeri kann KEWA AG's Audio abspielen und Transkription lesen ✓
 
 ### Dashboards
 
@@ -49,8 +49,8 @@ Requirements für Initial-Release. Jedes mappt auf Roadmap-Phasen.
 - [x] **DASH-02**: KEWA AG kann Projekte und Aufgaben erstellen und bearbeiten ✓
 - [x] **DASH-03**: Imeri sieht Liste seiner offenen Aufgaben ✓
 - [x] **DASH-04**: Imeri kann Aufgaben als erledigt markieren mit Foto-Upload ✓
-- [ ] **DASH-05**: KEWA AG kann Sichtbarkeit einstellen (Imeri sieht Projekte+Aufgaben oder nur Aufgaben)
-- [ ] **DASH-06**: KEWA AG sieht Übersicht aller Audio-Dateien (inkl. Imeris Notfall-Audios)
+- [x] **DASH-05**: KEWA AG kann Sichtbarkeit einstellen (Imeri sieht Projekte+Aufgaben oder nur Aufgaben) ✓
+- [x] **DASH-06**: KEWA AG sieht Übersicht aller Audio-Dateien (inkl. Imeris Notfall-Audios) ✓
 - [x] **DASH-07**: App ist mobile-optimiert (Touch-Targets ≥76dp für Baustellennutzung) ✓
 
 ### Berichte & Archivierung
@@ -97,9 +97,9 @@ Welche Phasen decken welche Requirements ab.
 | AUTH-03 | Phase 1 | Complete ✓ |
 | STRUC-01 | Phase 1 | Complete ✓ |
 | STRUC-02 | Phase 1 | Complete ✓ |
-| STRUC-03 | Phase 5 | Pending |
-| STRUC-04 | Phase 5 | Pending |
-| STRUC-05 | Phase 5 | Pending |
+| STRUC-03 | Phase 5 | Complete ✓ |
+| STRUC-04 | Phase 5 | Complete ✓ |
+| STRUC-05 | Phase 5 | Complete ✓ |
 | TASK-01 | Phase 2 | Complete ✓ |
 | TASK-02 | Phase 2 | Complete ✓ |
 | TASK-03 | Phase 2 | Complete ✓ |
@@ -109,16 +109,16 @@ Welche Phasen decken welche Requirements ab.
 | PHOTO-01 | Phase 3 | Complete ✓ |
 | PHOTO-02 | Phase 3 | Complete ✓ |
 | PHOTO-03 | Phase 3 | Complete ✓ |
-| AUDIO-01 | Phase 4 | Pending |
-| AUDIO-02 | Phase 4 | Pending |
-| AUDIO-03 | Phase 4 | Pending |
-| AUDIO-04 | Phase 4 | Pending |
+| AUDIO-01 | Phase 4 | Complete ✓ |
+| AUDIO-02 | Phase 4 | Complete ✓ |
+| AUDIO-03 | Phase 4 | Complete ✓ |
+| AUDIO-04 | Phase 4 | Complete ✓ |
 | DASH-01 | Phase 2 | Complete ✓ |
 | DASH-02 | Phase 2 | Complete ✓ |
 | DASH-03 | Phase 2 | Complete ✓ |
 | DASH-04 | Phase 3 | Complete ✓ |
-| DASH-05 | Phase 5 | Pending |
-| DASH-06 | Phase 4 | Pending |
+| DASH-05 | Phase 5 | Complete ✓ |
+| DASH-06 | Phase 4 | Complete ✓ |
 | DASH-07 | Phase 1 | Complete ✓ |
 | REPORT-01 | Phase 6 | Pending |
 | REPORT-02 | Phase 6 | Pending |
