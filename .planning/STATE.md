@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-01-16)
 ## Current Position
 
 Phase: 4 of 6 (Voice Notes)
-Plan: 2 of 2 complete
+Plan: 3 of 3 complete
 Status: Phase complete
-Last activity: 2026-01-17 — Completed 04-02-PLAN.md (Transcription Service Integration)
+Last activity: 2026-01-17 — Completed 04-03-PLAN.md (Audio UI Components)
 
-Progress: ██████████ 63% (10/16 plans)
+Progress: ███████████ 69% (11/16 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 10
-- Average duration: 12 min
-- Total execution time: 1.97 hours
+- Total plans completed: 11
+- Average duration: 13 min
+- Total execution time: 2.38 hours
 
 **By Phase:**
 
@@ -30,11 +30,11 @@ Progress: ██████████ 63% (10/16 plans)
 | 1. Foundation | 3/3 | 43 min | 14 min |
 | 2. Task Management | 3/3 | 24 min | 8 min |
 | 3. Photo Documentation | 2/2 | 39 min | 20 min |
-| 4. Voice Notes | 2/2 | 7 min | 4 min |
+| 4. Voice Notes | 3/3 | 32 min | 11 min |
 
 **Recent Trend:**
-- Last 5 plans: 03-01 (4 min), 03-02 (35 min), 04-01 (3 min), 04-02 (4 min)
-- Trend: API-only plans are fast (3-4 min), UI plans take longer (35 min)
+- Last 5 plans: 03-02 (35 min), 04-01 (3 min), 04-02 (4 min), 04-03 (25 min)
+- Trend: API-only plans are fast (3-4 min), UI plans take longer (25-35 min)
 
 ## Accumulated Context
 
@@ -75,14 +75,19 @@ Recent decisions affecting current work:
 | German (Hochdeutsch) for transcription | 04-02 | KEWA speaks German, Imeri needs to read instructions |
 | Fire-and-forget transcription | 04-02 | Upload completes immediately, transcription runs in background |
 | Idempotent /transcribe endpoint | 04-02 | Safe to retry, returns existing result if completed |
+| MediaRecorder with webm/mp4 preference | 04-03 | webm widely supported, mp4 fallback for Safari |
+| 60-second max audio duration | 04-03 | Sufficient for explanations, prevents large files |
+| Preview before audio upload | 04-03 | Users can verify recording quality before committing |
+| Custom audio controls (48px targets) | 04-03 | Touch-friendly for mobile workers |
+| Tap-to-expand gallery items | 04-03 | Mobile-friendly interaction for audio list |
+| Combined storage bucket migration | 04-03 | Photos and audio buckets in single migration |
 
 ### Pending Todos
 
 - Apply migration 001_initial_schema.sql to Supabase
 - Apply migration 003_task_photos.sql to Supabase
+- Apply migration 004_storage_buckets.sql to Supabase (or create buckets manually)
 - Apply migration 005_task_audio.sql to Supabase
-- Create 'task-photos' storage bucket with policies
-- Create 'task-audio' storage bucket with policies
 - Configure .env.local with actual Supabase credentials
 - Configure OPENAI_API_KEY for transcription
 - Update placeholder PIN hashes in users table with real bcrypt hashes
@@ -90,7 +95,7 @@ Recent decisions affecting current work:
 ### Blockers/Concerns
 
 - Supabase project needs to be created and migrations applied before testing API endpoints
-- Storage buckets 'task-photos' and 'task-audio' must be created manually with correct policies
+- Storage buckets 'task-photos' and 'task-audio' need 004_storage_buckets.sql migration applied
 - OpenAI API key required for transcription to work (audio uploads work without it, transcription fails silently)
 - Next.js 16 middleware deprecation warning (works but may need migration to proxy pattern)
 - Next.js Turbopack has intermittent build race conditions (use NEXT_TURBOPACK=0 for reliable builds)
@@ -100,6 +105,7 @@ Recent decisions affecting current work:
 Phase 4 (Voice Notes) COMPLETE:
 1. **04-01:** Audio storage schema + TypeScript types + CRUD API
 2. **04-02:** OpenAI Whisper transcription integration
+3. **04-03:** Audio UI components (recorder, player, gallery, task integration)
 
 **Delivered:**
 - Audio API: GET/POST/DELETE /api/audio
@@ -108,16 +114,27 @@ Phase 4 (Voice Notes) COMPLETE:
 - TypeScript types: AudioType, TranscriptionStatus, TaskAudio, etc.
 - Transcription service: src/lib/transcription.ts
 - Auto-transcription on explanation upload (fire-and-forget)
+- AudioRecorder component with MediaRecorder API (60s max)
+- AudioPlayer component with custom controls and transcription display
+- AudioGallery component with expandable items and filters
+- /dashboard/audio page for KEWA audio overview
+- Task detail audio section with role-based UI
+- Storage bucket migration with RLS policies
 
 **New files this phase:**
+- supabase/migrations/004_storage_buckets.sql
 - supabase/migrations/005_task_audio.sql
 - src/app/api/audio/route.ts
 - src/app/api/audio/[id]/route.ts
 - src/app/api/audio/[id]/transcribe/route.ts
 - src/lib/transcription.ts
+- src/components/audio/AudioRecorder.tsx (582 lines)
+- src/components/audio/AudioPlayer.tsx (331 lines)
+- src/components/audio/AudioGallery.tsx (234 lines)
+- src/app/dashboard/audio/page.tsx (223 lines)
 
 ## Session Continuity
 
-Last session: 2026-01-17 18:40
-Stopped at: Completed 04-02-PLAN.md (Transcription Service Integration)
+Last session: 2026-01-17 20:15
+Stopped at: Completed 04-03-PLAN.md (Audio UI Components)
 Resume file: None - Phase 4 complete, ready for Phase 5
