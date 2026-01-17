@@ -168,6 +168,14 @@ export interface UpdateProjectInput {
   visible_to_imeri?: boolean
 }
 
+/**
+ * Input for updating a unit
+ */
+export interface UpdateUnitInput {
+  tenant_name?: string | null
+  tenant_visible_to_imeri?: boolean
+}
+
 // =============================================
 // API RESPONSE TYPES
 // =============================================
@@ -177,6 +185,13 @@ export interface UpdateProjectInput {
  */
 export interface UnitsResponse {
   units: UnitWithStats[]
+}
+
+/**
+ * Response for single unit operations
+ */
+export interface UnitResponse {
+  unit: UnitWithStats
 }
 
 /**
