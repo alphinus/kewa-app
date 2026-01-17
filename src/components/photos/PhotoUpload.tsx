@@ -231,30 +231,30 @@ export function PhotoUpload({
       {existingPhotos.length > 0 && (
         <div className="grid grid-cols-2 gap-3">
           {existingPhotos.map((photo) => (
-            <div key={photo.id} className="relative group bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden">
+            <div key={photo.id} className="relative group rounded-lg overflow-hidden border-2 border-gray-200 dark:border-gray-700">
               <img
                 src={photo.url}
                 alt={photo.file_name}
-                className="w-full h-24 object-cover"
+                className="w-full h-28 object-cover bg-gray-100 dark:bg-gray-800"
                 loading="lazy"
               />
               {!disabled && (
                 <>
                   {deleteConfirmId === photo.id ? (
-                    <div className="absolute inset-0 bg-black/70 rounded-lg flex flex-col items-center justify-center gap-2 p-2">
-                      <p className="text-white text-xs text-center">Foto loeschen?</p>
-                      <div className="flex gap-2">
+                    <div className="absolute inset-0 bg-black/80 flex flex-col items-center justify-center gap-3 p-3">
+                      <p className="text-white text-sm font-medium text-center">Foto loeschen?</p>
+                      <div className="flex gap-3">
                         <button
                           onClick={() => handleDelete(photo.id)}
                           disabled={deleting}
-                          className="px-3 py-1 bg-red-600 text-white text-xs rounded hover:bg-red-700 disabled:opacity-50 min-h-[32px]"
+                          className="px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 disabled:opacity-50 min-h-[40px] min-w-[60px]"
                         >
-                          {deleting ? 'Loesche...' : 'Ja'}
+                          {deleting ? '...' : 'Ja'}
                         </button>
                         <button
                           onClick={() => setDeleteConfirmId(null)}
                           disabled={deleting}
-                          className="px-3 py-1 bg-gray-600 text-white text-xs rounded hover:bg-gray-700 disabled:opacity-50 min-h-[32px]"
+                          className="px-4 py-2 bg-gray-600 text-white text-sm font-medium rounded-lg hover:bg-gray-700 disabled:opacity-50 min-h-[40px] min-w-[60px]"
                         >
                           Nein
                         </button>
@@ -263,7 +263,7 @@ export function PhotoUpload({
                   ) : (
                     <button
                       onClick={() => setDeleteConfirmId(photo.id)}
-                      className="absolute top-1 right-1 p-1.5 bg-black/50 rounded-full text-white opacity-0 group-hover:opacity-100 sm:opacity-100 transition-opacity min-w-[32px] min-h-[32px] flex items-center justify-center"
+                      className="absolute top-2 right-2 p-2 bg-black/60 rounded-full text-white hover:bg-black/80 transition-colors min-w-[36px] min-h-[36px] flex items-center justify-center"
                       aria-label="Foto loeschen"
                     >
                       <TrashIcon className="w-4 h-4" />
@@ -278,9 +278,16 @@ export function PhotoUpload({
 
       {/* Photo count indicator */}
       {maxPhotos > 0 && (
-        <p className="text-sm text-gray-500 dark:text-gray-400">
-          {photosCount} von {maxPhotos} Fotos
-        </p>
+        <div className="flex items-center justify-between">
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            {photosCount} von {maxPhotos} Fotos
+          </p>
+          {photosCount < maxPhotos && (
+            <span className="text-xs text-green-600 dark:text-green-400">
+              + {maxPhotos - photosCount} moeglich
+            </span>
+          )}
+        </div>
       )}
 
       {/* Upload state: idle - show buttons */}

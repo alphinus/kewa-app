@@ -257,7 +257,7 @@ export default function TaskDetailPage() {
   const isImeri = userRole === 'imeri'
 
   return (
-    <div className="space-y-4 pb-24 relative">
+    <div className="space-y-4 pb-40 relative">
       {/* Back button */}
       <button
         onClick={() => router.back()}
@@ -339,37 +339,85 @@ export default function TaskDetailPage() {
       {/* Photo documentation section */}
       <Card>
         <CardContent className="p-4 space-y-4">
-          <h2 className="text-sm font-medium text-gray-700 dark:text-gray-300">
+          <h2 className="font-semibold text-gray-900 dark:text-gray-100">
             Foto-Dokumentation
           </h2>
 
           {photosLoading ? (
-            <div className="flex items-center justify-center py-6">
+            <div className="flex items-center justify-center py-8">
               <LoadingSpinner />
               <span className="ml-2 text-gray-500 dark:text-gray-400">Fotos werden geladen...</span>
             </div>
           ) : (
             <>
-              {/* Before/After view */}
-              <BeforeAfterView
-                explanationPhotos={explanationPhotos}
-                completionPhotos={completionPhotos}
-              />
+              {/* Completed task: Show before/after comparison */}
+              {isCompleted && (
+                <BeforeAfterView
+                  explanationPhotos={explanationPhotos}
+                  completionPhotos={completionPhotos}
+                />
+              )}
 
-              {/* KEWA: Add explanation photos (only if task is open) */}
-              {isKewa && !isCompleted && (
-                <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
-                  <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-                    Erklaerungsfotos hinzufuegen
-                  </h3>
-                  <PhotoUpload
-                    taskId={task.id}
-                    photoType="explanation"
-                    maxPhotos={2}
-                    existingPhotos={explanationPhotos}
-                    onUploadComplete={handlePhotoUpload}
-                    onDelete={handlePhotoDelete}
-                  />
+              {/* Open task: Show appropriate content based on role */}
+              {!isCompleted && (
+                <div className="space-y-6">
+                  {/* KEWA: Edit explanation photos */}
+                  {isKewa && (
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                          Erklaerungsfotos
+                        </h3>
+                        <span className="text-xs text-gray-500 dark:text-gray-400">
+                          fuer Imeri sichtbar
+                        </span>
+                      </div>
+                      <PhotoUpload
+                        taskId={task.id}
+                        photoType="explanation"
+                        maxPhotos={2}
+                        existingPhotos={explanationPhotos}
+                        onUploadComplete={handlePhotoUpload}
+                        onDelete={handlePhotoDelete}
+                      />
+                    </div>
+                  )}
+
+                  {/* Imeri: View-only explanation photos */}
+                  {isImeri && (
+                    <div className="space-y-3">
+                      <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                        Erklaerungsfotos von KEWA AG
+                      </h3>
+                      {explanationPhotos.length > 0 ? (
+                        <div className="grid grid-cols-2 gap-3">
+                          {explanationPhotos.map((photo) => (
+                            <div key={photo.id} className="relative rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800">
+                              <img
+                                src={photo.url}
+                                alt={photo.file_name}
+                                className="w-full h-32 object-cover"
+                                loading="lazy"
+                              />
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="py-6 text-center bg-gray-50 dark:bg-gray-800/50 rounded-lg">
+                          <p className="text-sm text-gray-500 dark:text-gray-400">
+                            Keine Erklaerungsfotos vorhanden
+                          </p>
+                        </div>
+                      )}
+
+                      {/* Hint for completion photos */}
+                      <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                        <p className="text-sm text-blue-700 dark:text-blue-300">
+                          Erledigungsfotos werden beim Abschliessen der Aufgabe hochgeladen.
+                        </p>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </>
@@ -377,8 +425,8 @@ export default function TaskDetailPage() {
         </CardContent>
       </Card>
 
-      {/* Sticky bottom action bar */}
-      <div className="fixed bottom-0 left-0 right-0 p-4 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 z-40 isolate">
+      {/* Sticky bottom action bar - positioned above MobileNav (h-16) */}
+      <div className="fixed bottom-16 left-0 right-0 p-4 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 z-40 shadow-lg">
         <div className="max-w-lg mx-auto flex gap-3">
           {/* KEWA: Edit button (if open) */}
           {isKewa && !isCompleted && (

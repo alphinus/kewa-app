@@ -44,13 +44,16 @@ export function BeforeAfterView({
 
   return (
     <>
-      <div className="grid grid-cols-1 min-[400px]:grid-cols-2 gap-4">
-        {/* Explanation column (KEWA) */}
+      <div className="grid grid-cols-2 gap-4">
+        {/* Explanation column (KEWA) - Vorher */}
         <div className="space-y-3">
-          <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 border-b border-gray-200 dark:border-gray-700 pb-2">
-            Erklaerung
-            <span className="text-gray-500 dark:text-gray-400 font-normal ml-1">(KEWA AG)</span>
-          </h4>
+          <div className="flex items-center gap-2 pb-2 border-b border-gray-200 dark:border-gray-700">
+            <div className="w-3 h-3 rounded-full bg-amber-500" />
+            <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100">
+              Vorher
+            </h4>
+          </div>
+          <p className="text-xs text-gray-500 dark:text-gray-400">KEWA AG</p>
           {explanationPhotos.length > 0 ? (
             <div className="space-y-2">
               {explanationPhotos.map((photo) => (
@@ -58,32 +61,35 @@ export function BeforeAfterView({
                   key={photo.id}
                   type="button"
                   onClick={() => handlePhotoClick(photo)}
-                  className="relative block w-full rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                  className="relative block w-full rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 active:scale-[0.98] transition-transform"
                 >
                   <img
                     src={photo.url}
                     alt={photo.file_name}
-                    className="w-full h-32 object-cover transition-transform hover:scale-[1.02]"
+                    className="w-full h-36 object-cover"
                     loading="lazy"
                   />
                 </button>
               ))}
             </div>
           ) : (
-            <div className="py-4 text-center bg-gray-50 dark:bg-gray-800/50 rounded-lg">
-              <p className="text-sm text-gray-500 dark:text-gray-400 italic">
-                Noch keine Fotos
+            <div className="py-8 text-center bg-gray-50 dark:bg-gray-800/50 rounded-lg border-2 border-dashed border-gray-200 dark:border-gray-700">
+              <p className="text-sm text-gray-400 dark:text-gray-500">
+                Keine Fotos
               </p>
             </div>
           )}
         </div>
 
-        {/* Completion column (Imeri) */}
+        {/* Completion column (Imeri) - Nachher */}
         <div className="space-y-3">
-          <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 border-b border-gray-200 dark:border-gray-700 pb-2">
-            Erledigung
-            <span className="text-gray-500 dark:text-gray-400 font-normal ml-1">(Imeri)</span>
-          </h4>
+          <div className="flex items-center gap-2 pb-2 border-b border-gray-200 dark:border-gray-700">
+            <div className="w-3 h-3 rounded-full bg-green-500" />
+            <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100">
+              Nachher
+            </h4>
+          </div>
+          <p className="text-xs text-gray-500 dark:text-gray-400">Imeri</p>
           {completionPhotos.length > 0 ? (
             <div className="space-y-2">
               {completionPhotos.map((photo) => (
@@ -91,21 +97,21 @@ export function BeforeAfterView({
                   key={photo.id}
                   type="button"
                   onClick={() => handlePhotoClick(photo)}
-                  className="relative block w-full rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                  className="relative block w-full rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 active:scale-[0.98] transition-transform"
                 >
                   <img
                     src={photo.url}
                     alt={photo.file_name}
-                    className="w-full h-32 object-cover transition-transform hover:scale-[1.02]"
+                    className="w-full h-36 object-cover"
                     loading="lazy"
                   />
                 </button>
               ))}
             </div>
           ) : (
-            <div className="py-4 text-center bg-gray-50 dark:bg-gray-800/50 rounded-lg">
-              <p className="text-sm text-gray-500 dark:text-gray-400 italic">
-                Noch keine Fotos
+            <div className="py-8 text-center bg-gray-50 dark:bg-gray-800/50 rounded-lg border-2 border-dashed border-gray-200 dark:border-gray-700">
+              <p className="text-sm text-gray-400 dark:text-gray-500">
+                Keine Fotos
               </p>
             </div>
           )}
