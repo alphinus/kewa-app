@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-01-16)
 ## Current Position
 
 Phase: 5 of 6 (Building Visualization)
-Plan: 1 of 3 complete
+Plan: 2 of 3 complete
 Status: In progress
-Last activity: 2026-01-17 — Completed 05-01-PLAN.md (Unit Detail API)
+Last activity: 2026-01-17 — Completed 05-02-PLAN.md (Floor Plan Renderer Component)
 
-Progress: ████████████ 75% (12/16 plans)
+Progress: █████████████ 81% (13/16 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 12
-- Average duration: 12 min
-- Total execution time: 2.47 hours
+- Total plans completed: 13
+- Average duration: 11 min
+- Total execution time: 2.53 hours
 
 **By Phase:**
 
@@ -31,11 +31,11 @@ Progress: ████████████ 75% (12/16 plans)
 | 2. Task Management | 3/3 | 24 min | 8 min |
 | 3. Photo Documentation | 2/2 | 39 min | 20 min |
 | 4. Voice Notes | 3/3 | 32 min | 11 min |
-| 5. Building Visualization | 1/3 | 5 min | 5 min |
+| 5. Building Visualization | 2/3 | 9 min | 5 min |
 
 **Recent Trend:**
-- Last 5 plans: 04-01 (3 min), 04-02 (4 min), 04-03 (25 min), 05-01 (5 min)
-- Trend: API-only plans are fast (3-5 min), UI plans take longer (25-35 min)
+- Last 5 plans: 04-02 (4 min), 04-03 (25 min), 05-01 (5 min), 05-02 (4 min)
+- Trend: API-only plans are fast (3-5 min), UI component plans fast (4-5 min)
 
 ## Accumulated Context
 
@@ -84,6 +84,10 @@ Recent decisions affecting current work:
 | Combined storage bucket migration | 04-03 | Photos and audio buckets in single migration |
 | Reuse aggregation pattern for unit detail | 05-01 | Same task stats approach as list endpoint for consistency |
 | KEWA-only unit updates | 05-01 | Tenant info is sensitive, only KEWA can modify |
+| Compact mode (60px) for grid cells | 05-02 | Fit more units on mobile screen |
+| Dach spans full width | 05-02 | Building has single rooftop unit |
+| Building unit blue highlight | 05-02 | Distinguish from regular common areas |
+| Empty cell placeholders | 05-02 | Visual consistency when units missing |
 
 ### Pending Todos
 
@@ -107,19 +111,25 @@ Recent decisions affecting current work:
 
 Phase 5 (Building Visualization) IN PROGRESS:
 1. **05-01:** Unit Detail API (COMPLETE)
-2. **05-02:** Building Grid UI (pending)
+2. **05-02:** Building Grid UI (COMPLETE)
 3. **05-03:** Unit Detail Page (pending)
 
 **Delivered so far:**
 - GET /api/units/[id] with task statistics
 - PUT /api/units/[id] for tenant_name and visibility (KEWA only)
 - UpdateUnitInput and UnitResponse TypeScript types
+- BuildingGrid component for floor-based apartment layout
+- UnitCell component with progress bar
+- CommonAreasList component for non-apartment units
 
 **New files this phase:**
 - src/app/api/units/[id]/route.ts
+- src/components/building/UnitCell.tsx
+- src/components/building/BuildingGrid.tsx
+- src/components/building/CommonAreasList.tsx
 
 ## Session Continuity
 
-Last session: 2026-01-17 19:40
-Stopped at: Completed 05-01-PLAN.md (Unit Detail API)
-Resume file: None - ready for 05-02
+Last session: 2026-01-17 20:42
+Stopped at: Completed 05-02-PLAN.md (Floor Plan Renderer Component)
+Resume file: None - ready for 05-03
