@@ -4,24 +4,24 @@
 
 See: .planning/PROJECT.md (updated 2026-01-16)
 
-**Core value:** KEWA AG hat jederzeit volle Transparenz darüber, welche Arbeiten Imeri erledigt hat — mit Fotobeweis und Zeitstempel.
-**Current focus:** Phase 6 (Reports & Advanced) — Plan 1 complete
+**Core value:** KEWA AG hat jederzeit volle Transparenz darueber, welche Arbeiten Imeri erledigt hat - mit Fotobeweis und Zeitstempel.
+**Current focus:** PROJECT COMPLETE - All 6 phases delivered
 
 ## Current Position
 
 Phase: 6 of 6 (Reports & Advanced)
-Plan: 1 of 2 complete
-Status: In progress
-Last activity: 2026-01-17 — Completed 06-01-PLAN.md (Recurring Tasks)
+Plan: 2 of 2 complete
+Status: COMPLETE
+Last activity: 2026-01-17 - Completed 06-02-PLAN.md (Weekly Report)
 
-Progress: ███████████████ 94% (15/16 plans)
+Progress: ████████████████ 100% (16/16 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 15
+- Total plans completed: 16
 - Average duration: 11 min
-- Total execution time: 2.87 hours
+- Total execution time: 3.17 hours
 
 **By Phase:**
 
@@ -32,10 +32,10 @@ Progress: ███████████████ 94% (15/16 plans)
 | 3. Photo Documentation | 2/2 | 39 min | 20 min |
 | 4. Voice Notes | 3/3 | 32 min | 11 min |
 | 5. Building Visualization | 3/3 | 17 min | 6 min |
-| 6. Reports & Advanced | 1/2 | 12 min | 12 min |
+| 6. Reports & Advanced | 2/2 | 30 min | 15 min |
 
 **Recent Trend:**
-- Last 5 plans: 05-01 (5 min), 05-02 (4 min), 05-03 (8 min), 06-01 (12 min)
+- Last 5 plans: 05-02 (4 min), 05-03 (8 min), 06-01 (12 min), 06-02 (18 min)
 - Trend: Consistent execution time across feature development
 
 ## Accumulated Context
@@ -95,6 +95,10 @@ Recent decisions affecting current work:
 | Weekly=+7 days, monthly=+1 month | 06-01 | Simple date calculation for recurring tasks |
 | Fire-and-forget recurring trigger | 06-01 | Don't block completion response |
 | KEWA-only recurring selector | 06-01 | Only KEWA can set recurring type |
+| KEWA-only report access | 06-02 | Reports for accountability, not Imeri self-view |
+| Report grouped by unit then project | 06-02 | Logical building structure organization |
+| Week navigation pattern | 06-02 | Monday-Sunday weeks with German labels |
+| Collapsible report sections | 06-02 | Handle large reports without scroll fatigue |
 
 ### Pending Todos
 
@@ -114,29 +118,49 @@ Recent decisions affecting current work:
 - Next.js 16 middleware deprecation warning (works but may need migration to proxy pattern)
 - Next.js Turbopack has intermittent build race conditions (use NEXT_TURBOPACK=0 for reliable builds)
 
-## Phase 6 Progress
+## Phase 6 Complete
 
-Phase 6 (Reports & Advanced) IN PROGRESS:
+Phase 6 (Reports & Advanced) COMPLETE:
 1. **06-01:** Recurring Tasks (COMPLETE)
-2. **06-02:** Weekly Report (Pending)
+2. **06-02:** Weekly Report (COMPLETE)
 
-**Delivered so far:**
+**Delivered:**
 - RecurringType TypeScript type
 - TaskForm recurring selector (KEWA only)
 - POST /api/tasks/recurring endpoint
 - Automatic recurring task creation on completion
+- GET /api/reports/weekly endpoint with aggregation
+- WeeklyReport component with photo display
+- /dashboard/berichte page with week navigation
+- Berichte navigation link for KEWA
 
 **New files this phase:**
 - src/app/api/tasks/recurring/route.ts
+- src/app/api/reports/weekly/route.ts
+- src/app/dashboard/berichte/page.tsx
+- src/components/reports/WeeklyReport.tsx
 
 **Modified files this phase:**
 - src/components/tasks/TaskForm.tsx
+- src/components/navigation/mobile-nav.tsx
 - src/types/database.ts
 - src/app/api/tasks/route.ts
 - src/app/api/tasks/[id]/route.ts
 
+## Project Complete
+
+All 6 phases delivered:
+1. Foundation - Next.js, Supabase, PIN auth, mobile shell
+2. Task Management - CRUD, dashboard, list views
+3. Photo Documentation - Upload, storage, before/after display
+4. Voice Notes - Recording, upload, transcription
+5. Building Visualization - Grid view, floor plan, unit detail
+6. Reports & Advanced - Recurring tasks, weekly reports
+
+**Total:** 16 plans, 3.17 hours execution time
+
 ## Session Continuity
 
-Last session: 2026-01-17 21:22
-Stopped at: Completed 06-01-PLAN.md (Recurring Tasks)
-Resume file: None - ready for 06-02-PLAN.md
+Last session: 2026-01-17 22:21
+Stopped at: PROJECT COMPLETE - All phases delivered
+Resume file: None - project complete
