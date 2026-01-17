@@ -5,8 +5,8 @@ import { Card, CardContent, CardHeader, CardFooter } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { ProjectSelect } from '@/components/projects/ProjectSelect'
-import type { TaskWithProject, CreateTaskInput, UpdateTaskInput, Task } from '@/types/database'
-import type { Priority } from '@/types'
+import type { TaskWithProject, CreateTaskInput, UpdateTaskInput, Task, RecurringType } from '@/types/database'
+import type { Priority, Role } from '@/types'
 
 interface TaskFormProps {
   /** Form mode */
@@ -15,6 +15,8 @@ interface TaskFormProps {
   task?: TaskWithProject
   /** Default unit ID for project filter */
   defaultUnitId?: string
+  /** Current user role (KEWA can set recurring) */
+  userRole?: Role
   /** Callback on successful save */
   onSave: (task: Task) => void
   /** Callback on cancel */
@@ -31,6 +33,13 @@ const priorityOptions: { value: Priority; label: string }[] = [
   { value: 'urgent', label: 'Dringend' },
 ]
 
+// Recurring type options for select (KEWA only)
+const recurringOptions: { value: RecurringType; label: string }[] = [
+  { value: 'none', label: 'Einmalig' },
+  { value: 'weekly', label: 'Woechentlich' },
+  { value: 'monthly', label: 'Monatlich' },
+]
+
 /**
  * Task create/edit form modal
  */
@@ -38,6 +47,7 @@ export function TaskForm({
   mode,
   task,
   defaultUnitId,
+  userRole,
   onSave,
   onCancel,
   onDelete,
@@ -48,6 +58,7 @@ export function TaskForm({
   const [description, setDescription] = useState(task?.description || '')
   const [dueDate, setDueDate] = useState(task?.due_date?.split('T')[0] || '')
   const [priority, setPriority] = useState<Priority>(task?.priority || 'normal')
+  const [recurringType, setRecurringType] = useState<RecurringType>(task?.recurring_type || 'none')
 
   // UI state
   const [saving, setSaving] = useState(false)
@@ -63,6 +74,7 @@ export function TaskForm({
       setDescription(task.description || '')
       setDueDate(task.due_date?.split('T')[0] || '')
       setPriority(task.priority)
+      setRecurringType(task.recurring_type || 'none')
     }
   }, [task])
 
@@ -98,6 +110,7 @@ export function TaskForm({
           description: description.trim() || undefined,
           due_date: dueDate || undefined,
           priority,
+          recurring_type: userRole === 'kewa' ? recurringType : undefined,
         }
 
         const response = await fetch('/api/tasks', {
@@ -120,6 +133,7 @@ export function TaskForm({
           description: description.trim() || undefined,
           due_date: dueDate || null,
           priority,
+          recurring_type: userRole === 'kewa' ? recurringType : undefined,
         }
 
         const response = await fetch(`/api/tasks/${task.id}`, {
@@ -294,6 +308,26 @@ export function TaskForm({
                 ))}
               </select>
             </div>
+
+            {/* Recurring type (KEWA only) */}
+            {userRole === 'kewa' && (
+              <div className="w-full">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Wiederholung
+                </label>
+                <select
+                  value={recurringType}
+                  onChange={(e) => setRecurringType(e.target.value as RecurringType)}
+                  className="w-full h-12 min-h-[48px] px-4 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  {recurringOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
 
             {/* Status toggle (edit mode only) */}
             {mode === 'edit' && task && (

@@ -212,7 +212,7 @@ export async function POST(
       status: 'open',
       priority: body.priority || 'normal',
       due_date: body.due_date || null,
-      recurring_type: 'none',
+      recurring_type: body.recurring_type || 'none',
     }
 
     const { data: newTask, error: createError } = await supabase

@@ -125,6 +125,11 @@ export interface ProjectWithUnit extends Project {
 // =============================================
 
 /**
+ * Recurring type for tasks
+ */
+export type RecurringType = 'none' | 'weekly' | 'monthly'
+
+/**
  * Input for creating a new task
  */
 export interface CreateTaskInput {
@@ -133,6 +138,7 @@ export interface CreateTaskInput {
   description?: string
   due_date?: string
   priority?: Priority
+  recurring_type?: RecurringType
 }
 
 /**
