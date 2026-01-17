@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-01-16)
 
 **Core value:** KEWA AG hat jederzeit volle Transparenz darüber, welche Arbeiten Imeri erledigt hat — mit Fotobeweis und Zeitstempel.
-**Current focus:** Phase 4 — Voice Notes (IN PROGRESS)
+**Current focus:** Phase 4 — Voice Notes (COMPLETE)
 
 ## Current Position
 
 Phase: 4 of 6 (Voice Notes)
-Plan: 1 of 2 complete
-Status: In progress
-Last activity: 2026-01-17 — Completed 04-01-PLAN.md (Audio Storage Infrastructure)
+Plan: 2 of 2 complete
+Status: Phase complete
+Last activity: 2026-01-17 — Completed 04-02-PLAN.md (Transcription Service Integration)
 
-Progress: █████████░ 56% (9/16 plans)
+Progress: ██████████ 63% (10/16 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 9
+- Total plans completed: 10
 - Average duration: 12 min
-- Total execution time: 1.85 hours
+- Total execution time: 1.97 hours
 
 **By Phase:**
 
@@ -30,11 +30,11 @@ Progress: █████████░ 56% (9/16 plans)
 | 1. Foundation | 3/3 | 43 min | 14 min |
 | 2. Task Management | 3/3 | 24 min | 8 min |
 | 3. Photo Documentation | 2/2 | 39 min | 20 min |
-| 4. Voice Notes | 1/2 | 3 min | 3 min |
+| 4. Voice Notes | 2/2 | 7 min | 4 min |
 
 **Recent Trend:**
-- Last 5 plans: 02-03 (12 min), 03-01 (4 min), 03-02 (35 min), 04-01 (3 min)
-- Trend: API-only plans are fast, UI plans take longer
+- Last 5 plans: 03-01 (4 min), 03-02 (35 min), 04-01 (3 min), 04-02 (4 min)
+- Trend: API-only plans are fast (3-4 min), UI plans take longer (35 min)
 
 ## Accumulated Context
 
@@ -72,6 +72,9 @@ Recent decisions affecting current work:
 | Max 1 audio per type per task | 04-01 | Simpler than photos, one voice note per purpose is sufficient |
 | 10MB audio file size limit | 04-01 | Audio files are larger than compressed images |
 | Transcription status workflow | 04-01 | explanation=pending (will be transcribed), emergency=completed |
+| German (Hochdeutsch) for transcription | 04-02 | KEWA speaks German, Imeri needs to read instructions |
+| Fire-and-forget transcription | 04-02 | Upload completes immediately, transcription runs in background |
+| Idempotent /transcribe endpoint | 04-02 | Safe to retry, returns existing result if completed |
 
 ### Pending Todos
 
@@ -81,33 +84,40 @@ Recent decisions affecting current work:
 - Create 'task-photos' storage bucket with policies
 - Create 'task-audio' storage bucket with policies
 - Configure .env.local with actual Supabase credentials
+- Configure OPENAI_API_KEY for transcription
 - Update placeholder PIN hashes in users table with real bcrypt hashes
 
 ### Blockers/Concerns
 
 - Supabase project needs to be created and migrations applied before testing API endpoints
 - Storage buckets 'task-photos' and 'task-audio' must be created manually with correct policies
+- OpenAI API key required for transcription to work (audio uploads work without it, transcription fails silently)
 - Next.js 16 middleware deprecation warning (works but may need migration to proxy pattern)
 - Next.js Turbopack has intermittent build race conditions (use NEXT_TURBOPACK=0 for reliable builds)
 
-## Phase 4 In Progress
+## Phase 4 Complete
 
-Phase 4 (Voice Notes) IN PROGRESS:
-1. **04-01:** ✓ Audio storage schema + TypeScript types + CRUD API
-2. **04-02:** - Audio recording UI + playback components
+Phase 4 (Voice Notes) COMPLETE:
+1. **04-01:** Audio storage schema + TypeScript types + CRUD API
+2. **04-02:** OpenAI Whisper transcription integration
 
-**Delivered so far:**
+**Delivered:**
 - Audio API: GET/POST/DELETE /api/audio
+- Transcription API: POST /api/audio/[id]/transcribe
 - task_audio table with transcription workflow support
 - TypeScript types: AudioType, TranscriptionStatus, TaskAudio, etc.
+- Transcription service: src/lib/transcription.ts
+- Auto-transcription on explanation upload (fire-and-forget)
 
-**New files:**
+**New files this phase:**
 - supabase/migrations/005_task_audio.sql
 - src/app/api/audio/route.ts
 - src/app/api/audio/[id]/route.ts
+- src/app/api/audio/[id]/transcribe/route.ts
+- src/lib/transcription.ts
 
 ## Session Continuity
 
-Last session: 2026-01-17 18:35
-Stopped at: Completed 04-01-PLAN.md (Audio Storage Infrastructure)
-Resume file: None - ready for 04-02 (Audio UI)
+Last session: 2026-01-17 18:40
+Stopped at: Completed 04-02-PLAN.md (Transcription Service Integration)
+Resume file: None - Phase 4 complete, ready for Phase 5
