@@ -1,0 +1,11 @@
+-- Set PIN hashes for users
+-- KEWA AG: PIN 1234
+-- Imeri: PIN 5678
+
+UPDATE users
+SET pin_hash = '$2b$10$Dm5ReFjXek0mmz7irIZxyOuQlutv/XyFrlvQBU7NjpHY2ErPIQQAu'
+WHERE id = '00000000-0000-0000-0000-000000000001';
+
+UPDATE users
+SET pin_hash = '$2b$10$.h6hfq1Ji6ChcKXFk6UPR.1NZpmsDuNldUS7w3XN5TGqPwAiQx9QS'
+WHERE id = '00000000-0000-0000-0000-000000000002';
