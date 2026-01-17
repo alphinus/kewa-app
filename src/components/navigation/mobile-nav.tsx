@@ -6,6 +6,7 @@ import {
   LayoutDashboard,
   Building2,
   CheckSquare,
+  FileText,
   Mic,
   Settings
 } from 'lucide-react'
@@ -23,6 +24,7 @@ const kewaNavItems: NavItem[] = [
   { href: '/dashboard', label: 'Uebersicht', icon: LayoutDashboard },
   { href: '/dashboard/gebaude', label: 'Gebaeude', icon: Building2 },
   { href: '/dashboard/aufgaben', label: 'Aufgaben', icon: CheckSquare },
+  { href: '/dashboard/berichte', label: 'Berichte', icon: FileText },
   { href: '/dashboard/audio', label: 'Audio', icon: Mic },
   { href: '/dashboard/settings', label: 'Einstellungen', icon: Settings }
 ]
@@ -40,7 +42,7 @@ interface MobileNavProps {
 
 /**
  * Bottom navigation bar for mobile devices
- * Role-based items: KEWA AG sees 5 items, Imeri sees 2
+ * Role-based items: KEWA AG sees 6 items, Imeri sees 3
  * Touch targets: min 48px height per item
  */
 export function MobileNav({ role }: MobileNavProps) {
