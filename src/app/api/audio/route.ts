@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { transcribeAudio } from '@/lib/transcription'
 import type {
   TaskAudio,
   TaskAudioWithUrl,
@@ -314,6 +315,15 @@ export async function POST(
       )
     }
 
+    // Fire-and-forget auto-transcription for explanation audio
+    if (audioType === 'explanation') {
+      triggerTranscription(newAudio.id, storagePath, file.name || `audio.${extension}`).catch(
+        (err) => {
+          console.error('Auto-transcription error:', err)
+        }
+      )
+    }
+
     // Generate signed URL for response
     const { data: signedUrl } = await supabase.storage
       .from(BUCKET_NAME)
@@ -346,4 +356,72 @@ function getFileExtension(mimeType: string): string {
     'audio/ogg': 'ogg',
   }
   return extensionMap[mimeType] || 'webm'
+}
+
+/**
+ * Trigger automatic transcription for an audio file (fire-and-forget)
+ *
+ * This runs asynchronously after upload completes.
+ * Failures are logged but don't affect the upload response.
+ * User can manually retry via /api/audio/[id]/transcribe if auto-transcription fails.
+ */
+async function triggerTranscription(
+  audioId: string,
+  storagePath: string,
+  fileName: string
+): Promise<void> {
+  const supabase = await createClient()
+
+  try {
+    // Update status to processing
+    await supabase
+      .from('task_audio')
+      .update({ transcription_status: 'processing' })
+      .eq('id', audioId)
+
+    // Download audio from storage
+    const { data: fileData, error: downloadError } = await supabase.storage
+      .from(BUCKET_NAME)
+      .download(storagePath)
+
+    if (downloadError || !fileData) {
+      throw new Error(`Failed to download audio: ${downloadError?.message}`)
+    }
+
+    // Convert Blob to ArrayBuffer
+    const arrayBuffer = await fileData.arrayBuffer()
+
+    // Call transcription service
+    const result = await transcribeAudio(arrayBuffer, fileName)
+
+    // Update database with result
+    if (result.success) {
+      await supabase
+        .from('task_audio')
+        .update({
+          transcription: result.transcription,
+          transcription_status: 'completed',
+        })
+        .eq('id', audioId)
+    } else {
+      await supabase
+        .from('task_audio')
+        .update({
+          transcription: result.error || 'Unknown transcription error',
+          transcription_status: 'failed',
+        })
+        .eq('id', audioId)
+    }
+  } catch (error) {
+    // Mark as failed with error message
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+    await supabase
+      .from('task_audio')
+      .update({
+        transcription: errorMessage,
+        transcription_status: 'failed',
+      })
+      .eq('id', audioId)
+    throw error // Re-throw so the .catch() in the caller logs it
+  }
 }
