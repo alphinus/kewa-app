@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-01-16)
 
 **Core value:** KEWA AG hat jederzeit volle Transparenz darüber, welche Arbeiten Imeri erledigt hat — mit Fotobeweis und Zeitstempel.
-**Current focus:** Phase 3 — Photo Documentation (IN PROGRESS)
+**Current focus:** Phase 3 — Photo Documentation (COMPLETE)
 
 ## Current Position
 
-Phase: 3 of 6 (Photo Documentation)
-Plan: 1 of 3 complete
-Status: In progress
-Last activity: 2026-01-16 — Completed 03-01-PLAN.md (Photo Storage Infrastructure)
+Phase: 3 of 6 (Photo Documentation) ✓
+Plan: 2 of 2 complete
+Status: Phase complete - ready for Phase 4
+Last activity: 2026-01-17 — Completed 03-02-PLAN.md (Photo UI Components)
 
-Progress: ███████░░░ 44% (7/16 plans)
+Progress: ████████░░ 50% (8/16 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 7
-- Average duration: 10 min
-- Total execution time: 1.18 hours
+- Total plans completed: 8
+- Average duration: 13 min
+- Total execution time: 1.8 hours
 
 **By Phase:**
 
@@ -29,11 +29,11 @@ Progress: ███████░░░ 44% (7/16 plans)
 |-------|-------|-------|----------|
 | 1. Foundation | 3/3 | 43 min | 14 min |
 | 2. Task Management | 3/3 | 24 min | 8 min |
-| 3. Photo Documentation | 1/3 | 4 min | 4 min |
+| 3. Photo Documentation | 2/2 | 39 min | 20 min |
 
 **Recent Trend:**
-- Last 5 plans: 02-01 (3 min), 02-02 (9 min), 02-03 (12 min), 03-01 (4 min)
-- Trend: API-only plans completing faster than UI plans
+- Last 5 plans: 02-02 (9 min), 02-03 (12 min), 03-01 (4 min), 03-02 (35 min)
+- Trend: UI plans with user feedback take longer but deliver better UX
 
 ## Accumulated Context
 
@@ -64,6 +64,10 @@ Recent decisions affecting current work:
 | 720px max dimension, 0.8 quality WebP | 03-01 | Balance between visual quality and file size (~50-100KB) |
 | 1 hour signed URL expiry | 03-01 | Balance between caching and security |
 | Role-based photo upload | 03-01 | KEWA=explanation only, Imeri=completion only |
+| Preview before upload | 03-02 | User can verify image quality before uploading |
+| Upload retry (3 attempts) | 03-02 | Handle poor network conditions on construction sites |
+| Vorher/Nachher labels | 03-02 | Clearer than Erklaerung/Erledigung for photo comparison |
+| Action bar at bottom-16 | 03-02 | Positioned above MobileNav to avoid overlap |
 
 ### Pending Todos
 
@@ -80,24 +84,25 @@ Recent decisions affecting current work:
 - Next.js 16 middleware deprecation warning (works but may need migration to proxy pattern)
 - Next.js Turbopack has intermittent build race conditions (use NEXT_TURBOPACK=0 for reliable builds)
 
-## Phase 3 Progress
+## Phase 3 Complete ✓
 
-Phase 3 (Photo Documentation) IN PROGRESS:
-1. **03-01:** (COMPLETE) Photo storage schema + compression utility + CRUD API
-2. **03-02:** (PENDING) Photo UI components
-3. **03-03:** (PENDING) Photo integration with tasks
+Phase 3 (Photo Documentation) COMPLETE:
+1. **03-01:** ✓ Photo storage schema + compression utility + CRUD API
+2. **03-02:** ✓ Photo UI components + task detail page + completion flow
 
-**API endpoints delivered (Phase 3):**
-- GET /api/photos?task_id (list with signed URLs)
-- POST /api/photos (multipart upload with validation)
-- DELETE /api/photos/[id] (ownership check)
+**Delivered:**
+- Photo API: GET/POST/DELETE /api/photos
+- PhotoUpload component with camera/gallery support
+- BeforeAfterView with Vorher/Nachher comparison
+- Task detail page at /dashboard/aufgaben/[id]
+- CompleteTaskModal requires photo for completion
 
-**New utilities:**
-- imageCompression.ts - Canvas-based WebP compression
-- PhotoType, TaskPhoto, TaskPhotoWithUrl types
+**New components:**
+- PhotoUpload.tsx, PhotoGallery.tsx, BeforeAfterView.tsx
+- Task detail page with role-based photo sections
 
 ## Session Continuity
 
-Last session: 2026-01-16 15:18
-Stopped at: Completed 03-01-PLAN.md
-Resume file: None - ready for 03-02-PLAN.md (Photo UI Components)
+Last session: 2026-01-17 18:30
+Stopped at: Completed Phase 3 (Photo Documentation)
+Resume file: None - ready for Phase 4 (Voice Notes)

@@ -32,9 +32,9 @@ Requirements für Initial-Release. Jedes mappt auf Roadmap-Phasen.
 
 ### Fotos
 
-- [ ] **PHOTO-01**: KEWA AG kann bis zu 2 Bilder pro Aufgabe anhängen (Erklärung)
-- [ ] **PHOTO-02**: Imeri kann bis zu 2 Fotos pro Aufgabe hochladen (Dokumentation Erledigung)
-- [ ] **PHOTO-03**: User sieht Vorher/Nachher-Fotos nebeneinander
+- [x] **PHOTO-01**: KEWA AG kann bis zu 2 Bilder pro Aufgabe anhängen (Erklärung) ✓
+- [x] **PHOTO-02**: Imeri kann bis zu 2 Fotos pro Aufgabe hochladen (Dokumentation Erledigung) ✓
+- [x] **PHOTO-03**: User sieht Vorher/Nachher-Fotos nebeneinander ✓
 
 ### Sprachnotizen
 
@@ -48,7 +48,7 @@ Requirements für Initial-Release. Jedes mappt auf Roadmap-Phasen.
 - [x] **DASH-01**: KEWA AG sieht Übersicht aller Einheiten mit Status ✓
 - [x] **DASH-02**: KEWA AG kann Projekte und Aufgaben erstellen und bearbeiten ✓
 - [x] **DASH-03**: Imeri sieht Liste seiner offenen Aufgaben ✓
-- [ ] **DASH-04**: Imeri kann Aufgaben als erledigt markieren mit Foto-Upload
+- [x] **DASH-04**: Imeri kann Aufgaben als erledigt markieren mit Foto-Upload ✓
 - [ ] **DASH-05**: KEWA AG kann Sichtbarkeit einstellen (Imeri sieht Projekte+Aufgaben oder nur Aufgaben)
 - [ ] **DASH-06**: KEWA AG sieht Übersicht aller Audio-Dateien (inkl. Imeris Notfall-Audios)
 - [x] **DASH-07**: App ist mobile-optimiert (Touch-Targets ≥76dp für Baustellennutzung) ✓
@@ -106,9 +106,9 @@ Welche Phasen decken welche Requirements ab.
 | TASK-04 | Phase 2 | Complete ✓ |
 | TASK-05 | Phase 6 | Pending |
 | TASK-06 | Phase 2 | Complete ✓ |
-| PHOTO-01 | Phase 3 | Pending |
-| PHOTO-02 | Phase 3 | Pending |
-| PHOTO-03 | Phase 3 | Pending |
+| PHOTO-01 | Phase 3 | Complete ✓ |
+| PHOTO-02 | Phase 3 | Complete ✓ |
+| PHOTO-03 | Phase 3 | Complete ✓ |
 | AUDIO-01 | Phase 4 | Pending |
 | AUDIO-02 | Phase 4 | Pending |
 | AUDIO-03 | Phase 4 | Pending |
@@ -116,7 +116,7 @@ Welche Phasen decken welche Requirements ab.
 | DASH-01 | Phase 2 | Complete ✓ |
 | DASH-02 | Phase 2 | Complete ✓ |
 | DASH-03 | Phase 2 | Complete ✓ |
-| DASH-04 | Phase 2 | Pending |
+| DASH-04 | Phase 3 | Complete ✓ |
 | DASH-05 | Phase 5 | Pending |
 | DASH-06 | Phase 4 | Pending |
 | DASH-07 | Phase 1 | Complete ✓ |
