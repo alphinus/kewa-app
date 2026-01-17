@@ -140,10 +140,10 @@ export async function PUT(
     // Parse request body
     const body: UpdateTaskInput = await request.json()
 
-    // Check if task exists
+    // Check if task exists (include recurring_type for completion handling)
     const { data: existingTask, error: fetchError } = await supabase
       .from('tasks')
-      .select('id, status')
+      .select('id, status, recurring_type')
       .eq('id', id)
       .single()
 
@@ -203,6 +203,35 @@ export async function PUT(
         { error: 'Failed to update task' },
         { status: 500 }
       )
+    }
+
+    // Trigger recurring task creation if task was just completed and is recurring
+    if (
+      body.status === 'completed' &&
+      existingTask.status !== 'completed' &&
+      existingTask.recurring_type &&
+      existingTask.recurring_type !== 'none'
+    ) {
+      // Fire and forget - don't block the response
+      try {
+        // Get the base URL from the request
+        const baseUrl = request.nextUrl.origin
+        fetch(`${baseUrl}/api/tasks/recurring`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            // Forward auth headers
+            'x-user-id': request.headers.get('x-user-id') || '',
+            'x-user-role': request.headers.get('x-user-role') || '',
+          },
+          body: JSON.stringify({ completed_task_id: id }),
+        }).catch((err) => {
+          console.error('Error triggering recurring task creation:', err)
+        })
+      } catch (err) {
+        // Log but don't fail the completion
+        console.error('Error setting up recurring task trigger:', err)
+      }
     }
 
     return NextResponse.json({ task: updatedTask })
