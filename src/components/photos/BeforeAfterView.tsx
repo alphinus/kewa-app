@@ -58,7 +58,7 @@ export function BeforeAfterView({
                   key={photo.id}
                   type="button"
                   onClick={() => handlePhotoClick(photo)}
-                  className="block w-full rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                  className="relative block w-full rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                 >
                   <img
                     src={photo.url}
@@ -70,9 +70,11 @@ export function BeforeAfterView({
               ))}
             </div>
           ) : (
-            <p className="text-sm text-gray-500 dark:text-gray-400 italic py-4 text-center bg-gray-50 dark:bg-gray-800/50 rounded-lg">
-              Noch keine Fotos
-            </p>
+            <div className="py-4 text-center bg-gray-50 dark:bg-gray-800/50 rounded-lg">
+              <p className="text-sm text-gray-500 dark:text-gray-400 italic">
+                Noch keine Fotos
+              </p>
+            </div>
           )}
         </div>
 
@@ -89,7 +91,7 @@ export function BeforeAfterView({
                   key={photo.id}
                   type="button"
                   onClick={() => handlePhotoClick(photo)}
-                  className="block w-full rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                  className="relative block w-full rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                 >
                   <img
                     src={photo.url}
@@ -101,9 +103,11 @@ export function BeforeAfterView({
               ))}
             </div>
           ) : (
-            <p className="text-sm text-gray-500 dark:text-gray-400 italic py-4 text-center bg-gray-50 dark:bg-gray-800/50 rounded-lg">
-              Noch keine Fotos
-            </p>
+            <div className="py-4 text-center bg-gray-50 dark:bg-gray-800/50 rounded-lg">
+              <p className="text-sm text-gray-500 dark:text-gray-400 italic">
+                Noch keine Fotos
+              </p>
+            </div>
           )}
         </div>
       </div>

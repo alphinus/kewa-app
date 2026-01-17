@@ -257,7 +257,7 @@ export default function TaskDetailPage() {
   const isImeri = userRole === 'imeri'
 
   return (
-    <div className="space-y-4 pb-24">
+    <div className="space-y-4 pb-24 relative">
       {/* Back button */}
       <button
         onClick={() => router.back()}
@@ -378,7 +378,7 @@ export default function TaskDetailPage() {
       </Card>
 
       {/* Sticky bottom action bar */}
-      <div className="fixed bottom-0 left-0 right-0 p-4 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 z-40">
+      <div className="fixed bottom-0 left-0 right-0 p-4 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 z-40 isolate">
         <div className="max-w-lg mx-auto flex gap-3">
           {/* KEWA: Edit button (if open) */}
           {isKewa && !isCompleted && (

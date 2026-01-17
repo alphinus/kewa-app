@@ -231,11 +231,11 @@ export function PhotoUpload({
       {existingPhotos.length > 0 && (
         <div className="grid grid-cols-2 gap-3">
           {existingPhotos.map((photo) => (
-            <div key={photo.id} className="relative group">
+            <div key={photo.id} className="relative group bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden">
               <img
                 src={photo.url}
                 alt={photo.file_name}
-                className="w-full h-24 object-cover rounded-lg"
+                className="w-full h-24 object-cover"
                 loading="lazy"
               />
               {!disabled && (
