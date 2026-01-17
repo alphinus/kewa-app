@@ -92,7 +92,13 @@ export async function POST(
       }
 
       // Archive the project
-      const { data: updatedProject, error: updateError } = await supabase
+      // Note: archived_at column may not exist if migration 006 not applied
+      // Try with archived_at first, fallback to status-only update
+      let updatedProject
+      let updateError
+
+      // First try with archived_at
+      const result1 = await supabase
         .from('projects')
         .update({
           status: 'archived',
@@ -101,6 +107,21 @@ export async function POST(
         .eq('id', projectId)
         .select()
         .single()
+
+      if (result1.error && result1.error.message.includes('archived_at')) {
+        // Column doesn't exist, use status-only update
+        const result2 = await supabase
+          .from('projects')
+          .update({ status: 'archived' })
+          .eq('id', projectId)
+          .select()
+          .single()
+        updatedProject = result2.data
+        updateError = result2.error
+      } else {
+        updatedProject = result1.data
+        updateError = result1.error
+      }
 
       if (updateError) {
         console.error('Error archiving project:', updateError)
@@ -113,7 +134,12 @@ export async function POST(
       return NextResponse.json({ project: updatedProject })
     } else {
       // Unarchiving: Set status to active, clear archived_at
-      const { data: updatedProject, error: updateError } = await supabase
+      // Note: archived_at column may not exist if migration 006 not applied
+      let updatedProject
+      let updateError
+
+      // First try with archived_at
+      const result1 = await supabase
         .from('projects')
         .update({
           status: 'active',
@@ -122,6 +148,21 @@ export async function POST(
         .eq('id', projectId)
         .select()
         .single()
+
+      if (result1.error && result1.error.message.includes('archived_at')) {
+        // Column doesn't exist, use status-only update
+        const result2 = await supabase
+          .from('projects')
+          .update({ status: 'active' })
+          .eq('id', projectId)
+          .select()
+          .single()
+        updatedProject = result2.data
+        updateError = result2.error
+      } else {
+        updatedProject = result1.data
+        updateError = result1.error
+      }
 
       if (updateError) {
         console.error('Error unarchiving project:', updateError)
