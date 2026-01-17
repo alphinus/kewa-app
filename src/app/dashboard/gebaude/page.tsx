@@ -1,22 +1,30 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { useRouter } from 'next/navigation'
 import { useSession } from '@/hooks/useSession'
 import { Card, CardContent } from '@/components/ui/card'
+import { BuildingGrid } from '@/components/building/BuildingGrid'
+import { CommonAreasList } from '@/components/building/CommonAreasList'
+import { UnitDetailModal } from '@/components/building/UnitDetailModal'
 import type { UnitWithStats, UnitsResponse } from '@/types/database'
-import type { UnitType } from '@/types'
 
 /**
- * Gebaude (Units) overview page
- * Shows all units grouped by type with task statistics
+ * Gebaeudeuebersicht page
+ *
+ * Displays:
+ * - Building grid with floor-based apartment layout
+ * - Common areas section below
+ * - Unit detail modal on click
+ *
+ * KEWA can edit tenant name and visibility in modal.
+ * Both roles can view and navigate to tasks.
  */
 export default function GebaudePage() {
-  const router = useRouter()
-  const { session } = useSession()
+  const { session, loading: sessionLoading } = useSession()
   const [units, setUnits] = useState<UnitWithStats[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [selectedUnit, setSelectedUnit] = useState<UnitWithStats | null>(null)
 
   const fetchUnits = useCallback(async () => {
     try {
@@ -41,37 +49,74 @@ export default function GebaudePage() {
     fetchUnits()
   }, [fetchUnits])
 
-  // Group units by type
-  const apartments = units
-    .filter(u => u.unit_type === 'apartment')
-    .sort((a, b) => {
-      // Sort by floor descending, then by position/name
-      const floorDiff = (b.floor ?? -1) - (a.floor ?? -1)
-      if (floorDiff !== 0) return floorDiff
-      return a.name.localeCompare(b.name)
-    })
+  // Filter units by type
+  const apartments = units.filter((u) => u.unit_type === 'apartment')
+  const commonAreas = units.filter(
+    (u) => u.unit_type === 'common_area' || u.unit_type === 'building'
+  )
 
-  const commonAreas = units.filter(u => u.unit_type === 'common_area')
-  const buildingWide = units.filter(u => u.unit_type === 'building')
-
-  const handleUnitClick = (unitId: string) => {
-    router.push(`/dashboard/aufgaben?unit_id=${unitId}`)
+  // Handle unit click - open modal
+  const handleUnitClick = (unit: UnitWithStats) => {
+    setSelectedUnit(unit)
   }
 
-  // Loading state with skeleton cards
-  if (loading) {
+  // Handle modal close
+  const handleModalClose = () => {
+    setSelectedUnit(null)
+  }
+
+  // Handle save from modal - update local state
+  const handleModalSave = (updatedUnit: UnitWithStats) => {
+    setUnits((prev) =>
+      prev.map((u) => (u.id === updatedUnit.id ? updatedUnit : u))
+    )
+  }
+
+  // Determine if current user is KEWA
+  const isKewa = session.authenticated && session.user?.role === 'kewa'
+
+  // Loading skeleton
+  if (loading || sessionLoading) {
     return (
       <div className="space-y-6">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-          Gebaude
+          Gebaeudeuebersicht
         </h1>
-        <div className="space-y-4">
-          {[1, 2, 3].map(i => (
-            <div
-              key={i}
-              className="h-20 bg-gray-200 dark:bg-gray-800 rounded-xl animate-pulse"
-            />
+
+        {/* Building grid skeleton */}
+        <div className="max-w-[600px] mx-auto space-y-1">
+          {[4, 3, 2, 1, 0].map((floor) => (
+            <div key={floor} className="flex items-center gap-2">
+              <div className="w-10 sm:w-12 flex-shrink-0">
+                <div className="h-4 w-8 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+              </div>
+              <div className={`flex-1 grid gap-1 sm:gap-2 ${floor === 4 ? 'grid-cols-1' : 'grid-cols-3'}`}>
+                {floor === 4 ? (
+                  <div className="h-[60px] bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse" />
+                ) : (
+                  [0, 1, 2].map((pos) => (
+                    <div
+                      key={pos}
+                      className="h-[60px] bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse"
+                    />
+                  ))
+                )}
+              </div>
+            </div>
           ))}
+        </div>
+
+        {/* Common areas skeleton */}
+        <div className="space-y-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+          <div className="h-4 w-40 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+          <div className="flex gap-2">
+            {[1, 2, 3].map((i) => (
+              <div
+                key={i}
+                className="h-[48px] w-[120px] bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse"
+              />
+            ))}
+          </div>
         </div>
       </div>
     )
@@ -82,14 +127,14 @@ export default function GebaudePage() {
     return (
       <div className="space-y-6">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-          Gebaude
+          Gebaeudeuebersicht
         </h1>
         <Card>
-          <CardContent className="p-4 text-center">
+          <CardContent className="p-6 text-center space-y-4">
             <p className="text-red-500">{error}</p>
             <button
               onClick={fetchUnits}
-              className="mt-2 text-blue-500 underline"
+              className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
             >
               Erneut versuchen
             </button>
@@ -104,7 +149,7 @@ export default function GebaudePage() {
     return (
       <div className="space-y-6">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-          Gebaude
+          Gebaeudeuebersicht
         </h1>
         <Card>
           <CardContent className="p-6 text-center">
@@ -120,136 +165,31 @@ export default function GebaudePage() {
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-        Gebaude
+        Gebaeudeuebersicht
       </h1>
-      <p className="text-gray-600 dark:text-gray-400">
-        Uebersicht aller Einheiten
-      </p>
 
-      {/* Apartments section */}
-      {apartments.length > 0 && (
-        <section className="space-y-3">
-          <h2 className="text-lg font-semibold text-gray-700 dark:text-gray-300">
-            Wohnungen
-          </h2>
-          <div className="grid gap-3">
-            {apartments.map(unit => (
-              <UnitCard
-                key={unit.id}
-                unit={unit}
-                onClick={() => handleUnitClick(unit.id)}
-                showTenant={session.user?.role === 'kewa'}
-              />
-            ))}
-          </div>
-        </section>
-      )}
+      {/* Building Grid - centered with max-width */}
+      <div className="max-w-[600px] mx-auto">
+        <BuildingGrid apartments={apartments} onUnitClick={handleUnitClick} />
+      </div>
 
-      {/* Common areas section */}
+      {/* Common Areas - below grid with divider */}
       {commonAreas.length > 0 && (
-        <section className="space-y-3">
-          <h2 className="text-lg font-semibold text-gray-700 dark:text-gray-300">
-            Gemeinschaftsflaechen
-          </h2>
-          <div className="grid gap-3">
-            {commonAreas.map(unit => (
-              <UnitCard
-                key={unit.id}
-                unit={unit}
-                onClick={() => handleUnitClick(unit.id)}
-                showTenant={false}
-              />
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* Building-wide section */}
-      {buildingWide.length > 0 && (
-        <section className="space-y-3">
-          <h2 className="text-lg font-semibold text-gray-700 dark:text-gray-300">
-            Gesamtgebaude
-          </h2>
-          <div className="grid gap-3">
-            {buildingWide.map(unit => (
-              <UnitCard
-                key={unit.id}
-                unit={unit}
-                onClick={() => handleUnitClick(unit.id)}
-                showTenant={false}
-              />
-            ))}
-          </div>
-        </section>
-      )}
-    </div>
-  )
-}
-
-interface UnitCardProps {
-  unit: UnitWithStats
-  onClick: () => void
-  showTenant: boolean
-}
-
-/**
- * Individual unit card with task count badge
- */
-function UnitCard({ unit, onClick, showTenant }: UnitCardProps) {
-  const openTasks = unit.open_tasks_count
-
-  // Badge color based on open task count
-  const getBadgeClasses = () => {
-    if (openTasks === 0) {
-      return 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300'
-    }
-    if (openTasks <= 2) {
-      return 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300'
-    }
-    return 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300'
-  }
-
-  return (
-    <Card
-      className="cursor-pointer active:scale-[0.98] transition-transform"
-      onClick={onClick}
-    >
-      <CardContent className="p-4">
-        <div className="flex items-center justify-between min-h-[48px]">
-          <div className="flex-1">
-            <p className="font-medium text-gray-900 dark:text-gray-100">
-              {unit.name}
-            </p>
-            {showTenant && unit.tenant_name && (
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                {unit.tenant_name}
-              </p>
-            )}
-          </div>
-          <div className="flex items-center gap-2">
-            <span
-              className={`px-2.5 py-1 text-sm font-medium rounded-full ${getBadgeClasses()}`}
-            >
-              {openTasks === 0
-                ? 'Keine'
-                : `${openTasks} offen`}
-            </span>
-            <svg
-              className="w-5 h-5 text-gray-400"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M9 5l7 7-7 7"
-              />
-            </svg>
-          </div>
+        <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
+          <CommonAreasList
+            commonAreas={commonAreas}
+            onUnitClick={handleUnitClick}
+          />
         </div>
-      </CardContent>
-    </Card>
+      )}
+
+      {/* Unit Detail Modal */}
+      <UnitDetailModal
+        unit={selectedUnit}
+        onClose={handleModalClose}
+        onSave={handleModalSave}
+        isKewa={isKewa}
+      />
+    </div>
   )
 }
