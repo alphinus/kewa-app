@@ -273,3 +273,64 @@ export interface PhotosResponse {
 export interface PhotoResponse {
   photo: TaskPhotoWithUrl
 }
+
+// =============================================
+// AUDIO TYPES
+// =============================================
+
+/**
+ * Audio type distinguishing explanation from emergency audio
+ */
+export type AudioType = 'explanation' | 'emergency'
+
+/**
+ * Transcription status for audio files
+ */
+export type TranscriptionStatus = 'pending' | 'processing' | 'completed' | 'failed'
+
+/**
+ * Audio attachment for task voice notes
+ */
+export interface TaskAudio {
+  id: string
+  task_id: string
+  audio_type: AudioType
+  storage_path: string
+  file_name: string
+  file_size: number
+  duration_seconds: number | null
+  transcription: string | null
+  transcription_status: TranscriptionStatus
+  uploaded_by: string
+  created_at: string
+}
+
+/**
+ * TaskAudio with resolved storage URL
+ */
+export interface TaskAudioWithUrl extends TaskAudio {
+  url: string
+}
+
+/**
+ * Input for creating audio (client-side)
+ */
+export interface CreateAudioInput {
+  task_id: string
+  audio_type: AudioType
+  file: File
+}
+
+/**
+ * Response for GET /api/audio
+ */
+export interface AudiosResponse {
+  audios: TaskAudioWithUrl[]
+}
+
+/**
+ * Response for single audio operations
+ */
+export interface AudioResponse {
+  audio: TaskAudioWithUrl
+}
