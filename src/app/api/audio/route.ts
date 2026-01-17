@@ -35,8 +35,13 @@ const ALLOWED_AUDIO_TYPES = [
 
 /**
  * GET /api/audio?task_id={id}
+ * GET /api/audio?audio_type={type}
+ * GET /api/audio (KEWA only - returns all audio)
  *
- * Returns all audio files for a task with signed URLs.
+ * Returns audio files with signed URLs.
+ * - With task_id: returns all audio for that task
+ * - With audio_type: filter by type (KEWA only)
+ * - Without params: returns all audio (KEWA only)
  * Requires authentication.
  */
 export async function GET(
@@ -59,15 +64,55 @@ export async function GET(
     // Parse query params
     const { searchParams } = new URL(request.url)
     const taskId = searchParams.get('task_id')
+    const audioTypeFilter = searchParams.get('audio_type') as AudioType | null
 
+    // If no task_id provided, only KEWA can list all audio
     if (!taskId) {
-      return NextResponse.json(
-        { error: 'task_id query parameter is required' },
-        { status: 400 }
+      if (userRole !== 'kewa') {
+        return NextResponse.json(
+          { error: 'task_id query parameter is required' },
+          { status: 400 }
+        )
+      }
+
+      // KEWA: Fetch all audio files with optional type filter
+      let query = supabase
+        .from('task_audio')
+        .select('*')
+        .order('created_at', { ascending: false })
+
+      if (audioTypeFilter && ['explanation', 'emergency'].includes(audioTypeFilter)) {
+        query = query.eq('audio_type', audioTypeFilter)
+      }
+
+      const { data: audios, error: audiosError } = await query
+
+      if (audiosError) {
+        console.error('Error fetching audio files:', audiosError)
+        return NextResponse.json(
+          { error: 'Failed to fetch audio files' },
+          { status: 500 }
+        )
+      }
+
+      // Generate signed URLs for each audio file
+      const audiosWithUrls: TaskAudioWithUrl[] = await Promise.all(
+        (audios || []).map(async (audio: TaskAudio) => {
+          const { data: signedUrl } = await supabase.storage
+            .from(BUCKET_NAME)
+            .createSignedUrl(audio.storage_path, URL_EXPIRY_SECONDS)
+
+          return {
+            ...audio,
+            url: signedUrl?.signedUrl || '',
+          }
+        })
       )
+
+      return NextResponse.json({ audios: audiosWithUrls })
     }
 
-    // Verify task exists and user has access
+    // With task_id: Verify task exists and user has access
     const { data: task, error: taskError } = await supabase
       .from('tasks')
       .select(`
