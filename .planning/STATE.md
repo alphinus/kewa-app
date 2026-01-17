@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-01-16)
 
 **Core value:** KEWA AG hat jederzeit volle Transparenz darüber, welche Arbeiten Imeri erledigt hat — mit Fotobeweis und Zeitstempel.
-**Current focus:** Phase 3 — Photo Documentation (COMPLETE)
+**Current focus:** Phase 4 — Voice Notes (IN PROGRESS)
 
 ## Current Position
 
-Phase: 3 of 6 (Photo Documentation) ✓
-Plan: 2 of 2 complete
-Status: Phase complete - ready for Phase 4
-Last activity: 2026-01-17 — Completed 03-02-PLAN.md (Photo UI Components)
+Phase: 4 of 6 (Voice Notes)
+Plan: 1 of 2 complete
+Status: In progress
+Last activity: 2026-01-17 — Completed 04-01-PLAN.md (Audio Storage Infrastructure)
 
-Progress: ████████░░ 50% (8/16 plans)
+Progress: █████████░ 56% (9/16 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 8
-- Average duration: 13 min
-- Total execution time: 1.8 hours
+- Total plans completed: 9
+- Average duration: 12 min
+- Total execution time: 1.85 hours
 
 **By Phase:**
 
@@ -30,10 +30,11 @@ Progress: ████████░░ 50% (8/16 plans)
 | 1. Foundation | 3/3 | 43 min | 14 min |
 | 2. Task Management | 3/3 | 24 min | 8 min |
 | 3. Photo Documentation | 2/2 | 39 min | 20 min |
+| 4. Voice Notes | 1/2 | 3 min | 3 min |
 
 **Recent Trend:**
-- Last 5 plans: 02-02 (9 min), 02-03 (12 min), 03-01 (4 min), 03-02 (35 min)
-- Trend: UI plans with user feedback take longer but deliver better UX
+- Last 5 plans: 02-03 (12 min), 03-01 (4 min), 03-02 (35 min), 04-01 (3 min)
+- Trend: API-only plans are fast, UI plans take longer
 
 ## Accumulated Context
 
@@ -68,41 +69,45 @@ Recent decisions affecting current work:
 | Upload retry (3 attempts) | 03-02 | Handle poor network conditions on construction sites |
 | Vorher/Nachher labels | 03-02 | Clearer than Erklaerung/Erledigung for photo comparison |
 | Action bar at bottom-16 | 03-02 | Positioned above MobileNav to avoid overlap |
+| Max 1 audio per type per task | 04-01 | Simpler than photos, one voice note per purpose is sufficient |
+| 10MB audio file size limit | 04-01 | Audio files are larger than compressed images |
+| Transcription status workflow | 04-01 | explanation=pending (will be transcribed), emergency=completed |
 
 ### Pending Todos
 
 - Apply migration 001_initial_schema.sql to Supabase
 - Apply migration 003_task_photos.sql to Supabase
+- Apply migration 005_task_audio.sql to Supabase
 - Create 'task-photos' storage bucket with policies
+- Create 'task-audio' storage bucket with policies
 - Configure .env.local with actual Supabase credentials
 - Update placeholder PIN hashes in users table with real bcrypt hashes
 
 ### Blockers/Concerns
 
 - Supabase project needs to be created and migrations applied before testing API endpoints
-- Storage bucket 'task-photos' must be created manually with correct policies
+- Storage buckets 'task-photos' and 'task-audio' must be created manually with correct policies
 - Next.js 16 middleware deprecation warning (works but may need migration to proxy pattern)
 - Next.js Turbopack has intermittent build race conditions (use NEXT_TURBOPACK=0 for reliable builds)
 
-## Phase 3 Complete ✓
+## Phase 4 In Progress
 
-Phase 3 (Photo Documentation) COMPLETE:
-1. **03-01:** ✓ Photo storage schema + compression utility + CRUD API
-2. **03-02:** ✓ Photo UI components + task detail page + completion flow
+Phase 4 (Voice Notes) IN PROGRESS:
+1. **04-01:** ✓ Audio storage schema + TypeScript types + CRUD API
+2. **04-02:** - Audio recording UI + playback components
 
-**Delivered:**
-- Photo API: GET/POST/DELETE /api/photos
-- PhotoUpload component with camera/gallery support
-- BeforeAfterView with Vorher/Nachher comparison
-- Task detail page at /dashboard/aufgaben/[id]
-- CompleteTaskModal requires photo for completion
+**Delivered so far:**
+- Audio API: GET/POST/DELETE /api/audio
+- task_audio table with transcription workflow support
+- TypeScript types: AudioType, TranscriptionStatus, TaskAudio, etc.
 
-**New components:**
-- PhotoUpload.tsx, PhotoGallery.tsx, BeforeAfterView.tsx
-- Task detail page with role-based photo sections
+**New files:**
+- supabase/migrations/005_task_audio.sql
+- src/app/api/audio/route.ts
+- src/app/api/audio/[id]/route.ts
 
 ## Session Continuity
 
-Last session: 2026-01-17 18:30
-Stopped at: Completed Phase 3 (Photo Documentation)
-Resume file: None - ready for Phase 4 (Voice Notes)
+Last session: 2026-01-17 18:35
+Stopped at: Completed 04-01-PLAN.md (Audio Storage Infrastructure)
+Resume file: None - ready for 04-02 (Audio UI)
