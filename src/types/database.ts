@@ -57,6 +57,7 @@ export interface Project {
   description: string | null
   status: ProjectStatus
   visible_to_imeri: boolean
+  archived_at: string | null
   created_at: string
 }
 

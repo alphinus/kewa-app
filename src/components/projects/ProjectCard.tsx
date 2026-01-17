@@ -7,7 +7,7 @@ import { cn } from '@/lib/utils'
 import type { ProjectWithUnit } from '@/types/database'
 
 interface ProjectCardProps {
-  project: ProjectWithUnit & { archived_at?: string | null }
+  project: ProjectWithUnit
   openTasksCount: number
   totalTasksCount: number
   onArchive: (projectId: string, archive: boolean) => Promise<void>

@@ -7,7 +7,6 @@ import { ProjectCard } from '@/components/projects/ProjectCard'
 import type { ProjectWithUnit, ProjectsResponse, TasksResponse } from '@/types/database'
 
 interface ProjectWithStats extends ProjectWithUnit {
-  archived_at?: string | null
   openTasksCount: number
   totalTasksCount: number
 }
