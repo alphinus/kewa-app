@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-01-16)
 
 **Core value:** KEWA AG hat jederzeit volle Transparenz darueber, welche Arbeiten Imeri erledigt hat - mit Fotobeweis und Zeitstempel.
-**Current focus:** PROJECT COMPLETE - All 6 phases delivered
+**Current focus:** PROJECT COMPLETE - All 6 phases delivered + bonus archiving feature
 
 ## Current Position
 
 Phase: 6 of 6 (Reports & Advanced)
-Plan: 2 of 2 complete
+Plan: 3 of 3 complete
 Status: COMPLETE
-Last activity: 2026-01-17 - Completed 06-02-PLAN.md (Weekly Report)
+Last activity: 2026-01-17 - Completed 06-03-PLAN.md (Archiving System)
 
-Progress: ████████████████ 100% (16/16 plans)
+Progress: █████████████████ 100% (17/17 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 16
+- Total plans completed: 17
 - Average duration: 11 min
-- Total execution time: 3.17 hours
+- Total execution time: 3.42 hours
 
 **By Phase:**
 
@@ -32,10 +32,10 @@ Progress: ████████████████ 100% (16/16 plans)
 | 3. Photo Documentation | 2/2 | 39 min | 20 min |
 | 4. Voice Notes | 3/3 | 32 min | 11 min |
 | 5. Building Visualization | 3/3 | 17 min | 6 min |
-| 6. Reports & Advanced | 2/2 | 30 min | 15 min |
+| 6. Reports & Advanced | 3/3 | 45 min | 15 min |
 
 **Recent Trend:**
-- Last 5 plans: 05-02 (4 min), 05-03 (8 min), 06-01 (12 min), 06-02 (18 min)
+- Last 5 plans: 05-03 (8 min), 06-01 (12 min), 06-02 (18 min), 06-03 (15 min)
 - Trend: Consistent execution time across feature development
 
 ## Accumulated Context
@@ -99,6 +99,10 @@ Recent decisions affecting current work:
 | Report grouped by unit then project | 06-02 | Logical building structure organization |
 | Week navigation pattern | 06-02 | Monday-Sunday weeks with German labels |
 | Collapsible report sections | 06-02 | Handle large reports without scroll fatigue |
+| Archive requires all tasks completed | 06-03 | Prevents archiving incomplete work |
+| Archived hidden by default | 06-03 | Clean active view, toggle to see archived |
+| KEWA-only archive/unarchive | 06-03 | Archive is management action |
+| Resilient archive endpoint | 06-03 | Works even if migration not applied |
 
 ### Pending Todos
 
@@ -106,6 +110,7 @@ Recent decisions affecting current work:
 - Apply migration 003_task_photos.sql to Supabase
 - Apply migration 004_storage_buckets.sql to Supabase (or create buckets manually)
 - Apply migration 005_task_audio.sql to Supabase
+- Apply migration 006_archive_tracking.sql to Supabase
 - Configure .env.local with actual Supabase credentials
 - Configure OPENAI_API_KEY for transcription
 - Update placeholder PIN hashes in users table with real bcrypt hashes
@@ -123,6 +128,7 @@ Recent decisions affecting current work:
 Phase 6 (Reports & Advanced) COMPLETE:
 1. **06-01:** Recurring Tasks (COMPLETE)
 2. **06-02:** Weekly Report (COMPLETE)
+3. **06-03:** Archiving System (COMPLETE)
 
 **Delivered:**
 - RecurringType TypeScript type
@@ -133,12 +139,17 @@ Phase 6 (Reports & Advanced) COMPLETE:
 - WeeklyReport component with photo display
 - /dashboard/berichte page with week navigation
 - Berichte navigation link for KEWA
+- POST /api/projects/[id]/archive endpoint
+- Archive filter on GET /api/projects
+- Archive UI with toggle and visual indicators
 
 **New files this phase:**
 - src/app/api/tasks/recurring/route.ts
 - src/app/api/reports/weekly/route.ts
 - src/app/dashboard/berichte/page.tsx
 - src/components/reports/WeeklyReport.tsx
+- src/app/api/projects/[id]/archive/route.ts
+- supabase/migrations/006_archive_tracking.sql
 
 **Modified files this phase:**
 - src/components/tasks/TaskForm.tsx
@@ -146,6 +157,9 @@ Phase 6 (Reports & Advanced) COMPLETE:
 - src/types/database.ts
 - src/app/api/tasks/route.ts
 - src/app/api/tasks/[id]/route.ts
+- src/app/api/projects/route.ts
+- src/app/dashboard/projekte/page.tsx
+- src/components/projects/ProjectCard.tsx
 
 ## Project Complete
 
@@ -155,12 +169,12 @@ All 6 phases delivered:
 3. Photo Documentation - Upload, storage, before/after display
 4. Voice Notes - Recording, upload, transcription
 5. Building Visualization - Grid view, floor plan, unit detail
-6. Reports & Advanced - Recurring tasks, weekly reports
+6. Reports & Advanced - Recurring tasks, weekly reports, archiving
 
-**Total:** 16 plans, 3.17 hours execution time
+**Total:** 17 plans, 3.42 hours execution time
 
 ## Session Continuity
 
-Last session: 2026-01-17 22:21
-Stopped at: PROJECT COMPLETE - All phases delivered
+Last session: 2026-01-17 23:00
+Stopped at: PROJECT COMPLETE - All phases delivered including 06-03 archiving
 Resume file: None - project complete
