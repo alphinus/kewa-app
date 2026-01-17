@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-01-16)
 
 **Core value:** KEWA AG hat jederzeit volle Transparenz darüber, welche Arbeiten Imeri erledigt hat — mit Fotobeweis und Zeitstempel.
-**Current focus:** Phase 4 — Voice Notes (COMPLETE)
+**Current focus:** Phase 5 — Building Visualization
 
 ## Current Position
 
-Phase: 4 of 6 (Voice Notes)
-Plan: 3 of 3 complete
-Status: Phase complete
-Last activity: 2026-01-17 — Completed 04-03-PLAN.md (Audio UI Components)
+Phase: 5 of 6 (Building Visualization)
+Plan: 1 of 3 complete
+Status: In progress
+Last activity: 2026-01-17 — Completed 05-01-PLAN.md (Unit Detail API)
 
-Progress: ███████████ 69% (11/16 plans)
+Progress: ████████████ 75% (12/16 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 11
-- Average duration: 13 min
-- Total execution time: 2.38 hours
+- Total plans completed: 12
+- Average duration: 12 min
+- Total execution time: 2.47 hours
 
 **By Phase:**
 
@@ -31,10 +31,11 @@ Progress: ███████████ 69% (11/16 plans)
 | 2. Task Management | 3/3 | 24 min | 8 min |
 | 3. Photo Documentation | 2/2 | 39 min | 20 min |
 | 4. Voice Notes | 3/3 | 32 min | 11 min |
+| 5. Building Visualization | 1/3 | 5 min | 5 min |
 
 **Recent Trend:**
-- Last 5 plans: 03-02 (35 min), 04-01 (3 min), 04-02 (4 min), 04-03 (25 min)
-- Trend: API-only plans are fast (3-4 min), UI plans take longer (25-35 min)
+- Last 5 plans: 04-01 (3 min), 04-02 (4 min), 04-03 (25 min), 05-01 (5 min)
+- Trend: API-only plans are fast (3-5 min), UI plans take longer (25-35 min)
 
 ## Accumulated Context
 
@@ -81,6 +82,8 @@ Recent decisions affecting current work:
 | Custom audio controls (48px targets) | 04-03 | Touch-friendly for mobile workers |
 | Tap-to-expand gallery items | 04-03 | Mobile-friendly interaction for audio list |
 | Combined storage bucket migration | 04-03 | Photos and audio buckets in single migration |
+| Reuse aggregation pattern for unit detail | 05-01 | Same task stats approach as list endpoint for consistency |
+| KEWA-only unit updates | 05-01 | Tenant info is sensitive, only KEWA can modify |
 
 ### Pending Todos
 
@@ -100,41 +103,23 @@ Recent decisions affecting current work:
 - Next.js 16 middleware deprecation warning (works but may need migration to proxy pattern)
 - Next.js Turbopack has intermittent build race conditions (use NEXT_TURBOPACK=0 for reliable builds)
 
-## Phase 4 Complete
+## Phase 5 Progress
 
-Phase 4 (Voice Notes) COMPLETE:
-1. **04-01:** Audio storage schema + TypeScript types + CRUD API
-2. **04-02:** OpenAI Whisper transcription integration
-3. **04-03:** Audio UI components (recorder, player, gallery, task integration)
+Phase 5 (Building Visualization) IN PROGRESS:
+1. **05-01:** Unit Detail API (COMPLETE)
+2. **05-02:** Building Grid UI (pending)
+3. **05-03:** Unit Detail Page (pending)
 
-**Delivered:**
-- Audio API: GET/POST/DELETE /api/audio
-- Transcription API: POST /api/audio/[id]/transcribe
-- task_audio table with transcription workflow support
-- TypeScript types: AudioType, TranscriptionStatus, TaskAudio, etc.
-- Transcription service: src/lib/transcription.ts
-- Auto-transcription on explanation upload (fire-and-forget)
-- AudioRecorder component with MediaRecorder API (60s max)
-- AudioPlayer component with custom controls and transcription display
-- AudioGallery component with expandable items and filters
-- /dashboard/audio page for KEWA audio overview
-- Task detail audio section with role-based UI
-- Storage bucket migration with RLS policies
+**Delivered so far:**
+- GET /api/units/[id] with task statistics
+- PUT /api/units/[id] for tenant_name and visibility (KEWA only)
+- UpdateUnitInput and UnitResponse TypeScript types
 
 **New files this phase:**
-- supabase/migrations/004_storage_buckets.sql
-- supabase/migrations/005_task_audio.sql
-- src/app/api/audio/route.ts
-- src/app/api/audio/[id]/route.ts
-- src/app/api/audio/[id]/transcribe/route.ts
-- src/lib/transcription.ts
-- src/components/audio/AudioRecorder.tsx (582 lines)
-- src/components/audio/AudioPlayer.tsx (331 lines)
-- src/components/audio/AudioGallery.tsx (234 lines)
-- src/app/dashboard/audio/page.tsx (223 lines)
+- src/app/api/units/[id]/route.ts
 
 ## Session Continuity
 
-Last session: 2026-01-17 20:15
-Stopped at: Completed 04-03-PLAN.md (Audio UI Components)
-Resume file: None - Phase 4 complete, ready for Phase 5
+Last session: 2026-01-17 19:40
+Stopped at: Completed 05-01-PLAN.md (Unit Detail API)
+Resume file: None - ready for 05-02
