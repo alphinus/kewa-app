@@ -27,7 +27,7 @@ Requirements für Initial-Release. Jedes mappt auf Roadmap-Phasen.
 - [x] **TASK-02**: User kann Aufgabenstatus setzen (offen / erledigt) ✓
 - [x] **TASK-03**: User kann Fälligkeitsdatum pro Aufgabe setzen ✓
 - [x] **TASK-04**: User kann Priorität pro Aufgabe setzen ✓
-- [ ] **TASK-05**: KEWA AG kann wiederkehrende Aufgaben erstellen (wöchentlich/monatlich)
+- [x] **TASK-05**: KEWA AG kann wiederkehrende Aufgaben erstellen (wöchentlich/monatlich) ✓
 - [x] **TASK-06**: Imeri kann Kurznotiz bei Erledigung hinzufügen ✓
 
 ### Fotos
@@ -55,8 +55,8 @@ Requirements für Initial-Release. Jedes mappt auf Roadmap-Phasen.
 
 ### Berichte & Archivierung
 
-- [ ] **REPORT-01**: System generiert wöchentlichen Bericht (erledigte Arbeiten mit Fotos/Zeitstempel)
-- [ ] **REPORT-02**: Erledigte Projekte werden archiviert nach Abschluss aller Aufgaben
+- [x] **REPORT-01**: System generiert wöchentlichen Bericht (erledigte Arbeiten mit Fotos/Zeitstempel) ✓
+- [x] **REPORT-02**: Erledigte Projekte werden archiviert nach Abschluss aller Aufgaben ✓
 
 ## v2 Requirements
 
@@ -104,7 +104,7 @@ Welche Phasen decken welche Requirements ab.
 | TASK-02 | Phase 2 | Complete ✓ |
 | TASK-03 | Phase 2 | Complete ✓ |
 | TASK-04 | Phase 2 | Complete ✓ |
-| TASK-05 | Phase 6 | Pending |
+| TASK-05 | Phase 6 | Complete ✓ |
 | TASK-06 | Phase 2 | Complete ✓ |
 | PHOTO-01 | Phase 3 | Complete ✓ |
 | PHOTO-02 | Phase 3 | Complete ✓ |
@@ -120,8 +120,8 @@ Welche Phasen decken welche Requirements ab.
 | DASH-05 | Phase 5 | Complete ✓ |
 | DASH-06 | Phase 4 | Complete ✓ |
 | DASH-07 | Phase 1 | Complete ✓ |
-| REPORT-01 | Phase 6 | Pending |
-| REPORT-02 | Phase 6 | Pending |
+| REPORT-01 | Phase 6 | Complete ✓ |
+| REPORT-02 | Phase 6 | Complete ✓ |
 
 **Coverage:**
 - v1 requirements: 30 total
