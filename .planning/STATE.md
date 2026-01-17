@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-01-16)
 
 **Core value:** KEWA AG hat jederzeit volle Transparenz darüber, welche Arbeiten Imeri erledigt hat — mit Fotobeweis und Zeitstempel.
-**Current focus:** Phase 5 — Building Visualization
+**Current focus:** Phase 5 COMPLETE — Ready for Phase 6
 
 ## Current Position
 
-Phase: 5 of 6 (Building Visualization)
-Plan: 2 of 3 complete
-Status: In progress
-Last activity: 2026-01-17 — Completed 05-02-PLAN.md (Floor Plan Renderer Component)
+Phase: 5 of 6 (Building Visualization) COMPLETE
+Plan: 3 of 3 complete
+Status: Phase complete
+Last activity: 2026-01-17 — Completed 05-03-PLAN.md (Unit Detail Page)
 
-Progress: █████████████ 81% (13/16 plans)
+Progress: ██████████████ 88% (14/16 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 13
+- Total plans completed: 14
 - Average duration: 11 min
-- Total execution time: 2.53 hours
+- Total execution time: 2.67 hours
 
 **By Phase:**
 
@@ -31,11 +31,11 @@ Progress: █████████████ 81% (13/16 plans)
 | 2. Task Management | 3/3 | 24 min | 8 min |
 | 3. Photo Documentation | 2/2 | 39 min | 20 min |
 | 4. Voice Notes | 3/3 | 32 min | 11 min |
-| 5. Building Visualization | 2/3 | 9 min | 5 min |
+| 5. Building Visualization | 3/3 | 17 min | 6 min |
 
 **Recent Trend:**
-- Last 5 plans: 04-02 (4 min), 04-03 (25 min), 05-01 (5 min), 05-02 (4 min)
-- Trend: API-only plans are fast (3-5 min), UI component plans fast (4-5 min)
+- Last 5 plans: 04-03 (25 min), 05-01 (5 min), 05-02 (4 min), 05-03 (8 min)
+- Trend: UI integration plans with checkpoints take slightly longer
 
 ## Accumulated Context
 
@@ -88,6 +88,9 @@ Recent decisions affecting current work:
 | Dach spans full width | 05-02 | Building has single rooftop unit |
 | Building unit blue highlight | 05-02 | Distinguish from regular common areas |
 | Empty cell placeholders | 05-02 | Visual consistency when units missing |
+| Slide-up modal matching TaskForm | 05-03 | Consistent mobile pattern across app |
+| Local state update on save | 05-03 | Faster UI response without full refetch |
+| hasChanges check for save | 05-03 | Prevents unnecessary API calls |
 
 ### Pending Todos
 
@@ -107,29 +110,33 @@ Recent decisions affecting current work:
 - Next.js 16 middleware deprecation warning (works but may need migration to proxy pattern)
 - Next.js Turbopack has intermittent build race conditions (use NEXT_TURBOPACK=0 for reliable builds)
 
-## Phase 5 Progress
+## Phase 5 Summary (COMPLETE)
 
-Phase 5 (Building Visualization) IN PROGRESS:
+Phase 5 (Building Visualization) COMPLETE:
 1. **05-01:** Unit Detail API (COMPLETE)
 2. **05-02:** Building Grid UI (COMPLETE)
-3. **05-03:** Unit Detail Page (pending)
+3. **05-03:** Unit Detail Page (COMPLETE)
 
-**Delivered so far:**
+**Delivered:**
 - GET /api/units/[id] with task statistics
 - PUT /api/units/[id] for tenant_name and visibility (KEWA only)
 - UpdateUnitInput and UnitResponse TypeScript types
 - BuildingGrid component for floor-based apartment layout
 - UnitCell component with progress bar
 - CommonAreasList component for non-apartment units
+- UnitDetailModal for viewing/editing unit details
+- /dashboard/gebaude page with full building visualization
 
 **New files this phase:**
 - src/app/api/units/[id]/route.ts
 - src/components/building/UnitCell.tsx
 - src/components/building/BuildingGrid.tsx
 - src/components/building/CommonAreasList.tsx
+- src/components/building/UnitDetailModal.tsx
+- src/app/dashboard/gebaude/page.tsx
 
 ## Session Continuity
 
-Last session: 2026-01-17 20:42
-Stopped at: Completed 05-02-PLAN.md (Floor Plan Renderer Component)
-Resume file: None - ready for 05-03
+Last session: 2026-01-17 20:53
+Stopped at: Completed 05-03-PLAN.md (Unit Detail Page)
+Resume file: None - ready for Phase 6
