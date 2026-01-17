@@ -6,9 +6,11 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { BeforeAfterView } from '@/components/photos/BeforeAfterView'
 import { PhotoUpload } from '@/components/photos/PhotoUpload'
+import { AudioRecorder } from '@/components/audio/AudioRecorder'
+import { AudioPlayer } from '@/components/audio/AudioPlayer'
 import { CompleteTaskModal } from '@/components/tasks/CompleteTaskModal'
 import { TaskForm } from '@/components/tasks/TaskForm'
-import type { TaskWithProject, TaskPhotoWithUrl, PhotosResponse } from '@/types/database'
+import type { TaskWithProject, TaskPhotoWithUrl, PhotosResponse, TaskAudioWithUrl, AudiosResponse } from '@/types/database'
 import type { Priority, Role } from '@/types'
 
 /**
@@ -102,8 +104,10 @@ export default function TaskDetailPage() {
   // State
   const [task, setTask] = useState<TaskWithProject | null>(null)
   const [photos, setPhotos] = useState<TaskPhotoWithUrl[]>([])
+  const [audios, setAudios] = useState<TaskAudioWithUrl[]>([])
   const [loading, setLoading] = useState(true)
   const [photosLoading, setPhotosLoading] = useState(true)
+  const [audiosLoading, setAudiosLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [userRole, setUserRole] = useState<Role | null>(null)
 
@@ -114,6 +118,10 @@ export default function TaskDetailPage() {
   // Derived photo arrays
   const explanationPhotos = photos.filter((p) => p.photo_type === 'explanation')
   const completionPhotos = photos.filter((p) => p.photo_type === 'completion')
+
+  // Derived audio arrays
+  const explanationAudio = audios.find((a) => a.audio_type === 'explanation')
+  const emergencyAudio = audios.find((a) => a.audio_type === 'emergency')
 
   /**
    * Fetch task details
@@ -160,6 +168,25 @@ export default function TaskDetailPage() {
   }, [taskId])
 
   /**
+   * Fetch audio for this task
+   */
+  const fetchAudios = useCallback(async () => {
+    try {
+      setAudiosLoading(true)
+
+      const response = await fetch(`/api/audio?task_id=${taskId}`)
+      if (response.ok) {
+        const data: AudiosResponse = await response.json()
+        setAudios(data.audios)
+      }
+    } catch (err) {
+      console.error('Error fetching audio:', err)
+    } finally {
+      setAudiosLoading(false)
+    }
+  }, [taskId])
+
+  /**
    * Get current user role from session
    */
   const fetchUserRole = useCallback(async () => {
@@ -178,8 +205,9 @@ export default function TaskDetailPage() {
   useEffect(() => {
     fetchTask()
     fetchPhotos()
+    fetchAudios()
     fetchUserRole()
-  }, [fetchTask, fetchPhotos, fetchUserRole])
+  }, [fetchTask, fetchPhotos, fetchAudios, fetchUserRole])
 
   /**
    * Handle photo upload complete
@@ -196,13 +224,28 @@ export default function TaskDetailPage() {
   }, [])
 
   /**
+   * Handle audio upload complete
+   */
+  const handleAudioUpload = useCallback((audio: TaskAudioWithUrl) => {
+    setAudios((prev) => [...prev, audio])
+  }, [])
+
+  /**
+   * Handle audio delete
+   */
+  const handleAudioDelete = useCallback((audioId: string) => {
+    setAudios((prev) => prev.filter((a) => a.id !== audioId))
+  }, [])
+
+  /**
    * Handle task completion
    */
   const handleComplete = useCallback(() => {
     setShowCompleteModal(false)
     fetchTask()
     fetchPhotos()
-  }, [fetchTask, fetchPhotos])
+    fetchAudios()
+  }, [fetchTask, fetchPhotos, fetchAudios])
 
   /**
    * Handle task edit save
@@ -421,6 +464,101 @@ export default function TaskDetailPage() {
                 </div>
               )}
             </>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Audio documentation section */}
+      <Card>
+        <CardContent className="p-4 space-y-4">
+          <h2 className="font-semibold text-gray-900 dark:text-gray-100">
+            Sprachnotizen
+          </h2>
+
+          {audiosLoading ? (
+            <div className="flex items-center justify-center py-8">
+              <LoadingSpinner />
+              <span className="ml-2 text-gray-500 dark:text-gray-400">Sprachnotizen werden geladen...</span>
+            </div>
+          ) : (
+            <div className="space-y-6">
+              {/* Explanation audio section - KEWA records, both can view */}
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-blue-500 rounded-full" />
+                  <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Erklaerung von KEWA AG
+                  </h3>
+                </div>
+
+                {/* KEWA: Can record explanation audio if not completed */}
+                {isKewa && !isCompleted && (
+                  <AudioRecorder
+                    taskId={task.id}
+                    audioType="explanation"
+                    existingAudio={explanationAudio}
+                    onRecordComplete={handleAudioUpload}
+                    onDelete={handleAudioDelete}
+                  />
+                )}
+
+                {/* KEWA completed task: Show existing audio player */}
+                {isKewa && isCompleted && explanationAudio && (
+                  <AudioPlayer audio={explanationAudio} showTranscription={true} />
+                )}
+
+                {/* Imeri: View-only explanation audio */}
+                {isImeri && explanationAudio && (
+                  <AudioPlayer audio={explanationAudio} showTranscription={true} />
+                )}
+
+                {/* No explanation audio message */}
+                {!explanationAudio && (isImeri || (isKewa && isCompleted)) && (
+                  <div className="py-4 text-center bg-gray-50 dark:bg-gray-800/50 rounded-lg">
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      Keine Erklaerung vorhanden
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* Emergency audio section - Imeri records, both can view */}
+              {(emergencyAudio || isImeri) && (
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-orange-500 rounded-full" />
+                    <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                      Notfall-Notiz
+                    </h3>
+                  </div>
+
+                  {/* Imeri: Can record emergency audio */}
+                  {isImeri && (
+                    <AudioRecorder
+                      taskId={task.id}
+                      audioType="emergency"
+                      existingAudio={emergencyAudio}
+                      onRecordComplete={handleAudioUpload}
+                      onDelete={handleAudioDelete}
+                    />
+                  )}
+
+                  {/* KEWA: View-only emergency audio */}
+                  {isKewa && emergencyAudio && (
+                    <AudioPlayer audio={emergencyAudio} showTranscription={false} />
+                  )}
+
+                  {/* No emergency audio for KEWA */}
+                  {isKewa && !emergencyAudio && (
+                    <div className="py-4 text-center bg-gray-50 dark:bg-gray-800/50 rounded-lg">
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                        Keine Notfall-Notiz vorhanden
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
           )}
         </CardContent>
       </Card>
