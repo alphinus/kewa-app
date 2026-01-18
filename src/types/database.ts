@@ -895,3 +895,92 @@ export interface ExpenseResponse {
 export interface PaymentResponse {
   payment: Payment
 }
+
+// =============================================
+// CONDITION TRACKING ENTITIES (Phase 07-05)
+// =============================================
+
+/**
+ * Condition history record for room/unit/component changes
+ */
+export interface ConditionHistory {
+  id: string
+  entity_type: 'room' | 'unit' | 'component'
+  entity_id: string
+  old_condition: RoomCondition | null
+  new_condition: RoomCondition
+  source_project_id: string | null
+  source_work_order_id: string | null
+  media_ids: string[] | null
+  notes: string | null
+  changed_by: string | null
+  changed_at: string
+}
+
+/**
+ * Unit condition summary (from view)
+ */
+export interface UnitConditionSummary {
+  unit_id: string
+  unit_name: string
+  building_id: string
+  total_rooms: number
+  new_rooms: number
+  partial_rooms: number
+  old_rooms: number
+  renovation_percentage: number | null
+  overall_condition: RoomCondition | null
+  last_condition_update: string | null
+}
+
+/**
+ * System setting entry
+ */
+export interface SystemSetting {
+  key: string
+  value: unknown
+  description: string | null
+  updated_at: string
+  updated_by: string | null
+}
+
+/**
+ * Storage metadata record
+ */
+export interface StorageMetadata {
+  id: string
+  bucket_name: string
+  file_path: string
+  file_name: string
+  file_size: number | null
+  mime_type: string | null
+  checksum: string | null
+  width: number | null
+  height: number | null
+  duration_seconds: number | null
+  has_thumbnail: boolean
+  thumbnail_path: string | null
+  entity_type: string | null
+  entity_id: string | null
+  uploaded_by: string | null
+  uploaded_at: string
+  marked_for_deletion: boolean
+  deletion_scheduled_at: string | null
+}
+
+/**
+ * Magic link token record
+ */
+export interface MagicLinkToken {
+  id: string
+  token: string
+  user_id: string | null
+  work_order_id: string | null
+  email: string
+  purpose: string
+  expires_at: string
+  used_at: string | null
+  is_revoked: boolean
+  created_at: string
+  created_by: string | null
+}
