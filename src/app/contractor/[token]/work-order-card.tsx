@@ -346,15 +346,10 @@ export default function WorkOrderCard({
 
         {/* Mark Complete Button - Show when in progress */}
         {workOrder.status === 'in_progress' && (
-          <div className="border-t border-gray-200 pt-4">
-            <button
-              onClick={() => handleStatusUpdate('done')}
-              disabled={isLoading}
-              className="w-full bg-teal-600 text-white font-semibold py-4 rounded-lg hover:bg-teal-700 disabled:opacity-50 transition-colors"
-            >
-              {isLoading ? 'Wird verarbeitet...' : 'Als erledigt markieren'}
-            </button>
-          </div>
+          <CompletionSection
+            onComplete={() => handleStatusUpdate('done')}
+            isLoading={isLoading}
+          />
         )}
 
         {/* Completed State */}
@@ -396,6 +391,81 @@ function Section({
     <div>
       <h3 className="text-sm font-medium text-gray-500 mb-1">{title}</h3>
       {children}
+    </div>
+  )
+}
+
+// Completion section with optional photo upload prompt
+function CompletionSection({
+  onComplete,
+  isLoading,
+}: {
+  onComplete: () => void
+  isLoading: boolean
+}) {
+  const [showConfirm, setShowConfirm] = useState(false)
+
+  const handleComplete = () => {
+    // Show confirmation dialog with photo upload suggestion
+    setShowConfirm(true)
+  }
+
+  const handleConfirm = () => {
+    setShowConfirm(false)
+    onComplete()
+  }
+
+  return (
+    <div className="border-t border-gray-200 pt-4 space-y-3">
+      {/* Info about uploads */}
+      <div className="flex items-start gap-2 p-3 bg-blue-50 rounded-lg">
+        <svg className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <p className="text-sm text-blue-800">
+          Tipp: Laden Sie Fotos der abgeschlossenen Arbeit hoch, bevor Sie den Auftrag als erledigt markieren. Dies erleichtert die Abnahme.
+        </p>
+      </div>
+
+      {/* Complete button */}
+      <button
+        onClick={handleComplete}
+        disabled={isLoading}
+        className="w-full bg-teal-600 text-white font-semibold py-4 rounded-lg hover:bg-teal-700 disabled:opacity-50 transition-colors"
+      >
+        {isLoading ? 'Wird verarbeitet...' : 'Als erledigt markieren'}
+      </button>
+
+      {/* Confirmation modal */}
+      {showConfirm && (
+        <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50">
+          <div className="bg-white w-full sm:max-w-md sm:rounded-lg rounded-t-lg p-4 safe-area-inset-bottom">
+            <h3 className="text-lg font-semibold text-gray-900 mb-3">
+              Auftrag abschliessen?
+            </h3>
+            <p className="text-gray-600 text-sm mb-4">
+              Moechten Sie den Auftrag als erledigt markieren? Stellen Sie sicher, dass Sie alle relevanten Fotos hochgeladen haben.
+            </p>
+
+            {/* Actions */}
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowConfirm(false)}
+                className="flex-1 bg-gray-200 text-gray-700 font-semibold py-3 rounded-lg hover:bg-gray-300 transition-colors"
+              >
+                Abbrechen
+              </button>
+              <button
+                onClick={handleConfirm}
+                disabled={isLoading}
+                className="flex-1 bg-teal-600 text-white font-semibold py-3 rounded-lg hover:bg-teal-700 disabled:opacity-50 transition-colors"
+              >
+                {isLoading ? 'Wird verarbeitet...' : 'Ja, abschliessen'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
