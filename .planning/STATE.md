@@ -5,26 +5,28 @@
 See: .planning/PROJECT.md (updated 2026-01-18)
 
 **Core value:** KEWA AG hat volle Transparenz und Kontrolle uber alle Renovationen — mit standardisierten Workflows, externer Handwerker-Integration, Kostenuebersicht und automatischer Zustandshistorie.
-**Current focus:** v2.0 Renovation Operations System — Phase 11 Complete
+**Current focus:** v2.0 Renovation Operations System — Phase 12 In Progress
 
 ## Current Position
 
-Phase: 11 of 18 (History & Digital Twin)
-Plan: 3 of 3 complete
-Status: COMPLETE
-Last activity: 2026-01-18 — Completed 11-03-PLAN.md (Condition Automation Verification)
+Phase: 12 of 18 (Dashboard & Visualization)
+Plan: 1 of 5 complete
+Status: In Progress
+Last activity: 2026-01-18 — Completed 12-01-PLAN.md (Parking Schema & Basic Display)
 
-Progress: [======] 100% (3/3 plans complete in Phase 11)
+Progress: [=-----] 20% (1/5 plans complete in Phase 12)
 
-## Phase 11 Plans
+## Phase 12 Plans
 
 | Plan | Name | Wave | Scope | Status |
 |------|------|------|-------|--------|
-| 11-01 | Unit Timeline View | 1 | medium | COMPLETE |
-| 11-02 | Room Condition Grid | 1 | small | COMPLETE |
-| 11-03 | Condition Automation Verification | 1 | small | COMPLETE |
+| 12-01 | Parking Schema & Basic Display | 1 | medium | COMPLETE |
+| 12-02 | Dashboard Layout & Building Heatmap | 1 | medium | Pending |
+| 12-03 | Project Timeline & Status | 1 | medium | Pending |
+| 12-04 | Cost Overview Dashboard | 1 | medium | Pending |
+| 12-05 | Dashboard Filters & Export | 1 | small | Pending |
 
-**Wave 1:** COMPLETE (Plans 01-03)
+**Wave 1:** In Progress (Plan 01 complete)
 
 ## v2.0 Milestone Scope
 
@@ -58,7 +60,7 @@ Progress: [======] 100% (3/3 plans complete in Phase 11)
 | 9 | External Contractor Portal | 16 | COMPLETE |
 | 10 | Cost & Finance | 9 | COMPLETE |
 | 11 | History & Digital Twin | 5 | COMPLETE |
-| 12 | Dashboard & Visualization | 18 | Pending |
+| 12 | Dashboard & Visualization | 18 | In Progress |
 | **MVP Total** | | **92** | |
 | 13 | Change Orders & Suppliers | 7 | Pending |
 | 14 | Inspection & Push | 8 | Pending |
@@ -79,7 +81,7 @@ v1 artifacts in `.planning/milestones/`:
 ## Pending Setup Tasks
 
 Before production deployment:
-- Apply all migrations (001-038) to Supabase
+- Apply all migrations (001-039) to Supabase
 - Create storage buckets (task-photos, task-audio, documents, media)
 - Configure .env.local with Supabase credentials
 - Configure OPENAI_API_KEY for transcription
@@ -168,16 +170,19 @@ Before production deployment:
 | Client-side timeline pagination | 11-01 | Timeline needs interactivity (expand/collapse, load more) |
 | Aggregate sources in JS vs SQL | 11-01 | Simpler code, easier to maintain, acceptable performance |
 | KEWA role only for timeline | 11-01 | Timeline contains cost/invoice data requiring elevated access |
+| Parking uses units table extension | 12-01 | Reuse existing infrastructure vs new parking table |
+| Simplified parking status enum | 12-01 | 3 states (free/occupied/maintenance) cover all scenarios |
+| Partial indexes for parking | 12-01 | Only index parking_spot rows for efficiency |
 
 ## Session Continuity
 
 Last session: 2026-01-18
-Stopped at: Completed 11-03-PLAN.md (Condition Automation Verification)
+Stopped at: Completed 12-01-PLAN.md (Parking Schema & Basic Display)
 Resume file: None
 
 ## Next Step
 
-Phase 11 (History & Digital Twin) is COMPLETE.
+Phase 12 (Dashboard & Visualization) is IN PROGRESS.
 
-Next phase to execute:
-- **Phase 12:** Dashboard & Visualization (18 requirements)
+Next plan to execute:
+- **Plan 12-02:** Dashboard Layout & Building Heatmap
