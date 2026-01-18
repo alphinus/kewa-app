@@ -7,7 +7,7 @@
 import Link from 'next/link'
 
 interface TokenErrorProps {
-  error: 'expired' | 'used' | 'revoked' | 'not_found'
+  error: 'expired' | 'used' | 'revoked' | 'not_found' | 'work_order_closed'
 }
 
 export default function TokenError({ error }: TokenErrorProps) {

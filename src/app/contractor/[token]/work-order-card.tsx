@@ -5,9 +5,14 @@
  *
  * Mobile-optimized card displaying work order details and actions.
  * Touch-friendly buttons with min 44px height.
+ *
+ * Variants:
+ * - compact: Summary card for dashboard list (title, location, status, deadline)
+ * - full: Detailed view with all fields and actions
  */
 
 import { useState } from 'react'
+import Link from 'next/link'
 
 interface WorkOrderData {
   id: string
@@ -36,19 +41,27 @@ interface WorkOrderData {
         address: string | null
       }
     }
-  }
+  } | null
 }
+
+type CardVariant = 'compact' | 'full'
 
 interface WorkOrderCardProps {
   workOrder: WorkOrderData
   token: string
-  contractorEmail: string
+  contractorEmail?: string
+  variant?: CardVariant
+  isActionNeeded?: boolean
+  isCompleted?: boolean
 }
 
 export default function WorkOrderCard({
   workOrder,
   token,
   contractorEmail,
+  variant = 'full',
+  isActionNeeded = false,
+  isCompleted = false,
 }: WorkOrderCardProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [showRejectModal, setShowRejectModal] = useState(false)
@@ -64,6 +77,15 @@ export default function WorkOrderCard({
       day: '2-digit',
       month: '2-digit',
       year: 'numeric',
+    })
+  }
+
+  // Format short date
+  const formatShortDate = (dateStr: string | null) => {
+    if (!dateStr) return null
+    return new Date(dateStr).toLocaleDateString('de-CH', {
+      day: '2-digit',
+      month: '2-digit',
     })
   }
 
@@ -84,6 +106,7 @@ export default function WorkOrderCard({
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          workOrderId: workOrder.id,
           status: newStatus,
           ...data,
         }),
@@ -97,7 +120,7 @@ export default function WorkOrderCard({
       window.location.reload()
     } catch (error) {
       console.error('Status update failed:', error)
-      alert('Failed to update status. Please try again.')
+      alert('Aktualisierung fehlgeschlagen. Bitte versuchen Sie es erneut.')
     } finally {
       setIsLoading(false)
     }
@@ -119,20 +142,119 @@ export default function WorkOrderCard({
     setShowRejectModal(false)
   }
 
-  // Handle mark as viewed (auto-trigger when first loaded)
-  const handleMarkViewed = () => {
-    if (workOrder.status === 'sent') {
-      handleStatusUpdate('viewed')
-    }
+  // Get status config
+  const statusConfig: Record<string, { bg: string; text: string; label: string }> = {
+    draft: { bg: 'bg-gray-100', text: 'text-gray-700', label: 'Entwurf' },
+    sent: { bg: 'bg-blue-100', text: 'text-blue-700', label: 'Neu' },
+    viewed: { bg: 'bg-yellow-100', text: 'text-yellow-700', label: 'Antwort erwartet' },
+    accepted: { bg: 'bg-green-100', text: 'text-green-700', label: 'Akzeptiert' },
+    rejected: { bg: 'bg-red-100', text: 'text-red-700', label: 'Abgelehnt' },
+    in_progress: { bg: 'bg-purple-100', text: 'text-purple-700', label: 'In Arbeit' },
+    blocked: { bg: 'bg-orange-100', text: 'text-orange-700', label: 'Blockiert' },
+    done: { bg: 'bg-teal-100', text: 'text-teal-700', label: 'Erledigt' },
+    inspected: { bg: 'bg-indigo-100', text: 'text-indigo-700', label: 'Geprueft' },
+    closed: { bg: 'bg-gray-100', text: 'text-gray-700', label: 'Geschlossen' },
   }
 
-  // Auto-mark as viewed on first load
-  useState(() => {
-    if (workOrder.status === 'sent') {
-      handleMarkViewed()
-    }
-  })
+  const status = statusConfig[workOrder.status] ?? statusConfig.draft
 
+  // Get location string
+  const getLocationString = () => {
+    if (!workOrder.room) return null
+    const building = workOrder.room.unit?.building?.name
+    const unit = workOrder.room.unit?.name
+    const room = workOrder.room.name
+    if (building && unit) {
+      return `${building}, ${unit} - ${room}`
+    }
+    return room
+  }
+
+  // Compact card variant for dashboard list
+  if (variant === 'compact') {
+    return (
+      <Link
+        href={`/contractor/${token}/${workOrder.id}`}
+        className="block p-4 hover:bg-gray-50 transition-colors"
+      >
+        <div className="flex items-start gap-3">
+          {/* Action indicator */}
+          {isActionNeeded && (
+            <div className="flex-shrink-0 mt-1">
+              <span className="relative flex h-3 w-3">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75" />
+                <span className="relative inline-flex rounded-full h-3 w-3 bg-orange-500" />
+              </span>
+            </div>
+          )}
+
+          {/* Content */}
+          <div className="flex-1 min-w-0">
+            {/* Title and Status */}
+            <div className="flex items-start justify-between gap-2 mb-1">
+              <h3 className="font-medium text-gray-900 truncate">
+                {workOrder.title}
+              </h3>
+              <span className={`flex-shrink-0 px-2 py-0.5 text-xs font-medium rounded-full ${status.bg} ${status.text}`}>
+                {status.label}
+              </span>
+            </div>
+
+            {/* Location */}
+            {getLocationString() && (
+              <p className="text-sm text-gray-600 truncate mb-1">
+                {getLocationString()}
+              </p>
+            )}
+
+            {/* Meta info row */}
+            <div className="flex items-center gap-4 text-xs text-gray-500">
+              {/* Estimated cost */}
+              {workOrder.estimated_cost && (
+                <span className="font-medium">
+                  {formatCurrency(workOrder.estimated_cost)}
+                </span>
+              )}
+
+              {/* Deadline */}
+              {workOrder.acceptance_deadline && !isCompleted && (
+                <span className={`flex items-center gap-1 ${
+                  new Date(workOrder.acceptance_deadline) < new Date()
+                    ? 'text-red-600'
+                    : ''
+                }`}>
+                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  Bis {formatShortDate(workOrder.acceptance_deadline)}
+                </span>
+              )}
+
+              {/* Date range */}
+              {workOrder.requested_start_date && (
+                <span>
+                  {formatShortDate(workOrder.requested_start_date)}
+                  {workOrder.requested_end_date && ` - ${formatShortDate(workOrder.requested_end_date)}`}
+                </span>
+              )}
+            </div>
+          </div>
+
+          {/* Chevron */}
+          <svg
+            className="flex-shrink-0 w-5 h-5 text-gray-400 mt-1"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          </svg>
+        </div>
+      </Link>
+    )
+  }
+
+  // Full card variant for detail view
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
       {/* Header */}
@@ -150,9 +272,16 @@ export default function WorkOrderCard({
 
       {/* Content */}
       <div className="p-4 space-y-4">
+        {/* Status Badge */}
+        <div className={`inline-flex items-center px-3 py-1 rounded-full ${status.bg}`}>
+          <span className={`text-sm font-medium ${status.text}`}>
+            {status.label}
+          </span>
+        </div>
+
         {/* Location */}
         {workOrder.room && (
-          <Section title="Location">
+          <Section title="Standort">
             <p className="text-gray-900">
               {workOrder.room.unit?.name} - {workOrder.room.name}
             </p>
@@ -164,7 +293,7 @@ export default function WorkOrderCard({
 
         {/* Description */}
         {workOrder.description && (
-          <Section title="Description">
+          <Section title="Beschreibung">
             <p className="text-gray-700 whitespace-pre-wrap">
               {workOrder.description}
             </p>
@@ -173,7 +302,7 @@ export default function WorkOrderCard({
 
         {/* Scope of Work */}
         {workOrder.scope_of_work && (
-          <Section title="Scope of Work">
+          <Section title="Arbeitsumfang">
             <p className="text-gray-700 whitespace-pre-wrap">
               {workOrder.scope_of_work}
             </p>
@@ -181,16 +310,16 @@ export default function WorkOrderCard({
         )}
 
         {/* Dates */}
-        <Section title="Schedule">
+        <Section title="Zeitplan">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <p className="text-gray-500 text-sm">Requested Start</p>
+              <p className="text-gray-500 text-sm">Gewuenschter Beginn</p>
               <p className="text-gray-900 font-medium">
                 {formatDate(workOrder.requested_start_date)}
               </p>
             </div>
             <div>
-              <p className="text-gray-500 text-sm">Requested End</p>
+              <p className="text-gray-500 text-sm">Gewuenschtes Ende</p>
               <p className="text-gray-900 font-medium">
                 {formatDate(workOrder.requested_end_date)}
               </p>
@@ -198,7 +327,7 @@ export default function WorkOrderCard({
           </div>
           {workOrder.acceptance_deadline && (
             <div className="mt-2 pt-2 border-t border-gray-100">
-              <p className="text-gray-500 text-sm">Response Deadline</p>
+              <p className="text-gray-500 text-sm">Antwort bis</p>
               <p className="text-orange-600 font-medium">
                 {formatDate(workOrder.acceptance_deadline)}
               </p>
@@ -207,7 +336,7 @@ export default function WorkOrderCard({
         </Section>
 
         {/* Cost */}
-        <Section title="Estimated Cost">
+        <Section title="Geschaetzte Kosten">
           <p className="text-2xl font-bold text-gray-900">
             {formatCurrency(workOrder.estimated_cost)}
           </p>
@@ -216,7 +345,7 @@ export default function WorkOrderCard({
         {/* Response Form - Only show when awaiting response */}
         {workOrder.status === 'viewed' && (
           <div className="border-t border-gray-200 pt-4 space-y-4">
-            <h3 className="font-semibold text-gray-900">Your Response</h3>
+            <h3 className="font-semibold text-gray-900">Ihre Antwort</h3>
 
             {/* Proposed Cost */}
             <div>
@@ -224,7 +353,7 @@ export default function WorkOrderCard({
                 htmlFor="proposedCost"
                 className="block text-sm font-medium text-gray-700 mb-1"
               >
-                Your Price (CHF)
+                Ihr Preis (CHF)
               </label>
               <input
                 id="proposedCost"
@@ -243,7 +372,7 @@ export default function WorkOrderCard({
                 htmlFor="notes"
                 className="block text-sm font-medium text-gray-700 mb-1"
               >
-                Notes (optional)
+                Bemerkungen (optional)
               </label>
               <textarea
                 id="notes"
@@ -251,7 +380,7 @@ export default function WorkOrderCard({
                 onChange={(e) => setNotes(e.target.value)}
                 rows={3}
                 className="w-full px-3 py-3 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Any comments or questions..."
+                placeholder="Fragen oder Anmerkungen..."
               />
             </div>
 
@@ -262,14 +391,14 @@ export default function WorkOrderCard({
                 disabled={isLoading}
                 className="flex-1 bg-green-600 text-white font-semibold py-4 rounded-lg hover:bg-green-700 disabled:opacity-50 transition-colors"
               >
-                {isLoading ? 'Processing...' : 'Accept Work Order'}
+                {isLoading ? 'Wird verarbeitet...' : 'Auftrag annehmen'}
               </button>
               <button
                 onClick={() => setShowRejectModal(true)}
                 disabled={isLoading}
                 className="flex-1 bg-red-600 text-white font-semibold py-4 rounded-lg hover:bg-red-700 disabled:opacity-50 transition-colors"
               >
-                Reject
+                Ablehnen
               </button>
             </div>
           </div>
@@ -283,7 +412,7 @@ export default function WorkOrderCard({
               disabled={isLoading}
               className="w-full bg-purple-600 text-white font-semibold py-4 rounded-lg hover:bg-purple-700 disabled:opacity-50 transition-colors"
             >
-              {isLoading ? 'Processing...' : 'Start Work'}
+              {isLoading ? 'Wird verarbeitet...' : 'Arbeit starten'}
             </button>
           </div>
         )}
@@ -296,8 +425,30 @@ export default function WorkOrderCard({
               disabled={isLoading}
               className="w-full bg-teal-600 text-white font-semibold py-4 rounded-lg hover:bg-teal-700 disabled:opacity-50 transition-colors"
             >
-              {isLoading ? 'Processing...' : 'Mark as Complete'}
+              {isLoading ? 'Wird verarbeitet...' : 'Als erledigt markieren'}
             </button>
+          </div>
+        )}
+
+        {/* Completed State */}
+        {(workOrder.status === 'done' || workOrder.status === 'inspected' || workOrder.status === 'closed') && (
+          <div className="border-t border-gray-200 pt-4">
+            <div className="flex items-center gap-2 text-green-600">
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M5 13l4 4L19 7"
+                />
+              </svg>
+              <span className="font-medium">Arbeit erfolgreich abgeschlossen</span>
+            </div>
           </div>
         )}
       </div>
@@ -329,6 +480,14 @@ function Section({
   )
 }
 
+// Rejection reasons
+const REJECTION_REASONS = [
+  { id: 'capacity', label: 'Kapazitaet', description: 'Keine freie Kapazitaet im Zeitraum' },
+  { id: 'location', label: 'Standort', description: 'Standort zu weit entfernt' },
+  { id: 'scope', label: 'Arbeitsumfang', description: 'Arbeitsumfang nicht passend' },
+  { id: 'other', label: 'Sonstiges', description: 'Anderer Grund' },
+] as const
+
 // Reject modal component
 function RejectModal({
   onClose,
@@ -337,38 +496,73 @@ function RejectModal({
   onClose: () => void
   onReject: (reason: string) => void
 }) {
-  const [reason, setReason] = useState('')
+  const [selectedReason, setSelectedReason] = useState<string>('')
+  const [customReason, setCustomReason] = useState('')
+
+  const handleSubmit = () => {
+    if (!selectedReason) return
+    const reasonObj = REJECTION_REASONS.find((r) => r.id === selectedReason)
+    if (selectedReason === 'other' && customReason.trim()) {
+      onReject(`${reasonObj?.label}: ${customReason}`)
+    } else if (reasonObj) {
+      onReject(reasonObj.description)
+    }
+  }
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50">
-      <div className="bg-white w-full sm:max-w-md sm:rounded-lg rounded-t-lg p-4 safe-area-inset-bottom">
+      <div className="bg-white w-full sm:max-w-md sm:rounded-lg rounded-t-lg p-4 safe-area-inset-bottom max-h-[80vh] overflow-y-auto">
         <h3 className="text-lg font-semibold text-gray-900 mb-4">
-          Reject Work Order
+          Auftrag ablehnen
         </h3>
         <p className="text-gray-600 text-sm mb-4">
-          Please provide a reason for rejecting this work order:
+          Bitte waehlen Sie einen Grund fuer die Ablehnung:
         </p>
-        <textarea
-          value={reason}
-          onChange={(e) => setReason(e.target.value)}
-          rows={3}
-          className="w-full px-3 py-3 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-red-500 focus:border-red-500 mb-4"
-          placeholder="Reason for rejection..."
-          autoFocus
-        />
+
+        {/* Reason Selection */}
+        <div className="space-y-2 mb-4">
+          {REJECTION_REASONS.map((reason) => (
+            <button
+              key={reason.id}
+              type="button"
+              onClick={() => setSelectedReason(reason.id)}
+              className={`w-full text-left px-4 py-3 rounded-lg border transition-colors ${
+                selectedReason === reason.id
+                  ? 'border-red-500 bg-red-50'
+                  : 'border-gray-200 hover:bg-gray-50'
+              }`}
+            >
+              <span className="font-medium text-gray-900">{reason.label}</span>
+              <span className="block text-sm text-gray-500">{reason.description}</span>
+            </button>
+          ))}
+        </div>
+
+        {/* Custom reason input */}
+        {selectedReason === 'other' && (
+          <textarea
+            value={customReason}
+            onChange={(e) => setCustomReason(e.target.value)}
+            rows={3}
+            className="w-full px-3 py-3 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-red-500 focus:border-red-500 mb-4"
+            placeholder="Bitte geben Sie den Grund an..."
+            autoFocus
+          />
+        )}
+
         <div className="flex gap-3">
           <button
             onClick={onClose}
             className="flex-1 bg-gray-200 text-gray-700 font-semibold py-4 rounded-lg hover:bg-gray-300 transition-colors"
           >
-            Cancel
+            Abbrechen
           </button>
           <button
-            onClick={() => onReject(reason)}
-            disabled={!reason.trim()}
+            onClick={handleSubmit}
+            disabled={!selectedReason || (selectedReason === 'other' && !customReason.trim())}
             className="flex-1 bg-red-600 text-white font-semibold py-4 rounded-lg hover:bg-red-700 disabled:opacity-50 transition-colors"
           >
-            Reject
+            Ablehnen
           </button>
         </div>
       </div>
