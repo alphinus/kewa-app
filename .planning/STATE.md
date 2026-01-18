@@ -10,23 +10,23 @@ See: .planning/PROJECT.md (updated 2026-01-18)
 ## Current Position
 
 Phase: 12 of 18 (Dashboard & Visualization)
-Plan: 1 of 5 complete
+Plan: 2 of 5 complete
 Status: In Progress
-Last activity: 2026-01-18 — Completed 12-01-PLAN.md (Parking Schema & Basic Display)
+Last activity: 2026-01-18 — Completed 12-02-PLAN.md (Property Dashboard & Heatmap)
 
-Progress: [=-----] 20% (1/5 plans complete in Phase 12)
+Progress: [==----] 40% (2/5 plans complete in Phase 12)
 
 ## Phase 12 Plans
 
 | Plan | Name | Wave | Scope | Status |
 |------|------|------|-------|--------|
 | 12-01 | Parking Schema & Basic Display | 1 | medium | COMPLETE |
-| 12-02 | Dashboard Layout & Building Heatmap | 1 | medium | Pending |
+| 12-02 | Dashboard Layout & Building Heatmap | 1 | medium | COMPLETE |
 | 12-03 | Project Timeline & Status | 1 | medium | Pending |
 | 12-04 | Cost Overview Dashboard | 1 | medium | Pending |
 | 12-05 | Dashboard Filters & Export | 1 | small | Pending |
 
-**Wave 1:** In Progress (Plan 01 complete)
+**Wave 1:** In Progress (Plans 01-02 complete)
 
 ## v2.0 Milestone Scope
 
@@ -173,11 +173,15 @@ Before production deployment:
 | Parking uses units table extension | 12-01 | Reuse existing infrastructure vs new parking table |
 | Simplified parking status enum | 12-01 | 3 states (free/occupied/maintenance) cover all scenarios |
 | Partial indexes for parking | 12-01 | Only index parking_spot rows for efficiency |
+| Reuse BuildingGrid floor config | 12-02 | Matches existing 5-floor layout for consistency |
+| Server components for dashboard | 12-02 | Direct DB access, no client-side query overhead |
+| Max 6 room dots with overflow | 12-02 | Prevents UI clutter for units with many rooms |
+| KEWA role only for property dashboard | 12-02 | Dashboard contains property-wide renovation data |
 
 ## Session Continuity
 
 Last session: 2026-01-18
-Stopped at: Completed 12-01-PLAN.md (Parking Schema & Basic Display)
+Stopped at: Completed 12-02-PLAN.md (Property Dashboard & Heatmap)
 Resume file: None
 
 ## Next Step
@@ -185,4 +189,4 @@ Resume file: None
 Phase 12 (Dashboard & Visualization) is IN PROGRESS.
 
 Next plan to execute:
-- **Plan 12-02:** Dashboard Layout & Building Heatmap
+- **Plan 12-03:** Project Timeline & Status
