@@ -13,6 +13,43 @@ interface RouteContext {
   params: Promise<{ id: string }>
 }
 
+// Type for the raw Supabase response
+interface WorkOrderQueryResult {
+  id: string
+  title: string
+  description: string | null
+  scope_of_work: string | null
+  requested_start_date: string | null
+  requested_end_date: string | null
+  acceptance_deadline: string | null
+  estimated_cost: number | null
+  room: Array<{
+    id: string
+    name: string
+    room_type: string
+    unit: Array<{
+      id: string
+      name: string
+      building: Array<{
+        id: string
+        name: string
+        address: string
+      }> | null
+    }> | null
+  }> | null
+  partner: Array<{
+    id: string
+    company_name: string
+    contact_name: string | null
+    email: string
+  }> | null
+}
+
+// Helper to safely extract first element from Supabase array relation
+function first<T>(arr: T[] | null | undefined): T | null {
+  return arr && arr.length > 0 ? arr[0] : null
+}
+
 /**
  * GET /api/work-orders/[id]/pdf - Generate PDF for work order
  *
@@ -48,7 +85,7 @@ export async function GET(
     const supabase = await createClient()
 
     // Fetch work order with relations needed for PDF
-    const { data: workOrder, error } = await supabase
+    const { data, error } = await supabase
       .from('work_orders')
       .select(`
         id,
@@ -94,15 +131,56 @@ export async function GET(
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
+    // Cast to our expected type (Supabase returns arrays for relations)
+    const workOrder = data as unknown as WorkOrderQueryResult
+
+    // Extract first elements from Supabase array relations
+    const roomData = first(workOrder.room)
+    const unitData = roomData ? first(roomData.unit) : null
+    const buildingData = unitData ? first(unitData.building) : null
+    const partnerData = first(workOrder.partner)
+
+    // Build the normalized work order data for PDF generation
+    const workOrderData = {
+      id: workOrder.id,
+      title: workOrder.title,
+      description: workOrder.description,
+      scope_of_work: workOrder.scope_of_work,
+      requested_start_date: workOrder.requested_start_date,
+      requested_end_date: workOrder.requested_end_date,
+      acceptance_deadline: workOrder.acceptance_deadline,
+      estimated_cost: workOrder.estimated_cost,
+      room: roomData ? {
+        id: roomData.id,
+        name: roomData.name,
+        room_type: roomData.room_type,
+        unit: unitData ? {
+          id: unitData.id,
+          name: unitData.name,
+          building: buildingData ? {
+            id: buildingData.id,
+            name: buildingData.name,
+            address: buildingData.address
+          } : undefined
+        } : undefined
+      } : undefined,
+      partner: partnerData ? {
+        id: partnerData.id,
+        company_name: partnerData.company_name,
+        contact_name: partnerData.contact_name,
+        email: partnerData.email
+      } : undefined
+    }
+
     // Generate PDF
-    const pdfBuffer = await generateWorkOrderPDF(workOrder)
+    const pdfBuffer = await generateWorkOrderPDF(workOrderData)
 
     // Generate filename
     const shortId = id.slice(0, 8).toUpperCase()
     const filename = `arbeitsauftrag-${shortId}.pdf`
 
     // Return PDF with download headers
-    return new NextResponse(pdfBuffer, {
+    return new NextResponse(new Uint8Array(pdfBuffer), {
       status: 200,
       headers: {
         'Content-Type': 'application/pdf',

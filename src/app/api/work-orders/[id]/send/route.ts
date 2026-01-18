@@ -102,7 +102,11 @@ export async function POST(
     }
 
     // Verify partner exists and has email
-    const partner = workOrder.partner as { id: string; email: string; company_name: string } | null
+    // Supabase returns array for relations in select queries
+    const partnerData = Array.isArray(workOrder.partner)
+      ? workOrder.partner[0]
+      : workOrder.partner
+    const partner = partnerData as { id: string; email: string; company_name: string } | null
     if (!partner?.email) {
       return NextResponse.json(
         { error: 'Partner email not found' },
