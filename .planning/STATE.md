@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-01-18)
 
 **Core value:** KEWA AG hat volle Transparenz und Kontrolle uber alle Renovationen — mit standardisierten Workflows, externer Handwerker-Integration, Kostenuebersicht und automatischer Zustandshistorie.
-**Current focus:** v2.0 Renovation Operations System — Phase 9 IN PROGRESS
+**Current focus:** v2.0 Renovation Operations System — Phase 9 COMPLETE
 
 ## Current Position
 
 Phase: 9 of 18 (External Contractor Portal)
-Plan: 4 of 5 complete
-Status: In progress - Wave 2 complete
-Last activity: 2026-01-18 — Completed 09-04-PLAN.md (Contractor File Uploads)
+Plan: 5 of 5 complete
+Status: PHASE COMPLETE
+Last activity: 2026-01-18 — Completed 09-05-PLAN.md (Tracking & Event Logging)
 
-Progress: [====] 80% (4/5 plans complete in Phase 9)
+Progress: [=====] 100% (5/5 plans complete in Phase 9)
 
 ## Phase 9 Plans
 
@@ -24,11 +24,11 @@ Progress: [====] 80% (4/5 plans complete in Phase 9)
 | 09-02 | Contractor Dashboard Transformation | 1 | medium | COMPLETE |
 | 09-03 | Response Actions & Counter-Offer Flow | 2 | medium | COMPLETE |
 | 09-04 | Contractor File Uploads | 2 | medium | COMPLETE |
-| 09-05 | Tracking & Event Logging | 3 | small | Pending |
+| 09-05 | Tracking & Event Logging | 3 | small | COMPLETE |
 
 **Wave 1:** COMPLETE (Plans 01-02)
 **Wave 2:** COMPLETE (Plans 03-04)
-**Wave 3:** Pending (Plan 05)
+**Wave 3:** COMPLETE (Plan 05)
 
 ## v2.0 Milestone Scope
 
@@ -59,7 +59,7 @@ Progress: [====] 80% (4/5 plans complete in Phase 9)
 |-------|------|--------------|--------|
 | 7 | Foundation & Data Model | 38 | COMPLETE |
 | 8 | Template System | 6 | COMPLETE |
-| 9 | External Contractor Portal | 16 | In Progress |
+| 9 | External Contractor Portal | 16 | COMPLETE |
 | 10 | Cost & Finance | 9 | Pending |
 | 11 | History & Digital Twin | 5 | Pending |
 | 12 | Dashboard & Visualization | 18 | Pending |
@@ -83,7 +83,7 @@ v1 artifacts in `.planning/milestones/`:
 ## Pending Setup Tasks
 
 Before production deployment:
-- Apply all migrations (001-036) to Supabase
+- Apply all migrations (001-038) to Supabase
 - Create storage buckets (task-photos, task-audio, documents, media)
 - Configure .env.local with Supabase credentials
 - Configure OPENAI_API_KEY for transcription
@@ -148,13 +148,24 @@ Before production deployment:
 | 3-state counter-offer workflow | 09-03 | pending -> approved/rejected by KEWA |
 | Storage bucket 'media' for unified uploads | 09-04 | Single bucket for all work order files |
 | Status-aware upload/delete permissions | 09-04 | Only allowed in accepted/in_progress/done statuses |
+| Event type enum for logging | 09-05 | Type safety, limited set of known events |
+| Actor type tracking with email | 09-05 | Contractors don't have user IDs, need email |
+| Auto-status logging via trigger | 09-05 | Ensures all status changes captured |
+| 48h/24h deadline thresholds | 09-05 | Standard business response windows |
+| Urgency sorting for deadlines | 09-05 | Most urgent items surface first |
 
 ## Session Continuity
 
 Last session: 2026-01-18
-Stopped at: Completed 09-04-PLAN.md (Contractor File Uploads)
+Stopped at: Completed 09-05-PLAN.md (Tracking & Event Logging) - Phase 9 COMPLETE
 Resume file: None
 
 ## Next Step
 
-Continue Phase 9 execution. Wave 3 (Plan 05: Tracking & Event Logging) ready to execute.
+Phase 9 COMPLETE. Ready to start Phase 10: Cost & Finance.
+
+Phase 10 will implement:
+- Offer management (CREATE, APPROVE, REJECT)
+- Invoice tracking (DRAFT -> SENT -> PAID)
+- Payment recording
+- Cost summaries and reporting
