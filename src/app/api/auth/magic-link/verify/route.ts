@@ -153,11 +153,13 @@ export async function POST(request: NextRequest) {
       : ['work_orders:read', 'work_orders:respond']
 
     // Create session with work order context
+    const rolesDataRaw = roleData?.roles as unknown
+    const roleInfo = (Array.isArray(rolesDataRaw) ? rolesDataRaw[0] : rolesDataRaw) as { name: string } | null
     const sessionToken = await createSession({
       userId: userId,
       role: 'imeri', // Legacy role
       roleId: roleData?.role_id || null,
-      roleName: (roleData?.roles as { name: string } | null)?.name || 'external_contractor',
+      roleName: roleInfo?.name || 'external_contractor',
       permissions
     })
 
@@ -166,7 +168,7 @@ export async function POST(request: NextRequest) {
       .from('users')
       .update({
         last_login_at: new Date().toISOString(),
-        login_count: supabase.rpc ? undefined : 1 // Will be incremented by separate query
+        login_count: 1 // Will be incremented on subsequent logins
       })
       .eq('id', userId)
 
@@ -252,6 +254,10 @@ async function getPermissionsForRole(
   if (!permissions) return []
 
   return permissions
-    .map((p) => (p.permissions as { code: string } | null)?.code)
+    .map((p) => {
+      const permData = p.permissions as unknown
+      const perm = (Array.isArray(permData) ? permData[0] : permData) as { code: string } | null
+      return perm?.code
+    })
     .filter((code): code is string => !!code)
 }

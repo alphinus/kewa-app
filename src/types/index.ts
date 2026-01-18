@@ -2,21 +2,60 @@
  * Shared TypeScript types for the KEWA-Imeri App
  */
 
-// User roles
+// =============================================
+// LEGACY TYPES (for backward compatibility)
+// =============================================
+
+// Legacy user roles (kept for backward compatibility)
 export type Role = 'kewa' | 'imeri'
 
-// User representation
+// Legacy user representation
 export interface User {
   id: string
   role: Role
   displayName: string
 }
 
-// Session state
+// Legacy session state
 export interface Session {
   authenticated: boolean
   user?: User
 }
+
+// =============================================
+// V2.0 RBAC TYPES (Phase 07-04)
+// =============================================
+
+// New RBAC user roles
+export type UserRole =
+  | 'admin'
+  | 'property_manager'
+  | 'accounting'
+  | 'tenant'
+  | 'external_contractor'
+
+// Authentication methods
+export type AuthMethod = 'pin' | 'email_password' | 'magic_link'
+
+// Re-export auth types
+export type {
+  Role as RoleEntity,
+  Permission,
+  RolePermission,
+  RoleWithPermissions,
+  SessionData,
+  ValidatedSession,
+  ValidatedSessionWithRBAC,
+  MagicLinkPurpose,
+  MagicLinkToken,
+  TenantUser,
+  LoginRequest,
+  LoginResponse,
+  RegisterRequest,
+  RegisterResponse,
+  AuthAuditAction,
+  AuthAuditLog
+} from './auth'
 
 // Building hierarchy types
 export type UnitType = 'apartment' | 'common_area' | 'building'

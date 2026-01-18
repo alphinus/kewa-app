@@ -137,7 +137,9 @@ async function handlePinAuth(
   const permissions = await getUserPermissions(supabase, matchedUser.role_id)
 
   // Create session token with new RBAC data
-  const roleData = matchedUser.roles as { name: string; display_name: string; is_internal: boolean } | null
+  // Supabase returns related data, handle the structure
+  const rolesData = matchedUser.roles as unknown
+  const roleData = (Array.isArray(rolesData) ? rolesData[0] : rolesData) as { name: string; display_name: string; is_internal: boolean } | null
   const sessionToken = await createSession({
     userId: matchedUser.id,
     role: matchedUser.role as 'kewa' | 'imeri', // Legacy role for backward compat
@@ -147,13 +149,12 @@ async function handlePinAuth(
   })
 
   // Update login stats
+  const currentLoginCount = (matchedUser as unknown as { login_count?: number })?.login_count || 0
   await supabase
     .from('users')
     .update({
       last_login_at: new Date().toISOString(),
-      login_count: (matchedUser as { login_count?: number }).login_count
-        ? ((matchedUser as { login_count: number }).login_count + 1)
-        : 1
+      login_count: currentLoginCount + 1
     })
     .eq('id', matchedUser.id)
 
@@ -280,7 +281,8 @@ async function handleEmailAuth(
   const permissions = await getUserPermissions(supabase, user.role_id)
 
   // Create session
-  const roleData = user.roles as { name: string; display_name: string; is_internal: boolean } | null
+  const rolesData = user.roles as unknown
+  const roleData = (Array.isArray(rolesData) ? rolesData[0] : rolesData) as { name: string; display_name: string; is_internal: boolean } | null
   const sessionToken = await createSession({
     userId: user.id,
     role: user.role as 'kewa' | 'imeri',
@@ -290,13 +292,12 @@ async function handleEmailAuth(
   })
 
   // Update login stats
+  const currentLoginCount = (user as unknown as { login_count?: number })?.login_count || 0
   await supabase
     .from('users')
     .update({
       last_login_at: new Date().toISOString(),
-      login_count: (user as { login_count?: number }).login_count
-        ? ((user as { login_count: number }).login_count + 1)
-        : 1
+      login_count: currentLoginCount + 1
     })
     .eq('id', user.id)
 
@@ -340,7 +341,11 @@ async function getUserPermissions(
   if (!permissions) return []
 
   return permissions
-    .map((p) => (p.permissions as { code: string } | null)?.code)
+    .map((p) => {
+      const permData = p.permissions as unknown
+      const perm = (Array.isArray(permData) ? permData[0] : permData) as { code: string } | null
+      return perm?.code
+    })
     .filter((code): code is string => !!code)
 }
 

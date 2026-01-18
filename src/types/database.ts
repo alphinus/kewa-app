@@ -26,7 +26,9 @@ import type {
   ExpenseCategory,
   ExpensePaymentMethod,
   PaymentMethod,
-  PaymentStatus
+  PaymentStatus,
+  UserRole,
+  AuthMethod
 } from './index'
 
 // =============================================
@@ -34,13 +36,72 @@ import type {
 // =============================================
 
 /**
- * User with PIN-based authentication
+ * User with multi-auth support (v2.0)
  */
 export interface User {
   id: string
   pin_hash: string
-  role: Role
+  role: Role // Legacy role field
   display_name: string
+  // v2.0 auth fields (optional for backward compat)
+  role_id?: string | null
+  email?: string | null
+  email_verified?: boolean
+  password_hash?: string | null
+  auth_method?: AuthMethod
+  last_login_at?: string | null
+  login_count?: number
+  is_active?: boolean
+  created_at: string
+  updated_at?: string
+}
+
+/**
+ * Role table (v2.0 RBAC)
+ */
+export interface DbRole {
+  id: string
+  name: UserRole
+  display_name: string
+  description: string | null
+  is_internal: boolean
+  is_active: boolean
+  created_at: string
+}
+
+/**
+ * Permission table (v2.0 RBAC)
+ */
+export interface DbPermission {
+  id: string
+  code: string
+  name: string
+  description: string | null
+  resource: string
+  action: string
+  created_at: string
+}
+
+/**
+ * Role-Permission junction (v2.0 RBAC)
+ */
+export interface DbRolePermission {
+  id: string
+  role_id: string
+  permission_id: string
+  created_at: string
+}
+
+/**
+ * Tenant-Unit relationship (v2.0)
+ */
+export interface DbTenantUser {
+  id: string
+  user_id: string
+  unit_id: string
+  is_primary: boolean
+  move_in_date: string | null
+  move_out_date: string | null
   created_at: string
 }
 
