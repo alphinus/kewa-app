@@ -5,30 +5,26 @@
 See: .planning/PROJECT.md (updated 2026-01-18)
 
 **Core value:** KEWA AG hat volle Transparenz und Kontrolle uber alle Renovationen — mit standardisierten Workflows, externer Handwerker-Integration, Kostenuebersicht und automatischer Zustandshistorie.
-**Current focus:** v2.0 Renovation Operations System — Phase 10 Complete
+**Current focus:** v2.0 Renovation Operations System — Phase 11 In Progress
 
 ## Current Position
 
-Phase: 10 of 18 (Cost & Finance)
-Plan: 6 of 6 complete
-Status: COMPLETE
-Last activity: 2026-01-18 — Completed 10-06-PLAN.md (Unit Investment View and Rent Entry)
+Phase: 11 of 18 (History & Digital Twin)
+Plan: 2 of 3 complete
+Status: In progress
+Last activity: 2026-01-18 — Completed 11-02-PLAN.md (Room Condition Grid)
 
-Progress: [======] 100% (6/6 plans complete in Phase 10)
+Progress: [====--] 67% (2/3 plans complete in Phase 11)
 
-## Phase 10 Plans
+## Phase 11 Plans
 
 | Plan | Name | Wave | Scope | Status |
 |------|------|------|-------|--------|
-| 10-01 | Invoice Submission & Approval | 1 | medium | COMPLETE |
-| 10-02 | Manual Expense Entry | 1 | small | COMPLETE |
-| 10-03 | Payment Recording | 1 | small | COMPLETE |
-| 10-04 | Project Cost Dashboard | 2 | medium | COMPLETE |
-| 10-05 | Accounting Export (CSV) | 2 | small | COMPLETE |
-| 10-06 | Unit Investment View | 2 | medium | COMPLETE |
+| 11-01 | Unit Timeline View | 1 | medium | COMPLETE |
+| 11-02 | Room Condition Grid | 1 | small | COMPLETE |
+| 11-03 | Condition Automation Verification | 1 | small | Pending |
 
-**Wave 1:** COMPLETE (Plans 01-03)
-**Wave 2:** COMPLETE (Plans 04-06)
+**Wave 1:** In progress (Plans 01-02 complete)
 
 ## v2.0 Milestone Scope
 
@@ -61,7 +57,7 @@ Progress: [======] 100% (6/6 plans complete in Phase 10)
 | 8 | Template System | 6 | COMPLETE |
 | 9 | External Contractor Portal | 16 | COMPLETE |
 | 10 | Cost & Finance | 9 | COMPLETE |
-| 11 | History & Digital Twin | 5 | Pending |
+| 11 | History & Digital Twin | 5 | In Progress |
 | 12 | Dashboard & Visualization | 18 | Pending |
 | **MVP Total** | | **92** | |
 | 13 | Change Orders & Suppliers | 7 | Pending |
@@ -163,16 +159,19 @@ Before production deployment:
 | Supabase array relation handling | 10-04 | Explicit extraction for to-one relations returning arrays |
 | Offer-invoice side-by-side | 10-04 | Per CONTEXT.md - simple comparison without variance highlight |
 | Legacy role for cost access | 10-06 | v2.0 RBAC not yet in session - use kewa role only |
+| Unicode icons for room types | 11-02 | Avoid icon library dependency, simple symbols work well |
+| Server components for condition display | 11-02 | Direct DB access, no client state needed |
+| Integrate into kosten/wohnungen page | 11-02 | Reuse existing unit detail rather than new route |
 
 ## Session Continuity
 
 Last session: 2026-01-18
-Stopped at: Completed 10-06-PLAN.md (Unit Investment View and Rent Entry)
+Stopped at: Completed 11-02-PLAN.md (Room Condition Grid)
 Resume file: None
 
 ## Next Step
 
-Phase 10 (Cost & Finance) is COMPLETE.
+Phase 11 (History & Digital Twin) in progress.
 
-Next phase to execute:
-- **Phase 11:** History & Digital Twin (5 requirements)
+Next plan to execute:
+- **Plan 11-03:** Condition Automation Verification (small, wave 1)
