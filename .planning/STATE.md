@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-01-18)
 
 **Core value:** KEWA AG hat volle Transparenz und Kontrolle uber alle Renovationen — mit standardisierten Workflows, externer Handwerker-Integration, Kostenuebersicht und automatischer Zustandshistorie.
-**Current focus:** v2.0 Renovation Operations System — Phase 11 In Progress
+**Current focus:** v2.0 Renovation Operations System — Phase 11 Complete
 
 ## Current Position
 
 Phase: 11 of 18 (History & Digital Twin)
-Plan: 2 of 3 complete
-Status: In progress
-Last activity: 2026-01-18 — Completed 11-02-PLAN.md (Room Condition Grid)
+Plan: 3 of 3 complete
+Status: COMPLETE
+Last activity: 2026-01-18 — Completed 11-03-PLAN.md (Condition Automation Verification)
 
-Progress: [====--] 67% (2/3 plans complete in Phase 11)
+Progress: [======] 100% (3/3 plans complete in Phase 11)
 
 ## Phase 11 Plans
 
@@ -22,9 +22,9 @@ Progress: [====--] 67% (2/3 plans complete in Phase 11)
 |------|------|------|-------|--------|
 | 11-01 | Unit Timeline View | 1 | medium | COMPLETE |
 | 11-02 | Room Condition Grid | 1 | small | COMPLETE |
-| 11-03 | Condition Automation Verification | 1 | small | Pending |
+| 11-03 | Condition Automation Verification | 1 | small | COMPLETE |
 
-**Wave 1:** In progress (Plans 01-02 complete)
+**Wave 1:** COMPLETE (Plans 01-03)
 
 ## v2.0 Milestone Scope
 
@@ -57,7 +57,7 @@ Progress: [====--] 67% (2/3 plans complete in Phase 11)
 | 8 | Template System | 6 | COMPLETE |
 | 9 | External Contractor Portal | 16 | COMPLETE |
 | 10 | Cost & Finance | 9 | COMPLETE |
-| 11 | History & Digital Twin | 5 | In Progress |
+| 11 | History & Digital Twin | 5 | COMPLETE |
 | 12 | Dashboard & Visualization | 18 | Pending |
 | **MVP Total** | | **92** | |
 | 13 | Change Orders & Suppliers | 7 | Pending |
@@ -95,6 +95,7 @@ Before production deployment:
 - Next.js 16 middleware.ts file convention deprecated (proxy.ts migration future)
 - Type errors in 07-04 auth routes (non-blocking, to be addressed)
 - ~~Type export issues in templates.ts (TemplateCategory, TemplateScope need re-export)~~ FIXED (09-02)
+- Template tasks don't have room_id by default (documented limitation, alternative trigger available)
 
 ## Accumulated Decisions
 
@@ -162,16 +163,18 @@ Before production deployment:
 | Unicode icons for room types | 11-02 | Avoid icon library dependency, simple symbols work well |
 | Server components for condition display | 11-02 | Direct DB access, no client state needed |
 | Integrate into kosten/wohnungen page | 11-02 | Reuse existing unit detail rather than new route |
+| Trigger relies on task room_id | 11-03 | on_project_approved finds rooms via tasks.room_id |
+| Alternative trigger available | 11-03 | Migration 035 has trigger that updates ALL unit rooms |
 
 ## Session Continuity
 
 Last session: 2026-01-18
-Stopped at: Completed 11-02-PLAN.md (Room Condition Grid)
+Stopped at: Completed 11-03-PLAN.md (Condition Automation Verification)
 Resume file: None
 
 ## Next Step
 
-Phase 11 (History & Digital Twin) in progress.
+Phase 11 (History & Digital Twin) is COMPLETE.
 
-Next plan to execute:
-- **Plan 11-03:** Condition Automation Verification (small, wave 1)
+Next phase to execute:
+- **Phase 12:** Dashboard & Visualization (18 requirements)
