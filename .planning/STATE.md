@@ -181,6 +181,9 @@ Before production deployment:
 | Mock history data for MVP | 12-03 | Placeholder until occupancy_history table implemented |
 | 90/70% occupancy thresholds | 12-03 | Standard property management thresholds for alerts |
 | Combined occupancy as simple average | 12-03 | Units + parking slots treated equally |
+| Event delegation via data-unit-id | 12-04 | Avoids prop drilling through server components |
+| Custom CSS animation for slide panel | 12-04 | Tailwind v4 doesn't include animate-in utilities |
+| Client wrapper pattern for server components | 12-04 | Enables client state for server component children |
 | Polymorphic comments pattern | 12-05 | Same entity_type/entity_id approach as media table |
 | KEWA-only internal comments | 12-05 | Contractors should not see internal discussions |
 | Yellow/blue comment visibility | 12-05 | Visual distinction for internal vs shared comments |
