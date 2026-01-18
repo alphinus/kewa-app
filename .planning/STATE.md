@@ -10,23 +10,23 @@ See: .planning/PROJECT.md (updated 2026-01-18)
 ## Current Position
 
 Phase: 9 of 18 (External Contractor Portal)
-Plan: 1 of 5 complete
-Status: In progress
-Last activity: 2026-01-18 — Completed 09-01-PLAN.md (WorkOrder Creation & PDF Generation)
+Plan: 2 of 5 complete
+Status: In progress - Wave 1 complete
+Last activity: 2026-01-18 — Completed 09-02-PLAN.md (Contractor Dashboard Transformation)
 
-Progress: [=] 20% (1/5 plans complete in Phase 9)
+Progress: [==] 40% (2/5 plans complete in Phase 9)
 
 ## Phase 9 Plans
 
 | Plan | Name | Wave | Scope | Status |
 |------|------|------|-------|--------|
 | 09-01 | WorkOrder Creation & PDF Generation | 1 | medium | COMPLETE |
-| 09-02 | Contractor Dashboard Transformation | 1 | medium | Pending |
+| 09-02 | Contractor Dashboard Transformation | 1 | medium | COMPLETE |
 | 09-03 | Response Actions & Counter-Offer Flow | 2 | medium | Pending |
 | 09-04 | Contractor File Uploads | 2 | medium | Pending |
 | 09-05 | Tracking & Event Logging | 3 | small | Pending |
 
-**Wave 1:** In progress (Plans 01-02) — parallel execution
+**Wave 1:** COMPLETE (Plans 01-02)
 **Wave 2:** Pending (Plans 03-04) — parallel execution
 **Wave 3:** Pending (Plan 05)
 
@@ -98,7 +98,7 @@ Before production deployment:
 - ~~Inconsistent session fetching pattern (DEBT-03)~~ FIXED
 - Next.js 16 middleware.ts file convention deprecated (proxy.ts migration future)
 - Type errors in 07-04 auth routes (non-blocking, to be addressed)
-- Type export issues in templates.ts (TemplateCategory, TemplateScope need re-export)
+- ~~Type export issues in templates.ts (TemplateCategory, TemplateScope need re-export)~~ FIXED (09-02)
 
 ## Accumulated Decisions
 
@@ -140,13 +140,17 @@ Before production deployment:
 | 72h default acceptance deadline | 09-01 | Standard business response window for contractors |
 | Mailto links instead of SMTP | 09-01 | Simpler deployment, user controls sending |
 | Supabase array relation transform | 09-01 | Use first() helper to extract single elements |
+| Query by partner email for dashboard | 09-02 | Shows ALL contractor work orders, not just token-linked |
+| Status-aware token expiry | 09-02 | Active work orders never time-expire (contractor can bookmark) |
+| Auto-mark viewed on dashboard load | 09-02 | Implements EXT-13 tracking requirement |
+| Predefined rejection reasons | 09-02 | Standardizes rejection data for reporting |
 
 ## Session Continuity
 
 Last session: 2026-01-18
-Stopped at: Completed 09-01-PLAN.md (WorkOrder Creation & PDF Generation)
+Stopped at: Completed 09-02-PLAN.md (Contractor Dashboard Transformation)
 Resume file: None
 
 ## Next Step
 
-Continue Phase 9 execution. Wave 1 Plan 02 (Contractor Dashboard Transformation) may be executing in parallel.
+Continue Phase 9 execution. Wave 2 (Plans 03-04: Response Actions & Counter-Offer Flow, Contractor File Uploads) ready to execute in parallel.
