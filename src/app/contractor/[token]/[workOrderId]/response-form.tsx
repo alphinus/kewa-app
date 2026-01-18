@@ -25,10 +25,10 @@ interface ResponseFormProps {
     requested_start_date: string | null
     requested_end_date: string | null
     counter_offer_status?: string | null
-    proposed_cost?: number | null
-    proposed_start_date?: string | null
-    proposed_end_date?: string | null
-    contractor_notes?: string | null
+    proposed_cost?: number | null | undefined
+    proposed_start_date?: string | null | undefined
+    proposed_end_date?: string | null | undefined
+    contractor_notes?: string | null | undefined
   }
   token: string
 }
@@ -157,10 +157,10 @@ export default function ResponseForm({ workOrder, token }: ResponseFormProps) {
 
               {/* Show proposed values */}
               <div className="mt-3 space-y-1 text-sm">
-                {workOrder.proposed_cost !== null && (
+                {workOrder.proposed_cost != null && (
                   <p className="text-blue-800">
                     <span className="font-medium">Ihr Preis:</span>{' '}
-                    {formatCurrency(workOrder.proposed_cost)}
+                    {formatCurrency(workOrder.proposed_cost ?? null)}
                   </p>
                 )}
                 {workOrder.proposed_start_date && (

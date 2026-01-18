@@ -11,9 +11,9 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
+import { cookies } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
-import { getSession } from '@/lib/session'
-import { hasPermission } from '@/lib/permissions'
+import { validateSession, SESSION_COOKIE_NAME } from '@/lib/session'
 
 // ============================================
 // TYPES
@@ -36,14 +36,20 @@ export async function POST(
     const { id: workOrderId } = await params
 
     // Check admin authentication
-    const session = await getSession()
-    if (!session?.user) {
+    const cookieStore = await cookies()
+    const sessionCookie = cookieStore.get(SESSION_COOKIE_NAME)
+
+    if (!sessionCookie?.value) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Check permission (admin or manager can manage work orders)
-    const canManage = await hasPermission(session.user.id, 'work_orders', 'update')
-    if (!canManage) {
+    const session = await validateSession(sessionCookie.value)
+    if (!session) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    // Only kewa role can manage work orders (admin access)
+    if (session.role !== 'kewa') {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
