@@ -10,22 +10,22 @@ See: .planning/PROJECT.md (updated 2026-01-18)
 ## Current Position
 
 Phase: 8 of 18 (Template System)
-Plan: 1 of 4 complete
+Plan: 2 of 4 complete
 Status: In progress
-Last activity: 2026-01-18 — Completed 08-01 Template Schema & Types
+Last activity: 2026-01-18 — Completed 08-02 Template CRUD & Library UI
 
-Progress: █░░░ 25% (1/4 plans complete in Phase 8)
+Progress: ██░░ 50% (2/4 plans complete in Phase 8)
 
 ## Phase 8 Plans
 
 | Plan | Name | Wave | Scope | Status |
 |------|------|------|-------|--------|
 | 08-01 | Template Schema & Types | 1 | medium | COMPLETE |
-| 08-02 | Template API | 1 | medium | Pending |
-| 08-03 | Template UI | 2 | medium | Pending |
-| 08-04 | Template Application | 2 | medium | Pending |
+| 08-02 | Template CRUD & Library UI | 1 | large | COMPLETE |
+| 08-03 | Template Application | 2 | medium | Pending |
+| 08-04 | Timeline Visualization | 2 | medium | Pending |
 
-**Wave 1:** In progress (Plan 01 complete, Plan 02 pending)
+**Wave 1:** COMPLETE (Plans 01-02)
 **Wave 2:** Pending (Plans 03-04)
 
 ## v2.0 Milestone Scope
@@ -56,7 +56,7 @@ Progress: █░░░ 25% (1/4 plans complete in Phase 8)
 | Phase | Name | Requirements | Status |
 |-------|------|--------------|--------|
 | 7 | Foundation & Data Model | 38 | COMPLETE |
-| 8 | Template System | 6 | In Progress (1/4) |
+| 8 | Template System | 6 | In Progress (2/4) |
 | 9 | External Contractor Portal | 16 | Pending |
 | 10 | Cost & Finance | 9 | Pending |
 | 11 | History & Digital Twin | 5 | Pending |
@@ -81,7 +81,7 @@ v1 artifacts in `.planning/milestones/`:
 ## Pending Setup Tasks
 
 Before production deployment:
-- Apply all migrations (001-033) to Supabase
+- Apply all migrations (001-034) to Supabase
 - Create storage buckets (task-photos, task-audio, documents, media)
 - Configure .env.local with Supabase credentials
 - Configure OPENAI_API_KEY for transcription
@@ -124,13 +124,15 @@ Before production deployment:
 | Template scope distinction | 08-01 | unit vs room scope for different template types |
 | Duration calculation strategy | 08-01 | MAX for package (tasks overlap), SUM for phase |
 | Soft-blocking quality gates | 08-01 | Gates advisory by default, optional blocking |
+| Auto-generate WBS codes in editor | 08-02 | Reduce user error, maintain hierarchy consistency |
+| Admin-only template write ops | 08-02 | Non-admin users can view but not edit templates |
 
 ## Session Continuity
 
-Last session: 2026-01-18T02:33:20Z
-Stopped at: Completed 08-01-PLAN.md (Template Schema & Types)
+Last session: 2026-01-18T02:40:00Z
+Stopped at: Completed 08-02-PLAN.md (Template CRUD & Library UI)
 Resume file: None
 
 ## Next Step
 
-Continue with 08-02 (Template API) to build REST endpoints for template CRUD operations.
+Continue with 08-03 (Template Application) to implement applying templates to renovation projects.
