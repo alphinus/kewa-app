@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-01-18)
 ## Current Position
 
 Phase: 12 of 18 (Dashboard & Visualization)
-Plan: 2 of 5 complete
+Plan: 3 of 5 complete
 Status: In Progress
-Last activity: 2026-01-18 — Completed 12-02-PLAN.md (Property Dashboard & Heatmap)
+Last activity: 2026-01-18 — Completed 12-03-PLAN.md (Occupancy Dashboard)
 
-Progress: [==----] 40% (2/5 plans complete in Phase 12)
+Progress: [===---] 60% (3/5 plans complete in Phase 12)
 
 ## Phase 12 Plans
 
@@ -22,11 +22,11 @@ Progress: [==----] 40% (2/5 plans complete in Phase 12)
 |------|------|------|-------|--------|
 | 12-01 | Parking Schema & Basic Display | 1 | medium | COMPLETE |
 | 12-02 | Dashboard Layout & Building Heatmap | 1 | medium | COMPLETE |
-| 12-03 | Project Timeline & Status | 1 | medium | Pending |
+| 12-03 | Occupancy Dashboard | 1 | small | COMPLETE |
 | 12-04 | Cost Overview Dashboard | 1 | medium | Pending |
 | 12-05 | Dashboard Filters & Export | 1 | small | Pending |
 
-**Wave 1:** In Progress (Plans 01-02 complete)
+**Wave 1:** In Progress (Plans 01-03 complete)
 
 ## v2.0 Milestone Scope
 
@@ -177,11 +177,15 @@ Before production deployment:
 | Server components for dashboard | 12-02 | Direct DB access, no client-side query overhead |
 | Max 6 room dots with overflow | 12-02 | Prevents UI clutter for units with many rooms |
 | KEWA role only for property dashboard | 12-02 | Dashboard contains property-wide renovation data |
+| SVG polyline for sparkline | 12-03 | CSS-only per Phase 8 decision, no external library |
+| Mock history data for MVP | 12-03 | Placeholder until occupancy_history table implemented |
+| 90/70% occupancy thresholds | 12-03 | Standard property management thresholds for alerts |
+| Combined occupancy as simple average | 12-03 | Units + parking slots treated equally |
 
 ## Session Continuity
 
 Last session: 2026-01-18
-Stopped at: Completed 12-02-PLAN.md (Property Dashboard & Heatmap)
+Stopped at: Completed 12-03-PLAN.md (Occupancy Dashboard)
 Resume file: None
 
 ## Next Step
@@ -189,4 +193,4 @@ Resume file: None
 Phase 12 (Dashboard & Visualization) is IN PROGRESS.
 
 Next plan to execute:
-- **Plan 12-03:** Project Timeline & Status
+- **Plan 12-04:** Cost Overview Dashboard
