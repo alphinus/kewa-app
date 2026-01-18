@@ -107,7 +107,9 @@ export function validateContractorUpload(
       }
     }
   } else if (mediaType === 'document') {
-    if (!allowedTypes.includes(mimeType as typeof allowedTypes[number])) {
+    // For documents, check if it's in the allowed list
+    const documentTypes = ALLOWED_MIME_TYPES.document
+    if (!documentTypes.includes(mimeType as typeof documentTypes[number])) {
       return {
         valid: false,
         error: 'Nur PDF-Dateien erlaubt',
