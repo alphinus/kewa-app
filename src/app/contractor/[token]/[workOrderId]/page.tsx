@@ -9,6 +9,8 @@
  * - Accept/reject actions
  * - Status-based action buttons
  * - Back to dashboard link
+ * - File uploads (EXT-11, EXT-12)
+ * - Media gallery
  */
 
 import Link from 'next/link'
@@ -18,6 +20,8 @@ import { getContractorWorkOrderById } from '@/lib/contractor/queries'
 import WorkOrderCard from '../work-order-card'
 import TokenError from '../token-error'
 import RequestLinkForm from '../request-link-form'
+import UploadSection from './upload-section'
+import MediaGallery from './media-gallery'
 
 interface WorkOrderDetailPageProps {
   params: Promise<{ token: string; workOrderId: string }>
@@ -134,6 +138,25 @@ export default async function WorkOrderDetailPage({
         <ActionHint
           type="rejected"
           message="Sie haben diesen Auftrag abgelehnt."
+        />
+      )}
+
+      {/* Upload Section - Show when status allows uploads */}
+      {['accepted', 'in_progress', 'done'].includes(workOrder.status) && (
+        <UploadSection
+          token={token}
+          workOrderId={workOrderId}
+          workOrderStatus={workOrder.status}
+        />
+      )}
+
+      {/* Media Gallery - Show always for completed/closed (read-only) */}
+      {['done', 'inspected', 'closed'].includes(workOrder.status) && (
+        <MediaGallery
+          token={token}
+          workOrderId={workOrderId}
+          workOrderStatus={workOrder.status}
+          readOnly={workOrder.status === 'closed'}
         />
       )}
     </div>
