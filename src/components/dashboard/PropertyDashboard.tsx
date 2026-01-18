@@ -10,6 +10,7 @@
 
 import { fetchDashboardSummary } from '@/lib/dashboard/dashboard-queries'
 import { BuildingHeatmap } from './BuildingHeatmap'
+import { OccupancyGauge } from './OccupancyGauge'
 import { ParkingSection } from '@/components/parking/ParkingSection'
 import { cn } from '@/lib/utils'
 
@@ -58,6 +59,9 @@ export async function PropertyDashboard({
           value={`${summary.renovatedRooms}/${summary.totalRooms}`}
         />
       </div>
+
+      {/* Occupancy Gauge */}
+      <OccupancyGauge buildingId={buildingId} />
 
       {/* Building + Parking Layout */}
       <div className="flex gap-4">
