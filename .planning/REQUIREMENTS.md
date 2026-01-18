@@ -56,22 +56,22 @@
 
 ### Externe Handwerker: Link-Portal
 
-- [ ] **EXT-01**: WorkOrder-Erstellung aus Projekt/Task mit Partner-Zuweisung
-- [ ] **EXT-02**: WorkOrder enthält: Scope, Location, Zeitfenster, Anhänge, Notizen
-- [ ] **EXT-03**: PDF-Generierung des WorkOrders
-- [ ] **EXT-04**: Email-Versand via lokalen Email-Client (mailto)
-- [ ] **EXT-05**: Magic-Link (Token) zur Web-Seite im Email
-- [ ] **EXT-06**: Contractor Web-Portal: Details + Anhänge anzeigen
-- [ ] **EXT-07**: Contractor: "Accept" / "Reject" Buttons
-- [ ] **EXT-08**: Contractor: Preisvorschlag (Betrag + Kommentar)
-- [ ] **EXT-09**: Contractor: Zeitfenster-Vorschlag
-- [ ] **EXT-10**: Contractor: Fragen/Kommentar-Feld
-- [ ] **EXT-11**: Contractor: Dokumente hochladen (Offerte/Rechnung)
-- [ ] **EXT-12**: Contractor: Fotos hochladen
-- [ ] **EXT-13**: Tracking: "Viewed" = Magic-Link geöffnet
-- [ ] **EXT-14**: Zeitgestempelte Events im Log
-- [ ] **EXT-15**: Automatische Erinnerungen (24h + 48h)
-- [ ] **EXT-16**: Annahme-Deadline (z.B. 72h)
+- [x] **EXT-01**: WorkOrder-Erstellung aus Projekt/Task mit Partner-Zuweisung
+- [x] **EXT-02**: WorkOrder enthält: Scope, Location, Zeitfenster, Anhänge, Notizen
+- [x] **EXT-03**: PDF-Generierung des WorkOrders
+- [x] **EXT-04**: Email-Versand via lokalen Email-Client (mailto)
+- [x] **EXT-05**: Magic-Link (Token) zur Web-Seite im Email
+- [x] **EXT-06**: Contractor Web-Portal: Details + Anhänge anzeigen
+- [x] **EXT-07**: Contractor: "Accept" / "Reject" Buttons
+- [x] **EXT-08**: Contractor: Preisvorschlag (Betrag + Kommentar)
+- [x] **EXT-09**: Contractor: Zeitfenster-Vorschlag
+- [x] **EXT-10**: Contractor: Fragen/Kommentar-Feld
+- [x] **EXT-11**: Contractor: Dokumente hochladen (Offerte/Rechnung)
+- [x] **EXT-12**: Contractor: Fotos hochladen
+- [x] **EXT-13**: Tracking: "Viewed" = Magic-Link geöffnet
+- [x] **EXT-14**: Zeitgestempelte Events im Log
+- [ ] **EXT-15**: Automatische Erinnerungen (24h + 48h) — DEFERRED (requires background jobs)
+- [x] **EXT-16**: Annahme-Deadline (z.B. 72h)
 
 ### Historie & Digital Twin
 

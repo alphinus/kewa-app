@@ -66,13 +66,15 @@
 - EXT-01 to EXT-16
 
 **Success Criteria:**
-- [ ] WorkOrder-Erstellung mit allen Pflichtfeldern
-- [ ] PDF-Generierung funktional
-- [ ] Email mit Magic-Link versendet (mailto)
-- [ ] Contractor-Portal: View, Accept, Reject, Price, Upload
-- [ ] Tracking: Viewed-Status, Erinnerungen, Deadline
+- [x] WorkOrder-Erstellung mit allen Pflichtfeldern
+- [x] PDF-Generierung funktional
+- [x] Email mit Magic-Link versendet (mailto)
+- [x] Contractor-Portal: View, Accept, Reject, Price, Upload
+- [x] Tracking: Viewed-Status, Erinnerungen, Deadline
 
 **Requirements Count:** 16
+**Status:** ✓ Complete (2026-01-18)
+**Note:** EXT-15 (Automatic Reminders) deferred — requires background job infrastructure
 
 ---
 
@@ -250,7 +252,7 @@
 |-------|--------------|-------|--------|
 | 7 | DEBT-01-04, DATA-01-15, AUTH-01-09, STAT-01-04, NFR-01-06 | 38 | ✓ Complete |
 | 8 | TMPL-01-06 | 6 | ✓ Complete |
-| 9 | EXT-01-16 | 16 | Pending |
+| 9 | EXT-01-16 | 16 | ✓ Complete |
 | 10 | COST-01-06, RENT-01-03 | 9 | Pending |
 | 11 | HIST-01-05 | 5 | Pending |
 | 12 | DASH-01-06, PARK-01-05, OCCU-01-04, COMM-01-03 | 18 | Pending |
