@@ -5,29 +5,28 @@
 See: .planning/PROJECT.md (updated 2026-01-18)
 
 **Core value:** KEWA AG hat volle Transparenz und Kontrolle uber alle Renovationen — mit standardisierten Workflows, externer Handwerker-Integration, Kostenuebersicht und automatischer Zustandshistorie.
-**Current focus:** v2.0 Renovation Operations System — Phase 7 COMPLETE
+**Current focus:** v2.0 Renovation Operations System — Phase 8 IN PROGRESS
 
 ## Current Position
 
-Phase: 7 (Foundation & Data Model) COMPLETE
-Plan: 5 of 5 complete
-Status: PHASE 7 COMPLETE
-Last activity: 2026-01-18 — Completed 07-05 Status Workflows & NFR
+Phase: 8 of 18 (Template System)
+Plan: 1 of 4 complete
+Status: In progress
+Last activity: 2026-01-18 — Completed 08-01 Template Schema & Types
 
-Progress: ████████████████████ 100% (5/5 plans complete)
+Progress: █░░░ 25% (1/4 plans complete in Phase 8)
 
-## Phase 7 Plans
+## Phase 8 Plans
 
 | Plan | Name | Wave | Scope | Status |
 |------|------|------|-------|--------|
-| 07-01 | Tech Debt Fixes | 1 | small | COMPLETE |
-| 07-02 | Core Data Model | 1 | large | COMPLETE |
-| 07-03 | Cost & Finance Model | 1 | medium | COMPLETE |
-| 07-04 | RBAC & Multi-Auth | 2 | large | COMPLETE |
-| 07-05 | Status Workflows & NFR | 2 | medium | COMPLETE |
+| 08-01 | Template Schema & Types | 1 | medium | COMPLETE |
+| 08-02 | Template API | 1 | medium | Pending |
+| 08-03 | Template UI | 2 | medium | Pending |
+| 08-04 | Template Application | 2 | medium | Pending |
 
-**Wave 1:** COMPLETE (Plans 01-03)
-**Wave 2:** COMPLETE (Plans 04-05)
+**Wave 1:** In progress (Plan 01 complete, Plan 02 pending)
+**Wave 2:** Pending (Plans 03-04)
 
 ## v2.0 Milestone Scope
 
@@ -57,7 +56,7 @@ Progress: ████████████████████ 100% (5/5
 | Phase | Name | Requirements | Status |
 |-------|------|--------------|--------|
 | 7 | Foundation & Data Model | 38 | COMPLETE |
-| 8 | Template System | 6 | Pending |
+| 8 | Template System | 6 | In Progress (1/4) |
 | 9 | External Contractor Portal | 16 | Pending |
 | 10 | Cost & Finance | 9 | Pending |
 | 11 | History & Digital Twin | 5 | Pending |
@@ -82,7 +81,7 @@ v1 artifacts in `.planning/milestones/`:
 ## Pending Setup Tasks
 
 Before production deployment:
-- Apply all migrations (001-031) to Supabase
+- Apply all migrations (001-033) to Supabase
 - Create storage buckets (task-photos, task-audio, documents, media)
 - Configure .env.local with Supabase credentials
 - Configure OPENAI_API_KEY for transcription
@@ -121,15 +120,17 @@ Before production deployment:
 | RLS with helper functions | 07-05 | Cleaner policy definitions, reusable across tables |
 | System settings as key-value JSONB | 07-05 | Flexible configuration without schema changes |
 | 44px minimum touch target | 07-05 | Apple HIG recommends 44pt for touch accessibility |
+| 3-level WBS hierarchy | 08-01 | Standard PM structure: Phase > Package > Task |
+| Template scope distinction | 08-01 | unit vs room scope for different template types |
+| Duration calculation strategy | 08-01 | MAX for package (tasks overlap), SUM for phase |
+| Soft-blocking quality gates | 08-01 | Gates advisory by default, optional blocking |
 
 ## Session Continuity
 
-Last session: 2026-01-18T01:19:15Z
-Stopped at: Completed 07-05-PLAN.md (Status Workflows & NFR) - Phase 7 complete
+Last session: 2026-01-18T02:33:20Z
+Stopped at: Completed 08-01-PLAN.md (Template Schema & Types)
 Resume file: None
 
 ## Next Step
 
-**Phase 7 Complete!** Ready for Phase 8 (Template System) or Phase 9 (Contractor Portal).
-
-Recommended next: Phase 8 (Template System) - builds on task/project structure created in Phase 7.
+Continue with 08-02 (Template API) to build REST endpoints for template CRUD operations.
