@@ -37,7 +37,14 @@ export interface VerifyMagicLinkResult {
   workOrderId?: string
   email?: string
   userId?: string
-  error?: 'expired' | 'used' | 'revoked' | 'not_found'
+  error?: 'expired' | 'used' | 'revoked' | 'not_found' | 'work_order_closed'
+}
+
+export interface ContractorAccessResult {
+  valid: boolean
+  email?: string
+  workOrderId?: string
+  error?: 'expired' | 'used' | 'revoked' | 'not_found' | 'work_order_closed'
 }
 
 interface MagicLinkToken {
@@ -358,4 +365,82 @@ export async function isTokenExpiringSoon(token: string): Promise<boolean> {
   const hoursRemaining = (expiresAt.getTime() - Date.now()) / (1000 * 60 * 60)
 
   return hoursRemaining > 0 && hoursRemaining < 24
+}
+
+// ============================================
+// CONTRACTOR ACCESS VALIDATION
+// ============================================
+
+/**
+ * Validate contractor access with status-aware token expiry.
+ *
+ * Key differences from peekMagicLink:
+ * - For viewed/accepted/in_progress work orders: Token never time-expires
+ *   (contractor can bookmark and return anytime while work is active)
+ * - For draft/sent work orders: Standard time-based expiry applies
+ * - For closed work orders: Access denied with work_order_closed error
+ *
+ * This implements the context decision: "Link validity: Until work order is complete"
+ *
+ * @param token - The magic link token
+ * @returns Validation result with email for dashboard query
+ */
+export async function validateContractorAccess(
+  token: string
+): Promise<ContractorAccessResult> {
+  const supabase = await createClient()
+
+  // Find token with work order status
+  const { data: tokenData, error: tokenError } = await supabase
+    .from('magic_link_tokens')
+    .select('*')
+    .eq('token', token)
+    .single()
+
+  if (tokenError || !tokenData) {
+    return { valid: false, error: 'not_found' }
+  }
+
+  // Check if revoked
+  if (tokenData.is_revoked) {
+    return { valid: false, error: 'revoked' }
+  }
+
+  // Get work order status if token is linked to a work order
+  let workOrderStatus: string | null = null
+  if (tokenData.work_order_id) {
+    const { data: woData } = await supabase
+      .from('work_orders')
+      .select('status')
+      .eq('id', tokenData.work_order_id)
+      .single()
+
+    workOrderStatus = woData?.status || null
+  }
+
+  // Check work order status - deny access if closed
+  if (workOrderStatus === 'closed') {
+    return { valid: false, error: 'work_order_closed' }
+  }
+
+  // Status-aware expiry logic:
+  // - For viewed/accepted/in_progress/blocked/done: No time expiry
+  // - For draft/sent or no work order: Standard time-based expiry
+  const activeStatuses = ['viewed', 'accepted', 'in_progress', 'blocked', 'done', 'inspected']
+  const isActive = workOrderStatus && activeStatuses.includes(workOrderStatus)
+
+  if (!isActive) {
+    // Apply time-based expiry for draft/sent or no linked work order
+    const expiresAt = new Date(tokenData.expires_at)
+    if (expiresAt < new Date()) {
+      return { valid: false, error: 'expired' }
+    }
+  }
+
+  // Token is valid - return email for contractor dashboard query
+  return {
+    valid: true,
+    email: tokenData.email,
+    workOrderId: tokenData.work_order_id ?? undefined
+  }
 }
