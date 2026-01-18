@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-01-18)
 
 **Core value:** KEWA AG hat volle Transparenz und Kontrolle uber alle Renovationen — mit standardisierten Workflows, externer Handwerker-Integration, Kostenuebersicht und automatischer Zustandshistorie.
-**Current focus:** v2.0 Renovation Operations System — Phase 10 In Progress
+**Current focus:** v2.0 Renovation Operations System — Phase 10 Complete
 
 ## Current Position
 
 Phase: 10 of 18 (Cost & Finance)
-Plan: 4 of 5 complete
-Status: In Progress
-Last activity: 2026-01-18 — Completed 10-04-PLAN.md (Project Cost Dashboard)
+Plan: 6 of 6 complete
+Status: COMPLETE
+Last activity: 2026-01-18 — Completed 10-06-PLAN.md (Unit Investment View and Rent Entry)
 
-Progress: [====--] 80% (4/5 plans complete in Phase 10)
+Progress: [======] 100% (6/6 plans complete in Phase 10)
 
 ## Phase 10 Plans
 
@@ -24,10 +24,11 @@ Progress: [====--] 80% (4/5 plans complete in Phase 10)
 | 10-02 | Manual Expense Entry | 1 | small | COMPLETE |
 | 10-03 | Payment Recording | 1 | small | COMPLETE |
 | 10-04 | Project Cost Dashboard | 2 | medium | COMPLETE |
-| 10-05 | Accounting Export (CSV) | 2 | small | Pending |
+| 10-05 | Accounting Export (CSV) | 2 | small | COMPLETE |
+| 10-06 | Unit Investment View | 2 | medium | COMPLETE |
 
 **Wave 1:** COMPLETE (Plans 01-03)
-**Wave 2:** In Progress (Plan 04 complete, 05 pending)
+**Wave 2:** COMPLETE (Plans 04-06)
 
 ## v2.0 Milestone Scope
 
@@ -59,7 +60,7 @@ Progress: [====--] 80% (4/5 plans complete in Phase 10)
 | 7 | Foundation & Data Model | 38 | COMPLETE |
 | 8 | Template System | 6 | COMPLETE |
 | 9 | External Contractor Portal | 16 | COMPLETE |
-| 10 | Cost & Finance | 9 | In Progress (4/5) |
+| 10 | Cost & Finance | 9 | COMPLETE |
 | 11 | History & Digital Twin | 5 | Pending |
 | 12 | Dashboard & Visualization | 18 | Pending |
 | **MVP Total** | | **92** | |
@@ -161,16 +162,17 @@ Before production deployment:
 | Swiss formatting centralized | 10-04 | formatters.ts with all CHF, date, number utilities |
 | Supabase array relation handling | 10-04 | Explicit extraction for to-one relations returning arrays |
 | Offer-invoice side-by-side | 10-04 | Per CONTEXT.md - simple comparison without variance highlight |
+| Legacy role for cost access | 10-06 | v2.0 RBAC not yet in session - use kewa role only |
 
 ## Session Continuity
 
 Last session: 2026-01-18
-Stopped at: Completed 10-04-PLAN.md (Project Cost Dashboard)
+Stopped at: Completed 10-06-PLAN.md (Unit Investment View and Rent Entry)
 Resume file: None
 
 ## Next Step
 
-Continue Phase 10: Cost & Finance.
+Phase 10 (Cost & Finance) is COMPLETE.
 
-Next plan to execute:
-- **10-05:** Accounting Export (CSV with Swiss formatting)
+Next phase to execute:
+- **Phase 11:** History & Digital Twin (5 requirements)
