@@ -32,6 +32,9 @@ import type {
   ParkingStatus
 } from './index'
 
+// Re-export ParkingStatus for modules importing from database.ts
+export type { ParkingStatus } from './index'
+
 // =============================================
 // BASE DATABASE ENTITIES
 // =============================================
