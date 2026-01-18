@@ -13,6 +13,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import ResponseForm from './[workOrderId]/response-form'
 
 interface WorkOrderData {
   id: string
@@ -28,6 +29,10 @@ interface WorkOrderData {
   proposed_cost: number | null
   acceptance_deadline: string | null
   contractor_notes: string | null
+  // Counter-offer tracking
+  counter_offer_status?: string | null
+  counter_offer_responded_at?: string | null
+  counter_offer_response_notes?: string | null
   room?: {
     id: string
     name: string
@@ -64,11 +69,6 @@ export default function WorkOrderCard({
   isCompleted = false,
 }: WorkOrderCardProps) {
   const [isLoading, setIsLoading] = useState(false)
-  const [showRejectModal, setShowRejectModal] = useState(false)
-  const [notes, setNotes] = useState('')
-  const [proposedCost, setProposedCost] = useState(
-    workOrder.estimated_cost?.toString() ?? ''
-  )
 
   // Format date for display
   const formatDate = (dateStr: string | null) => {
@@ -124,22 +124,6 @@ export default function WorkOrderCard({
     } finally {
       setIsLoading(false)
     }
-  }
-
-  // Handle accept
-  const handleAccept = () => {
-    handleStatusUpdate('accepted', {
-      proposed_cost: proposedCost ? parseFloat(proposedCost) : null,
-      contractor_notes: notes || null,
-    })
-  }
-
-  // Handle reject
-  const handleReject = (reason: string) => {
-    handleStatusUpdate('rejected', {
-      rejection_reason: reason,
-    })
-    setShowRejectModal(false)
   }
 
   // Get status config
@@ -344,64 +328,7 @@ export default function WorkOrderCard({
 
         {/* Response Form - Only show when awaiting response */}
         {workOrder.status === 'viewed' && (
-          <div className="border-t border-gray-200 pt-4 space-y-4">
-            <h3 className="font-semibold text-gray-900">Ihre Antwort</h3>
-
-            {/* Proposed Cost */}
-            <div>
-              <label
-                htmlFor="proposedCost"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
-                Ihr Preis (CHF)
-              </label>
-              <input
-                id="proposedCost"
-                type="number"
-                step="0.01"
-                value={proposedCost}
-                onChange={(e) => setProposedCost(e.target.value)}
-                className="w-full px-3 py-3 border border-gray-300 rounded-lg text-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="0.00"
-              />
-            </div>
-
-            {/* Notes */}
-            <div>
-              <label
-                htmlFor="notes"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
-                Bemerkungen (optional)
-              </label>
-              <textarea
-                id="notes"
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                rows={3}
-                className="w-full px-3 py-3 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Fragen oder Anmerkungen..."
-              />
-            </div>
-
-            {/* Action Buttons */}
-            <div className="flex gap-3">
-              <button
-                onClick={handleAccept}
-                disabled={isLoading}
-                className="flex-1 bg-green-600 text-white font-semibold py-4 rounded-lg hover:bg-green-700 disabled:opacity-50 transition-colors"
-              >
-                {isLoading ? 'Wird verarbeitet...' : 'Auftrag annehmen'}
-              </button>
-              <button
-                onClick={() => setShowRejectModal(true)}
-                disabled={isLoading}
-                className="flex-1 bg-red-600 text-white font-semibold py-4 rounded-lg hover:bg-red-700 disabled:opacity-50 transition-colors"
-              >
-                Ablehnen
-              </button>
-            </div>
-          </div>
+          <ResponseForm workOrder={workOrder} token={token} />
         )}
 
         {/* Start Work Button - Show when accepted */}
@@ -453,13 +380,6 @@ export default function WorkOrderCard({
         )}
       </div>
 
-      {/* Reject Modal */}
-      {showRejectModal && (
-        <RejectModal
-          onClose={() => setShowRejectModal(false)}
-          onReject={handleReject}
-        />
-      )}
     </div>
   )
 }
@@ -476,96 +396,6 @@ function Section({
     <div>
       <h3 className="text-sm font-medium text-gray-500 mb-1">{title}</h3>
       {children}
-    </div>
-  )
-}
-
-// Rejection reasons
-const REJECTION_REASONS = [
-  { id: 'capacity', label: 'Kapazitaet', description: 'Keine freie Kapazitaet im Zeitraum' },
-  { id: 'location', label: 'Standort', description: 'Standort zu weit entfernt' },
-  { id: 'scope', label: 'Arbeitsumfang', description: 'Arbeitsumfang nicht passend' },
-  { id: 'other', label: 'Sonstiges', description: 'Anderer Grund' },
-] as const
-
-// Reject modal component
-function RejectModal({
-  onClose,
-  onReject,
-}: {
-  onClose: () => void
-  onReject: (reason: string) => void
-}) {
-  const [selectedReason, setSelectedReason] = useState<string>('')
-  const [customReason, setCustomReason] = useState('')
-
-  const handleSubmit = () => {
-    if (!selectedReason) return
-    const reasonObj = REJECTION_REASONS.find((r) => r.id === selectedReason)
-    if (selectedReason === 'other' && customReason.trim()) {
-      onReject(`${reasonObj?.label}: ${customReason}`)
-    } else if (reasonObj) {
-      onReject(reasonObj.description)
-    }
-  }
-
-  return (
-    <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50">
-      <div className="bg-white w-full sm:max-w-md sm:rounded-lg rounded-t-lg p-4 safe-area-inset-bottom max-h-[80vh] overflow-y-auto">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">
-          Auftrag ablehnen
-        </h3>
-        <p className="text-gray-600 text-sm mb-4">
-          Bitte waehlen Sie einen Grund fuer die Ablehnung:
-        </p>
-
-        {/* Reason Selection */}
-        <div className="space-y-2 mb-4">
-          {REJECTION_REASONS.map((reason) => (
-            <button
-              key={reason.id}
-              type="button"
-              onClick={() => setSelectedReason(reason.id)}
-              className={`w-full text-left px-4 py-3 rounded-lg border transition-colors ${
-                selectedReason === reason.id
-                  ? 'border-red-500 bg-red-50'
-                  : 'border-gray-200 hover:bg-gray-50'
-              }`}
-            >
-              <span className="font-medium text-gray-900">{reason.label}</span>
-              <span className="block text-sm text-gray-500">{reason.description}</span>
-            </button>
-          ))}
-        </div>
-
-        {/* Custom reason input */}
-        {selectedReason === 'other' && (
-          <textarea
-            value={customReason}
-            onChange={(e) => setCustomReason(e.target.value)}
-            rows={3}
-            className="w-full px-3 py-3 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-red-500 focus:border-red-500 mb-4"
-            placeholder="Bitte geben Sie den Grund an..."
-            autoFocus
-          />
-        )}
-
-        <div className="flex gap-3">
-          <button
-            onClick={onClose}
-            className="flex-1 bg-gray-200 text-gray-700 font-semibold py-4 rounded-lg hover:bg-gray-300 transition-colors"
-          >
-            Abbrechen
-          </button>
-          <button
-            onClick={handleSubmit}
-            disabled={!selectedReason || (selectedReason === 'other' && !customReason.trim())}
-            className="flex-1 bg-red-600 text-white font-semibold py-4 rounded-lg hover:bg-red-700 disabled:opacity-50 transition-colors"
-          >
-            Ablehnen
-          </button>
-        </div>
-      </div>
     </div>
   )
 }

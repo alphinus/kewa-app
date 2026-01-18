@@ -59,6 +59,10 @@ export interface ContractorWorkOrder {
   created_at: string
   room: WorkOrderLocation | null
   partner: WorkOrderPartner | null
+  // Counter-offer tracking
+  counter_offer_status: string | null
+  counter_offer_responded_at: string | null
+  counter_offer_response_notes: string | null
 }
 
 export type ActionStatus = 'needsAction' | 'inProgress' | 'completed'
@@ -107,6 +111,9 @@ export async function getContractorWorkOrders(
       rejected_at,
       rejection_reason,
       created_at,
+      counter_offer_status,
+      counter_offer_responded_at,
+      counter_offer_response_notes,
       room:rooms (
         id,
         name,
@@ -238,6 +245,9 @@ export async function getContractorWorkOrderById(
       rejected_at,
       rejection_reason,
       created_at,
+      counter_offer_status,
+      counter_offer_responded_at,
+      counter_offer_response_notes,
       room:rooms (
         id,
         name,

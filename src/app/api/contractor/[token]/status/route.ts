@@ -24,9 +24,10 @@ interface StatusUpdateRequest {
 }
 
 // Valid status transitions for contractors
+// Note: viewed -> viewed allowed for counter-offer updates
 const VALID_TRANSITIONS: Record<string, string[]> = {
   sent: ['viewed'],
-  viewed: ['accepted', 'rejected'],
+  viewed: ['accepted', 'rejected', 'viewed'],
   accepted: ['in_progress'],
   in_progress: ['done', 'blocked'],
   blocked: ['in_progress'],

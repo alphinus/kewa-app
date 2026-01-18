@@ -86,10 +86,24 @@ export default async function WorkOrderDetailPage({
         />
       )}
 
-      {workOrder.status === 'viewed' && (
+      {workOrder.status === 'viewed' && !workOrder.counter_offer_status && (
         <ActionHint
           type="respond"
           message="Bitte akzeptieren oder lehnen Sie diesen Auftrag ab."
+        />
+      )}
+
+      {workOrder.status === 'viewed' && workOrder.counter_offer_status === 'pending' && (
+        <ActionHint
+          type="pending"
+          message="Ihr Gegenangebot wird von KEWA geprueft. Sie erhalten eine Antwort."
+        />
+      )}
+
+      {workOrder.status === 'viewed' && workOrder.counter_offer_status === 'rejected' && (
+        <ActionHint
+          type="respond"
+          message="Ihr Gegenangebot wurde abgelehnt. Sie koennen ein neues Angebot einreichen."
         />
       )}
 
@@ -131,7 +145,7 @@ function ActionHint({
   type,
   message,
 }: {
-  type: 'view' | 'respond' | 'start' | 'complete' | 'completed' | 'rejected'
+  type: 'view' | 'respond' | 'start' | 'complete' | 'completed' | 'rejected' | 'pending'
   message: string
 }) {
   const iconConfig: Record<typeof type, { color: string; icon: React.ReactNode }> = {
@@ -149,6 +163,14 @@ function ActionHint({
       icon: (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      ),
+    },
+    pending: {
+      color: 'text-blue-700 bg-blue-50 border-blue-200',
+      icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
       ),
     },
