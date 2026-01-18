@@ -5,30 +5,29 @@
 See: .planning/PROJECT.md (updated 2026-01-18)
 
 **Core value:** KEWA AG hat volle Transparenz und Kontrolle uber alle Renovationen — mit standardisierten Workflows, externer Handwerker-Integration, Kostenuebersicht und automatischer Zustandshistorie.
-**Current focus:** v2.0 Renovation Operations System — Phase 9 COMPLETE
+**Current focus:** v2.0 Renovation Operations System — Phase 10 In Progress
 
 ## Current Position
 
-Phase: 9 of 18 (External Contractor Portal)
-Plan: 5 of 5 complete
-Status: PHASE COMPLETE
-Last activity: 2026-01-18 — Completed 09-05-PLAN.md (Tracking & Event Logging)
+Phase: 10 of 18 (Cost & Finance)
+Plan: 3 of 5 complete
+Status: In Progress
+Last activity: 2026-01-18 — Completed 10-03-PLAN.md (Payment Recording)
 
-Progress: [=====] 100% (5/5 plans complete in Phase 9)
+Progress: [===--] 60% (3/5 plans complete in Phase 10)
 
-## Phase 9 Plans
+## Phase 10 Plans
 
 | Plan | Name | Wave | Scope | Status |
 |------|------|------|-------|--------|
-| 09-01 | WorkOrder Creation & PDF Generation | 1 | medium | COMPLETE |
-| 09-02 | Contractor Dashboard Transformation | 1 | medium | COMPLETE |
-| 09-03 | Response Actions & Counter-Offer Flow | 2 | medium | COMPLETE |
-| 09-04 | Contractor File Uploads | 2 | medium | COMPLETE |
-| 09-05 | Tracking & Event Logging | 3 | small | COMPLETE |
+| 10-01 | Invoice Submission & Approval | 1 | medium | COMPLETE |
+| 10-02 | Manual Expense Entry | 1 | small | COMPLETE |
+| 10-03 | Payment Recording | 1 | small | COMPLETE |
+| 10-04 | Project Cost Dashboard | 2 | medium | Pending |
+| 10-05 | Accounting Export (CSV) | 2 | small | Pending |
 
-**Wave 1:** COMPLETE (Plans 01-02)
-**Wave 2:** COMPLETE (Plans 03-04)
-**Wave 3:** COMPLETE (Plan 05)
+**Wave 1:** COMPLETE (Plans 01-03)
+**Wave 2:** Pending (Plans 04-05)
 
 ## v2.0 Milestone Scope
 
@@ -60,7 +59,7 @@ Progress: [=====] 100% (5/5 plans complete in Phase 9)
 | 7 | Foundation & Data Model | 38 | COMPLETE |
 | 8 | Template System | 6 | COMPLETE |
 | 9 | External Contractor Portal | 16 | COMPLETE |
-| 10 | Cost & Finance | 9 | Pending |
+| 10 | Cost & Finance | 9 | In Progress (3/5) |
 | 11 | History & Digital Twin | 5 | Pending |
 | 12 | Dashboard & Visualization | 18 | Pending |
 | **MVP Total** | | **92** | |
@@ -153,19 +152,20 @@ Before production deployment:
 | Auto-status logging via trigger | 09-05 | Ensures all status changes captured |
 | 48h/24h deadline thresholds | 09-05 | Standard business response windows |
 | Urgency sorting for deadlines | 09-05 | Most urgent items surface first |
+| Full payment only for MVP | 10-03 | No partial payments UI - simpler workflow |
+| Completed payments immutable | 10-03 | Audit trail integrity for accounting |
+| Database trigger for payment status sync | 10-03 | Atomic, reliable invoice status updates |
 
 ## Session Continuity
 
 Last session: 2026-01-18
-Stopped at: Completed 09-05-PLAN.md (Tracking & Event Logging) - Phase 9 COMPLETE
+Stopped at: Completed 10-03-PLAN.md (Payment Recording)
 Resume file: None
 
 ## Next Step
 
-Phase 9 COMPLETE. Ready to start Phase 10: Cost & Finance.
+Continue Phase 10: Cost & Finance.
 
-Phase 10 will implement:
-- Offer management (CREATE, APPROVE, REJECT)
-- Invoice tracking (DRAFT -> SENT -> PAID)
-- Payment recording
-- Cost summaries and reporting
+Next plans to execute:
+- **10-04:** Project Cost Dashboard (uses project_costs view, work order breakdown)
+- **10-05:** Accounting Export (CSV with Swiss formatting)
