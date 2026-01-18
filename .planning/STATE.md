@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-01-18)
 ## Current Position
 
 Phase: 9 of 18 (External Contractor Portal)
-Plan: 2 of 5 complete
-Status: In progress - Wave 1 complete
-Last activity: 2026-01-18 — Completed 09-02-PLAN.md (Contractor Dashboard Transformation)
+Plan: 4 of 5 complete
+Status: In progress - Wave 2 complete
+Last activity: 2026-01-18 — Completed 09-04-PLAN.md (Contractor File Uploads)
 
-Progress: [==] 40% (2/5 plans complete in Phase 9)
+Progress: [====] 80% (4/5 plans complete in Phase 9)
 
 ## Phase 9 Plans
 
@@ -22,12 +22,12 @@ Progress: [==] 40% (2/5 plans complete in Phase 9)
 |------|------|------|-------|--------|
 | 09-01 | WorkOrder Creation & PDF Generation | 1 | medium | COMPLETE |
 | 09-02 | Contractor Dashboard Transformation | 1 | medium | COMPLETE |
-| 09-03 | Response Actions & Counter-Offer Flow | 2 | medium | Pending |
-| 09-04 | Contractor File Uploads | 2 | medium | Pending |
+| 09-03 | Response Actions & Counter-Offer Flow | 2 | medium | COMPLETE |
+| 09-04 | Contractor File Uploads | 2 | medium | COMPLETE |
 | 09-05 | Tracking & Event Logging | 3 | small | Pending |
 
 **Wave 1:** COMPLETE (Plans 01-02)
-**Wave 2:** Pending (Plans 03-04) — parallel execution
+**Wave 2:** COMPLETE (Plans 03-04)
 **Wave 3:** Pending (Plan 05)
 
 ## v2.0 Milestone Scope
@@ -144,13 +144,17 @@ Before production deployment:
 | Status-aware token expiry | 09-02 | Active work orders never time-expire (contractor can bookmark) |
 | Auto-mark viewed on dashboard load | 09-02 | Implements EXT-13 tracking requirement |
 | Predefined rejection reasons | 09-02 | Standardizes rejection data for reporting |
+| Counter-offer via proposed_cost field | 09-03 | Reuses existing field, adds status tracking |
+| 3-state counter-offer workflow | 09-03 | pending -> approved/rejected by KEWA |
+| Storage bucket 'media' for unified uploads | 09-04 | Single bucket for all work order files |
+| Status-aware upload/delete permissions | 09-04 | Only allowed in accepted/in_progress/done statuses |
 
 ## Session Continuity
 
 Last session: 2026-01-18
-Stopped at: Completed 09-02-PLAN.md (Contractor Dashboard Transformation)
+Stopped at: Completed 09-04-PLAN.md (Contractor File Uploads)
 Resume file: None
 
 ## Next Step
 
-Continue Phase 9 execution. Wave 2 (Plans 03-04: Response Actions & Counter-Offer Flow, Contractor File Uploads) ready to execute in parallel.
+Continue Phase 9 execution. Wave 3 (Plan 05: Tracking & Event Logging) ready to execute.
