@@ -207,7 +207,7 @@ export function QualityGateProgress({
                 type="file"
                 accept="image/*"
                 onChange={handleFileChange}
-                disabled={uploading || gate.status === 'passed'}
+                disabled={uploading}
                 className="sr-only"
               />
             </label>

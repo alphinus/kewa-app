@@ -340,3 +340,103 @@ export interface TemplateDependenciesResponse {
 export interface TemplateQualityGatesResponse {
   quality_gates: TemplateQualityGate[]
 }
+
+// =============================================
+// PROJECT RUNTIME TYPES
+// =============================================
+
+/**
+ * Project quality gate status
+ */
+export type QualityGateStatus = 'pending' | 'passed' | 'failed'
+
+/**
+ * Checklist item progress tracking
+ */
+export interface ChecklistProgress {
+  id: string
+  completed: boolean
+  completed_at: string | null
+  completed_by: string | null
+}
+
+/**
+ * Project quality gate (runtime instance from template)
+ */
+export interface ProjectQualityGate {
+  id: string
+  project_id: string
+  template_gate_id: string | null
+  gate_level: GateLevel
+  phase_id: string | null
+  package_id: string | null
+  name: string
+  description: string | null
+  checklist_items: TemplateChecklistItem[]
+  checklist_progress: ChecklistProgress[] | null
+  min_photos_required: number
+  photo_types: string[]
+  is_blocking: boolean
+  auto_approve_when_complete: boolean
+  status: QualityGateStatus
+  approved_at: string | null
+  approved_by: string | null
+  created_at: string
+  updated_at: string
+}
+
+/**
+ * Quality gate completion status for display
+ */
+export interface QualityGateCompletion {
+  checklist_complete: boolean
+  checklist_progress: string  // e.g., "3/5"
+  photos_complete: boolean
+  photos_progress: string  // e.g., "2/3"
+  is_complete: boolean
+  can_auto_approve: boolean
+}
+
+/**
+ * Media attachment for quality gate photos
+ */
+export interface QualityGatePhoto {
+  id: string
+  file_name: string
+  storage_path: string
+  created_at?: string
+}
+
+/**
+ * Project quality gate with completion tracking
+ */
+export interface ProjectQualityGateWithCompletion extends ProjectQualityGate {
+  completion: QualityGateCompletion
+  photos: QualityGatePhoto[]
+  phase?: {
+    id: string
+    name: string
+    wbs_code: string
+    status: string
+  } | null
+  package?: {
+    id: string
+    name: string
+    wbs_code: string
+    status: string
+  } | null
+}
+
+/**
+ * Response for project quality gates list
+ */
+export interface ProjectQualityGatesResponse {
+  quality_gates: ProjectQualityGateWithCompletion[]
+}
+
+/**
+ * Response for single project quality gate
+ */
+export interface ProjectQualityGateResponse {
+  quality_gate: ProjectQualityGateWithCompletion
+}
