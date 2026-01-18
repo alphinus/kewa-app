@@ -365,3 +365,60 @@ END;
 $$ LANGUAGE plpgsql;
 
 COMMENT ON FUNCTION apply_template_to_project IS 'Atomically applies a template to a project, creating phases, packages, tasks, dependencies, and quality gates with proper ID remapping';
+
+-- =============================================
+-- TMPL-06: CONDITION UPDATE ON PROJECT APPROVAL
+-- =============================================
+
+-- This function complements the existing on_project_approved trigger from 027_condition_tracking.sql
+-- It provides a more comprehensive update that affects ALL rooms in the unit, not just
+-- rooms that had tasks completed. This is appropriate when applying a template that
+-- represents a complete renovation.
+
+CREATE OR REPLACE FUNCTION update_condition_on_project_approval()
+RETURNS TRIGGER AS $$
+BEGIN
+  -- Only trigger when status changes to 'approved'
+  IF NEW.status = 'approved' AND (OLD.status IS NULL OR OLD.status != 'approved') THEN
+
+    -- Get the unit for this project
+    -- Update all rooms in the unit to 'new' condition
+    UPDATE rooms
+    SET
+      condition = 'new',
+      condition_updated_at = NOW(),
+      condition_source_project_id = NEW.id
+    WHERE unit_id = NEW.unit_id;
+
+    -- Log condition changes to history (if table exists from 027_condition_tracking.sql)
+    IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'condition_history') THEN
+      INSERT INTO condition_history (entity_type, entity_id, old_condition, new_condition, source_project_id, notes, changed_by)
+      SELECT
+        'room',
+        r.id,
+        r.condition,
+        'new',
+        NEW.id,
+        'Automatisch aktualisiert nach Projekt-Abnahme: ' || NEW.name,
+        NEW.approved_by
+      FROM rooms r
+      WHERE r.unit_id = NEW.unit_id;
+    END IF;
+
+  END IF;
+
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Note: The trigger itself is already created in 027_condition_tracking.sql as projects_on_approved
+-- We only update the function here to include all rooms in the unit.
+-- If you want to use this version instead, drop and recreate the trigger:
+-- DROP TRIGGER IF EXISTS projects_on_approved ON renovation_projects;
+-- CREATE TRIGGER projects_on_approved_v2
+--   AFTER UPDATE ON renovation_projects
+--   FOR EACH ROW
+--   WHEN (NEW.status = 'approved' AND (OLD.status IS DISTINCT FROM 'approved'))
+--   EXECUTE FUNCTION update_condition_on_project_approval();
+
+COMMENT ON FUNCTION update_condition_on_project_approval IS 'TMPL-06: Updates room conditions to new when project is approved';
