@@ -47,12 +47,12 @@
 
 ### Template-System
 
-- [ ] **TMPL-01**: Template-Library für Komplett-Renovationen
-- [ ] **TMPL-02**: Template-Library für Einzel-Raum-Renovationen (Bad, Küche, etc.)
-- [ ] **TMPL-03**: Templates enthalten Phasen → Pakete → Tasks (WBS)
-- [ ] **TMPL-04**: Task-Abhängigkeiten und geschätzte Dauer
-- [ ] **TMPL-05**: Quality Gates (Abnahme-Checkpoints) mit Evidenz-Anforderungen
-- [ ] **TMPL-06**: Mapping-Regeln: Abschluss triggert Raum/Unit Condition Update
+- [x] **TMPL-01**: Template-Library für Komplett-Renovationen
+- [x] **TMPL-02**: Template-Library für Einzel-Raum-Renovationen (Bad, Küche, etc.)
+- [x] **TMPL-03**: Templates enthalten Phasen → Pakete → Tasks (WBS)
+- [x] **TMPL-04**: Task-Abhängigkeiten und geschätzte Dauer
+- [x] **TMPL-05**: Quality Gates (Abnahme-Checkpoints) mit Evidenz-Anforderungen
+- [x] **TMPL-06**: Mapping-Regeln: Abschluss triggert Raum/Unit Condition Update
 
 ### Externe Handwerker: Link-Portal
 

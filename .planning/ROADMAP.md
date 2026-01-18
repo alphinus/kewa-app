@@ -48,12 +48,13 @@
 - TMPL-01 to TMPL-06
 
 **Success Criteria:**
-- [ ] Template-Library mit mind. 3 Vorlagen (Komplett, Bad, Küche)
-- [ ] WBS: Phasen → Pakete → Tasks mit Abhängigkeiten
-- [ ] Quality Gates definierbar mit Evidenz-Anforderungen
-- [ ] Template anwendbar auf neue Projekte
+- [x] Template-Library mit mind. 3 Vorlagen (Komplett, Bad, Küche)
+- [x] WBS: Phasen → Pakete → Tasks mit Abhängigkeiten
+- [x] Quality Gates definierbar mit Evidenz-Anforderungen
+- [x] Template anwendbar auf neue Projekte
 
 **Requirements Count:** 6
+**Status:** ✓ Complete (2026-01-18)
 
 ---
 
@@ -248,7 +249,7 @@
 | Phase | Requirements | Count | Status |
 |-------|--------------|-------|--------|
 | 7 | DEBT-01-04, DATA-01-15, AUTH-01-09, STAT-01-04, NFR-01-06 | 38 | ✓ Complete |
-| 8 | TMPL-01-06 | 6 | Pending |
+| 8 | TMPL-01-06 | 6 | ✓ Complete |
 | 9 | EXT-01-16 | 16 | Pending |
 | 10 | COST-01-06, RENT-01-03 | 9 | Pending |
 | 11 | HIST-01-05 | 5 | Pending |
