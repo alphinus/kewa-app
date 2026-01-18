@@ -192,6 +192,10 @@ export async function getProjectWorkOrdersWithCosts(
     const invoices = Array.isArray(wo.invoices) ? wo.invoices : []
     const invoice = invoices[0] || null
 
+    // Handle Supabase returning arrays for to-one relations
+    const roomData = Array.isArray(wo.room) ? wo.room[0] : wo.room
+    const partnerData = Array.isArray(wo.partner) ? wo.partner[0] : wo.partner
+
     return {
       id: wo.id,
       title: wo.title,
@@ -199,8 +203,8 @@ export async function getProjectWorkOrdersWithCosts(
       estimated_cost: wo.estimated_cost,
       proposed_cost: wo.proposed_cost,
       final_cost: wo.final_cost,
-      room: wo.room as Pick<Room, 'id' | 'name'> | null,
-      partner: wo.partner as Pick<Partner, 'id' | 'company_name'> | null,
+      room: roomData ? { id: roomData.id, name: roomData.name } : null,
+      partner: partnerData ? { id: partnerData.id, company_name: partnerData.company_name } : null,
       acceptedOffer: acceptedOffer as WorkOrderWithCosts['acceptedOffer'],
       invoice: invoice as WorkOrderWithCosts['invoice'],
     }
@@ -267,6 +271,33 @@ export async function getProjectCostBreakdown(
     }
   }
 
+  // Handle Supabase returning arrays for to-one relations
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const unitRaw = project.unit as any
+  const unitData = Array.isArray(unitRaw) ? unitRaw[0] : unitRaw
+  const buildingRaw = unitData?.building
+  const buildingData = buildingRaw && Array.isArray(buildingRaw)
+    ? buildingRaw[0]
+    : buildingRaw
+
+  const normalizedProject = {
+    id: project.id,
+    name: project.name,
+    status: project.status,
+    estimated_cost: project.estimated_cost,
+    planned_start_date: project.planned_start_date,
+    planned_end_date: project.planned_end_date,
+    unit: unitData
+      ? {
+          id: unitData.id as string,
+          name: unitData.name as string,
+          building: buildingData
+            ? { id: buildingData.id as string, name: buildingData.name as string }
+            : null,
+        }
+      : null,
+  }
+
   // Fetch cost summary
   const { data: summary } = await getProjectCostSummary(supabase, projectId)
 
@@ -308,7 +339,7 @@ export async function getProjectCostBreakdown(
 
   return {
     data: {
-      project: project as ProjectWithCostBreakdown['project'],
+      project: normalizedProject,
       summary,
       workOrders,
       expenses,
@@ -373,19 +404,22 @@ export async function getAllProjectCostSummaries(
 
   // Combine data
   const result: ProjectCostSummaryItem[] = (projects || []).map((p) => {
-    const unit = p.unit as {
-      id: string
-      name: string
-      building: { id: string; name: string } | null
-    } | null
+    // Handle Supabase returning arrays for to-one relations
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const unitRaw = p.unit as any
+    const unitData = Array.isArray(unitRaw) ? unitRaw[0] : unitRaw
+    const buildingRaw = unitData?.building
+    const buildingData = buildingRaw && Array.isArray(buildingRaw)
+      ? buildingRaw[0]
+      : buildingRaw
     const costs = costMap.get(p.id)
 
     return {
       project_id: p.id,
       project_name: p.name,
-      unit_id: unit?.id ?? '',
-      unit_name: unit?.name ?? '-',
-      building_name: unit?.building?.name ?? null,
+      unit_id: (unitData?.id as string) ?? '',
+      unit_name: (unitData?.name as string) ?? '-',
+      building_name: (buildingData?.name as string) ?? null,
       status: p.status,
       estimated_cost: p.estimated_cost,
       total_invoiced: costs?.total_invoiced ?? 0,
