@@ -9,7 +9,7 @@ import {
   formatSwissDate,
   getInvoiceStatusLabel,
   getInvoiceStatusColor
-} from '@/lib/costs/invoice-queries'
+} from '@/lib/costs/invoice-constants'
 import type { InvoiceWithRelations } from '@/lib/costs/invoice-queries'
 
 /**
