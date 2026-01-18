@@ -128,13 +128,14 @@
 - COMM-01 to COMM-03
 
 **Success Criteria:**
-- [ ] Property-Level Dashboard mit Heatmap (Units × Rooms)
-- [ ] Drilldown: Property → Unit → Room → Project → Tasks
-- [ ] 8 Parkplätze vertikal neben Gebäude
-- [ ] Auslastung berechnet aus Wohnungen + Parkplätzen
-- [ ] Kommentare auf Tasks/WorkOrders mit Timestamps
+- [x] Property-Level Dashboard mit Heatmap (Units × Rooms)
+- [x] Drilldown: Property → Unit → Room → Project → Tasks
+- [x] 8 Parkplätze vertikal neben Gebäude
+- [x] Auslastung berechnet aus Wohnungen + Parkplätzen
+- [x] Kommentare auf Tasks/WorkOrders mit Timestamps
 
 **Requirements Count:** 18
+**Status:** ✓ Complete (2026-01-18)
 
 ---
 
@@ -257,7 +258,7 @@
 | 9 | EXT-01-16 | 16 | ✓ Complete |
 | 10 | COST-01-06, RENT-01-03 | 9 | ✓ Complete |
 | 11 | HIST-01-05 | 5 | ✓ Complete |
-| 12 | DASH-01-06, PARK-01-05, OCCU-01-04, COMM-01-03 | 18 | Pending |
+| 12 | DASH-01-06, PARK-01-05, OCCU-01-04, COMM-01-03 | 18 | ✓ Complete |
 | **MVP Total** | | **92** | |
 | 13 | CHNG-01-03, SUPP-01-04 | 7 | Pending |
 | 14 | INSP-01-03, PUSH-01-05 | 8 | Pending |
