@@ -1,11 +1,17 @@
 'use client'
 
-import { useState, useEffect, use } from 'react'
+import { useState, useEffect, use, Suspense, lazy } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { WBSTree } from '@/components/templates/WBSTree'
+import { SimpleTimeline } from '@/components/templates/SimpleTimeline'
 import { fetchTemplate, deleteTemplate } from '@/lib/api/templates'
 import type { TemplateWithHierarchy, TemplateTask } from '@/types/templates'
+
+// Lazy load GanttPreview for better performance
+const GanttPreview = lazy(() =>
+  import('@/components/templates/GanttPreview').then(mod => ({ default: mod.GanttPreview }))
+)
 
 const categoryLabels: Record<string, string> = {
   complete_renovation: 'Komplett-Renovation',
@@ -50,6 +56,8 @@ export default function TemplateDetailPage({ params }: PageProps) {
   const [error, setError] = useState<string | null>(null)
   const [isAdmin, setIsAdmin] = useState(false)
   const [selectedTask, setSelectedTask] = useState<TemplateTask | null>(null)
+  const [timelineView, setTimelineView] = useState<'simple' | 'gantt'>('simple')
+  const [startDate, setStartDate] = useState<Date>(new Date())
 
   useEffect(() => {
     loadTemplate()
@@ -208,6 +216,66 @@ export default function TemplateDetailPage({ params }: PageProps) {
             )}
             {template.total_estimated_cost !== null && template.total_estimated_cost > 0 && (
               <StatCard label="Kosten" value={`CHF ${template.total_estimated_cost.toLocaleString('de-CH')}`} />
+            )}
+          </div>
+        )}
+
+        {/* Timeline Visualization */}
+        {stats && stats.taskCount > 0 && (
+          <div className="mb-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold text-gray-900">Timeline</h2>
+              <div className="flex items-center gap-4">
+                {/* Start date picker */}
+                <div className="flex items-center gap-2">
+                  <label htmlFor="start-date" className="text-sm text-gray-600">Start:</label>
+                  <input
+                    id="start-date"
+                    type="date"
+                    value={startDate.toISOString().split('T')[0]}
+                    onChange={(e) => setStartDate(new Date(e.target.value))}
+                    className="px-2 py-1 border rounded text-sm"
+                  />
+                </div>
+                {/* View toggle */}
+                <div className="flex rounded-lg border overflow-hidden">
+                  <button
+                    onClick={() => setTimelineView('simple')}
+                    className={`px-3 py-1 text-sm ${
+                      timelineView === 'simple'
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-white text-gray-600 hover:bg-gray-50'
+                    }`}
+                  >
+                    Einfach
+                  </button>
+                  <button
+                    onClick={() => setTimelineView('gantt')}
+                    className={`px-3 py-1 text-sm ${
+                      timelineView === 'gantt'
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-white text-gray-600 hover:bg-gray-50'
+                    }`}
+                  >
+                    Gantt
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {timelineView === 'simple' ? (
+              <SimpleTimeline template={template} />
+            ) : (
+              <Suspense
+                fallback={
+                  <div className="border rounded-lg p-8 text-center text-gray-500">
+                    <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mb-2"></div>
+                    <p>Lade Gantt-Diagramm...</p>
+                  </div>
+                }
+              >
+                <GanttPreview template={template} startDate={startDate} />
+              </Suspense>
             )}
           </div>
         )}
