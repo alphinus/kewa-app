@@ -5,29 +5,29 @@
 See: .planning/PROJECT.md (updated 2026-01-18)
 
 **Core value:** KEWA AG hat volle Transparenz und Kontrolle über alle Renovationen — mit standardisierten Workflows, externer Handwerker-Integration, Kostenübersicht und automatischer Zustandshistorie.
-**Current focus:** v2.0 Renovation Operations System — Phase 7 ready
+**Current focus:** v2.0 Renovation Operations System — Phase 7 Wave 1 complete
 
 ## Current Position
 
 Phase: 7 (Foundation & Data Model)
-Plan: 2 of 5 complete (07-02, 07-03 done, Wave 1 in progress)
-Status: IN PROGRESS
-Last activity: 2026-01-18 — Completed 07-02 Core Data Model
+Plan: 3 of 5 complete (Wave 1 complete: 07-01, 07-02, 07-03)
+Status: WAVE 1 COMPLETE
+Last activity: 2026-01-18 — Completed 07-01 Tech Debt Fixes
 
-Progress: ██████████░░░░░░░ 40% (2/5 plans complete)
+Progress: ████████████░░░░░ 60% (3/5 plans complete)
 
 ## Phase 7 Plans
 
 | Plan | Name | Wave | Scope | Status |
 |------|------|------|-------|--------|
-| 07-01 | Tech Debt Fixes | 1 | small | In progress |
+| 07-01 | Tech Debt Fixes | 1 | small | COMPLETE |
 | 07-02 | Core Data Model | 1 | large | COMPLETE |
 | 07-03 | Cost & Finance Model | 1 | medium | COMPLETE |
-| 07-04 | RBAC & Multi-Auth | 2 | large | Pending |
-| 07-05 | Status Workflows & NFR | 2 | medium | Pending |
+| 07-04 | RBAC & Multi-Auth | 2 | large | Ready |
+| 07-05 | Status Workflows & NFR | 2 | medium | Ready |
 
-**Wave 1:** Plans 01-03 run in parallel (no dependencies)
-**Wave 2:** Plans 04-05 run in parallel (depend on Wave 1)
+**Wave 1:** COMPLETE (Plans 01-03)
+**Wave 2:** Ready (Plans 04-05, depend on Wave 1)
 
 ## v2.0 Milestone Scope
 
@@ -56,7 +56,7 @@ Progress: ██████████░░░░░░░ 40% (2/5 plans com
 
 | Phase | Name | Requirements | Status |
 |-------|------|--------------|--------|
-| 7 | Foundation & Data Model | 38 | ○ Ready |
+| 7 | Foundation & Data Model | 38 | ◐ Wave 1 Complete |
 | 8 | Template System | 6 | ○ Pending |
 | 9 | External Contractor Portal | 16 | ○ Pending |
 | 10 | Cost & Finance | 9 | ○ Pending |
@@ -82,7 +82,7 @@ v1 artifacts in `.planning/milestones/`:
 ## Pending Setup Tasks
 
 Before production deployment:
-- Apply all migrations (001-006) to Supabase
+- Apply all migrations (001-007) to Supabase
 - Create storage buckets (task-photos, task-audio)
 - Configure .env.local with Supabase credentials
 - Configure OPENAI_API_KEY for transcription
@@ -91,14 +91,18 @@ Before production deployment:
 
 ## Known Issues
 
-- Next.js 16 middleware deprecation warning (DEBT-01)
-- Turbopack intermittent build race conditions (DEBT-02)
-- Inconsistent session fetching pattern (DEBT-03)
+- ~~Next.js 16 middleware deprecation warning (DEBT-01)~~ FIXED
+- ~~Turbopack intermittent build race conditions (DEBT-02)~~ FIXED
+- ~~Inconsistent session fetching pattern (DEBT-03)~~ FIXED
+- Next.js 16 middleware.ts file convention deprecated (proxy.ts migration future)
 
 ## Accumulated Decisions
 
 | Decision | Phase | Rationale |
 |----------|-------|-----------|
+| Response headers for user context | 07-01 | Next.js 16 deprecated request header mutation |
+| Disable parallelServerCompiles | 07-01 | Prevents build race conditions |
+| Unified session.ts module | 07-01 | Single source of truth, Edge-compatible |
 | Swiss VAT 7.7% default | 07-03 | KEWA operates in Switzerland |
 | Auto-calculate tax/total via triggers | 07-03 | Reduces errors, ensures consistency |
 | Payment status cascade | 07-03 | Payments auto-update invoice status |
@@ -110,10 +114,10 @@ Before production deployment:
 
 ## Session Continuity
 
-Last session: 2026-01-18T01:02:01Z
-Stopped at: Completed 07-02-PLAN.md (Core Data Model)
+Last session: 2026-01-18T01:09:08Z
+Stopped at: Completed 07-01-PLAN.md (Tech Debt Fixes) - Wave 1 complete
 Resume file: None
 
 ## Next Step
 
-**Continue Phase 7 execution** — Wave 1 plan 01 may be in progress, then Wave 2 (04-05)
+**Execute Phase 7 Wave 2** — Plans 07-04 (RBAC & Multi-Auth) and 07-05 (Status Workflows & NFR)
