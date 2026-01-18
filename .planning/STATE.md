@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-01-18)
 ## Current Position
 
 Phase: 10 of 18 (Cost & Finance)
-Plan: 3 of 5 complete
+Plan: 4 of 5 complete
 Status: In Progress
-Last activity: 2026-01-18 — Completed 10-03-PLAN.md (Payment Recording)
+Last activity: 2026-01-18 — Completed 10-04-PLAN.md (Project Cost Dashboard)
 
-Progress: [===--] 60% (3/5 plans complete in Phase 10)
+Progress: [====--] 80% (4/5 plans complete in Phase 10)
 
 ## Phase 10 Plans
 
@@ -23,11 +23,11 @@ Progress: [===--] 60% (3/5 plans complete in Phase 10)
 | 10-01 | Invoice Submission & Approval | 1 | medium | COMPLETE |
 | 10-02 | Manual Expense Entry | 1 | small | COMPLETE |
 | 10-03 | Payment Recording | 1 | small | COMPLETE |
-| 10-04 | Project Cost Dashboard | 2 | medium | Pending |
+| 10-04 | Project Cost Dashboard | 2 | medium | COMPLETE |
 | 10-05 | Accounting Export (CSV) | 2 | small | Pending |
 
 **Wave 1:** COMPLETE (Plans 01-03)
-**Wave 2:** Pending (Plans 04-05)
+**Wave 2:** In Progress (Plan 04 complete, 05 pending)
 
 ## v2.0 Milestone Scope
 
@@ -59,7 +59,7 @@ Progress: [===--] 60% (3/5 plans complete in Phase 10)
 | 7 | Foundation & Data Model | 38 | COMPLETE |
 | 8 | Template System | 6 | COMPLETE |
 | 9 | External Contractor Portal | 16 | COMPLETE |
-| 10 | Cost & Finance | 9 | In Progress (3/5) |
+| 10 | Cost & Finance | 9 | In Progress (4/5) |
 | 11 | History & Digital Twin | 5 | Pending |
 | 12 | Dashboard & Visualization | 18 | Pending |
 | **MVP Total** | | **92** | |
@@ -158,17 +158,19 @@ Before production deployment:
 | Separate constants from queries modules | 10-02 | Client components cannot import server-only modules |
 | Project/Unit radio toggle for expenses | 10-02 | Mutually exclusive UI simpler than multi-select |
 | Receipt required for all expenses | 10-02 | Per COST-02 requirement for documentation |
+| Swiss formatting centralized | 10-04 | formatters.ts with all CHF, date, number utilities |
+| Supabase array relation handling | 10-04 | Explicit extraction for to-one relations returning arrays |
+| Offer-invoice side-by-side | 10-04 | Per CONTEXT.md - simple comparison without variance highlight |
 
 ## Session Continuity
 
 Last session: 2026-01-18
-Stopped at: Completed 10-02-PLAN.md (Manual Expense Entry with Receipt Upload)
+Stopped at: Completed 10-04-PLAN.md (Project Cost Dashboard)
 Resume file: None
 
 ## Next Step
 
 Continue Phase 10: Cost & Finance.
 
-Next plans to execute:
-- **10-04:** Project Cost Dashboard (uses project_costs view, work order breakdown)
+Next plan to execute:
 - **10-05:** Accounting Export (CSV with Swiss formatting)
