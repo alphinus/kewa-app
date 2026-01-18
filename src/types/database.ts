@@ -28,7 +28,8 @@ import type {
   PaymentMethod,
   PaymentStatus,
   UserRole,
-  AuthMethod
+  AuthMethod,
+  ParkingStatus
 } from './index'
 
 // =============================================
@@ -130,7 +131,7 @@ export interface Building {
 }
 
 /**
- * Unit: Apartment, common area, or entire building
+ * Unit: Apartment, common area, parking spot, or entire building
  */
 export interface Unit {
   id: string
@@ -143,8 +144,20 @@ export interface Unit {
   tenant_visible_to_imeri: boolean
   rent_amount: number | null
   rent_currency: string
+  parking_number: number | null
+  parking_status: ParkingStatus | null
   created_at: string
   updated_at: string
+}
+
+/**
+ * Parking spot - Unit with unit_type='parking_spot'
+ * Type alias for clarity when working specifically with parking data
+ */
+export type ParkingSpot = Unit & {
+  unit_type: 'parking_spot'
+  parking_number: number
+  parking_status: ParkingStatus
 }
 
 /**

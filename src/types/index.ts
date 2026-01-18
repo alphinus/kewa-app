@@ -58,7 +58,10 @@ export type {
 } from './auth'
 
 // Building hierarchy types
-export type UnitType = 'apartment' | 'common_area' | 'building'
+export type UnitType = 'apartment' | 'common_area' | 'building' | 'parking_spot'
+
+// Parking spot status
+export type ParkingStatus = 'free' | 'occupied' | 'maintenance'
 
 // Task management types
 export type TaskStatus = 'open' | 'completed'
