@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-01-18)
 
 **Core value:** KEWA AG hat volle Transparenz und Kontrolle uber alle Renovationen — mit standardisierten Workflows, externer Handwerker-Integration, Kostenuebersicht und automatischer Zustandshistorie.
-**Current focus:** v2.0 Renovation Operations System — Phase 12 In Progress
+**Current focus:** v2.0 Renovation Operations System — Phase 12 COMPLETE
 
 ## Current Position
 
 Phase: 12 of 18 (Dashboard & Visualization)
-Plan: 3 of 5 complete
-Status: In Progress
-Last activity: 2026-01-18 — Completed 12-03-PLAN.md (Occupancy Dashboard)
+Plan: 5 of 5 complete
+Status: PHASE COMPLETE
+Last activity: 2026-01-18 — Completed 12-05-PLAN.md (Comments System)
 
-Progress: [===---] 60% (3/5 plans complete in Phase 12)
+Progress: [======] 100% (5/5 plans complete in Phase 12)
 
 ## Phase 12 Plans
 
@@ -23,10 +23,10 @@ Progress: [===---] 60% (3/5 plans complete in Phase 12)
 | 12-01 | Parking Schema & Basic Display | 1 | medium | COMPLETE |
 | 12-02 | Dashboard Layout & Building Heatmap | 1 | medium | COMPLETE |
 | 12-03 | Occupancy Dashboard | 1 | small | COMPLETE |
-| 12-04 | Cost Overview Dashboard | 1 | medium | Pending |
-| 12-05 | Dashboard Filters & Export | 1 | small | Pending |
+| 12-04 | Drilldown Navigation & Side Panel | 3 | medium | COMPLETE |
+| 12-05 | Comments System | 3 | medium | COMPLETE |
 
-**Wave 1:** In Progress (Plans 01-03 complete)
+**All Waves Complete**
 
 ## v2.0 Milestone Scope
 
@@ -60,7 +60,7 @@ Progress: [===---] 60% (3/5 plans complete in Phase 12)
 | 9 | External Contractor Portal | 16 | COMPLETE |
 | 10 | Cost & Finance | 9 | COMPLETE |
 | 11 | History & Digital Twin | 5 | COMPLETE |
-| 12 | Dashboard & Visualization | 18 | In Progress |
+| 12 | Dashboard & Visualization | 18 | COMPLETE |
 | **MVP Total** | | **92** | |
 | 13 | Change Orders & Suppliers | 7 | Pending |
 | 14 | Inspection & Push | 8 | Pending |
@@ -81,7 +81,7 @@ v1 artifacts in `.planning/milestones/`:
 ## Pending Setup Tasks
 
 Before production deployment:
-- Apply all migrations (001-039) to Supabase
+- Apply all migrations (001-040) to Supabase
 - Create storage buckets (task-photos, task-audio, documents, media)
 - Configure .env.local with Supabase credentials
 - Configure OPENAI_API_KEY for transcription
@@ -181,16 +181,21 @@ Before production deployment:
 | Mock history data for MVP | 12-03 | Placeholder until occupancy_history table implemented |
 | 90/70% occupancy thresholds | 12-03 | Standard property management thresholds for alerts |
 | Combined occupancy as simple average | 12-03 | Units + parking slots treated equally |
+| Polymorphic comments pattern | 12-05 | Same entity_type/entity_id approach as media table |
+| KEWA-only internal comments | 12-05 | Contractors should not see internal discussions |
+| Yellow/blue comment visibility | 12-05 | Visual distinction for internal vs shared comments |
 
 ## Session Continuity
 
 Last session: 2026-01-18
-Stopped at: Completed 12-03-PLAN.md (Occupancy Dashboard)
+Stopped at: Completed 12-05-PLAN.md (Comments System)
 Resume file: None
 
 ## Next Step
 
-Phase 12 (Dashboard & Visualization) is IN PROGRESS.
+Phase 12 (Dashboard & Visualization) is COMPLETE.
 
-Next plan to execute:
-- **Plan 12-04:** Cost Overview Dashboard
+**MVP Phase 1 Complete!** All phases 7-12 finished.
+
+Next phase to plan:
+- **Phase 13:** Change Orders & Suppliers (Phase 2 Extension)
