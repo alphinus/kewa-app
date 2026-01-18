@@ -16,6 +16,7 @@ import {
   getContractorWorkOrders,
   groupWorkOrdersByStatus,
 } from '@/lib/contractor/queries'
+import { sortByDeadlineUrgency } from '@/lib/work-orders/deadline'
 import DashboardSection from './dashboard-section'
 import WorkOrderCard from './work-order-card'
 import TokenError from './token-error'
@@ -49,8 +50,11 @@ export default async function ContractorDashboard({ params }: ContractorPageProp
   // Group by action status
   const grouped = groupWorkOrdersByStatus(workOrders)
 
+  // Sort action-needed items by deadline urgency (most urgent first)
+  const sortedNeedsAction = sortByDeadlineUrgency(grouped.needsAction)
+
   // Get IDs of work orders that need to be marked as viewed
-  const sentOrderIds = grouped.needsAction
+  const sentOrderIds = sortedNeedsAction
     .filter((wo) => wo.status === 'sent')
     .map((wo) => wo.id)
 
@@ -71,14 +75,14 @@ export default async function ContractorDashboard({ params }: ContractorPageProp
         </p>
       </div>
 
-      {/* Action Needed Section */}
+      {/* Action Needed Section - sorted by deadline urgency */}
       <DashboardSection
         title="Handlungsbedarf"
-        count={grouped.needsAction.length}
+        count={sortedNeedsAction.length}
         variant="action"
         emptyMessage="Keine offenen Auftraege"
       >
-        {grouped.needsAction.map((wo) => (
+        {sortedNeedsAction.map((wo) => (
           <WorkOrderCard
             key={wo.id}
             workOrder={wo}

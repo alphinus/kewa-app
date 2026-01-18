@@ -14,6 +14,8 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import ResponseForm from './[workOrderId]/response-form'
+import DeadlineBanner, { CompactDeadlineBanner } from './[workOrderId]/deadline-banner'
+import { getDeadlineStatus, isDeadlinePassed } from '@/lib/work-orders/deadline'
 
 interface WorkOrderData {
   id: string
@@ -154,20 +156,28 @@ export default function WorkOrderCard({
     return room
   }
 
+  // Get deadline status for styling
+  const deadlineStatus = getDeadlineStatus(workOrder.acceptance_deadline)
+  const isOverdue = isDeadlinePassed({ acceptance_deadline: workOrder.acceptance_deadline })
+
   // Compact card variant for dashboard list
   if (variant === 'compact') {
+    // Highlight overdue items needing action
+    const needsUrgentAction = isActionNeeded && (deadlineStatus === 'urgent' || deadlineStatus === 'expired')
+    const cardBg = needsUrgentAction ? 'bg-red-50' : ''
+
     return (
       <Link
         href={`/contractor/${token}/${workOrder.id}`}
-        className="block p-4 hover:bg-gray-50 transition-colors"
+        className={`block p-4 hover:bg-gray-50 transition-colors ${cardBg}`}
       >
         <div className="flex items-start gap-3">
           {/* Action indicator */}
           {isActionNeeded && (
             <div className="flex-shrink-0 mt-1">
               <span className="relative flex h-3 w-3">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75" />
-                <span className="relative inline-flex rounded-full h-3 w-3 bg-orange-500" />
+                <span className={`animate-ping absolute inline-flex h-full w-full rounded-full ${needsUrgentAction ? 'bg-red-400' : 'bg-orange-400'} opacity-75`} />
+                <span className={`relative inline-flex rounded-full h-3 w-3 ${needsUrgentAction ? 'bg-red-500' : 'bg-orange-500'}`} />
               </span>
             </div>
           )}
@@ -200,18 +210,9 @@ export default function WorkOrderCard({
                 </span>
               )}
 
-              {/* Deadline */}
+              {/* Deadline - use CompactDeadlineBanner */}
               {workOrder.acceptance_deadline && !isCompleted && (
-                <span className={`flex items-center gap-1 ${
-                  new Date(workOrder.acceptance_deadline) < new Date()
-                    ? 'text-red-600'
-                    : ''
-                }`}>
-                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  Bis {formatShortDate(workOrder.acceptance_deadline)}
-                </span>
+                <CompactDeadlineBanner deadline={workOrder.acceptance_deadline} />
               )}
 
               {/* Date range */}
@@ -256,6 +257,11 @@ export default function WorkOrderCard({
 
       {/* Content */}
       <div className="p-4 space-y-4">
+        {/* Deadline Banner - Show for items needing response */}
+        {workOrder.status === 'viewed' && workOrder.acceptance_deadline && (
+          <DeadlineBanner deadline={workOrder.acceptance_deadline} />
+        )}
+
         {/* Status Badge */}
         <div className={`inline-flex items-center px-3 py-1 rounded-full ${status.bg}`}>
           <span className={`text-sm font-medium ${status.text}`}>
