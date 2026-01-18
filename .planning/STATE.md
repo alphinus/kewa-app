@@ -5,28 +5,30 @@
 See: .planning/PROJECT.md (updated 2026-01-18)
 
 **Core value:** KEWA AG hat volle Transparenz und Kontrolle uber alle Renovationen — mit standardisierten Workflows, externer Handwerker-Integration, Kostenuebersicht und automatischer Zustandshistorie.
-**Current focus:** v2.0 Renovation Operations System — Phase 8 COMPLETE
+**Current focus:** v2.0 Renovation Operations System — Phase 9 IN PROGRESS
 
 ## Current Position
 
-Phase: 8 of 18 (Template System)
-Plan: 4 of 4 complete
-Status: Phase complete
-Last activity: 2026-01-18 — Completed 08-04 Quality Gates & Gantt Preview
+Phase: 9 of 18 (External Contractor Portal)
+Plan: 1 of 5 complete
+Status: In progress
+Last activity: 2026-01-18 — Completed 09-01-PLAN.md (WorkOrder Creation & PDF Generation)
 
-Progress: ████ 100% (4/4 plans complete in Phase 8)
+Progress: [=] 20% (1/5 plans complete in Phase 9)
 
-## Phase 8 Plans
+## Phase 9 Plans
 
 | Plan | Name | Wave | Scope | Status |
 |------|------|------|-------|--------|
-| 08-01 | Template Schema & Types | 1 | medium | COMPLETE |
-| 08-02 | Template CRUD & Library UI | 1 | large | COMPLETE |
-| 08-03 | Template Application | 2 | medium | COMPLETE |
-| 08-04 | Quality Gates & Gantt Preview | 2 | medium | COMPLETE |
+| 09-01 | WorkOrder Creation & PDF Generation | 1 | medium | COMPLETE |
+| 09-02 | Contractor Dashboard Transformation | 1 | medium | Pending |
+| 09-03 | Response Actions & Counter-Offer Flow | 2 | medium | Pending |
+| 09-04 | Contractor File Uploads | 2 | medium | Pending |
+| 09-05 | Tracking & Event Logging | 3 | small | Pending |
 
-**Wave 1:** COMPLETE (Plans 01-02)
-**Wave 2:** COMPLETE (Plans 03-04)
+**Wave 1:** In progress (Plans 01-02) — parallel execution
+**Wave 2:** Pending (Plans 03-04) — parallel execution
+**Wave 3:** Pending (Plan 05)
 
 ## v2.0 Milestone Scope
 
@@ -57,7 +59,7 @@ Progress: ████ 100% (4/4 plans complete in Phase 8)
 |-------|------|--------------|--------|
 | 7 | Foundation & Data Model | 38 | COMPLETE |
 | 8 | Template System | 6 | COMPLETE |
-| 9 | External Contractor Portal | 16 | Pending |
+| 9 | External Contractor Portal | 16 | In Progress |
 | 10 | Cost & Finance | 9 | Pending |
 | 11 | History & Digital Twin | 5 | Pending |
 | 12 | Dashboard & Visualization | 18 | Pending |
@@ -134,13 +136,17 @@ Before production deployment:
 | Lazy load GanttPreview | 08-04 | Improves initial page load performance |
 | Week-based time scale | 08-04 | Matches Swiss construction planning practices |
 | null approved_by = auto-approval | 08-04 | Distinguishes system from manual approval |
+| @react-pdf/renderer for PDF | 09-01 | No Puppeteer needed, React-native syntax, ESM-compatible |
+| 72h default acceptance deadline | 09-01 | Standard business response window for contractors |
+| Mailto links instead of SMTP | 09-01 | Simpler deployment, user controls sending |
+| Supabase array relation transform | 09-01 | Use first() helper to extract single elements |
 
 ## Session Continuity
 
-Last session: 2026-01-18T08:18:00Z
-Stopped at: Completed 08-04-PLAN.md (Quality Gates & Gantt Preview)
+Last session: 2026-01-18
+Stopped at: Completed 09-01-PLAN.md (WorkOrder Creation & PDF Generation)
 Resume file: None
 
 ## Next Step
 
-Phase 8 complete. Ready to begin Phase 9 (External Contractor Portal) - Magic link authentication, contractor task views, and progress updates.
+Continue Phase 9 execution. Wave 1 Plan 02 (Contractor Dashboard Transformation) may be executing in parallel.
