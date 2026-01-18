@@ -10,21 +10,21 @@ See: .planning/PROJECT.md (updated 2026-01-18)
 ## Current Position
 
 Phase: 7 (Foundation & Data Model)
-Plan: 3 of 5 complete (07-03 done, Wave 1 in progress)
+Plan: 2 of 5 complete (07-02, 07-03 done, Wave 1 in progress)
 Status: IN PROGRESS
-Last activity: 2026-01-18 — Completed 07-03 Cost & Finance Model
+Last activity: 2026-01-18 — Completed 07-02 Core Data Model
 
-Progress: █████░░░░░░░░░░░░ 20% (1/5 plans complete)
+Progress: ██████████░░░░░░░ 40% (2/5 plans complete)
 
 ## Phase 7 Plans
 
-| Plan | Name | Wave | Scope | Requirements |
-|------|------|------|-------|--------------|
-| 07-01 | Tech Debt Fixes | 1 | small | DEBT-01 to DEBT-04 |
-| 07-02 | Core Data Model | 1 | large | DATA-01 to DATA-09, DATA-14, DATA-15 |
-| 07-03 | Cost & Finance Model | 1 | medium | DATA-10 to DATA-13 | COMPLETE |
-| 07-04 | RBAC & Multi-Auth | 2 | large | AUTH-01 to AUTH-09 |
-| 07-05 | Status Workflows & NFR | 2 | medium | STAT-01 to STAT-04, NFR-01 to NFR-06 |
+| Plan | Name | Wave | Scope | Status |
+|------|------|------|-------|--------|
+| 07-01 | Tech Debt Fixes | 1 | small | In progress |
+| 07-02 | Core Data Model | 1 | large | COMPLETE |
+| 07-03 | Cost & Finance Model | 1 | medium | COMPLETE |
+| 07-04 | RBAC & Multi-Auth | 2 | large | Pending |
+| 07-05 | Status Workflows & NFR | 2 | medium | Pending |
 
 **Wave 1:** Plans 01-03 run in parallel (no dependencies)
 **Wave 2:** Plans 04-05 run in parallel (depend on Wave 1)
@@ -103,13 +103,17 @@ Before production deployment:
 | Auto-calculate tax/total via triggers | 07-03 | Reduces errors, ensures consistency |
 | Payment status cascade | 07-03 | Payments auto-update invoice status |
 | Expense requires entity link | 07-03 | Prevents orphan expenses |
+| Task v2.0 fields optional | 07-02 | Backward compatibility with existing API |
+| Polymorphic media attachments | 07-02 | entity_type/entity_id pattern for flexibility |
+| Multi-trade via array | 07-02 | Partners can have multiple trade skills |
+| Room condition prep | 07-02 | Ready for Digital Twin (Phase 11) |
 
 ## Session Continuity
 
-Last session: 2026-01-18T01:00:08Z
-Stopped at: Completed 07-03-PLAN.md (Cost & Finance Model)
+Last session: 2026-01-18T01:02:01Z
+Stopped at: Completed 07-02-PLAN.md (Core Data Model)
 Resume file: None
 
 ## Next Step
 
-**Continue Phase 7 execution** — Wave 1 plans 01-02 may be in progress, then Wave 2 (04-05)
+**Continue Phase 7 execution** — Wave 1 plan 01 may be in progress, then Wave 2 (04-05)
