@@ -39,8 +39,8 @@ interface WorkOrderData {
         id: string
         name: string
         address: string | null
-      }
-    }
+      } | null
+    } | null
   } | null
 }
 

@@ -161,8 +161,10 @@ export async function POST(
     }
 
     // Verify the package's phase belongs to this template
-    const phase = pkg.phase as { template_id: string }
-    if (phase.template_id !== id) {
+    // Supabase returns single nested relations as arrays when using !inner join
+    const phaseData = pkg.phase as unknown as { template_id: string }[] | { template_id: string }
+    const phase = Array.isArray(phaseData) ? phaseData[0] : phaseData
+    if (!phase || phase.template_id !== id) {
       return NextResponse.json(
         { error: 'Package not found in this template' },
         { status: 400 }

@@ -14,6 +14,9 @@ import type {
   TradeCategory
 } from './index'
 
+// Re-export types needed by API routes
+export type { TemplateCategory, TemplateScope, DependencyType, GateLevel }
+
 // =============================================
 // JSONB STRUCTURE TYPES
 // =============================================
