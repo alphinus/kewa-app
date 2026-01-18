@@ -342,7 +342,67 @@ export interface TemplateQualityGatesResponse {
 }
 
 // =============================================
-// PROJECT RUNTIME TYPES
+// RUNTIME PROJECT HIERARCHY TYPES
+// =============================================
+
+/**
+ * Runtime project phase (created from template)
+ */
+export interface ProjectPhase {
+  id: string
+  project_id: string
+  name: string
+  description: string | null
+  sort_order: number
+  wbs_code: string
+  estimated_duration_days: number | null
+  actual_duration_days: number | null
+  planned_start_date: string | null
+  planned_end_date: string | null
+  actual_start_date: string | null
+  actual_end_date: string | null
+  status: 'pending' | 'in_progress' | 'completed' | 'blocked'
+  source_template_phase_id: string | null
+  created_at: string
+  updated_at: string
+}
+
+/**
+ * Runtime project package
+ */
+export interface ProjectPackage {
+  id: string
+  phase_id: string
+  name: string
+  description: string | null
+  sort_order: number
+  wbs_code: string
+  trade_category: TradeCategory | null
+  estimated_duration_days: number | null
+  estimated_cost: number | null
+  actual_cost: number | null
+  status: 'pending' | 'in_progress' | 'completed' | 'blocked'
+  source_template_package_id: string | null
+  created_at: string
+  updated_at: string
+}
+
+/**
+ * Template application result
+ */
+export interface TemplateApplicationResult {
+  template_id: string
+  template_name: string
+  project_id: string
+  phases_created: number
+  packages_created: number
+  tasks_created: number
+  dependencies_created: number
+  gates_created: number
+}
+
+// =============================================
+// PROJECT QUALITY GATE TYPES
 // =============================================
 
 /**
