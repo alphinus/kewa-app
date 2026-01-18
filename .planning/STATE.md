@@ -155,11 +155,14 @@ Before production deployment:
 | Full payment only for MVP | 10-03 | No partial payments UI - simpler workflow |
 | Completed payments immutable | 10-03 | Audit trail integrity for accounting |
 | Database trigger for payment status sync | 10-03 | Atomic, reliable invoice status updates |
+| Separate constants from queries modules | 10-02 | Client components cannot import server-only modules |
+| Project/Unit radio toggle for expenses | 10-02 | Mutually exclusive UI simpler than multi-select |
+| Receipt required for all expenses | 10-02 | Per COST-02 requirement for documentation |
 
 ## Session Continuity
 
 Last session: 2026-01-18
-Stopped at: Completed 10-03-PLAN.md (Payment Recording)
+Stopped at: Completed 10-02-PLAN.md (Manual Expense Entry with Receipt Upload)
 Resume file: None
 
 ## Next Step
