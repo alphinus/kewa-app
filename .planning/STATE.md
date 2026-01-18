@@ -165,6 +165,9 @@ Before production deployment:
 | Integrate into kosten/wohnungen page | 11-02 | Reuse existing unit detail rather than new route |
 | Trigger relies on task room_id | 11-03 | on_project_approved finds rooms via tasks.room_id |
 | Alternative trigger available | 11-03 | Migration 035 has trigger that updates ALL unit rooms |
+| Client-side timeline pagination | 11-01 | Timeline needs interactivity (expand/collapse, load more) |
+| Aggregate sources in JS vs SQL | 11-01 | Simpler code, easier to maintain, acceptable performance |
+| KEWA role only for timeline | 11-01 | Timeline contains cost/invoice data requiring elevated access |
 
 ## Session Continuity
 
