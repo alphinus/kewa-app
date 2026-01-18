@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { Card, CardContent } from '@/components/ui/card'
 import { InvoiceList } from '@/components/costs/InvoiceList'
+import { ExportButton } from '@/components/costs/ExportButton'
 import { getInvoiceStatusCounts } from '@/lib/costs/invoice-queries'
 
 /**
@@ -51,13 +52,16 @@ export default async function RechnungenPage() {
   return (
     <div className="space-y-6 pb-20">
       {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-          Rechnungen
-        </h1>
-        <p className="text-gray-600 dark:text-gray-400 mt-1">
-          Rechnungspruefung und Freigabe
-        </p>
+      <div className="flex items-start justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+            Rechnungen
+          </h1>
+          <p className="text-gray-600 dark:text-gray-400 mt-1">
+            Rechnungspruefung und Freigabe
+          </p>
+        </div>
+        <ExportButton projects={projects ?? []} />
       </div>
 
       {/* Stats cards */}
