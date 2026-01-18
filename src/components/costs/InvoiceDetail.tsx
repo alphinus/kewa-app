@@ -4,10 +4,12 @@ import { useState, useCallback } from 'react'
 import { Button } from '@/components/ui/button'
 import { PaymentModal } from './PaymentModal'
 import { PaymentHistory } from './PaymentHistory'
+import { InvoiceApprovalActions } from './InvoiceApprovalActions'
 import {
   formatCHF,
   formatSwissDate
 } from '@/lib/costs/payment-helpers'
+import { cn } from '@/lib/utils'
 import type { Invoice } from '@/types/database'
 import type { InvoiceStatus } from '@/types'
 
@@ -27,12 +29,18 @@ interface InvoiceWithPartner extends Invoice {
     id: string
     name: string
   } | null
+  offer?: {
+    id: string
+    title: string
+    total_amount: number | null
+    status: string
+  } | null
 }
 
 interface InvoiceDetailProps {
   /** Invoice to display */
   invoice: InvoiceWithPartner
-  /** Callback when invoice is updated (e.g., after payment) */
+  /** Callback when invoice is updated (e.g., after payment or approval) */
   onUpdate?: () => void
 }
 
@@ -63,16 +71,96 @@ const STATUS_COLORS: Record<InvoiceStatus, string> = {
 }
 
 /**
- * InvoiceDetail - Display invoice information with payment functionality
+ * Status timeline showing workflow progression
+ */
+function StatusTimeline({ invoice }: { invoice: InvoiceWithPartner }) {
+  const steps = [
+    {
+      label: 'Erhalten',
+      status: 'received',
+      date: invoice.received_at,
+      active: true
+    },
+    {
+      label: 'In Pruefung',
+      status: 'under_review',
+      date: null,
+      active: ['under_review', 'approved', 'disputed', 'paid', 'partially_paid'].includes(invoice.status)
+    },
+    {
+      label: invoice.status === 'disputed' ? 'Beanstandet' : 'Freigegeben',
+      status: invoice.status === 'disputed' ? 'disputed' : 'approved',
+      date: invoice.status === 'disputed' ? null : invoice.approved_at,
+      active: ['approved', 'disputed', 'paid', 'partially_paid'].includes(invoice.status),
+      isDisputed: invoice.status === 'disputed'
+    },
+    {
+      label: 'Bezahlt',
+      status: 'paid',
+      date: invoice.paid_at,
+      active: invoice.status === 'paid'
+    }
+  ]
+
+  return (
+    <div className="flex items-center justify-between py-4 px-2">
+      {steps.map((step, idx) => (
+        <div key={step.status} className="flex items-center flex-1">
+          <div className="flex flex-col items-center">
+            <div
+              className={cn(
+                'w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium',
+                step.active
+                  ? step.isDisputed
+                    ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+                    : 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                  : 'bg-gray-100 text-gray-400 dark:bg-gray-800 dark:text-gray-500'
+              )}
+            >
+              {idx + 1}
+            </div>
+            <div className="mt-1 text-xs text-gray-500 dark:text-gray-400 text-center">
+              {step.label}
+            </div>
+            {step.date && (
+              <div className="text-xs text-gray-400 dark:text-gray-500">
+                {formatSwissDate(step.date)}
+              </div>
+            )}
+          </div>
+          {idx < steps.length - 1 && (
+            <div
+              className={cn(
+                'flex-1 h-0.5 mx-2',
+                step.active
+                  ? step.isDisputed
+                    ? 'bg-red-200 dark:bg-red-800'
+                    : 'bg-green-200 dark:bg-green-800'
+                  : 'bg-gray-200 dark:bg-gray-700'
+              )}
+            />
+          )}
+        </div>
+      ))}
+    </div>
+  )
+}
+
+/**
+ * InvoiceDetail - Display invoice information with approval and payment functionality
  *
  * Shows invoice details, status, amounts, and integrates:
+ * - StatusTimeline showing workflow progression
+ * - InvoiceApprovalActions for approving/disputing
  * - PaymentModal for "Als bezahlt markieren" action
  * - PaymentHistory for paid/partially_paid invoices
  */
-export function InvoiceDetail({ invoice, onUpdate }: InvoiceDetailProps) {
+export function InvoiceDetail({ invoice: initialInvoice, onUpdate }: InvoiceDetailProps) {
+  const [invoice, setInvoice] = useState(initialInvoice)
   const [showPaymentModal, setShowPaymentModal] = useState(false)
   const [refreshKey, setRefreshKey] = useState(0)
 
+  const canStartReview = invoice.status === 'received'
   const canPay = invoice.status === 'approved'
   const hasPayments = (invoice.amount_paid ?? 0) > 0 || invoice.status === 'paid' || invoice.status === 'partially_paid'
   const outstanding = invoice.amount_outstanding ?? (invoice.total_amount ?? 0) - (invoice.amount_paid ?? 0)
@@ -85,6 +173,35 @@ export function InvoiceDetail({ invoice, onUpdate }: InvoiceDetailProps) {
     setRefreshKey((prev) => prev + 1)
     onUpdate?.()
   }, [onUpdate])
+
+  /**
+   * Handle invoice status change from approval actions
+   */
+  const handleStatusChange = useCallback((updatedInvoice: InvoiceWithPartner) => {
+    setInvoice(updatedInvoice)
+    onUpdate?.()
+  }, [onUpdate])
+
+  /**
+   * Start review process (move from received to under_review)
+   */
+  const handleStartReview = async () => {
+    try {
+      const res = await fetch(`/api/invoices/${invoice.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'under_review' })
+      })
+
+      if (res.ok) {
+        const data = await res.json()
+        setInvoice(data.invoice)
+        onUpdate?.()
+      }
+    } catch (err) {
+      console.error('Error starting review:', err)
+    }
+  }
 
   return (
     <div className="space-y-6">
@@ -107,6 +224,11 @@ export function InvoiceDetail({ invoice, onUpdate }: InvoiceDetailProps) {
         >
           {STATUS_LABELS[invoice.status]}
         </span>
+      </div>
+
+      {/* Status Timeline */}
+      <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+        <StatusTimeline invoice={invoice} />
       </div>
 
       {/* Invoice details */}
@@ -312,6 +434,32 @@ export function InvoiceDetail({ invoice, onUpdate }: InvoiceDetailProps) {
         </div>
       )}
 
+      {/* Start review button (for received invoices) */}
+      {canStartReview && (
+        <div className="flex justify-end">
+          <Button
+            variant="primary"
+            size="lg"
+            onClick={handleStartReview}
+          >
+            Pruefung starten
+          </Button>
+        </div>
+      )}
+
+      {/* Approval actions (for under_review invoices) */}
+      {invoice.status === 'under_review' && (
+        <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+          <h3 className="text-sm font-medium text-blue-700 dark:text-blue-400 mb-4">
+            Rechnung pruefen und freigeben
+          </h3>
+          <InvoiceApprovalActions
+            invoice={invoice}
+            onStatusChange={handleStatusChange}
+          />
+        </div>
+      )}
+
       {/* Payment action button */}
       {canPay && outstanding > 0 && (
         <div className="flex justify-end">
@@ -326,11 +474,11 @@ export function InvoiceDetail({ invoice, onUpdate }: InvoiceDetailProps) {
         </div>
       )}
 
-      {/* Disabled state hint when not approved */}
-      {invoice.status !== 'approved' && invoice.status !== 'paid' && invoice.status !== 'partially_paid' && (
-        <div className="text-center p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-          <p className="text-sm text-gray-500 dark:text-gray-400">
-            Die Rechnung muss zuerst freigegeben werden, bevor eine Zahlung erfasst werden kann.
+      {/* Status-specific hints */}
+      {invoice.status === 'disputed' && (
+        <div className="text-center p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+          <p className="text-sm text-red-600 dark:text-red-400">
+            Diese Rechnung wurde beanstandet. Klaerung mit dem Partner erforderlich.
           </p>
         </div>
       )}

@@ -7,3 +7,5 @@
 export { PaymentModal } from './PaymentModal'
 export { PaymentHistory } from './PaymentHistory'
 export { InvoiceDetail } from './InvoiceDetail'
+export { InvoiceApprovalActions } from './InvoiceApprovalActions'
+export { InvoiceList } from './InvoiceList'
