@@ -14,7 +14,7 @@
 
 import { notFound } from 'next/navigation'
 import { peekMagicLink } from '@/lib/magic-link'
-import { createServerClient } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/server'
 import WorkOrderCard from './work-order-card'
 import TokenError from './token-error'
 
@@ -24,7 +24,7 @@ interface ContractorPageProps {
 
 // Get work order data
 async function getWorkOrderData(workOrderId: string) {
-  const supabase = await createServerClient()
+  const supabase = await createClient()
 
   const { data, error } = await supabase
     .from('work_orders')

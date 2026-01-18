@@ -26,18 +26,31 @@ export const SESSION_COOKIE_OPTIONS = {
 
 /**
  * Session payload structure stored in JWT
+ * Extended for RBAC support
  */
 export interface SessionPayload extends JWTPayload {
+  userId: string
+  role: 'kewa' | 'imeri' // Legacy role for backward compat
+  roleId?: string | null // New RBAC role ID
+  roleName?: string // New RBAC role name
+  permissions?: string[] // Permissions array
+}
+
+/**
+ * Validated session result (legacy format for backward compat)
+ */
+export interface ValidatedSession {
   userId: string
   role: 'kewa' | 'imeri'
 }
 
 /**
- * Validated session result
+ * Extended validated session with RBAC data
  */
-export interface ValidatedSession {
-  userId: string
-  role: 'kewa' | 'imeri'
+export interface ValidatedSessionWithRBAC extends ValidatedSession {
+  roleId: string | null
+  roleName: string
+  permissions: string[]
 }
 
 /**
@@ -55,6 +68,7 @@ function getSessionSecretKey(): Uint8Array | null {
 
 /**
  * Validate a session token (Edge-compatible)
+ * Returns legacy format for backward compatibility.
  *
  * @param token - JWT session token string
  * @returns Validated session or null if invalid/expired
@@ -90,6 +104,59 @@ export async function validateSession(token: string): Promise<ValidatedSession |
 }
 
 /**
+ * Validate a session token and return full RBAC data
+ *
+ * @param token - JWT session token string
+ * @returns Full session with RBAC data or null if invalid/expired
+ */
+export async function validateSessionWithRBAC(token: string): Promise<ValidatedSessionWithRBAC | null> {
+  try {
+    const secretKey = getSessionSecretKey()
+    if (!secretKey) {
+      return null
+    }
+
+    const { payload } = await jwtVerify(token, secretKey)
+    const sessionPayload = payload as SessionPayload
+
+    // Validate required fields
+    if (!sessionPayload.userId || !sessionPayload.role) {
+      return null
+    }
+
+    // Validate role is one of allowed values
+    if (sessionPayload.role !== 'kewa' && sessionPayload.role !== 'imeri') {
+      return null
+    }
+
+    return {
+      userId: sessionPayload.userId,
+      role: sessionPayload.role,
+      roleId: sessionPayload.roleId || null,
+      roleName: sessionPayload.roleName || mapLegacyRole(sessionPayload.role),
+      permissions: sessionPayload.permissions || []
+    }
+  } catch {
+    // Token is invalid or expired
+    return null
+  }
+}
+
+/**
+ * Map legacy role to new role name
+ */
+function mapLegacyRole(legacyRole: string): string {
+  switch (legacyRole) {
+    case 'kewa':
+      return 'admin'
+    case 'imeri':
+      return 'property_manager'
+    default:
+      return legacyRole
+  }
+}
+
+/**
  * Extract and validate session from Next.js request
  *
  * @param request - NextRequest object
@@ -103,6 +170,22 @@ export async function getSessionFromRequest(request: NextRequest): Promise<Valid
   }
 
   return validateSession(sessionCookie.value)
+}
+
+/**
+ * Extract and validate session with RBAC from Next.js request
+ *
+ * @param request - NextRequest object
+ * @returns Full session with RBAC data or null if not authenticated
+ */
+export async function getSessionWithRBACFromRequest(request: NextRequest): Promise<ValidatedSessionWithRBAC | null> {
+  const sessionCookie = request.cookies.get(SESSION_COOKIE_NAME)
+
+  if (!sessionCookie?.value) {
+    return null
+  }
+
+  return validateSessionWithRBAC(sessionCookie.value)
 }
 
 /**
