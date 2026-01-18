@@ -81,7 +81,7 @@ v1 artifacts in `.planning/milestones/`:
 ## Pending Setup Tasks
 
 Before production deployment:
-- Apply all migrations (001-034) to Supabase
+- Apply all migrations (001-036) to Supabase
 - Create storage buckets (task-photos, task-audio, documents, media)
 - Configure .env.local with Supabase credentials
 - Configure OPENAI_API_KEY for transcription
@@ -127,6 +127,9 @@ Before production deployment:
 | Soft-blocking quality gates | 08-01 | Gates advisory by default, optional blocking |
 | Auto-generate WBS codes in editor | 08-02 | Reduce user error, maintain hierarchy consistency |
 | Admin-only template write ops | 08-02 | Non-admin users can view but not edit templates |
+| Atomic template application via PG function | 08-03 | Ensures all-or-nothing for phases, packages, tasks, deps, gates |
+| Kahn's algorithm for cycle detection | 08-03 | O(V+E) complexity, clear cycle identification |
+| Wizard pattern for template application | 08-03 | Complex process benefits from guided flow with preview |
 | CSS Gantt over external library | 08-04 | Simpler, no license, full control |
 | Lazy load GanttPreview | 08-04 | Improves initial page load performance |
 | Week-based time scale | 08-04 | Matches Swiss construction planning practices |
