@@ -10,40 +10,40 @@
 
 ### Datenmodell & Infrastruktur
 
-- [ ] **DATA-01**: Property (Liegenschaft) Entity mit Basis-Attributen
-- [ ] **DATA-02**: Building Entity (optional, für Multi-Building Properties)
-- [ ] **DATA-03**: Unit (Wohnung) Entity mit Mietzins-Feld
-- [ ] **DATA-04**: Room (Raum/Zone) Entity mit Typ (Bad, Küche, etc.)
-- [ ] **DATA-05**: Component Entity (optional: Boden, Wände, Fenster, etc.)
-- [ ] **DATA-06**: RenovationProject Entity mit Status-Workflow
-- [ ] **DATA-07**: Task Entity mit Abhängigkeiten und Checklisten-Funktion
-- [ ] **DATA-08**: WorkOrder/Ticket Entity für externe Aufträge
-- [ ] **DATA-09**: Partner Entity (Handwerker/Lieferanten) mit Kategorien
-- [ ] **DATA-10**: Offer (Offerte) Entity
-- [ ] **DATA-11**: Invoice (Rechnung) Entity mit PDF-Speicherung
-- [ ] **DATA-12**: Expense (Spesen/Barzahlung) Entity
-- [ ] **DATA-13**: Payment Entity mit Methode (bar/Überweisung/etc.)
-- [ ] **DATA-14**: Media Entity (Fotos/Videos) mit vorher/nachher Metadaten
-- [ ] **DATA-15**: AuditLog Entity für alle Änderungen (Pflicht)
+- [x] **DATA-01**: Property (Liegenschaft) Entity mit Basis-Attributen
+- [x] **DATA-02**: Building Entity (optional, für Multi-Building Properties)
+- [x] **DATA-03**: Unit (Wohnung) Entity mit Mietzins-Feld
+- [x] **DATA-04**: Room (Raum/Zone) Entity mit Typ (Bad, Küche, etc.)
+- [x] **DATA-05**: Component Entity (optional: Boden, Wände, Fenster, etc.)
+- [x] **DATA-06**: RenovationProject Entity mit Status-Workflow
+- [x] **DATA-07**: Task Entity mit Abhängigkeiten und Checklisten-Funktion
+- [x] **DATA-08**: WorkOrder/Ticket Entity für externe Aufträge
+- [x] **DATA-09**: Partner Entity (Handwerker/Lieferanten) mit Kategorien
+- [x] **DATA-10**: Offer (Offerte) Entity
+- [x] **DATA-11**: Invoice (Rechnung) Entity mit PDF-Speicherung
+- [x] **DATA-12**: Expense (Spesen/Barzahlung) Entity
+- [x] **DATA-13**: Payment Entity mit Methode (bar/Überweisung/etc.)
+- [x] **DATA-14**: Media Entity (Fotos/Videos) mit vorher/nachher Metadaten
+- [x] **DATA-15**: AuditLog Entity für alle Änderungen (Pflicht)
 
 ### RBAC & Authentifizierung
 
-- [ ] **AUTH-01**: Admin-Rolle (KEWA) mit Vollzugriff
-- [ ] **AUTH-02**: Property/Project Manager Rolle
-- [ ] **AUTH-03**: Accounting Rolle (Kosten/Rechnungen)
-- [ ] **AUTH-04**: Tenant Rolle (read-only auf eigene Inhalte)
-- [ ] **AUTH-05**: External Contractor Rolle (nur eigene Aufträge)
-- [ ] **AUTH-06**: Jede Änderung erzeugt AuditLog-Eintrag
-- [ ] **AUTH-07**: PIN-Auth für interne Nutzer (bestehend)
-- [ ] **AUTH-08**: Email+Passwort-Auth für Mieter
-- [ ] **AUTH-09**: Magic-Link-Auth für externe Handwerker
+- [x] **AUTH-01**: Admin-Rolle (KEWA) mit Vollzugriff
+- [x] **AUTH-02**: Property/Project Manager Rolle
+- [x] **AUTH-03**: Accounting Rolle (Kosten/Rechnungen)
+- [x] **AUTH-04**: Tenant Rolle (read-only auf eigene Inhalte)
+- [x] **AUTH-05**: External Contractor Rolle (nur eigene Aufträge)
+- [x] **AUTH-06**: Jede Änderung erzeugt AuditLog-Eintrag
+- [x] **AUTH-07**: PIN-Auth für interne Nutzer (bestehend)
+- [x] **AUTH-08**: Email+Passwort-Auth für Mieter
+- [x] **AUTH-09**: Magic-Link-Auth für externe Handwerker
 
 ### Status-Workflows
 
-- [ ] **STAT-01**: WorkOrder Status: draft → sent → viewed → accepted/rejected → in_progress → done → inspected → closed
-- [ ] **STAT-02**: RenovationProject Status: planned → active → blocked → finished → approved
-- [ ] **STAT-03**: Room/Unit Condition: old | partial | new (ableitbar)
-- [ ] **STAT-04**: Condition-Tracking mit Datum, Quell-Projekt, Media-Referenzen
+- [x] **STAT-01**: WorkOrder Status: draft → sent → viewed → accepted/rejected → in_progress → done → inspected → closed
+- [x] **STAT-02**: RenovationProject Status: planned → active → blocked → finished → approved
+- [x] **STAT-03**: Room/Unit Condition: old | partial | new (ableitbar)
+- [x] **STAT-04**: Condition-Tracking mit Datum, Quell-Projekt, Media-Referenzen
 
 ### Template-System
 
@@ -128,10 +128,10 @@
 
 ### Tech Debt (Original v2.0)
 
-- [ ] **DEBT-01**: Next.js Middleware-Warning behoben (Proxy-Pattern)
-- [ ] **DEBT-02**: Turbopack Build stabil (keine Race-Conditions)
-- [ ] **DEBT-03**: Session-Fetching-Pattern vereinheitlicht
-- [ ] **DEBT-04**: Phase 03 VERIFICATION.md erstellt
+- [x] **DEBT-01**: Next.js Middleware-Warning behoben (Proxy-Pattern)
+- [x] **DEBT-02**: Turbopack Build stabil (keine Race-Conditions)
+- [x] **DEBT-03**: Session-Fetching-Pattern vereinheitlicht
+- [x] **DEBT-04**: Phase 03 VERIFICATION.md erstellt
 
 ---
 
@@ -219,12 +219,12 @@
 
 ## Non-Functional Requirements
 
-- [ ] **NFR-01**: Audit-Logging für alle Schreiboperationen
-- [ ] **NFR-02**: Schweizer Kontext: Datenschutz, Datentrennung Mieter/Intern
-- [ ] **NFR-03**: Konfigurierbare Retention-Policy
-- [ ] **NFR-04**: File Storage für PDFs und Fotos
-- [ ] **NFR-05**: Token-basierter sicherer externer Zugriff (Magic Link, ablaufend)
-- [ ] **NFR-06**: Mobile-friendly Contractor Page
+- [x] **NFR-01**: Audit-Logging für alle Schreiboperationen
+- [x] **NFR-02**: Schweizer Kontext: Datenschutz, Datentrennung Mieter/Intern
+- [x] **NFR-03**: Konfigurierbare Retention-Policy
+- [x] **NFR-04**: File Storage für PDFs und Fotos
+- [x] **NFR-05**: Token-basierter sicherer externer Zugriff (Magic Link, ablaufend)
+- [x] **NFR-06**: Mobile-friendly Contractor Page
 
 ---
 
