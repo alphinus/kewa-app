@@ -43,20 +43,85 @@ export async function verifyPin(pin: string, hash: string): Promise<boolean> {
 }
 
 /**
- * Create a session token for a user
- * Token expires after 7 days
+ * Hash a password for storage (for email+password auth)
  */
-export async function createSession(userId: string, role: 'kewa' | 'imeri'): Promise<string> {
+export async function hashPassword(password: string): Promise<string> {
+  return bcrypt.hash(password, BCRYPT_ROUNDS)
+}
+
+/**
+ * Verify a password against a stored hash
+ */
+export async function verifyPassword(password: string, hash: string): Promise<boolean> {
+  return bcrypt.compare(password, hash)
+}
+
+/**
+ * Session creation options for new RBAC system
+ */
+export interface CreateSessionOptions {
+  userId: string
+  role: 'kewa' | 'imeri' // Legacy role for backward compat
+  roleId?: string | null
+  roleName?: string
+  permissions?: string[]
+}
+
+/**
+ * Create a session token for a user
+ * Supports both legacy and new RBAC session data
+ *
+ * @param options - Session creation options or legacy (userId, role) params
+ */
+export async function createSession(
+  options: CreateSessionOptions | string,
+  legacyRole?: 'kewa' | 'imeri'
+): Promise<string> {
   const { SESSION_EXPIRATION_SECONDS } = await import('./session')
   const secret = getSessionSecret()
 
-  const token = await new SignJWT({ userId, role })
+  // Support legacy signature: createSession(userId, role)
+  if (typeof options === 'string') {
+    const token = await new SignJWT({
+      userId: options,
+      role: legacyRole!
+    })
+      .setProtectedHeader({ alg: 'HS256' })
+      .setIssuedAt()
+      .setExpirationTime(`${SESSION_EXPIRATION_SECONDS}s`)
+      .sign(secret)
+
+    return token
+  }
+
+  // New RBAC session creation
+  const token = await new SignJWT({
+    userId: options.userId,
+    role: options.role, // Keep legacy role for backward compat
+    roleId: options.roleId || null,
+    roleName: options.roleName || mapLegacyRole(options.role),
+    permissions: options.permissions || []
+  })
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
     .setExpirationTime(`${SESSION_EXPIRATION_SECONDS}s`)
     .sign(secret)
 
   return token
+}
+
+/**
+ * Map legacy role to new role name
+ */
+function mapLegacyRole(legacyRole: string): string {
+  switch (legacyRole) {
+    case 'kewa':
+      return 'admin'
+    case 'imeri':
+      return 'property_manager'
+    default:
+      return legacyRole
+  }
 }
 
 /**
