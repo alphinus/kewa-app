@@ -1,0 +1,265 @@
+# Requirements: KEWA v2.0 Renovation Operations System
+
+**Defined:** 2026-01-18
+**Source:** KEWA-RENOVATION-OPS-SPEC_v1_2026-01-18.md + Original v2.0 Scope
+**Core Value:** KEWA AG hat volle Transparenz und Kontrolle über alle Renovationen — mit standardisierten Workflows, externer Handwerker-Integration, Kostenübersicht und automatischer Zustandshistorie.
+
+---
+
+## Phase 1: MVP (Kern-System)
+
+### Datenmodell & Infrastruktur
+
+- [ ] **DATA-01**: Property (Liegenschaft) Entity mit Basis-Attributen
+- [ ] **DATA-02**: Building Entity (optional, für Multi-Building Properties)
+- [ ] **DATA-03**: Unit (Wohnung) Entity mit Mietzins-Feld
+- [ ] **DATA-04**: Room (Raum/Zone) Entity mit Typ (Bad, Küche, etc.)
+- [ ] **DATA-05**: Component Entity (optional: Boden, Wände, Fenster, etc.)
+- [ ] **DATA-06**: RenovationProject Entity mit Status-Workflow
+- [ ] **DATA-07**: Task Entity mit Abhängigkeiten und Checklisten-Funktion
+- [ ] **DATA-08**: WorkOrder/Ticket Entity für externe Aufträge
+- [ ] **DATA-09**: Partner Entity (Handwerker/Lieferanten) mit Kategorien
+- [ ] **DATA-10**: Offer (Offerte) Entity
+- [ ] **DATA-11**: Invoice (Rechnung) Entity mit PDF-Speicherung
+- [ ] **DATA-12**: Expense (Spesen/Barzahlung) Entity
+- [ ] **DATA-13**: Payment Entity mit Methode (bar/Überweisung/etc.)
+- [ ] **DATA-14**: Media Entity (Fotos/Videos) mit vorher/nachher Metadaten
+- [ ] **DATA-15**: AuditLog Entity für alle Änderungen (Pflicht)
+
+### RBAC & Authentifizierung
+
+- [ ] **AUTH-01**: Admin-Rolle (KEWA) mit Vollzugriff
+- [ ] **AUTH-02**: Property/Project Manager Rolle
+- [ ] **AUTH-03**: Accounting Rolle (Kosten/Rechnungen)
+- [ ] **AUTH-04**: Tenant Rolle (read-only auf eigene Inhalte)
+- [ ] **AUTH-05**: External Contractor Rolle (nur eigene Aufträge)
+- [ ] **AUTH-06**: Jede Änderung erzeugt AuditLog-Eintrag
+- [ ] **AUTH-07**: PIN-Auth für interne Nutzer (bestehend)
+- [ ] **AUTH-08**: Email+Passwort-Auth für Mieter
+- [ ] **AUTH-09**: Magic-Link-Auth für externe Handwerker
+
+### Status-Workflows
+
+- [ ] **STAT-01**: WorkOrder Status: draft → sent → viewed → accepted/rejected → in_progress → done → inspected → closed
+- [ ] **STAT-02**: RenovationProject Status: planned → active → blocked → finished → approved
+- [ ] **STAT-03**: Room/Unit Condition: old | partial | new (ableitbar)
+- [ ] **STAT-04**: Condition-Tracking mit Datum, Quell-Projekt, Media-Referenzen
+
+### Template-System
+
+- [ ] **TMPL-01**: Template-Library für Komplett-Renovationen
+- [ ] **TMPL-02**: Template-Library für Einzel-Raum-Renovationen (Bad, Küche, etc.)
+- [ ] **TMPL-03**: Templates enthalten Phasen → Pakete → Tasks (WBS)
+- [ ] **TMPL-04**: Task-Abhängigkeiten und geschätzte Dauer
+- [ ] **TMPL-05**: Quality Gates (Abnahme-Checkpoints) mit Evidenz-Anforderungen
+- [ ] **TMPL-06**: Mapping-Regeln: Abschluss triggert Raum/Unit Condition Update
+
+### Externe Handwerker: Link-Portal
+
+- [ ] **EXT-01**: WorkOrder-Erstellung aus Projekt/Task mit Partner-Zuweisung
+- [ ] **EXT-02**: WorkOrder enthält: Scope, Location, Zeitfenster, Anhänge, Notizen
+- [ ] **EXT-03**: PDF-Generierung des WorkOrders
+- [ ] **EXT-04**: Email-Versand via lokalen Email-Client (mailto)
+- [ ] **EXT-05**: Magic-Link (Token) zur Web-Seite im Email
+- [ ] **EXT-06**: Contractor Web-Portal: Details + Anhänge anzeigen
+- [ ] **EXT-07**: Contractor: "Accept" / "Reject" Buttons
+- [ ] **EXT-08**: Contractor: Preisvorschlag (Betrag + Kommentar)
+- [ ] **EXT-09**: Contractor: Zeitfenster-Vorschlag
+- [ ] **EXT-10**: Contractor: Fragen/Kommentar-Feld
+- [ ] **EXT-11**: Contractor: Dokumente hochladen (Offerte/Rechnung)
+- [ ] **EXT-12**: Contractor: Fotos hochladen
+- [ ] **EXT-13**: Tracking: "Viewed" = Magic-Link geöffnet
+- [ ] **EXT-14**: Zeitgestempelte Events im Log
+- [ ] **EXT-15**: Automatische Erinnerungen (24h + 48h)
+- [ ] **EXT-16**: Annahme-Deadline (z.B. 72h)
+
+### Historie & Digital Twin
+
+- [ ] **HIST-01**: Unit hat Timeline aller Projekte/WorkOrders/Kosten/Media
+- [ ] **HIST-02**: Unit-Übersicht zeigt Renovations-Fortschritt pro Raum
+- [ ] **HIST-03**: Raum-Condition wird aus abgeschlossenen Projekten abgeleitet
+- [ ] **HIST-04**: Automation: Projekt approved → Raum=new mit Datum+Media+Projekt-ID
+- [ ] **HIST-05**: Unit-Summary wird automatisch berechnet (% renoviert)
+
+### Kostenmodell
+
+- [ ] **COST-01**: Workflow: Offer → WorkOrder/Contract → Invoice → Payment
+- [ ] **COST-02**: Manuelle Expense-Einträge (Barzahlungen, Spesen)
+- [ ] **COST-03**: Kosten-Aggregation nach: Projekt, Unit, Room, Trade, Partner
+- [ ] **COST-04**: Varianz: Offerte vs Rechnung
+- [ ] **COST-05**: Anhänge für Rechnungs-PDFs und Belege
+- [ ] **COST-06**: CSV-Export für Buchhaltung
+
+### Mietzins
+
+- [ ] **RENT-01**: Mietzins pro Unit speicherbar
+- [ ] **RENT-02**: Dashboard zeigt: Miete vs Renovationskosten
+- [ ] **RENT-03**: Investment-Übersicht pro Unit
+
+### Dashboard & Visualisierung
+
+- [ ] **DASH-01**: Property-Level Übersicht
+- [ ] **DASH-02**: Units Matrix/Heatmap: Units × Rooms mit Status-Farben
+- [ ] **DASH-03**: Renovations-Fortschritt % pro Unit
+- [ ] **DASH-04**: Timeline pro Unit (abgeschlossene Projekte)
+- [ ] **DASH-05**: Kosten pro Unit/Projekt mit Filtern (Zeit, Partner, Trade)
+- [ ] **DASH-06**: Drilldown: Property → Unit → Room → Project → Tasks/WorkOrders → Media/Kosten
+
+### Parkplätze (Original v2.0)
+
+- [ ] **PARK-01**: 8 Parkplätze werden rechts neben dem Gebäude vertikal angezeigt
+- [ ] **PARK-02**: Parkplätze haben die gleiche Höhe wie das Gebäude (EG bis Dach)
+- [ ] **PARK-03**: Jeder Parkplatz hat Status: frei / belegt / reparatur
+- [ ] **PARK-04**: KEWA AG kann Parkplatz-Status ändern
+- [ ] **PARK-05**: Parkplatz-Belegung beeinflusst Gesamtauslastung
+
+### Auslastung (Original v2.0)
+
+- [ ] **OCCU-01**: Auslastungs-Dashboard mit Gesamtauslastung
+- [ ] **OCCU-02**: Leerstehende Wohnungen reduzieren Auslastung
+- [ ] **OCCU-03**: Unbelegte Parkplätze reduzieren Auslastung
+- [ ] **OCCU-04**: Auslastung als Prozent und visuell (Balken)
+
+### Task-Kommentare (Original v2.0)
+
+- [ ] **COMM-01**: Kommentare zu Tasks/WorkOrders schreiben
+- [ ] **COMM-02**: Chronologische Anzeige mit Autor und Zeitstempel
+- [ ] **COMM-03**: Interne Notizen (nur KEWA) vs externe Kommunikation
+
+### Tech Debt (Original v2.0)
+
+- [ ] **DEBT-01**: Next.js Middleware-Warning behoben (Proxy-Pattern)
+- [ ] **DEBT-02**: Turbopack Build stabil (keine Race-Conditions)
+- [ ] **DEBT-03**: Session-Fetching-Pattern vereinheitlicht
+- [ ] **DEBT-04**: Phase 03 VERIFICATION.md erstellt
+
+---
+
+## Phase 2: Erweiterungen
+
+### Change Orders
+
+- [ ] **CHNG-01**: Contractor kann Zusatzkosten anfragen
+- [ ] **CHNG-02**: KEWA kann Zusatzkosten genehmigen/ablehnen
+- [ ] **CHNG-03**: Change Order History im Projekt
+
+### Lieferanten-Modul (Pellets)
+
+- [ ] **SUPP-01**: Supplier Partner-Typ
+- [ ] **SUPP-02**: Purchase Order Flow: ordered → confirmed → delivered → invoiced → paid
+- [ ] **SUPP-03**: Lieferanten-Stammdaten in Partner
+- [ ] **SUPP-04**: Bestellung direkt an Pellet-Lieferant generieren
+
+### Inspection/Abnahme Workflow
+
+- [ ] **INSP-01**: Verbesserte Abnahme-Checklisten
+- [ ] **INSP-02**: Abnahme-Protokoll mit Unterschrift
+- [ ] **INSP-03**: Mängelliste mit Nachbesserungs-Workflow
+
+### Push-Notifications (Original v2.0)
+
+- [ ] **PUSH-01**: Push bei neuer Aufgabe/WorkOrder
+- [ ] **PUSH-02**: Push bei Fälligkeitserinnerung
+- [ ] **PUSH-03**: Push bei Contractor-Response
+- [ ] **PUSH-04**: PWA-basierte Push-Notifications
+- [ ] **PUSH-05**: Push an/ausschaltbar pro User
+
+### Wissensdatenbank (Optional)
+
+- [ ] **KNOW-01**: Knowledge Articles mit Kategorien
+- [ ] **KNOW-02**: Perspektiven: Vermieter / Mieter
+- [ ] **KNOW-03**: Kuratierte FAQ mit Quellen-Links
+- [ ] **KNOW-04**: Kontextuelle Vorschläge in Projekt-Screens
+
+---
+
+## Phase 3: Fortgeschritten
+
+### Mieter-Portal
+
+- [ ] **TPRT-01**: Mieter können eigene Tickets erstellen
+- [ ] **TPRT-02**: Ticket-Kategorien: Reparatur, Beschwerde, Anfrage
+- [ ] **TPRT-03**: Mieter sehen nur eigene Daten
+- [ ] **TPRT-04**: KEWA kann Ticket zu WorkOrder konvertieren
+
+### Offline-Support (Original v2.0)
+
+- [ ] **OFFL-01**: Offline-Anzeige von Aufgaben
+- [ ] **OFFL-02**: Offline als erledigt markieren
+- [ ] **OFFL-03**: Offline Foto-Upload (Queue)
+- [ ] **OFFL-04**: Automatische Synchronisierung
+- [ ] **OFFL-05**: Sync-Status klar erkennbar
+
+### Integrationen
+
+- [ ] **INTG-01**: Kalender-Integration
+- [ ] **INTG-02**: Buchhaltungs-Export erweitert
+- [ ] **INTG-03**: Document Store Integration
+
+### UX-Verbesserungen (Original v2.0)
+
+- [ ] **UXIM-01**: Mobile Navigation optimiert
+- [ ] **UXIM-02**: Foto-Upload mit Fortschrittsanzeige
+- [ ] **UXIM-03**: Foto-Galerie mit Vollbild-Ansicht
+- [ ] **UXIM-04**: Dashboard-Filter und Sortierung
+
+---
+
+## Out of Scope
+
+| Feature | Reason |
+|---------|--------|
+| Zahlungsabwicklung/Online-Payment | Nicht Teil dieser App, CSV-Export für Buchhaltung |
+| Transkription für Dialekt | Schweizerdeutsch zu unzuverlässig |
+| Native Mobile App | PWA-Ansatz bevorzugt |
+| Vollautomatische Ticket→WorkOrder | KEWA entscheidet manuell |
+| Rechtliche Beratung | Knowledge Base nur als FAQ, keine Rechtsberatung |
+
+---
+
+## Non-Functional Requirements
+
+- [ ] **NFR-01**: Audit-Logging für alle Schreiboperationen
+- [ ] **NFR-02**: Schweizer Kontext: Datenschutz, Datentrennung Mieter/Intern
+- [ ] **NFR-03**: Konfigurierbare Retention-Policy
+- [ ] **NFR-04**: File Storage für PDFs und Fotos
+- [ ] **NFR-05**: Token-basierter sicherer externer Zugriff (Magic Link, ablaufend)
+- [ ] **NFR-06**: Mobile-friendly Contractor Page
+
+---
+
+## Requirements Summary
+
+| Phase | Category | Count |
+|-------|----------|-------|
+| 1 | Data Model | 15 |
+| 1 | Auth/RBAC | 9 |
+| 1 | Status Workflows | 4 |
+| 1 | Templates | 6 |
+| 1 | External Portal | 16 |
+| 1 | History/Digital Twin | 5 |
+| 1 | Cost Model | 6 |
+| 1 | Rent | 3 |
+| 1 | Dashboard | 6 |
+| 1 | Parking | 5 |
+| 1 | Occupancy | 4 |
+| 1 | Comments | 3 |
+| 1 | Tech Debt | 4 |
+| **Phase 1 Total** | | **86** |
+| 2 | Change Orders | 3 |
+| 2 | Supplier Module | 4 |
+| 2 | Inspection | 3 |
+| 2 | Push Notifications | 5 |
+| 2 | Knowledge Base | 4 |
+| **Phase 2 Total** | | **19** |
+| 3 | Tenant Portal | 4 |
+| 3 | Offline Support | 5 |
+| 3 | Integrations | 3 |
+| 3 | UX Improvements | 4 |
+| **Phase 3 Total** | | **16** |
+| - | Non-Functional | 6 |
+| **Grand Total** | | **127** |
+
+---
+*Requirements defined: 2026-01-18*
+*Source: KEWA-RENOVATION-OPS-SPEC_v1 + Original v2.0 Scope*
