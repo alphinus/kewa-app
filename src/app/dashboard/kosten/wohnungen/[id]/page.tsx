@@ -28,18 +28,18 @@ interface PageProps {
 
 /**
  * Check if user has permission to view cost data
+ * Note: v2.0 will add more granular RBAC roles
  */
 function canViewCosts(role: Role): boolean {
-  const allowedRoles: Role[] = ['kewa', 'admin', 'manager', 'accounting']
-  return allowedRoles.includes(role)
+  return role === 'kewa'
 }
 
 /**
  * Check if user has permission to edit rent
+ * Note: v2.0 will add more granular RBAC roles
  */
 function canEditRent(role: Role): boolean {
-  const allowedRoles: Role[] = ['kewa', 'admin', 'accounting']
-  return allowedRoles.includes(role)
+  return role === 'kewa'
 }
 
 /**
@@ -134,7 +134,7 @@ export default async function UnitInvestmentDetailPage({ params }: PageProps) {
   // Extend cost summary with building info
   const unitWithBuilding = {
     ...costSummary,
-    building_name: unitData?.building_name
+    building_name: unitData?.building_name ?? undefined
   }
 
   return (
@@ -217,13 +217,13 @@ export default async function UnitInvestmentDetailPage({ params }: PageProps) {
                       </span>
                     </td>
                     <td className="px-4 py-3 text-right text-gray-600 dark:text-gray-400">
-                      {formatCHF(project.estimatedCost)}
+                      {formatCHF(project.estimated_cost)}
                     </td>
                     <td className="px-4 py-3 text-right font-medium text-gray-900 dark:text-gray-100">
-                      {formatCHF(project.totalInvoiced)}
+                      {formatCHF(project.total_invoiced)}
                     </td>
                     <td className="px-4 py-3 text-right text-green-600 dark:text-green-400">
-                      {formatCHF(project.totalPaid)}
+                      {formatCHF(project.total_paid)}
                     </td>
                   </tr>
                 ))}
@@ -237,7 +237,7 @@ export default async function UnitInvestmentDetailPage({ params }: PageProps) {
                     {formatCHF(projectsData.total)}
                   </td>
                   <td className="px-4 py-3 text-right font-bold text-green-600 dark:text-green-400">
-                    {formatCHF(projectsData.projects.reduce((sum, p) => sum + p.totalPaid, 0))}
+                    {formatCHF(projectsData.projects.reduce((sum, p) => sum + p.total_paid, 0))}
                   </td>
                 </tr>
               </tfoot>
@@ -359,7 +359,7 @@ async function fetchUnitBuilding(unitId: string): Promise<{
   const { data, error } = await supabase
     .from('units')
     .select(`
-      buildings (
+      building:buildings (
         name
       )
     `)
@@ -370,8 +370,10 @@ async function fetchUnitBuilding(unitId: string): Promise<{
     return null
   }
 
-  const unitData = data as { buildings: { name: string } | null }
+  // Supabase returns single relation as object, but type system shows array
+  // Use type assertion to handle the actual runtime shape
+  const building = data.building as unknown as { name: string } | null
   return {
-    building_name: unitData.buildings?.name ?? null
+    building_name: building?.name ?? null
   }
 }

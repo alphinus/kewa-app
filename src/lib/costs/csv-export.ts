@@ -11,7 +11,7 @@
  * Phase 10-05: CSV Export for Accounting (COST-06)
  */
 
-import Papa from 'papaparse'
+import * as Papa from 'papaparse'
 
 // ============================================
 // SWISS FORMATTING HELPERS

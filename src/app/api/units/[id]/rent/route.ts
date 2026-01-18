@@ -53,9 +53,9 @@ export async function PATCH(
       )
     }
 
-    // Only specific roles can update rent
-    const allowedRoles: Role[] = ['kewa', 'admin', 'accounting']
-    if (!allowedRoles.includes(userRole)) {
+    // Only kewa (internal) can update rent
+    // Note: v2.0 will add more granular RBAC with admin, accounting roles
+    if (userRole !== 'kewa') {
       return NextResponse.json(
         { error: 'Keine Berechtigung zum Aendern des Mietzinses' },
         { status: 403 }
@@ -183,9 +183,9 @@ export async function GET(
       )
     }
 
-    // All internal roles can view rent
-    const allowedRoles: Role[] = ['kewa', 'admin', 'manager', 'accounting']
-    if (!allowedRoles.includes(userRole)) {
+    // Only kewa (internal) can view rent
+    // Note: v2.0 will add more granular RBAC roles
+    if (userRole !== 'kewa') {
       return NextResponse.json(
         { error: 'Keine Berechtigung' },
         { status: 403 }

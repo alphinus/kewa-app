@@ -69,9 +69,9 @@ export async function GET(
       )
     }
 
-    // Check role - only internal roles can view cost data
-    const allowedRoles: Role[] = ['kewa', 'admin', 'manager', 'accounting']
-    if (!allowedRoles.includes(userRole)) {
+    // Check role - only kewa (internal) can view cost data
+    // Note: v2.0 will add more granular RBAC with admin, manager, accounting roles
+    if (userRole !== 'kewa') {
       return NextResponse.json(
         { error: 'Keine Berechtigung fuer Kostendaten' },
         { status: 403 }

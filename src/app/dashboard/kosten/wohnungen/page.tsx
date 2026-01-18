@@ -21,18 +21,18 @@ import type { Role } from '@/types'
 
 /**
  * Check if user has permission to view cost data
+ * Note: v2.0 will add more granular RBAC roles
  */
 function canViewCosts(role: Role): boolean {
-  const allowedRoles: Role[] = ['kewa', 'admin', 'manager', 'accounting']
-  return allowedRoles.includes(role)
+  return role === 'kewa'
 }
 
 /**
  * Check if user has permission to edit rent
+ * Note: v2.0 will add more granular RBAC roles
  */
 function canEditRent(role: Role): boolean {
-  const allowedRoles: Role[] = ['kewa', 'admin', 'accounting']
-  return allowedRoles.includes(role)
+  return role === 'kewa'
 }
 
 export default async function WohnungenInvestmentPage() {
