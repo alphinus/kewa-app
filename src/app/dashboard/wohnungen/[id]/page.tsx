@@ -44,7 +44,7 @@ import {
   fetchRecentConditionHistory
 } from '@/lib/units/condition-queries'
 import { formatSwissDate } from '@/lib/costs/payment-helpers'
-import type { Role, RoomCondition } from '@/types'
+import type { Role } from '@/types'
 
 interface PageProps {
   params: Promise<{ id: string }>

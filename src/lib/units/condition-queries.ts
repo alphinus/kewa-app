@@ -118,3 +118,56 @@ export async function fetchUnitConditionData(unitId: string): Promise<{
 
   return { summary, rooms }
 }
+
+/**
+ * Condition history entry from room_condition_timeline view
+ */
+export interface ConditionHistoryEntry {
+  id: string
+  room_id: string
+  room_name: string
+  unit_id: string
+  unit_name: string
+  old_condition: RoomCondition | null
+  new_condition: RoomCondition
+  source_project_id: string | null
+  project_name: string | null
+  source_work_order_id: string | null
+  work_order_title: string | null
+  media_ids: string[] | null
+  notes: string | null
+  changed_by: string | null
+  changed_by_name: string | null
+  changed_at: string
+}
+
+/**
+ * Fetch recent condition history for a unit
+ *
+ * Uses the room_condition_timeline view which joins condition_history
+ * with rooms, projects, and users for context.
+ *
+ * @param unitId - The unit ID to fetch history for
+ * @param limit - Maximum entries to return (default 5)
+ * @returns Array of ConditionHistoryEntry
+ */
+export async function fetchRecentConditionHistory(
+  unitId: string,
+  limit: number = 5
+): Promise<ConditionHistoryEntry[]> {
+  const supabase = await createClient()
+
+  const { data, error } = await supabase
+    .from('room_condition_timeline')
+    .select('*')
+    .eq('unit_id', unitId)
+    .order('changed_at', { ascending: false })
+    .limit(limit)
+
+  if (error) {
+    console.error('Error fetching condition history:', error)
+    return []
+  }
+
+  return (data ?? []) as ConditionHistoryEntry[]
+}
