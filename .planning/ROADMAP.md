@@ -87,14 +87,15 @@
 - RENT-01 to RENT-03
 
 **Success Criteria:**
-- [ ] Kosten-Workflow: Offer → Contract → Invoice → Payment
-- [ ] Manuelle Expenses erfassbar (Bar, Spesen)
-- [ ] Aggregation nach Projekt, Unit, Room, Partner
-- [ ] Varianz Offerte vs Rechnung sichtbar
-- [ ] CSV-Export für Buchhaltung
-- [ ] Mietzins pro Unit + Investment-Übersicht
+- [x] Kosten-Workflow: Offer → Contract → Invoice → Payment
+- [x] Manuelle Expenses erfassbar (Bar, Spesen)
+- [x] Aggregation nach Projekt, Unit, Room, Partner
+- [x] Varianz Offerte vs Rechnung sichtbar
+- [x] CSV-Export für Buchhaltung
+- [x] Mietzins pro Unit + Investment-Übersicht
 
 **Requirements Count:** 9
+**Status:** ✓ Complete (2026-01-18)
 
 ---
 
@@ -253,7 +254,7 @@
 | 7 | DEBT-01-04, DATA-01-15, AUTH-01-09, STAT-01-04, NFR-01-06 | 38 | ✓ Complete |
 | 8 | TMPL-01-06 | 6 | ✓ Complete |
 | 9 | EXT-01-16 | 16 | ✓ Complete |
-| 10 | COST-01-06, RENT-01-03 | 9 | Pending |
+| 10 | COST-01-06, RENT-01-03 | 9 | ✓ Complete |
 | 11 | HIST-01-05 | 5 | Pending |
 | 12 | DASH-01-06, PARK-01-05, OCCU-01-04, COMM-01-03 | 18 | Pending |
 | **MVP Total** | | **92** | |

@@ -83,18 +83,18 @@
 
 ### Kostenmodell
 
-- [ ] **COST-01**: Workflow: Offer → WorkOrder/Contract → Invoice → Payment
-- [ ] **COST-02**: Manuelle Expense-Einträge (Barzahlungen, Spesen)
-- [ ] **COST-03**: Kosten-Aggregation nach: Projekt, Unit, Room, Trade, Partner
-- [ ] **COST-04**: Varianz: Offerte vs Rechnung
-- [ ] **COST-05**: Anhänge für Rechnungs-PDFs und Belege
-- [ ] **COST-06**: CSV-Export für Buchhaltung
+- [x] **COST-01**: Workflow: Offer → WorkOrder/Contract → Invoice → Payment
+- [x] **COST-02**: Manuelle Expense-Einträge (Barzahlungen, Spesen)
+- [x] **COST-03**: Kosten-Aggregation nach: Projekt, Unit, Room, Trade, Partner
+- [x] **COST-04**: Varianz: Offerte vs Rechnung
+- [x] **COST-05**: Anhänge für Rechnungs-PDFs und Belege
+- [x] **COST-06**: CSV-Export für Buchhaltung
 
 ### Mietzins
 
-- [ ] **RENT-01**: Mietzins pro Unit speicherbar
-- [ ] **RENT-02**: Dashboard zeigt: Miete vs Renovationskosten
-- [ ] **RENT-03**: Investment-Übersicht pro Unit
+- [x] **RENT-01**: Mietzins pro Unit speicherbar
+- [x] **RENT-02**: Dashboard zeigt: Miete vs Renovationskosten
+- [x] **RENT-03**: Investment-Übersicht pro Unit
 
 ### Dashboard & Visualisierung
 
