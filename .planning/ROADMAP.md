@@ -107,12 +107,13 @@
 - HIST-01 to HIST-05
 
 **Success Criteria:**
-- [ ] Unit-Timeline zeigt alle Projekte/WorkOrders/Kosten/Media
-- [ ] Renovations-Fortschritt pro Raum ableitbar
-- [ ] Automation: Projekt approved → Room Condition = new
-- [ ] Unit-Summary (% renoviert) berechnet sich automatisch
+- [x] Unit-Timeline zeigt alle Projekte/WorkOrders/Kosten/Media
+- [x] Renovations-Fortschritt pro Raum ableitbar
+- [x] Automation: Projekt approved → Room Condition = new
+- [x] Unit-Summary (% renoviert) berechnet sich automatisch
 
 **Requirements Count:** 5
+**Status:** ✓ Complete (2026-01-18)
 
 ---
 
@@ -255,7 +256,7 @@
 | 8 | TMPL-01-06 | 6 | ✓ Complete |
 | 9 | EXT-01-16 | 16 | ✓ Complete |
 | 10 | COST-01-06, RENT-01-03 | 9 | ✓ Complete |
-| 11 | HIST-01-05 | 5 | Pending |
+| 11 | HIST-01-05 | 5 | ✓ Complete |
 | 12 | DASH-01-06, PARK-01-05, OCCU-01-04, COMM-01-03 | 18 | Pending |
 | **MVP Total** | | **92** | |
 | 13 | CHNG-01-03, SUPP-01-04 | 7 | Pending |

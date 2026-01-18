@@ -75,11 +75,11 @@
 
 ### Historie & Digital Twin
 
-- [ ] **HIST-01**: Unit hat Timeline aller Projekte/WorkOrders/Kosten/Media
-- [ ] **HIST-02**: Unit-Übersicht zeigt Renovations-Fortschritt pro Raum
-- [ ] **HIST-03**: Raum-Condition wird aus abgeschlossenen Projekten abgeleitet
-- [ ] **HIST-04**: Automation: Projekt approved → Raum=new mit Datum+Media+Projekt-ID
-- [ ] **HIST-05**: Unit-Summary wird automatisch berechnet (% renoviert)
+- [x] **HIST-01**: Unit hat Timeline aller Projekte/WorkOrders/Kosten/Media
+- [x] **HIST-02**: Unit-Übersicht zeigt Renovations-Fortschritt pro Raum
+- [x] **HIST-03**: Raum-Condition wird aus abgeschlossenen Projekten abgeleitet
+- [x] **HIST-04**: Automation: Projekt approved → Raum=new mit Datum+Media+Projekt-ID
+- [x] **HIST-05**: Unit-Summary wird automatisch berechnet (% renoviert)
 
 ### Kostenmodell
 
