@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-01-18)
 
 **Core value:** KEWA AG hat volle Transparenz und Kontrolle uber alle Renovationen — mit standardisierten Workflows, externer Handwerker-Integration, Kostenuebersicht und automatischer Zustandshistorie.
-**Current focus:** v2.0 Renovation Operations System — Phase 8 IN PROGRESS
+**Current focus:** v2.0 Renovation Operations System — Phase 8 COMPLETE
 
 ## Current Position
 
 Phase: 8 of 18 (Template System)
-Plan: 2 of 4 complete
-Status: In progress
-Last activity: 2026-01-18 — Completed 08-02 Template CRUD & Library UI
+Plan: 4 of 4 complete
+Status: Phase complete
+Last activity: 2026-01-18 — Completed 08-04 Quality Gates & Gantt Preview
 
-Progress: ██░░ 50% (2/4 plans complete in Phase 8)
+Progress: ████ 100% (4/4 plans complete in Phase 8)
 
 ## Phase 8 Plans
 
@@ -22,11 +22,11 @@ Progress: ██░░ 50% (2/4 plans complete in Phase 8)
 |------|------|------|-------|--------|
 | 08-01 | Template Schema & Types | 1 | medium | COMPLETE |
 | 08-02 | Template CRUD & Library UI | 1 | large | COMPLETE |
-| 08-03 | Template Application | 2 | medium | Pending |
-| 08-04 | Timeline Visualization | 2 | medium | Pending |
+| 08-03 | Template Application | 2 | medium | COMPLETE |
+| 08-04 | Quality Gates & Gantt Preview | 2 | medium | COMPLETE |
 
 **Wave 1:** COMPLETE (Plans 01-02)
-**Wave 2:** Pending (Plans 03-04)
+**Wave 2:** COMPLETE (Plans 03-04)
 
 ## v2.0 Milestone Scope
 
@@ -56,7 +56,7 @@ Progress: ██░░ 50% (2/4 plans complete in Phase 8)
 | Phase | Name | Requirements | Status |
 |-------|------|--------------|--------|
 | 7 | Foundation & Data Model | 38 | COMPLETE |
-| 8 | Template System | 6 | In Progress (2/4) |
+| 8 | Template System | 6 | COMPLETE |
 | 9 | External Contractor Portal | 16 | Pending |
 | 10 | Cost & Finance | 9 | Pending |
 | 11 | History & Digital Twin | 5 | Pending |
@@ -96,6 +96,7 @@ Before production deployment:
 - ~~Inconsistent session fetching pattern (DEBT-03)~~ FIXED
 - Next.js 16 middleware.ts file convention deprecated (proxy.ts migration future)
 - Type errors in 07-04 auth routes (non-blocking, to be addressed)
+- Type export issues in templates.ts (TemplateCategory, TemplateScope need re-export)
 
 ## Accumulated Decisions
 
@@ -126,13 +127,17 @@ Before production deployment:
 | Soft-blocking quality gates | 08-01 | Gates advisory by default, optional blocking |
 | Auto-generate WBS codes in editor | 08-02 | Reduce user error, maintain hierarchy consistency |
 | Admin-only template write ops | 08-02 | Non-admin users can view but not edit templates |
+| CSS Gantt over external library | 08-04 | Simpler, no license, full control |
+| Lazy load GanttPreview | 08-04 | Improves initial page load performance |
+| Week-based time scale | 08-04 | Matches Swiss construction planning practices |
+| null approved_by = auto-approval | 08-04 | Distinguishes system from manual approval |
 
 ## Session Continuity
 
-Last session: 2026-01-18T02:40:00Z
-Stopped at: Completed 08-02-PLAN.md (Template CRUD & Library UI)
+Last session: 2026-01-18T08:18:00Z
+Stopped at: Completed 08-04-PLAN.md (Quality Gates & Gantt Preview)
 Resume file: None
 
 ## Next Step
 
-Continue with 08-03 (Template Application) to implement applying templates to renovation projects.
+Phase 8 complete. Ready to begin Phase 9 (External Contractor Portal) - Magic link authentication, contractor task views, and progress updates.
