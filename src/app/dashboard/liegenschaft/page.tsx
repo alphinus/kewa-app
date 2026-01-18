@@ -11,6 +11,9 @@
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { PropertyDashboard } from '@/components/dashboard/PropertyDashboard'
+import { PropertyDashboardClient } from '@/components/dashboard/PropertyDashboardClient'
+import { DrilldownBreadcrumb } from '@/components/dashboard/DrilldownBreadcrumb'
+import { fetchHeatmapData } from '@/lib/dashboard/heatmap-queries'
 import { createClient } from '@/lib/supabase/server'
 import type { Role } from '@/types'
 
@@ -65,15 +68,27 @@ export default async function LiegenschaftPage() {
     )
   }
 
+  // Fetch units for client component
+  const units = await fetchHeatmapData(buildingId)
+
   return (
     <div className="space-y-6 pb-20">
+      <DrilldownBreadcrumb
+        items={[
+          { label: 'Dashboard', href: '/dashboard' },
+          { label: 'Liegenschaft' }
+        ]}
+      />
+
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
           Liegenschaftsuebersicht
         </h1>
       </div>
 
-      <PropertyDashboard buildingId={buildingId} />
+      <PropertyDashboardClient units={units}>
+        <PropertyDashboard buildingId={buildingId} />
+      </PropertyDashboardClient>
     </div>
   )
 }
