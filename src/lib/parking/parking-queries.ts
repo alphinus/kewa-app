@@ -4,7 +4,8 @@
  */
 
 import { createClient } from '@/lib/supabase/server'
-import type { ParkingSpot, ParkingStatus } from '@/types/database'
+import type { ParkingSpot } from '@/types/database'
+import type { ParkingStatus } from '@/types'
 
 /**
  * Fetch all parking spots for a building, ordered by parking number
