@@ -1,11 +1,21 @@
 import bcrypt from 'bcryptjs'
-import { SignJWT, jwtVerify, type JWTPayload } from 'jose'
+import { SignJWT } from 'jose'
+
+// Re-export session utilities for backward compatibility
+// These are the canonical session utilities - use them directly from @/lib/session
+export {
+  validateSession,
+  getSessionFromRequest,
+  getSessionFromCookie,
+  SESSION_COOKIE_NAME,
+  SESSION_COOKIE_OPTIONS,
+  SESSION_EXPIRATION_SECONDS,
+  type SessionPayload,
+  type ValidatedSession
+} from './session'
 
 // Cost factor for bcrypt hashing
 const BCRYPT_ROUNDS = 10
-
-// Session expiration: 7 days in seconds
-const SESSION_EXPIRATION_SECONDS = 60 * 60 * 24 * 7
 
 // Get session secret from environment
 function getSessionSecret(): Uint8Array {
@@ -14,12 +24,6 @@ function getSessionSecret(): Uint8Array {
     throw new Error('SESSION_SECRET environment variable is not set')
   }
   return new TextEncoder().encode(secret)
-}
-
-// Session payload type
-interface SessionPayload extends JWTPayload {
-  userId: string
-  role: 'kewa' | 'imeri'
 }
 
 /**
@@ -43,6 +47,7 @@ export async function verifyPin(pin: string, hash: string): Promise<boolean> {
  * Token expires after 7 days
  */
 export async function createSession(userId: string, role: 'kewa' | 'imeri'): Promise<string> {
+  const { SESSION_EXPIRATION_SECONDS } = await import('./session')
   const secret = getSessionSecret()
 
   const token = await new SignJWT({ userId, role })
@@ -57,41 +62,10 @@ export async function createSession(userId: string, role: 'kewa' | 'imeri'): Pro
 /**
  * Validate and decode a session token
  * Returns user info if valid, null if expired or invalid
+ *
+ * @deprecated Use validateSession from @/lib/session instead
  */
 export async function getSession(token: string): Promise<{ userId: string; role: 'kewa' | 'imeri' } | null> {
-  try {
-    const secret = getSessionSecret()
-    const { payload } = await jwtVerify(token, secret)
-
-    const sessionPayload = payload as SessionPayload
-
-    if (!sessionPayload.userId || !sessionPayload.role) {
-      return null
-    }
-
-    // Validate role is one of allowed values
-    if (sessionPayload.role !== 'kewa' && sessionPayload.role !== 'imeri') {
-      return null
-    }
-
-    return {
-      userId: sessionPayload.userId,
-      role: sessionPayload.role
-    }
-  } catch {
-    // Token is invalid or expired
-    return null
-  }
-}
-
-/**
- * Cookie configuration for session
- */
-export const SESSION_COOKIE_NAME = 'session'
-export const SESSION_COOKIE_OPTIONS = {
-  httpOnly: true,
-  secure: process.env.NODE_ENV === 'production',
-  sameSite: 'lax' as const,
-  maxAge: SESSION_EXPIRATION_SECONDS,
-  path: '/'
+  const { validateSession } = await import('./session')
+  return validateSession(token)
 }

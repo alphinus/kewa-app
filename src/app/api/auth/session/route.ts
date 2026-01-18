@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
-import { getSession, SESSION_COOKIE_NAME } from '@/lib/auth'
+import {
+  validateSession,
+  SESSION_COOKIE_NAME
+} from '@/lib/session'
 
 export async function GET() {
   try {
@@ -11,7 +14,8 @@ export async function GET() {
       return NextResponse.json({ authenticated: false })
     }
 
-    const session = await getSession(sessionCookie.value)
+    // Use unified session validation
+    const session = await validateSession(sessionCookie.value)
 
     if (!session) {
       return NextResponse.json({ authenticated: false })
