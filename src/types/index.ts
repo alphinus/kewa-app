@@ -215,3 +215,22 @@ export interface SessionResponse {
   role?: Role
   userId?: string
 }
+
+// =============================================
+// TEMPLATE SYSTEM TYPES (Phase 08)
+// =============================================
+
+// Template categorization
+export type TemplateCategory =
+  | 'complete_renovation'    // Komplett-Renovation
+  | 'room_specific'          // Raum-spezifisch (Bad, Kueche, etc.)
+  | 'trade_specific'         // Gewerk-spezifisch (Malerarbeiten, etc.)
+
+// Template scope
+export type TemplateScope = 'unit' | 'room'
+
+// Dependency types (standard project management)
+export type DependencyType = 'FS' | 'SS' | 'FF' | 'SF'
+
+// Quality gate levels
+export type GateLevel = 'package' | 'phase'

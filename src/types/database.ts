@@ -1045,3 +1045,38 @@ export interface MagicLinkToken {
   created_at: string
   created_by: string | null
 }
+
+// =============================================
+// TEMPLATE SYSTEM TYPES (Phase 08)
+// =============================================
+
+// Re-export all template types from templates.ts
+export type {
+  TemplateMaterialItem,
+  TemplateChecklistItem,
+  Template,
+  TemplatePhase,
+  TemplatePackage,
+  TemplateTask,
+  TemplateDependency,
+  TemplateQualityGate,
+  TemplateTaskWithPackage,
+  TemplatePackageWithTasks,
+  TemplatePhaseWithPackages,
+  TemplateWithHierarchy,
+  CreateTemplateInput,
+  UpdateTemplateInput,
+  CreateTemplatePhaseInput,
+  CreateTemplatePackageInput,
+  CreateTemplateTaskInput,
+  CreateTemplateDependencyInput,
+  CreateTemplateQualityGateInput,
+  TemplatesResponse,
+  TemplateResponse,
+  TemplateWithHierarchyResponse,
+  TemplatePhasesResponse,
+  TemplatePackagesResponse,
+  TemplateTasksResponse,
+  TemplateDependenciesResponse,
+  TemplateQualityGatesResponse
+} from './templates'
