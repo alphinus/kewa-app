@@ -8,6 +8,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import type { Role } from '@/types'
 import { createMagicLink } from '@/lib/magic-link'
+import { logSentEvent } from '@/lib/work-orders/events'
 
 interface RouteContext {
   params: Promise<{ id: string }>
@@ -141,6 +142,9 @@ export async function POST(
       // Log but don't fail the request
       console.error('Error updating work order status:', updateError)
     }
+
+    // Log 'sent' event
+    await logSentEvent(id, userId, partner.email)
 
     // Build mailto link
     const mailtoLink = buildMailtoLink(

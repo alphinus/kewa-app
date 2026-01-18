@@ -15,6 +15,11 @@ import { NextRequest, NextResponse } from 'next/server'
 import { validateContractorAccess } from '@/lib/magic-link'
 import { createClient } from '@/lib/supabase/server'
 import { ResponseAction, getRejectionReasonById } from '@/lib/contractor/constants'
+import {
+  logAcceptedEvent,
+  logRejectedEvent,
+  logCounterOfferSubmittedEvent,
+} from '@/lib/work-orders/events'
 
 // ============================================
 // TYPES
@@ -176,6 +181,28 @@ export async function POST(
         { error: 'Failed to process response' },
         { status: 500 }
       )
+    }
+
+    // Log event based on action
+    switch (action) {
+      case 'accept':
+        await logAcceptedEvent(workOrderId, validation.email, {
+          proposed_cost,
+          proposed_start_date,
+          proposed_end_date,
+        })
+        break
+      case 'reject':
+        await logRejectedEvent(workOrderId, validation.email, rejection_reason || 'Unbekannt')
+        break
+      case 'counter_offer':
+        await logCounterOfferSubmittedEvent(workOrderId, validation.email, {
+          proposed_cost,
+          proposed_start_date,
+          proposed_end_date,
+          notes: contractor_notes,
+        })
+        break
     }
 
     return NextResponse.json({

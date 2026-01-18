@@ -14,6 +14,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { validateContractorAccess } from '@/lib/magic-link'
 import { createClient } from '@/lib/supabase/server'
+import { logStartedEvent, logCompletedEvent } from '@/lib/work-orders/events'
 
 interface StatusUpdateRequest {
   workOrderId: string
@@ -146,6 +147,13 @@ export async function POST(
         { error: 'Failed to update status' },
         { status: 500 }
       )
+    }
+
+    // Log events for specific status changes
+    if (status === 'in_progress') {
+      await logStartedEvent(workOrderId, validation.email)
+    } else if (status === 'done') {
+      await logCompletedEvent(workOrderId, validation.email)
     }
 
     return NextResponse.json({

@@ -14,6 +14,10 @@ import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
 import { validateSession, SESSION_COOKIE_NAME } from '@/lib/session'
+import {
+  logCounterOfferApprovedEvent,
+  logCounterOfferRejectedEvent,
+} from '@/lib/work-orders/events'
 
 // ============================================
 // TYPES
@@ -149,6 +153,14 @@ export async function POST(
         { error: 'Failed to process counter-offer response' },
         { status: 500 }
       )
+    }
+
+    // Log event based on action
+    if (action === 'approve') {
+      await logCounterOfferApprovedEvent(workOrderId, session.userId, notes)
+    } else {
+      // Both 'reject' and 'close' result in counter-offer rejection
+      await logCounterOfferRejectedEvent(workOrderId, session.userId, notes)
     }
 
     return NextResponse.json({

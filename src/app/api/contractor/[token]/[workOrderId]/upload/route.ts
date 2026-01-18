@@ -21,6 +21,7 @@ import {
   type UploadMediaType,
   type UploadContext,
 } from '@/lib/storage/contractor-upload'
+import { logUploadAddedEvent } from '@/lib/work-orders/events'
 
 interface UploadResponse {
   media: {
@@ -171,6 +172,14 @@ export async function POST(
     const { data: signedUrl } = await supabase.storage
       .from(storagePath.bucket)
       .createSignedUrl(storagePath.path, 3600) // 1 hour expiry
+
+    // Log upload event
+    await logUploadAddedEvent(workOrderId, validation.email, {
+      file_name: file.name || storagePath.filename,
+      file_type: file.type,
+      media_id: media.id,
+      context: context,
+    })
 
     return NextResponse.json(
       {

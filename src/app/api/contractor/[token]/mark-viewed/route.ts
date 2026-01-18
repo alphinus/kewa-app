@@ -12,6 +12,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { validateContractorAccess } from '@/lib/magic-link'
 import { createClient } from '@/lib/supabase/server'
+import { logViewedEvent } from '@/lib/work-orders/events'
 
 interface RequestBody {
   workOrderIds: string[]
@@ -66,10 +67,16 @@ export async function POST(
       )
     }
 
+    // Log 'viewed' event for each updated work order
+    const updatedIds = updated?.map((wo) => wo.id) || []
+    for (const workOrderId of updatedIds) {
+      await logViewedEvent(workOrderId, validation.email)
+    }
+
     return NextResponse.json({
       success: true,
       updatedCount: updated?.length || 0,
-      updatedIds: updated?.map((wo) => wo.id) || [],
+      updatedIds,
     })
   } catch (error) {
     console.error('Mark viewed error:', error)
