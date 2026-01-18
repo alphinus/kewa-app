@@ -2,17 +2,20 @@
  * Unit Investment Detail Page
  *
  * Server component showing detailed investment view for a single unit.
- * Includes: UnitInvestmentCard (full), project list, expense list.
+ * Includes: UnitInvestmentCard (full), room conditions, project list, expense list.
  *
  * Path: /dashboard/kosten/wohnungen/[id]
  * Phase 10-06: Unit Investment View and Rent Entry
- * Requirements: RENT-01, RENT-02, RENT-03
+ * Phase 11-02: Room Condition Grid
+ * Requirements: RENT-01, RENT-02, RENT-03, HIST-02, HIST-05
  */
 
 import { cookies } from 'next/headers'
 import Link from 'next/link'
 import { redirect, notFound } from 'next/navigation'
 import { UnitInvestmentCard } from '@/components/costs/UnitInvestmentCard'
+import { UnitConditionSummary } from '@/components/units/UnitConditionSummary'
+import { RoomConditionGrid } from '@/components/units/RoomConditionGrid'
 import { formatCHF, formatSwissDate } from '@/lib/costs/payment-helpers'
 import {
   getUnitCostSummary,
@@ -165,6 +168,36 @@ export default async function UnitInvestmentDetailPage({ params }: PageProps) {
         showDetailLink={false}
         variant="full"
       />
+
+      {/* Room Status Section - Phase 11-02 */}
+      <section className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+        <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center gap-2">
+          <svg
+            className="w-5 h-5 text-gray-500 dark:text-gray-400"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
+            />
+          </svg>
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+            Raumstatus
+          </h3>
+        </div>
+
+        <div className="p-4 space-y-4">
+          {/* Unit Condition Summary (renovation percentage) */}
+          <UnitConditionSummary unitId={id} />
+
+          {/* Room Condition Grid */}
+          <RoomConditionGrid unitId={id} />
+        </div>
+      </section>
 
       {/* Renovation Projects */}
       <section className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
