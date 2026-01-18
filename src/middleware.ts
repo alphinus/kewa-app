@@ -62,16 +62,13 @@ export async function middleware(request: NextRequest) {
     return response
   }
 
-  // Valid session - continue with role in headers for downstream use
-  const requestHeaders = new Headers(request.headers)
-  requestHeaders.set('x-user-id', session.userId)
-  requestHeaders.set('x-user-role', session.role)
+  // Valid session - continue with role in response headers for downstream use
+  // Next.js 16+: Use response headers instead of deprecated request header mutation
+  const response = NextResponse.next()
+  response.headers.set('x-user-id', session.userId)
+  response.headers.set('x-user-role', session.role)
 
-  return NextResponse.next({
-    request: {
-      headers: requestHeaders
-    }
-  })
+  return response
 }
 
 // Protect /dashboard/* routes and /api/* routes (except /api/auth/*)
