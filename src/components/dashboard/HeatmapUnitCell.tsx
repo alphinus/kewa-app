@@ -60,6 +60,7 @@ export function HeatmapUnitCell({ unit, onClick, compact = false }: HeatmapUnitC
 
   return (
     <Card
+      data-unit-id={unit.id}
       onClick={onClick}
       className={cn(
         'cursor-pointer transition-all duration-200',
