@@ -40,8 +40,9 @@ interface ExpenseFormProps {
   projectId?: string
   /** Pre-select unit ID */
   unitId?: string
-  /** Callback after successful save */
-  onSuccess?: (expense: Expense) => void
+  /** Callback after successful save - receives expense data from API */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  onSuccess?: (expense: any) => void
   /** Callback on cancel */
   onCancel?: () => void
 }
