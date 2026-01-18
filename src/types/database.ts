@@ -134,6 +134,8 @@ export interface Project {
 
 /**
  * Task within a project
+ * Note: v2.0 fields (parent_task_id, checklist_items, etc.) are optional
+ * for backward compatibility with existing database records and API responses.
  */
 export interface Task {
   id: string
@@ -146,12 +148,13 @@ export interface Task {
   completed_at: string | null
   completion_note: string | null
   recurring_type: 'none' | 'weekly' | 'monthly'
-  parent_task_id: string | null
-  checklist_items: ChecklistItem[]
-  estimated_hours: number | null
-  actual_hours: number | null
-  room_id: string | null
-  renovation_project_id: string | null
+  // v2.0 fields (optional for backward compatibility)
+  parent_task_id?: string | null
+  checklist_items?: ChecklistItem[]
+  estimated_hours?: number | null
+  actual_hours?: number | null
+  room_id?: string | null
+  renovation_project_id?: string | null
   created_at: string
   updated_at: string
 }
