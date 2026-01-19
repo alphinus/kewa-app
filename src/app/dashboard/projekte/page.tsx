@@ -132,9 +132,9 @@ export default function ProjektePage() {
     }
   }
 
-  // Handle project click - navigate to tasks filtered by project
+  // Handle project click - navigate to project detail
   const handleProjectClick = (project: ProjectWithUnit) => {
-    router.push(`/dashboard/aufgaben?unit_id=${project.unit_id}`)
+    router.push(`/dashboard/projekte/${project.id}`)
   }
 
   // Calculate counts
