@@ -9,6 +9,7 @@
  * Phase 10-04: Project Cost Dashboard
  */
 
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import {
@@ -83,6 +84,11 @@ export function WorkOrderCostRow({
     ? 'invoice'
     : 'workOrder'
 
+  // Check if invoice can be created for this work order
+  // Eligible: status is done or accepted AND no invoice exists
+  const canCreateInvoice =
+    ['done', 'accepted'].includes(workOrder.status) && !hasInvoice
+
   return (
     <tr
       onClick={linkToDetail ? handleClick : undefined}
@@ -136,6 +142,19 @@ export function WorkOrderCostRow({
         )}
       </td>
 
+      {/* Actions */}
+      <td className="py-3 px-4 text-right">
+        {canCreateInvoice && (
+          <Link
+            href={`/dashboard/kosten/rechnungen/neu?work_order_id=${workOrder.id}`}
+            onClick={(e) => e.stopPropagation()}
+            className="inline-flex items-center px-2.5 py-1 text-xs font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/30 rounded transition-colors"
+          >
+            Rechnung erstellen
+          </Link>
+        )}
+      </td>
+
       {/* Status */}
       <td className="py-3 px-4 text-right">
         <StatusBadge status={displayStatus} type={statusType} />
@@ -164,6 +183,9 @@ export function WorkOrderCostRowSkeleton() {
         <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-20 ml-auto animate-pulse" />
       </td>
       <td className="py-3 px-4 text-right">
+        {/* Actions placeholder */}
+      </td>
+      <td className="py-3 px-4 text-right">
         <div className="h-5 bg-gray-200 dark:bg-gray-700 rounded-full w-20 ml-auto animate-pulse" />
       </td>
     </tr>
@@ -177,7 +199,7 @@ export function WorkOrderCostEmptyState() {
   return (
     <tr>
       <td
-        colSpan={5}
+        colSpan={6}
         className="py-8 text-center text-gray-500 dark:text-gray-400"
       >
         Keine Arbeitsauftraege vorhanden

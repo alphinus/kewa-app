@@ -82,6 +82,9 @@ export function ProjectCostDashboard({ data }: ProjectCostDashboardProps) {
                   Rechnung
                 </th>
                 <th className="py-3 px-4 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  Aktion
+                </th>
+                <th className="py-3 px-4 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Status
                 </th>
               </tr>
@@ -111,6 +114,7 @@ export function ProjectCostDashboard({ data }: ProjectCostDashboardProps) {
                   <td className="py-3 px-4 text-right text-gray-900 dark:text-gray-100">
                     {formatCHF(totals.totalInvoiced)}
                   </td>
+                  <td></td>
                   <td></td>
                 </tr>
               </tfoot>
@@ -260,6 +264,9 @@ export function ProjectCostDashboardSkeleton() {
                 </th>
                 <th className="py-3 px-4 text-right">
                   <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-16 ml-auto animate-pulse" />
+                </th>
+                <th className="py-3 px-4 text-right">
+                  <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-12 ml-auto animate-pulse" />
                 </th>
                 <th className="py-3 px-4 text-right">
                   <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-12 ml-auto animate-pulse" />
