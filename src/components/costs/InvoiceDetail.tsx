@@ -48,6 +48,7 @@ interface InvoiceDetailProps {
  * German labels for invoice status
  */
 const STATUS_LABELS: Record<InvoiceStatus, string> = {
+  draft: 'Entwurf',
   received: 'Erhalten',
   under_review: 'In Pruefung',
   approved: 'Freigegeben',
@@ -61,6 +62,7 @@ const STATUS_LABELS: Record<InvoiceStatus, string> = {
  * Status badge colors
  */
 const STATUS_COLORS: Record<InvoiceStatus, string> = {
+  draft: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400',
   received: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300',
   under_review: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
   approved: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
