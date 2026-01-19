@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-01-19)
 
 **Core value:** KEWA AG hat volle Transparenz und Kontrolle uber alle Renovationen — mit standardisierten Workflows, externer Handwerker-Integration, Kostenuebersicht und automatischer Zustandshistorie.
-**Current focus:** v2.0 MVP SHIPPED — Fixing UAT blockers
+**Current focus:** v2.0 MVP SHIPPED — UAT blockers resolved
 
 ## Current Position
 
 Phase: 09-external-contractor-portal (post-UAT fixes)
-Plan: 06 of 7 complete
-Status: UAT blockers being resolved
-Last activity: 2026-01-19 — Completed 09-06-PLAN.md (middleware magic link fix)
+Plan: 07 of 7 complete
+Status: UAT blockers resolved
+Last activity: 2026-01-19 — Completed 09-07-PLAN.md (work order UI integration)
 
-Progress: [############] 100% v2.0 MVP + UAT fixes in progress
+Progress: [############] 100% v2.0 MVP + UAT fixes complete
 
 ## v2.0 Milestone Summary
 
@@ -86,8 +86,15 @@ Choose one:
 - First-time contractor access now works without prior authentication
 - Commit: a337996
 
+**09-07-PLAN.md:** Integrated WorkOrderForm and WorkOrderSendDialog into admin UI
+- Added "Auftrag erstellen" button to project detail page
+- Created work order list page at /dashboard/auftraege
+- Created work order create page with form integration
+- Created work order detail page with send dialog
+- Commits: acdb4b2, 9a0f807, c2cde63, 34a6a37
+
 ## Session Continuity
 
 Last session: 2026-01-19
-Stopped at: Completed 09-06-PLAN.md
-Resume file: .planning/phases/09-external-contractor-portal/09-07-PLAN.md
+Stopped at: Completed 09-07-PLAN.md
+Resume file: None
