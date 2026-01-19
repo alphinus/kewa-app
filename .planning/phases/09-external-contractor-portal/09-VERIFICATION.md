@@ -1,8 +1,16 @@
 ---
 phase: 09-external-contractor-portal
-verified: 2026-01-18T15:30:00Z
+verified: 2026-01-19T16:30:00Z
 status: passed
-score: 15/16 requirements verified
+score: 16/16 truths verified
+re_verification:
+  previous_status: gaps_found
+  previous_score: 0/16 (UAT blocked by 2 issues)
+  gaps_closed:
+    - "Create Work Order form accessible from project detail page"
+    - "Contractor can access portal via magic link without prior session"
+  gaps_remaining: []
+  regressions: []
 must_haves:
   truths:
     - "KEWA can create work orders with required fields"
@@ -19,6 +27,8 @@ must_haves:
     - "Viewed status tracked when magic link opened"
     - "Events are timestamped in log"
     - "Deadline displayed with countdown"
+    - "Create Work Order form accessible from project detail page"
+    - "Contractor can access portal via magic link without prior session"
   artifacts:
     - path: "src/app/api/work-orders/route.ts"
       provides: "Work order CRUD API"
@@ -36,6 +46,16 @@ must_haves:
       provides: "Event logging system"
     - path: "src/lib/work-orders/deadline.ts"
       provides: "Deadline tracking utilities"
+    - path: "src/middleware.ts"
+      provides: "Path-based magic link token validation"
+    - path: "src/app/dashboard/auftraege/page.tsx"
+      provides: "Work order list page"
+    - path: "src/app/dashboard/auftraege/neu/page.tsx"
+      provides: "Work order create page"
+    - path: "src/app/dashboard/auftraege/[id]/page.tsx"
+      provides: "Work order detail page with send dialog"
+    - path: "src/app/dashboard/projekte/[id]/page.tsx"
+      provides: "Project detail with 'Auftrag erstellen' button"
   key_links:
     - from: "WorkOrderForm"
       to: "/api/work-orders"
@@ -52,6 +72,18 @@ must_haves:
     - from: "UploadSection"
       to: "/api/contractor/[token]/[workOrderId]/upload"
       via: "fetch POST multipart"
+    - from: "middleware.ts"
+      to: "validateContractorAccess"
+      via: "import"
+    - from: "projekte/[id]/page.tsx"
+      to: "/dashboard/auftraege/neu"
+      via: "Link"
+    - from: "auftraege/neu/page.tsx"
+      to: "WorkOrderForm"
+      via: "import"
+    - from: "auftraege/[id]/page.tsx"
+      to: "WorkOrderSendDialog"
+      via: "import"
 deferred:
   - requirement: "EXT-15"
     reason: "Automatic reminders (24h + 48h) require background job infrastructure - explicitly deferred in 09-05-PLAN.md"
@@ -60,9 +92,39 @@ deferred:
 # Phase 9: External Contractor Portal Verification Report
 
 **Phase Goal:** Handwerker koennen Auftraege via Magic-Link annehmen/ablehnen
-**Verified:** 2026-01-18
+**Verified:** 2026-01-19T16:30:00Z
 **Status:** PASSED
-**Re-verification:** No - initial verification
+**Re-verification:** Yes - after gap closure (Plans 09-06 and 09-07)
+
+## Re-verification Summary
+
+### Previous Gaps (from 09-UAT.md)
+
+| Gap | Previous Status | Current Status | Resolution |
+|-----|----------------|----------------|------------|
+| Create Work Order form not accessible | BLOCKER | CLOSED | Plan 09-07 added UI pages and wiring |
+| Middleware blocks contractor portal | BLOCKER | CLOSED | Plan 09-06 fixed path-based token validation |
+
+### Gap Closure Verification
+
+**Gap 1: Create Work Order form not accessible from project detail page**
+- **Claim:** Plan 09-07 added "Auftrag erstellen" button and work order pages
+- **Verification:**
+  - `src/app/dashboard/projekte/[id]/page.tsx` line 349: Link to `/dashboard/auftraege/neu?project_id=${project.id}`
+  - `src/app/dashboard/projekte/[id]/page.tsx` line 365: Button text "Auftrag erstellen"
+  - `src/app/dashboard/auftraege/page.tsx` (431 lines): Work order list page
+  - `src/app/dashboard/auftraege/neu/page.tsx` (115 lines): Create page imports WorkOrderForm
+  - `src/app/dashboard/auftraege/[id]/page.tsx` (649 lines): Detail page imports WorkOrderSendDialog
+- **Status:** VERIFIED - All artifacts exist, are substantive, and properly wired
+
+**Gap 2: Middleware blocks contractor portal access**
+- **Claim:** Plan 09-06 fixed middleware to validate path-based tokens before session
+- **Verification:**
+  - `src/middleware.ts` line 14: imports `validateContractorAccess` from '@/lib/magic-link'
+  - `src/middleware.ts` lines 102-114: Extracts token from path segments
+  - `src/middleware.ts` line 117: Calls `validateContractorAccess(token)` BEFORE any session check
+  - `src/middleware.ts` lines 127-142: Valid tokens pass through, contractor email in headers
+- **Status:** VERIFIED - Middleware correctly validates path tokens before requiring session
 
 ## Goal Achievement
 
@@ -70,61 +132,94 @@ deferred:
 
 | # | Truth | Status | Evidence |
 |---|-------|--------|----------|
-| 1 | KEWA can create work orders with required fields | VERIFIED | `src/app/api/work-orders/route.ts` (258 lines) - validates title, partner_id, project/task |
-| 2 | PDF can be generated for work orders | VERIFIED | `src/lib/pdf/work-order-pdf.tsx` (484 lines) - @react-pdf/renderer with German A4 template |
-| 3 | Email with magic link sent via mailto | VERIFIED | `src/app/api/work-orders/[id]/send/route.ts` (177 lines) - buildMailtoLink function |
-| 4 | Contractor can view work order details | VERIFIED | `src/app/contractor/[token]/page.tsx` (158 lines) + detail page (243 lines) |
-| 5 | Contractor can accept work orders | VERIFIED | `respond/route.ts` handleAccept() with status->accepted |
-| 6 | Contractor can reject with reason | VERIFIED | `respond/route.ts` handleReject() requires rejection_reason |
-| 7 | Contractor can propose different price | VERIFIED | counter_offer action sets proposed_cost |
-| 8 | Contractor can propose different schedule | VERIFIED | counter_offer action sets proposed_start_date/end_date |
+| 1 | KEWA can create work orders with required fields | VERIFIED | WorkOrderForm in neu/page.tsx calls /api/work-orders |
+| 2 | PDF can be generated for work orders | VERIFIED | work-order-pdf.tsx (484 lines), pdf/route.ts exists |
+| 3 | Email with magic link sent via mailto | VERIFIED | send/route.ts buildMailtoLink function |
+| 4 | Contractor can view work order details | VERIFIED | contractor/[token]/[workOrderId]/page.tsx (243 lines) |
+| 5 | Contractor can accept work orders | VERIFIED | respond/route.ts handleAccept() |
+| 6 | Contractor can reject with reason | VERIFIED | respond/route.ts handleReject() + reject-modal.tsx |
+| 7 | Contractor can propose different price | VERIFIED | counter_offer_form.tsx, proposed_cost field |
+| 8 | Contractor can propose different schedule | VERIFIED | counter_offer_form.tsx, proposed_start/end_date |
 | 9 | Contractor can add questions/comments | VERIFIED | contractor_notes field in respond API |
-| 10 | Contractor can upload documents | VERIFIED | `upload/route.ts` (223 lines) accepts application/pdf |
-| 11 | Contractor can upload photos | VERIFIED | `upload/route.ts` accepts image/* mime types |
-| 12 | Viewed status tracked | VERIFIED | `mark-viewed/route.ts` + MarkViewedTracker component |
-| 13 | Events are timestamped | VERIFIED | `038_work_order_events.sql` + `events.ts` (406 lines) |
-| 14 | Deadline displayed with countdown | VERIFIED | `deadline.ts` (204 lines) + DeadlineBanner component |
-| 15 | Automatic reminders (24h + 48h) | DEFERRED | EXT-15 explicitly deferred - requires background jobs |
+| 10 | Contractor can upload documents | VERIFIED | upload/route.ts accepts application/pdf |
+| 11 | Contractor can upload photos | VERIFIED | upload/route.ts accepts image/* |
+| 12 | Viewed status tracked | VERIFIED | mark-viewed/route.ts + MarkViewedTracker |
+| 13 | Events are timestamped | VERIFIED | events.ts (406 lines), 038_work_order_events.sql |
+| 14 | Deadline displayed with countdown | VERIFIED | deadline.ts (204 lines), DeadlineBanner |
+| 15 | Create Work Order accessible from project | VERIFIED | "Auftrag erstellen" button on projekte/[id]/page.tsx |
+| 16 | Contractor portal via magic link works | VERIFIED | Middleware validates path token before session |
 
-**Score:** 14/15 truths verified (1 intentionally deferred)
+**Score:** 16/16 truths verified
 
-### Required Artifacts
+### Required Artifacts (Gap Closure Focus)
 
-| Artifact | Expected | Exists | Lines | Substantive | Wired |
-|----------|----------|--------|-------|-------------|-------|
-| `src/types/work-order.ts` | WorkOrder types | YES | 286 | YES | YES - imported throughout |
-| `src/lib/pdf/work-order-pdf.tsx` | PDF generation | YES | 484 | YES | YES - used by pdf/route.ts |
-| `src/app/api/work-orders/route.ts` | CRUD API | YES | 258 | YES | YES - called by WorkOrderForm |
-| `src/app/api/work-orders/[id]/route.ts` | Single resource API | YES | exists | YES | YES |
-| `src/app/api/work-orders/[id]/pdf/route.ts` | PDF download | YES | 199 | YES | YES - linked from send response |
-| `src/app/api/work-orders/[id]/send/route.ts` | Send workflow | YES | 177 | YES | YES - creates magic link |
-| `src/app/contractor/[token]/page.tsx` | Dashboard | YES | 158 | YES | YES - server component |
-| `src/app/contractor/[token]/[workOrderId]/page.tsx` | Detail page | YES | 243 | YES | YES - linked from dashboard |
-| `src/app/contractor/[token]/work-order-card.tsx` | Card component | YES | 477 | YES | YES - used by dashboard |
-| `src/app/api/contractor/[token]/[workOrderId]/respond/route.ts` | Response API | YES | 322 | YES | YES - called by ResponseForm |
-| `src/app/api/contractor/[token]/[workOrderId]/upload/route.ts` | Upload API | YES | 223 | YES | YES - called by UploadSection |
-| `src/lib/work-orders/events.ts` | Event logging | YES | 406 | YES | YES - integrated in all APIs |
-| `src/lib/work-orders/deadline.ts` | Deadline utils | YES | 204 | YES | YES - used in dashboard/cards |
-| `src/components/work-orders/WorkOrderForm.tsx` | Create form | YES | 537 | YES | YES - calls API |
-| `src/components/work-orders/WorkOrderSendDialog.tsx` | Send dialog | YES | exists | YES | YES |
-| `src/components/admin/work-orders/CounterOfferReview.tsx` | Admin review | YES | 355 | YES | YES |
-| `src/components/admin/work-orders/EventLog.tsx` | Event timeline | YES | exists | YES | YES |
-| `supabase/migrations/037_work_order_extensions.sql` | DB extensions | YES | 160 | YES | YES - counter_offer_status enum |
-| `supabase/migrations/038_work_order_events.sql` | Events table | YES | 160 | YES | YES - triggers for auto-logging |
+| Artifact | Lines | Substantive | Wired | Status |
+|----------|-------|-------------|-------|--------|
+| `src/middleware.ts` | 158 | YES | YES | VERIFIED |
+| `src/app/dashboard/auftraege/page.tsx` | 431 | YES | YES | VERIFIED |
+| `src/app/dashboard/auftraege/neu/page.tsx` | 115 | YES | YES | VERIFIED |
+| `src/app/dashboard/auftraege/[id]/page.tsx` | 649 | YES | YES | VERIFIED |
+| `src/app/dashboard/projekte/[id]/page.tsx` | 451 | YES | YES | VERIFIED |
 
-### Key Link Verification
+### Key Link Verification (Gap Closure Focus)
 
 | From | To | Via | Status | Evidence |
 |------|-----|-----|--------|----------|
-| WorkOrderForm | /api/work-orders | fetch POST | WIRED | Line 241-244 in WorkOrderForm.tsx |
-| WorkOrderSendDialog | /api/work-orders/[id]/send | fetch POST | WIRED | Uses send endpoint |
-| Dashboard (page.tsx) | getContractorWorkOrders | direct call | WIRED | Line 46-48 |
-| ResponseForm | /api/contractor/.../respond | fetch POST | WIRED | Form submits to API |
-| UploadSection | /api/contractor/.../upload | fetch POST | WIRED | FileUploader calls API |
-| send/route.ts | createMagicLink | import | WIRED | Line 10 import + Line 127 call |
-| All APIs | logWorkOrderEvent | import | WIRED | Events logged in all mutations |
+| middleware.ts | validateContractorAccess | import | WIRED | Line 14 import, Line 117 call |
+| projekte/[id]/page.tsx | /dashboard/auftraege/neu | Link | WIRED | Line 349 href |
+| auftraege/neu/page.tsx | WorkOrderForm | import | WIRED | Line 17 import, Line 51 render |
+| auftraege/[id]/page.tsx | WorkOrderSendDialog | import | WIRED | Line 21 import, Line 641 render |
+| auftraege/[id]/page.tsx | /api/work-orders/[id] | fetch | WIRED | Line 138 fetch call |
 
-### Requirements Coverage
+### Anti-Patterns Found
+
+| File | Line | Pattern | Severity | Impact |
+|------|------|---------|----------|--------|
+| None | - | - | - | - |
+
+No stub patterns, TODOs, or placeholder content found in gap closure files.
+
+### Commits Verifying Gap Closure
+
+```
+87876a7 docs(09-07): complete work order UI integration plan
+34a6a37 feat(09-07): create work order detail page with send dialog
+c2cde63 feat(09-07): create work order create page
+9a0f807 feat(09-07): create work order list page
+acdb4b2 feat(09-07): add 'Auftrag erstellen' button to project detail page
+a337996 fix(09-06): validate path-based magic link tokens before session check
+```
+
+## Human Verification Required
+
+Since all automated checks pass, the following should be verified by human testing:
+
+### 1. Full Work Order Creation Flow
+**Test:** Navigate to project detail page, click "Auftrag erstellen", fill form, save
+**Expected:** Work order created, redirected to detail page
+**Why human:** End-to-end flow completion needs human verification
+
+### 2. Work Order Send Flow
+**Test:** From work order detail, click "Senden", confirm dialog, click mailto link
+**Expected:** Email client opens with magic link in body, status changes to 'sent'
+**Why human:** Email client interaction cannot be tested programmatically
+
+### 3. Contractor Portal Access via Magic Link
+**Test:** Copy magic link URL, open in incognito/new browser (no existing session)
+**Expected:** Contractor dashboard loads showing work orders, no login redirect
+**Why human:** Session/cookie state requires browser testing
+
+### 4. Contractor Accept/Reject Flow
+**Test:** Open magic link, view work order, click Accept or Reject
+**Expected:** Status updates, confirmation shown, KEWA sees change in admin
+**Why human:** Two-party workflow needs human testing
+
+### 5. Mobile Experience
+**Test:** Open contractor portal on mobile device, navigate, upload photo
+**Expected:** Touch-friendly UI (44px min buttons), camera upload works
+**Why human:** Mobile device testing cannot be automated
+
+## Requirements Coverage
 
 | Requirement | Description | Status |
 |-------------|-------------|--------|
@@ -147,115 +242,18 @@ deferred:
 
 **Requirements:** 15/16 satisfied (1 explicitly deferred)
 
-### Anti-Patterns Found
+## Summary
 
-| File | Line | Pattern | Severity | Impact |
-|------|------|---------|----------|--------|
-| layout.tsx | 48 | "Logo placeholder" comment | INFO | UI cosmetic only |
+All Phase 9 success criteria are met. The two blockers identified in UAT have been closed:
 
-No blocking anti-patterns found. All "placeholder" mentions are form input placeholders, not code stubs.
+1. **UAT Test 1 Blocker** (WorkOrderForm not integrated): Plan 09-07 created work order list, create, and detail pages, wiring WorkOrderForm and WorkOrderSendDialog into the admin UI. The "Auftrag erstellen" button is now visible on project detail pages.
 
-### Human Verification Required
+2. **UAT Test 4 Blocker** (Middleware blocks contractor portal): Plan 09-06 fixed the middleware to extract tokens from the URL path and validate them via validateContractorAccess BEFORE checking for an existing session, allowing first-time magic link access.
 
-Since all automated checks pass, the following should be verified by human testing:
-
-### 1. Full Work Order Flow
-**Test:** Create work order in admin, send to contractor, receive mailto link
-**Expected:** Email client opens with pre-filled subject, body, and magic link
-**Why human:** Cannot verify email client behavior programmatically
-
-### 2. Contractor Portal Experience
-**Test:** Open magic link on mobile device, view dashboard, navigate to detail
-**Expected:** Mobile-optimized UI, touch-friendly buttons (min 44px), proper German text
-**Why human:** Visual appearance and mobile UX need human judgment
-
-### 3. Accept/Reject Flow
-**Test:** Accept a work order, then reject another with reason
-**Expected:** Status updates correctly, events logged, KEWA sees changes
-**Why human:** End-to-end behavior needs human verification
-
-### 4. Counter-Offer Flow
-**Test:** Submit counter-offer with different price, KEWA approves
-**Expected:** CounterOfferReview shows in admin, approval changes status to accepted
-**Why human:** Two-party workflow needs human testing
-
-### 5. File Upload on Mobile
-**Test:** Upload photo using camera on mobile device
-**Expected:** Camera opens, photo uploads with progress, appears in gallery
-**Why human:** Mobile camera integration needs device testing
-
-### 6. PDF Generation
-**Test:** Download PDF for work order
-**Expected:** Professional A4 document with KEWA branding, German text, correct data
-**Why human:** Visual quality of PDF needs human review
-
-### Gaps Summary
-
-**No gaps found.** All phase 9 success criteria are met:
-
-- [x] WorkOrder-Erstellung mit allen Pflichtfeldern
-- [x] PDF-Generierung funktional
-- [x] Email mit Magic-Link versendet (mailto)
-- [x] Contractor-Portal: View, Accept, Reject, Price, Upload
-- [x] Tracking: Viewed-Status, Erinnerungen*, Deadline
-
-*Note: EXT-15 (automatic reminders 24h + 48h) was explicitly deferred in 09-05-PLAN.md as it requires background job infrastructure not yet in place. The deadline display and urgency highlighting ARE implemented.
-
-## Technical Summary
-
-### Files Created (Phase 9)
-
-**Plan 09-01: WorkOrder Creation & PDF**
-- `src/types/work-order.ts` - TypeScript types
-- `src/lib/pdf/work-order-pdf.tsx` - PDF template (484 lines)
-- `src/app/api/work-orders/route.ts` - CRUD API
-- `src/app/api/work-orders/[id]/route.ts` - Single resource
-- `src/app/api/work-orders/[id]/pdf/route.ts` - PDF download
-- `src/app/api/work-orders/[id]/send/route.ts` - Send workflow
-- `src/components/work-orders/WorkOrderForm.tsx` - Create form
-- `src/components/work-orders/WorkOrderSendDialog.tsx` - Send dialog
-
-**Plan 09-02: Contractor Dashboard**
-- `src/lib/contractor/queries.ts` - Query utilities
-- `src/app/contractor/[token]/page.tsx` - Dashboard (rewritten)
-- `src/app/contractor/[token]/dashboard-section.tsx` - Section component
-- `src/app/contractor/[token]/mark-viewed-tracker.tsx` - Auto-viewed tracking
-- `src/app/contractor/[token]/request-link-form.tsx` - Request new link
-- `src/app/contractor/[token]/[workOrderId]/page.tsx` - Detail page
-- `src/app/api/contractor/[token]/mark-viewed/route.ts` - Mark viewed API
-- `src/app/api/contractor/[token]/status/route.ts` - Status update API
-- `src/app/api/contractor/request-link/route.ts` - Request link API
-
-**Plan 09-03: Response Actions & Counter-Offer**
-- `supabase/migrations/037_work_order_extensions.sql` - DB extensions
-- `src/lib/contractor/constants.ts` - Rejection reasons
-- `src/app/api/contractor/[token]/[workOrderId]/respond/route.ts` - Response API
-- `src/app/contractor/[token]/[workOrderId]/response-form.tsx` - Response form
-- `src/app/contractor/[token]/[workOrderId]/reject-modal.tsx` - Reject modal
-- `src/app/contractor/[token]/[workOrderId]/counter-offer-form.tsx` - Counter-offer
-- `src/components/admin/work-orders/CounterOfferReview.tsx` - Admin review
-- `src/app/api/work-orders/[id]/counter-offer/route.ts` - Admin counter-offer API
-
-**Plan 09-04: File Uploads**
-- `src/lib/storage/contractor-upload.ts` - Upload utilities
-- `src/app/api/contractor/[token]/[workOrderId]/upload/route.ts` - Upload API
-- `src/app/api/contractor/[token]/[workOrderId]/media/route.ts` - Media list/delete
-- `src/components/upload/FileUploader.tsx` - Upload component
-- `src/app/contractor/[token]/[workOrderId]/upload-section.tsx` - Upload section
-- `src/app/contractor/[token]/[workOrderId]/media-gallery.tsx` - Media gallery
-
-**Plan 09-05: Tracking & Events**
-- `supabase/migrations/038_work_order_events.sql` - Events table + triggers
-- `src/lib/work-orders/events.ts` - Event logging utilities
-- `src/lib/work-orders/deadline.ts` - Deadline utilities
-- `src/app/api/work-orders/[id]/events/route.ts` - Events API
-- `src/components/admin/work-orders/EventLog.tsx` - Event timeline
-- `src/app/contractor/[token]/[workOrderId]/deadline-banner.tsx` - Deadline UI
-
-### Dependencies Added
-- `@react-pdf/renderer ^4.3.2` - PDF generation
+Phase 9 goal "Handwerker koennen Auftraege via Magic-Link annehmen/ablehnen" is achieved.
 
 ---
 
-*Verified: 2026-01-18*
+*Verified: 2026-01-19T16:30:00Z*
 *Verifier: Claude (gsd-verifier)*
+*Re-verification: Gap closure after Plans 09-06 and 09-07*
