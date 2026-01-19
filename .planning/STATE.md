@@ -2,97 +2,41 @@
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-01-18)
+See: .planning/PROJECT.md (updated 2026-01-19)
 
 **Core value:** KEWA AG hat volle Transparenz und Kontrolle uber alle Renovationen — mit standardisierten Workflows, externer Handwerker-Integration, Kostenuebersicht und automatischer Zustandshistorie.
-**Current focus:** v2.0 Renovation Operations System — MVP Complete (Phases 7-12.3)
+**Current focus:** v2.0 MVP SHIPPED — Ready for production deployment or v2.1 planning
 
 ## Current Position
 
-Phase: 12.3 of 18 (Fix Navigation Links)
-Plan: 1 of 1 (complete)
-Status: PHASE COMPLETE
-Last activity: 2026-01-19 — Completed 12.3-01-PLAN.md (Fix Navigation Links)
+Phase: v2.0 Complete
+Status: MILESTONE SHIPPED
+Last activity: 2026-01-19 — v2.0 milestone archived
 
-Progress: [############] 100% MVP (Phases 7-12.3 complete)
+Progress: [############] 100% v2.0 MVP Complete
 
-## Phase 12.3 Plans
+## v2.0 Milestone Summary
 
-| Plan | Name | Wave | Scope | Status |
-|------|------|------|-------|--------|
-| 12.3-01 | Fix Navigation Links | 1 | tiny | COMPLETE |
+**Shipped:** 2026-01-19
+**Phases:** 7-12.3 (9 phases, 31 plans)
+**Requirements:** 91/92 (99%) — 1 deferred (EXT-15)
 
-**Phase 12.3 Complete** - Navigation link gaps closed
-
-## Phase 12.2 Plans
-
-| Plan | Name | Wave | Scope | Status |
-|------|------|------|-------|--------|
-| 12.2-01 | Invoice Creation Form & Page | 1 | small | COMPLETE |
-
-**Phase 12.2 Complete** - INT-02 gap closed
-
-## Phase 12 Plans (Original)
-
-| Plan | Name | Wave | Scope | Status |
-|------|------|------|-------|--------|
-| 12-01 | Parking Schema & Basic Display | 1 | medium | COMPLETE |
-| 12-02 | Dashboard Layout & Building Heatmap | 1 | medium | COMPLETE |
-| 12-03 | Occupancy Dashboard | 1 | small | COMPLETE |
-| 12-04 | Drilldown Navigation & Side Panel | 3 | medium | COMPLETE |
-| 12-05 | Comments System | 3 | medium | COMPLETE |
-
-**All Waves Complete**
-
-## v2.0 Milestone Scope
-
-**Goal:** Transformation von Task-App zu vollstaendigem Renovations-Management-System
-
-**Requirements:** 127 total
-- Phase 1 MVP: 86 (Phases 7-12) - COMPLETE
-- Phase 2 Extensions: 19 (Phases 13-15)
-- Phase 3 Advanced: 16 (Phases 16-18)
-
-**Key Features:**
+**Key Features Delivered:**
 - Multi-Role RBAC (Admin, Manager, Accounting, Tenant, Contractor)
-- Externe Handwerker via Magic-Link Portal
-- Template-System (WBS mit Abhaengigkeiten)
-- Kosten-Workflow (Offer -> Invoice -> Payment)
-- Digital Twin (automatische Raum-Condition)
-- Dashboard (Heatmap, Timeline, Kosten)
-- Parkplaetze + Auslastung
-- Push-Notifications (Phase 2)
-- Mieter-Tickets (Phase 3)
-- Offline-Support (Phase 3)
-
-**Source:** KEWA-RENOVATION-OPS-SPEC_v1 + Original v2.0 Scope
-
-## Phase Overview
-
-| Phase | Name | Requirements | Status |
-|-------|------|--------------|--------|
-| 7 | Foundation & Data Model | 38 | COMPLETE |
-| 8 | Template System | 6 | COMPLETE |
-| 9 | External Contractor Portal | 16 | COMPLETE |
-| 10 | Cost & Finance | 9 | COMPLETE |
-| 11 | History & Digital Twin | 5 | COMPLETE |
-| 12 | Dashboard & Visualization | 18 | COMPLETE |
-| 12.1 | Project Detail & Navigation | - | COMPLETE |
-| 12.2 | Invoice Creation UI | - | COMPLETE |
-| 12.3 | Fix Navigation Links | - | COMPLETE |
-| **MVP Total** | | **92** | **COMPLETE** |
-| 13 | Change Orders & Suppliers | 7 | Pending |
-| 14 | Inspection & Push | 8 | Pending |
-| 15 | Knowledge Base | 4 | Pending |
-| **Phase 2 Total** | | **19** | |
-| 16 | Tenant Portal | 4 | Pending |
-| 17 | Offline Support | 5 | Pending |
-| 18 | Integrations & UX | 7 | Pending |
-| **Phase 3 Total** | | **16** | |
+- External Contractor Portal (Magic-Link, PDF, Accept/Reject, Counter-Offers)
+- Template System (WBS with phases, packages, tasks, dependencies)
+- Cost & Finance (Offer → Invoice → Payment, CSV Export, Investment)
+- Digital Twin (automatic room condition tracking)
+- Property Dashboard (heatmap, occupancy, drilldown, comments)
 
 ## Archives
 
-v1 artifacts in `.planning/milestones/`:
+**v2.0 artifacts in `.planning/milestones/`:**
+- `v2.0-ROADMAP.md` — Full phase details
+- `v2.0-REQUIREMENTS.md` — All v2.0 requirements
+- `v2.0-MILESTONE-AUDIT.md` — Verification report
+
+**v1 artifacts in `.planning/milestones/`:**
 - `v1-ROADMAP.md` — Full phase details
 - `v1-REQUIREMENTS.md` — All v1 requirements
 - `v1-MILESTONE-AUDIT.md` — Verification report
@@ -100,7 +44,7 @@ v1 artifacts in `.planning/milestones/`:
 ## Pending Setup Tasks
 
 Before production deployment:
-- Apply all migrations (001-040) to Supabase
+- Apply all migrations (001-044) to Supabase
 - Create storage buckets (task-photos, task-audio, documents, media)
 - Configure .env.local with Supabase credentials
 - Configure OPENAI_API_KEY for transcription
@@ -108,125 +52,33 @@ Before production deployment:
 - Apply RLS policies via Supabase Dashboard
 - Deploy to Vercel
 
-## Known Issues
+## Known Issues / Tech Debt
 
-- ~~Next.js 16 middleware deprecation warning (DEBT-01)~~ FIXED
-- ~~Turbopack intermittent build race conditions (DEBT-02)~~ FIXED
-- ~~Inconsistent session fetching pattern (DEBT-03)~~ FIXED
-- Next.js 16 middleware.ts file convention deprecated (proxy.ts migration future)
-- Type errors in 07-04 auth routes (non-blocking, to be addressed)
-- ~~Type export issues in templates.ts (TemplateCategory, TemplateScope need re-export)~~ FIXED (09-02)
-- Template tasks don't have room_id by default (documented limitation, alternative trigger available)
+- EXT-15: Automatic reminders deferred (requires background job infrastructure)
+- QualityGateEditor/QualityGateProgress/DependencyEditor components ready but not wired
+- CommentList/CommentForm components ready but not integrated into views
+- Task room_id must be manually assigned for condition triggers
+- Mock occupancy history data (needs occupancy_history table)
+- Logo placeholder in contractor portal layout
 
-## Accumulated Decisions
+## Next Steps
 
-| Decision | Phase | Rationale |
-|----------|-------|-----------|
-| Response headers for user context | 07-01 | Next.js 16 deprecated request header mutation |
-| Disable parallelServerCompiles | 07-01 | Prevents build race conditions |
-| Unified session.ts module | 07-01 | Single source of truth, Edge-compatible |
-| Swiss VAT 7.7% default | 07-03 | KEWA operates in Switzerland |
-| Auto-calculate tax/total via triggers | 07-03 | Reduces errors, ensures consistency |
-| Payment status cascade | 07-03 | Payments auto-update invoice status |
-| Expense requires entity link | 07-03 | Prevents orphan expenses |
-| Task v2.0 fields optional | 07-02 | Backward compatibility with existing API |
-| Polymorphic media attachments | 07-02 | entity_type/entity_id pattern for flexibility |
-| Multi-trade via array | 07-02 | Partners can have multiple trade skills |
-| Room condition prep | 07-02 | Ready for Digital Twin (Phase 11) |
-| 5 roles with granular permissions | 07-04 | RBAC system for fine-grained access control |
-| 3 auth methods (PIN, Email, Magic Link) | 07-04 | Different user types need different auth flows |
-| State machine via JSONB transition map | 07-05 | Declarative, easy to modify, trigger enforcement |
-| Terminal 'approved' state for projects | 07-05 | Prevents accidental changes to finalized projects |
-| Generic audit trigger for all tables | 07-05 | DRY - one function handles INSERT/UPDATE/DELETE |
-| RLS with helper functions | 07-05 | Cleaner policy definitions, reusable across tables |
-| System settings as key-value JSONB | 07-05 | Flexible configuration without schema changes |
-| 44px minimum touch target | 07-05 | Apple HIG recommends 44pt for touch accessibility |
-| 3-level WBS hierarchy | 08-01 | Standard PM structure: Phase > Package > Task |
-| Template scope distinction | 08-01 | unit vs room scope for different template types |
-| Duration calculation strategy | 08-01 | MAX for package (tasks overlap), SUM for phase |
-| Soft-blocking quality gates | 08-01 | Gates advisory by default, optional blocking |
-| Auto-generate WBS codes in editor | 08-02 | Reduce user error, maintain hierarchy consistency |
-| Admin-only template write ops | 08-02 | Non-admin users can view but not edit templates |
-| Atomic template application via PG function | 08-03 | Ensures all-or-nothing for phases, packages, tasks, deps, gates |
-| Kahn's algorithm for cycle detection | 08-03 | O(V+E) complexity, clear cycle identification |
-| Wizard pattern for template application | 08-03 | Complex process benefits from guided flow with preview |
-| CSS Gantt over external library | 08-04 | Simpler, no license, full control |
-| Lazy load GanttPreview | 08-04 | Improves initial page load performance |
-| Week-based time scale | 08-04 | Matches Swiss construction planning practices |
-| null approved_by = auto-approval | 08-04 | Distinguishes system from manual approval |
-| @react-pdf/renderer for PDF | 09-01 | No Puppeteer needed, React-native syntax, ESM-compatible |
-| 72h default acceptance deadline | 09-01 | Standard business response window for contractors |
-| Mailto links instead of SMTP | 09-01 | Simpler deployment, user controls sending |
-| Supabase array relation transform | 09-01 | Use first() helper to extract single elements |
-| Query by partner email for dashboard | 09-02 | Shows ALL contractor work orders, not just token-linked |
-| Status-aware token expiry | 09-02 | Active work orders never time-expire (contractor can bookmark) |
-| Auto-mark viewed on dashboard load | 09-02 | Implements EXT-13 tracking requirement |
-| Predefined rejection reasons | 09-02 | Standardizes rejection data for reporting |
-| Counter-offer via proposed_cost field | 09-03 | Reuses existing field, adds status tracking |
-| 3-state counter-offer workflow | 09-03 | pending -> approved/rejected by KEWA |
-| Storage bucket 'media' for unified uploads | 09-04 | Single bucket for all work order files |
-| Status-aware upload/delete permissions | 09-04 | Only allowed in accepted/in_progress/done statuses |
-| Event type enum for logging | 09-05 | Type safety, limited set of known events |
-| Actor type tracking with email | 09-05 | Contractors don't have user IDs, need email |
-| Auto-status logging via trigger | 09-05 | Ensures all status changes captured |
-| 48h/24h deadline thresholds | 09-05 | Standard business response windows |
-| Urgency sorting for deadlines | 09-05 | Most urgent items surface first |
-| Full payment only for MVP | 10-03 | No partial payments UI - simpler workflow |
-| Completed payments immutable | 10-03 | Audit trail integrity for accounting |
-| Database trigger for payment status sync | 10-03 | Atomic, reliable invoice status updates |
-| Separate constants from queries modules | 10-02 | Client components cannot import server-only modules |
-| Project/Unit radio toggle for expenses | 10-02 | Mutually exclusive UI simpler than multi-select |
-| Receipt required for all expenses | 10-02 | Per COST-02 requirement for documentation |
-| Swiss formatting centralized | 10-04 | formatters.ts with all CHF, date, number utilities |
-| Supabase array relation handling | 10-04 | Explicit extraction for to-one relations returning arrays |
-| Offer-invoice side-by-side | 10-04 | Per CONTEXT.md - simple comparison without variance highlight |
-| Legacy role for cost access | 10-06 | v2.0 RBAC not yet in session - use kewa role only |
-| Unicode icons for room types | 11-02 | Avoid icon library dependency, simple symbols work well |
-| Server components for condition display | 11-02 | Direct DB access, no client state needed |
-| Integrate into kosten/wohnungen page | 11-02 | Reuse existing unit detail rather than new route |
-| Trigger relies on task room_id | 11-03 | on_project_approved finds rooms via tasks.room_id |
-| Alternative trigger available | 11-03 | Migration 035 has trigger that updates ALL unit rooms |
-| Client-side timeline pagination | 11-01 | Timeline needs interactivity (expand/collapse, load more) |
-| Aggregate sources in JS vs SQL | 11-01 | Simpler code, easier to maintain, acceptable performance |
-| KEWA role only for timeline | 11-01 | Timeline contains cost/invoice data requiring elevated access |
-| Parking uses units table extension | 12-01 | Reuse existing infrastructure vs new parking table |
-| Simplified parking status enum | 12-01 | 3 states (free/occupied/maintenance) cover all scenarios |
-| Partial indexes for parking | 12-01 | Only index parking_spot rows for efficiency |
-| Reuse BuildingGrid floor config | 12-02 | Matches existing 5-floor layout for consistency |
-| Server components for dashboard | 12-02 | Direct DB access, no client-side query overhead |
-| Max 6 room dots with overflow | 12-02 | Prevents UI clutter for units with many rooms |
-| KEWA role only for property dashboard | 12-02 | Dashboard contains property-wide renovation data |
-| SVG polyline for sparkline | 12-03 | CSS-only per Phase 8 decision, no external library |
-| Mock history data for MVP | 12-03 | Placeholder until occupancy_history table implemented |
-| 90/70% occupancy thresholds | 12-03 | Standard property management thresholds for alerts |
-| Combined occupancy as simple average | 12-03 | Units + parking slots treated equally |
-| Event delegation via data-unit-id | 12-04 | Avoids prop drilling through server components |
-| Custom CSS animation for slide panel | 12-04 | Tailwind v4 doesn't include animate-in utilities |
-| Client wrapper pattern for server components | 12-04 | Enables client state for server component children |
-| Polymorphic comments pattern | 12-05 | Same entity_type/entity_id approach as media table |
-| KEWA-only internal comments | 12-05 | Contractors should not see internal discussions |
-| Yellow/blue comment visibility | 12-05 | Visual distinction for internal vs shared comments |
-| Direct Supabase query in server component | 12.1-01 | Same pattern as wohnungen detail page, simpler than API fetch |
-| Follow wohnungen detail page pattern | 12.1-01 | Consistency with existing code conventions |
-| Swiss VAT 8.0% (updated) | 12.2-01 | 2024 Swiss VAT increase from 7.7% |
-| Draft as default invoice status | 12.2-01 | New invoices start as drafts, not received |
-| Document optional for draft invoices | 12.2-01 | Allow creating draft without uploading PDF |
-| Counter-offer radio buttons | 12.2-01 | Clear UX for estimated vs proposed selection |
-| Line items sync to net amount | 12.2-01 | Single source of truth for invoice total |
-| Building link -> /liegenschaft | 12.3-01 | Property dashboard is closest existing route to non-existent /gebaeude |
+Choose one:
+
+1. **Deploy MVP to Production**
+   - Apply migrations to Supabase
+   - Configure environment
+   - Deploy to Vercel
+   - User acceptance testing
+
+2. **Start v2.1 Extensions**
+   - `/gsd:discuss-milestone` — thinking partner for v2.1 scope
+   - `/gsd:new-milestone` — create roadmap for Phase 2 (Phases 13-15)
+
+**Recommended:** `/clear` first for fresh context window
 
 ## Session Continuity
 
 Last session: 2026-01-19
-Stopped at: Completed 12.3-01-PLAN.md (Fix Navigation Links)
+Stopped at: v2.0 milestone completion
 Resume file: None
-
-## Next Step
-
-**Phase 12.3 complete** - Navigation link gaps closed.
-
-**MVP COMPLETE** - All Phase 1 requirements (Phases 7-12.3) implemented.
-
-Next action:
-- Phase 2 begins with Phase 13 (Change Orders & Suppliers)
-- Or deploy MVP to production
