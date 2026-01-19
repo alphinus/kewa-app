@@ -125,7 +125,11 @@ export async function GET(request: NextRequest) {
 /**
  * POST /api/invoices - Create a new invoice
  *
- * Body: CreateInvoiceInput
+ * Body: CreateInvoiceInput + optional status field
+ * - status: 'draft' (default) or other InvoiceStatus
+ * - document_storage_path: required unless status is 'draft'
+ *
+ * Phase 12.2-01: Added draft status support and work order duplicate check
  */
 export async function POST(request: NextRequest) {
   try {
@@ -140,7 +144,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const body: CreateInvoiceInput = await request.json()
+    const body = await request.json() as CreateInvoiceInput & { status?: string }
 
     // Validate required fields
     if (!body.partner_id) {
@@ -167,7 +171,12 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       )
     }
-    if (!body.document_storage_path) {
+
+    // Determine status (default to 'draft')
+    const status = body.status || 'draft'
+
+    // document_storage_path is required unless status is 'draft'
+    if (!body.document_storage_path && status !== 'draft') {
       return NextResponse.json(
         { error: 'document_storage_path is required (invoice PDF)' },
         { status: 400 }
@@ -191,6 +200,22 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Check for existing invoice linked to work order (prevent duplicates)
+    if (body.work_order_id) {
+      const { data: existingWorkOrderInvoice } = await supabase
+        .from('invoices')
+        .select('id')
+        .eq('work_order_id', body.work_order_id)
+        .single()
+
+      if (existingWorkOrderInvoice) {
+        return NextResponse.json(
+          { error: 'Dieser Arbeitsauftrag hat bereits eine verknuepfte Rechnung' },
+          { status: 409 }
+        )
+      }
+    }
+
     // Build insert data
     const insertData = {
       partner_id: body.partner_id,
@@ -201,13 +226,13 @@ export async function POST(request: NextRequest) {
       title: body.title ?? null,
       description: body.description ?? null,
       amount: body.amount,
-      tax_rate: body.tax_rate ?? 7.7,
+      tax_rate: body.tax_rate ?? 8.0, // Swiss VAT 8.0% (updated from 7.7%)
       line_items: body.line_items ?? [],
       invoice_date: body.invoice_date,
       due_date: body.due_date ?? null,
-      document_storage_path: body.document_storage_path,
-      status: 'received' as const,
-      received_at: new Date().toISOString(),
+      document_storage_path: body.document_storage_path ?? null,
+      status: status as 'draft' | 'received',
+      received_at: status === 'draft' ? null : new Date().toISOString(),
       created_by: userId
     }
 
