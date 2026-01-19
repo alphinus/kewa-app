@@ -9,7 +9,8 @@ import {
   FileText,
   Archive,
   Mic,
-  Settings
+  Settings,
+  Landmark
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { Role } from '@/types'
@@ -23,6 +24,7 @@ interface NavItem {
 // Navigation items for KEWA AG (admin role)
 const kewaNavItems: NavItem[] = [
   { href: '/dashboard', label: 'Uebersicht', icon: LayoutDashboard },
+  { href: '/dashboard/liegenschaft', label: 'Liegenschaft', icon: Landmark },
   { href: '/dashboard/gebaude', label: 'Gebaeude', icon: Building2 },
   { href: '/dashboard/aufgaben', label: 'Aufgaben', icon: CheckSquare },
   { href: '/dashboard/projekte', label: 'Projekte', icon: Archive },
@@ -43,7 +45,7 @@ interface MobileNavProps {
 
 /**
  * Bottom navigation bar for mobile devices
- * Role-based items: KEWA AG sees 6 items, Imeri sees 3
+ * Role-based items: KEWA AG sees 7 items, Imeri sees 3
  * Touch targets: min 48px height per item
  */
 export function MobileNav({ role }: MobileNavProps) {
