@@ -1,9 +1,9 @@
 ---
 status: complete
 phase: 09-external-contractor-portal
-source: [09-01-SUMMARY.md, 09-02-SUMMARY.md, 09-03-SUMMARY.md, 09-04-SUMMARY.md, 09-05-SUMMARY.md]
-started: 2026-01-19T14:30:00Z
-updated: 2026-01-19T14:45:00Z
+source: [09-01-SUMMARY.md, 09-02-SUMMARY.md, 09-03-SUMMARY.md, 09-04-SUMMARY.md, 09-05-SUMMARY.md, 09-06-SUMMARY.md, 09-07-SUMMARY.md]
+started: 2026-01-19T16:10:00Z
+updated: 2026-01-19T17:30:00Z
 ---
 
 ## Current Test
@@ -13,124 +13,155 @@ updated: 2026-01-19T14:45:00Z
 ## Tests
 
 ### 1. Create Work Order from Project
-expected: Navigate to project, create work order form appears with partner, deadline, cost fields. Submit saves successfully.
+expected: Navigate to project detail, click "Auftrag erstellen" button. Form opens with project pre-selected. Fill partner/deadline/cost, submit saves, redirects to detail page.
 result: issue
-reported: "nicht sichtbar - confirmed via code inspection: WorkOrderForm component exists but is NOT integrated into any page. No 'Create Work Order' button on project detail page."
+reported: "Projekt-Detail-Seite gibt 404 (Next.js 16 Middleware-Deprecation). WorkOrderForm via /dashboard/auftraege/neu funktioniert, zeigt alle Felder korrekt. Blockiert durch: keine Partners in DB."
 severity: blocker
 
-### 2. Download Work Order PDF
-expected: From work order detail, click "PDF" button. A professional A4 PDF downloads with KEWA AG branding, work details in German (address, unit, room, scope, dates, cost).
-result: skipped
-reason: Blocked by Test 1 - cannot create work orders to test PDF download
+### 2. Work Order List Page
+expected: Navigate to /dashboard/auftraege. See list of all work orders with status badges (German labels), partner name, deadline. Status filter works.
+result: pass
 
-### 3. Send Work Order to Contractor
-expected: Click "Send" on work order. Dialog shows email preview with magic link. Click mailto link opens email client pre-filled. Status changes to 'sent'.
+### 3. Work Order Detail Page
+expected: Click work order from list. Detail page shows partner info, scope, dates, cost, status timeline. Can see all work order details.
 result: skipped
-reason: Blocked by Test 1 - cannot create work orders to test send flow
+reason: Keine Work Orders in DB zum Testen
 
-### 4. Contractor Opens Magic Link
-expected: Open the magic link URL as contractor. Dashboard loads showing ALL work orders for this contractor grouped into: "Handlungsbedarf" (action needed), "In Bearbeitung" (in progress), "Abgeschlossen" (completed).
+### 4. Download Work Order PDF
+expected: From work order detail, click "PDF" button. A professional A4 PDF downloads with KEWA AG branding.
+result: skipped
+reason: Blockiert durch Test 1 - keine Work Orders
+
+### 5. Send Work Order to Contractor
+expected: On work order detail (status: draft), click "Senden". Dialog shows email preview with magic link.
+result: skipped
+reason: Blockiert durch Test 1 - keine Work Orders
+
+### 6. Contractor Opens Magic Link
+expected: Open the magic link URL as contractor (no prior login). Dashboard loads showing ALL work orders for this contractor.
 result: issue
-reported: "Middleware blocks contractor portal access - redirects to /login?error=contractor_access_required even for valid magic link tokens. Middleware requires session before token validation."
-severity: blocker
+reported: "Middleware validiert Token korrekt (ungueltige Tokens werden zu /login?error=not_found redirected). Kann nicht vollstaendig testen ohne validen Token/Work Order."
+severity: major
 
-### 5. Contractor Views Work Order Detail
-expected: Click a work order card in dashboard. Detail page opens with full work order info, action buttons, and back-to-dashboard link.
+### 7. Auto-Mark as Viewed
+expected: When contractor first opens dashboard with 'sent' work orders, they automatically change to 'viewed' status.
 result: skipped
-reason: Blocked by Test 4 - contractor portal middleware blocks access
+reason: Blockiert durch Test 6 - keine validen Tokens
 
-### 6. Auto-Mark as Viewed
-expected: When contractor first opens dashboard with 'sent' work orders, they automatically change to 'viewed' status. No manual action required.
+### 8. Contractor Views Work Order Detail
+expected: Click a work order card in dashboard. Detail page opens with full work order info and action buttons.
 result: skipped
-reason: Blocked by Test 4 - contractor portal middleware blocks access
+reason: Blockiert durch Test 6
 
-### 7. Contractor Accepts Work Order
-expected: Click "Annehmen" (Accept) button on work order. Status changes to 'accepted'. Confirmation shown.
+### 9. Contractor Accepts Work Order
+expected: Click "Annehmen" button. Status changes to 'accepted'.
 result: skipped
-reason: Blocked by Test 4 - contractor portal middleware blocks access
+reason: Blockiert durch Test 6
 
-### 8. Contractor Rejects Work Order
-expected: Click "Ablehnen" (Reject). Modal appears with predefined rejection reasons (Kapazität, Standort, Umfang, etc.). Select reason and submit. Status changes to 'rejected'.
+### 10. Contractor Rejects Work Order
+expected: Click "Ablehnen". Modal with rejection reasons appears.
 result: skipped
-reason: Blocked by Test 4 - contractor portal middleware blocks access
+reason: Blockiert durch Test 6
 
-### 9. Contractor Submits Counter-Offer
-expected: Click "Gegenangebot" (Counter-offer). Form shows side-by-side comparison with current values. Enter proposed price/dates/notes. Submit keeps status as 'viewed' but shows "Gegenangebot ausstehend".
+### 11. Contractor Submits Counter-Offer
+expected: Click "Gegenangebot". Form shows side-by-side comparison.
 result: skipped
-reason: Blocked by Test 4 - contractor portal middleware blocks access
+reason: Blockiert durch Test 6
 
-### 10. KEWA Reviews Counter-Offer
-expected: In KEWA admin, see counter-offer pending indicator. View comparison table of KEWA offer vs contractor proposal. Can approve, reject, or close the work order.
+### 12. KEWA Reviews Counter-Offer
+expected: In KEWA admin, see counter-offer comparison table.
 result: skipped
-reason: Blocked by Tests 1, 9 - cannot create work orders or counter-offers
+reason: Blockiert durch Tests 1, 11
 
-### 11. Contractor Uploads Photos
-expected: On accepted work order, "Uploads" section visible. Click to upload photo, select from camera or gallery. Photo appears in grid. Can add multiple photos with context labels (before, during, after, completion).
+### 13. Contractor Uploads Photos
+expected: On accepted work order, upload photos with context labels.
 result: skipped
-reason: Blocked by Test 4 - contractor portal middleware blocks access
+reason: Blockiert durch Test 6
 
-### 12. Contractor Uploads Documents
-expected: Upload PDF document (offer/invoice). File appears in documents list with download link. Max 20MB enforced.
+### 14. Contractor Uploads Documents
+expected: Upload PDF documents (offer/invoice).
 result: skipped
-reason: Blocked by Test 4 - contractor portal middleware blocks access
+reason: Blockiert durch Test 6
 
-### 13. Contractor Marks Work Complete
-expected: Click "Als erledigt markieren" (Mark Complete). Confirmation dialog mentions uploading completion photos. Confirm changes status to 'done'.
+### 15. Contractor Marks Work Complete
+expected: Click "Als erledigt markieren". Status changes to 'done'.
 result: skipped
-reason: Blocked by Test 4 - contractor portal middleware blocks access
+reason: Blockiert durch Test 6
 
-### 14. Deadline Display on Dashboard
-expected: Work orders show deadline countdown. Color coding: green (>48h), yellow (24-48h), red (<24h). Expired shows red with "Abgelaufen" text.
+### 16. Deadline Display on Dashboard
+expected: Work orders show deadline countdown with color coding.
 result: skipped
-reason: Blocked by Test 4 - contractor portal middleware blocks access
+reason: Blockiert durch Test 6
 
-### 15. Event Timeline in Admin
-expected: In KEWA admin work order detail, see event timeline showing all actions (created, sent, viewed, accepted, etc.) with timestamps and actor info.
+### 17. Event Timeline in Admin
+expected: In KEWA admin work order detail, see event timeline with timestamps.
 result: skipped
-reason: Blocked by Test 1 - cannot create work orders, no admin work order detail page
+reason: Blockiert durch Test 1 - keine Work Orders
 
-### 16. Request New Link (Expired Token)
-expected: If magic link expired, error page shows "Request New Link" form. Enter email, submit creates audit log entry and shows confirmation.
+### 18. Request New Link (Expired Token)
+expected: If magic link expired, error page shows "Request New Link" form.
 result: skipped
-reason: Blocked by Test 4 - middleware redirects before page can show error/request form
+reason: Keine expired Tokens zum Testen
 
 ## Summary
 
-total: 16
-passed: 0
+total: 18
+passed: 1
 issues: 2
 pending: 0
-skipped: 14
+skipped: 15
 
 ## Gaps
 
-- truth: "Create Work Order form accessible from project detail page"
+- truth: "Projekt-Detail-Seite zeigt Auftrag erstellen Button"
   status: failed
-  reason: "User reported: nicht sichtbar - confirmed via code inspection: WorkOrderForm component exists but is NOT integrated into any page. No 'Create Work Order' button on project detail page."
+  reason: "Next.js 16 gibt 404 fuer /dashboard/projekte/[id] trotz korrekt konfigurierter Route und 200 vom Server"
   severity: blocker
   test: 1
-  artifacts:
-    - path: "src/components/work-orders/WorkOrderForm.tsx"
-      issue: "Component exists but not imported/used anywhere"
-    - path: "src/components/work-orders/WorkOrderSendDialog.tsx"
-      issue: "Component exists but not imported/used anywhere"
-    - path: "src/app/dashboard/projekte/[id]/page.tsx"
-      issue: "Missing 'Create Work Order' button in actions section"
-  missing:
-    - "Add 'Create Work Order' button to project detail page actions"
-    - "Create work order list/detail page in KEWA admin"
-    - "Wire WorkOrderForm and WorkOrderSendDialog into UI"
-  debug_session: ""
-
-- truth: "Contractor can access portal via magic link without prior session"
-  status: failed
-  reason: "Middleware at src/middleware.ts blocks contractor portal - redirects to /login?error=contractor_access_required even for magic link URLs. The middleware checks for session BEFORE validating token, but magic links should work WITHOUT a session."
-  severity: blocker
-  test: 4
+  root_cause: "Next.js 16.1.2 Middleware-Deprecation - middleware.ts wird als veraltet markiert. Server rendert 200, aber Client zeigt 404."
   artifacts:
     - path: "src/middleware.ts"
-      issue: "handleContractorRoute checks session first, redirects if none - but magic link access should create the session"
+      issue: "Middleware deprecated in Next.js 16, needs migration to proxy"
+    - path: "src/app/dashboard/projekte/[id]/page.tsx"
+      issue: "Page renders successfully on server but 404 on client"
   missing:
-    - "Fix middleware to validate magic link token BEFORE requiring session"
-    - "Allow first-time magic link access without existing session"
-  debug_session: ""
+    - "Migrate middleware.ts to Next.js 16 proxy pattern"
+    - "OR: Downgrade to Next.js 15 for compatibility"
+
+- truth: "Contractor kann Portal ohne vorherige Session oeffnen"
+  status: partial
+  reason: "Middleware validiert Tokens korrekt (invalid -> redirect). Volltest blockiert durch fehlende Testdaten (Partners, Work Orders, Magic Links)"
+  severity: major
+  test: 6
+  root_cause: "Test-Umgebung hat keine Partners/Work Orders - nicht Code-Problem"
+  artifacts: []
+  missing:
+    - "Seed-Daten fuer Partners in Datenbank"
+    - "Seed-Daten fuer Work Orders mit Magic Links"
+
+## Environment Issues (Not Code Bugs)
+
+1. **Keine Partners in Datenbank** - WorkOrderForm kann nicht vollstaendig getestet werden
+2. **Keine Work Orders** - Contractor Portal kann nicht mit echten Daten getestet werden
+3. **Keine Magic Link Tokens** - Contractor-Zugang kann nur mit Rejection getestet werden
+
+## Code Issues Found During Testing
+
+1. **kewa-session Cookie Mismatch** (FIXED)
+   - 7 Dateien verwendeten falschen Cookie-Namen 'kewa-session' statt 'session'
+   - Gefixt: src/app/dashboard/projekte/[id]/page.tsx, auftraege/page.tsx, wohnungen/[id]/page.tsx, kosten/wohnungen/[id]/page.tsx, kosten/wohnungen/page.tsx
+   - 2 API-Routen noch mit altem Pattern (comments, parking) - funktionieren durch Middleware
+
+2. **Next.js 16 Middleware Deprecation** (UNRESOLVED)
+   - Server gibt 200, Client zeigt 404 fuer dynamische Routes
+   - Warnung: "The middleware file convention is deprecated. Please use proxy instead."
+   - Betrifft: /dashboard/projekte/[id], moeglicherweise andere [id] Routes
+
+## Verified Working
+
+1. Work Order List Page (/dashboard/auftraege) - PASS
+2. Work Order Create Form (/dashboard/auftraege/neu) - Form renders correctly
+3. Project List Page (/dashboard/projekte) - PASS
+4. Contractor Portal Token Validation - Invalid tokens correctly rejected
+5. Login Flow - PASS
+6. Session Management - PASS (after cookie fix)

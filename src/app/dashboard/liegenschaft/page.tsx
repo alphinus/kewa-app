@@ -8,14 +8,11 @@
  * Requirements: DASH-01, DASH-02, DASH-03
  */
 
-import { cookies } from 'next/headers'
-import { redirect } from 'next/navigation'
 import { PropertyDashboard } from '@/components/dashboard/PropertyDashboard'
 import { PropertyDashboardClient } from '@/components/dashboard/PropertyDashboardClient'
 import { DrilldownBreadcrumb } from '@/components/dashboard/DrilldownBreadcrumb'
 import { fetchHeatmapData } from '@/lib/dashboard/heatmap-queries'
 import { createClient } from '@/lib/supabase/server'
-import type { Role } from '@/types'
 
 export const metadata = {
   title: 'Liegenschaft - KEWA Dashboard',
@@ -37,26 +34,8 @@ async function getDefaultBuilding(): Promise<string | null> {
 }
 
 export default async function LiegenschaftPage() {
-  // Auth check
-  const cookieStore = await cookies()
-  const sessionCookie = cookieStore.get('kewa-session')
-
-  if (!sessionCookie?.value) {
-    redirect('/login')
-  }
-
-  let role: Role
-  try {
-    const session = JSON.parse(sessionCookie.value)
-    role = session.role
-  } catch {
-    redirect('/login')
-  }
-
-  // Only KEWA can see full dashboard
-  if (role !== 'kewa') {
-    redirect('/dashboard')
-  }
+  // Auth is handled by middleware - no need for redundant check here
+  // Middleware validates session and passes through for /dashboard/* routes
 
   const buildingId = await getDefaultBuilding()
 

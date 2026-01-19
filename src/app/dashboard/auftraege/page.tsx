@@ -16,6 +16,7 @@ import { cookies } from 'next/headers'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { validateSession, SESSION_COOKIE_NAME } from '@/lib/session'
 import type { Role, WorkOrderStatus } from '@/types'
 
 interface PageProps {
@@ -115,17 +116,15 @@ export default async function AuftraegePage({ searchParams }: PageProps) {
 
   // Get user session from cookies
   const cookieStore = await cookies()
-  const sessionCookie = cookieStore.get('kewa-session')
+  const sessionCookie = cookieStore.get(SESSION_COOKIE_NAME)
 
   if (!sessionCookie?.value) {
     redirect('/login')
   }
 
-  // Parse session
-  let session: { userId: string; role: Role }
-  try {
-    session = JSON.parse(sessionCookie.value)
-  } catch {
+  // Validate session
+  const session = await validateSession(sessionCookie.value)
+  if (!session) {
     redirect('/login')
   }
 
