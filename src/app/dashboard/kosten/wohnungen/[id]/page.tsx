@@ -238,7 +238,7 @@ export default async function UnitInvestmentDetailPage({ params }: PageProps) {
                   <tr key={project.id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
                     <td className="px-4 py-3">
                       <Link
-                        href={`/dashboard/renovationen/${project.id}`}
+                        href={`/dashboard/projekte/${project.id}`}
                         className="font-medium text-gray-900 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-400"
                       >
                         {project.name}
