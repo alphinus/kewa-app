@@ -168,11 +168,12 @@
 - Flow 2: Work Order → Invoice
 
 **Success Criteria:**
-- [ ] InvoiceForm component with work order pre-fill
-- [ ] "Neue Rechnung" page at `/dashboard/kosten/rechnungen/neu`
-- [ ] "Rechnung erstellen" action from completed work orders
+- [x] InvoiceForm component with work order pre-fill
+- [x] "Neue Rechnung" page at `/dashboard/kosten/rechnungen/neu`
+- [x] "Rechnung erstellen" action from completed work orders
 
 **Scope:** Small (1 form + 1 page + action button)
+**Status:** ✓ Complete (2026-01-19)
 
 ---
 
@@ -297,7 +298,7 @@
 | 11 | HIST-01-05 | 5 | ✓ Complete |
 | 12 | DASH-01-06, PARK-01-05, OCCU-01-04, COMM-01-03 | 18 | ✓ Complete |
 | 12.1 | INT-01 (Gap closure) | - | ✓ Complete |
-| 12.2 | INT-02 (Gap closure) | - | Pending |
+| 12.2 | INT-02 (Gap closure) | - | ✓ Complete |
 | **MVP Total** | | **92** | |
 | 13 | CHNG-01-03, SUPP-01-04 | 7 | Pending |
 | 14 | INSP-01-03, PUSH-01-05 | 8 | Pending |
