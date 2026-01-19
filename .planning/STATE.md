@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-01-18)
 ## Current Position
 
 Phase: 12.1 of 18 (Project Detail & Navigation)
-Plan: 0 of ? (not yet planned)
-Status: AWAITING PLAN
-Last activity: 2026-01-19 — Gap closure phases created from audit
+Plan: 1 of 1 COMPLETE
+Status: Phase 12.1 COMPLETE
+Last activity: 2026-01-19 — Completed 12.1-01-PLAN.md (Project Detail Page)
 
-Progress: [      ] 0% (Gap closure phases 12.1, 12.2 pending)
+Progress: [######] 50% (Phase 12.1 complete, Phase 12.2 pending)
 
 ## Phase 12 Plans
 
@@ -187,20 +187,21 @@ Before production deployment:
 | Polymorphic comments pattern | 12-05 | Same entity_type/entity_id approach as media table |
 | KEWA-only internal comments | 12-05 | Contractors should not see internal discussions |
 | Yellow/blue comment visibility | 12-05 | Visual distinction for internal vs shared comments |
+| Direct Supabase query in server component | 12.1-01 | Same pattern as wohnungen detail page, simpler than API fetch |
+| Follow wohnungen detail page pattern | 12.1-01 | Consistency with existing code conventions |
 
 ## Session Continuity
 
-Last session: 2026-01-18
-Stopped at: Completed 12-05-PLAN.md (Comments System)
+Last session: 2026-01-19
+Stopped at: Completed 12.1-01-PLAN.md (Project Detail Page)
 Resume file: None
 
 ## Next Step
 
-Phases 7-12 completed, but **milestone audit found 2 integration gaps**.
+**Phase 12.1 complete** - Integration gap INT-01 (Flow 1) closed.
 
-Gap closure phases created:
-- **Phase 12.1:** Project Detail & Navigation (closes INT-01, Flow 1)
+Remaining gap:
 - **Phase 12.2:** Invoice Creation UI (closes INT-02, Flow 2)
 
 Next action:
-- `/gsd:plan-phase 12.1` — Plan first gap closure phase
+- `/gsd:plan-phase 12.2` — Plan invoice creation gap closure phase
