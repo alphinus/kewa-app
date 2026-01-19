@@ -55,12 +55,12 @@ export default function ApplyTemplatePage() {
 
   // Handle success - navigate back to project
   const handleSuccess = () => {
-    router.push(`/dashboard/projects/${projectId}`)
+    router.push(`/dashboard/projekte/${projectId}`)
   }
 
   // Handle cancel - navigate back to project
   const handleCancel = () => {
-    router.push(`/dashboard/projects/${projectId}`)
+    router.push(`/dashboard/projekte/${projectId}`)
   }
 
   if (loading) {
@@ -118,7 +118,7 @@ export default function ApplyTemplatePage() {
             Dieses Projekt hat bereits eine Vorlage. Eine zweite Vorlage kann nicht angewendet werden.
           </p>
           <Link
-            href={`/dashboard/projects/${projectId}`}
+            href={`/dashboard/projekte/${projectId}`}
             className="inline-block px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
           >
             Zurueck zum Projekt
@@ -144,7 +144,7 @@ export default function ApplyTemplatePage() {
             Dieses Projekt hat den Status: <strong>{project.status}</strong>
           </p>
           <Link
-            href={`/dashboard/projects/${projectId}`}
+            href={`/dashboard/projekte/${projectId}`}
             className="inline-block px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
           >
             Zurueck zum Projekt
