@@ -399,7 +399,7 @@ export default async function UnitDetailPage({ params }: PageProps) {
                           <p className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
                             Projekt: {entry.source_project_id ? (
                               <Link
-                                href={`/dashboard/renovationen/${entry.source_project_id}`}
+                                href={`/dashboard/projekte/${entry.source_project_id}`}
                                 className="text-blue-600 dark:text-blue-400 hover:underline"
                               >
                                 {entry.project_name}
