@@ -5,15 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-01-19)
 
 **Core value:** KEWA AG hat volle Transparenz und Kontrolle uber alle Renovationen — mit standardisierten Workflows, externer Handwerker-Integration, Kostenuebersicht und automatischer Zustandshistorie.
-**Current focus:** v2.0 MVP SHIPPED — Ready for production deployment or v2.1 planning
+**Current focus:** v2.0 MVP SHIPPED — Fixing UAT blockers
 
 ## Current Position
 
-Phase: v2.0 Complete
-Status: MILESTONE SHIPPED
-Last activity: 2026-01-19 — v2.0 milestone archived
+Phase: 09-external-contractor-portal (post-UAT fixes)
+Plan: 06 of 7 complete
+Status: UAT blockers being resolved
+Last activity: 2026-01-19 — Completed 09-06-PLAN.md (middleware magic link fix)
 
-Progress: [############] 100% v2.0 MVP Complete
+Progress: [############] 100% v2.0 MVP + UAT fixes in progress
 
 ## v2.0 Milestone Summary
 
@@ -77,8 +78,16 @@ Choose one:
 
 **Recommended:** `/clear` first for fresh context window
 
+## UAT Blocker Fixes
+
+**09-06-PLAN.md:** Fixed middleware to validate path-based magic link tokens
+- Middleware now extracts token from URL path, not query params
+- Token validation happens before session check
+- First-time contractor access now works without prior authentication
+- Commit: a337996
+
 ## Session Continuity
 
 Last session: 2026-01-19
-Stopped at: v2.0 milestone completion
-Resume file: None
+Stopped at: Completed 09-06-PLAN.md
+Resume file: .planning/phases/09-external-contractor-portal/09-07-PLAN.md
