@@ -11,6 +11,7 @@ import {
   hasAnyPermission,
   isInternalRole
 } from '@/lib/permissions'
+import { validateContractorAccess } from '@/lib/magic-link'
 
 /**
  * Middleware for authentication and authorization
@@ -89,50 +90,54 @@ export async function middleware(request: NextRequest) {
 /**
  * Handle contractor portal routes
  *
- * Contractors access via magic link token, not standard session.
- * They have a session after first access, but limited to their work orders.
+ * Contractors access via magic link token in the URL path.
+ * URLs are: /contractor/{token} or /contractor/{token}/{workOrderId}
+ *
+ * Token is validated BEFORE checking for session, allowing
+ * first-time access without prior authentication.
  */
 async function handleContractorRoute(request: NextRequest): Promise<NextResponse> {
-  const { pathname, searchParams } = request.nextUrl
+  const { pathname } = request.nextUrl
 
-  // Check for magic link token in query params
-  const token = searchParams.get('token')
+  // Extract token from path: /contractor/{token} or /contractor/{token}/{workOrderId}
+  // The token is always the first path segment after /contractor/
+  const pathSegments = pathname.split('/').filter(Boolean)
+  // pathSegments = ['contractor', '{token}'] or ['contractor', '{token}', '{workOrderId}']
 
-  if (token) {
-    // Redirect to magic link verification endpoint
-    // This will validate the token and create a session
-    return NextResponse.redirect(
-      new URL(`/api/auth/magic-link/verify?token=${token}`, request.url)
-    )
-  }
-
-  // No token - check for existing session
-  const session = await getSessionWithRBACFromRequest(request)
-
-  if (!session) {
-    // No session - redirect to login with error
+  if (pathSegments.length < 2) {
+    // No token in path - redirect to login
     return NextResponse.redirect(
       new URL('/login?error=contractor_access_required', request.url)
     )
   }
 
-  // Check if contractor role
-  if (session.roleName !== 'external_contractor') {
-    // Internal users can also view contractor portal for testing
-    if (!isInternalRole(session.roleName)) {
-      return NextResponse.redirect(
-        new URL('/login?error=unauthorized', request.url)
-      )
-    }
+  const token = pathSegments[1] // First segment after 'contractor'
+
+  // Validate token using magic link validation (status-aware expiry)
+  const validation = await validateContractorAccess(token)
+
+  if (!validation.valid) {
+    // Token is invalid - redirect to login with specific error
+    const errorParam = validation.error || 'invalid_token'
+    return NextResponse.redirect(
+      new URL(`/login?error=${errorParam}`, request.url)
+    )
   }
 
-  // Valid contractor session - continue
+  // Token is valid - allow access
+  // The page component will handle session creation and rendering
   const response = NextResponse.next()
 
-  response.headers.set('x-user-id', session.userId)
-  response.headers.set('x-user-role', session.role)
-  response.headers.set('x-user-role-name', session.roleName)
-  response.headers.set('x-user-permissions', session.permissions.join(','))
+  // Pass contractor email via header for downstream use
+  if (validation.email) {
+    response.headers.set('x-contractor-email', validation.email)
+  }
+  if (validation.workOrderId) {
+    response.headers.set('x-work-order-id', validation.workOrderId)
+  }
+
+  // Mark as contractor access
+  response.headers.set('x-user-role-name', 'external_contractor')
 
   return response
 }
