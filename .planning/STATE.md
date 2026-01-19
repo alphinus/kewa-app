@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-01-18)
 
 **Core value:** KEWA AG hat volle Transparenz und Kontrolle uber alle Renovationen — mit standardisierten Workflows, externer Handwerker-Integration, Kostenuebersicht und automatischer Zustandshistorie.
-**Current focus:** v2.0 Renovation Operations System — Phase 12 COMPLETE
+**Current focus:** v2.0 Renovation Operations System — Gap closure phases 12.1-12.2
 
 ## Current Position
 
-Phase: 12 of 18 (Dashboard & Visualization)
-Plan: 5 of 5 complete
-Status: PHASE COMPLETE
-Last activity: 2026-01-18 — Completed 12-05-PLAN.md (Comments System)
+Phase: 12.1 of 18 (Project Detail & Navigation)
+Plan: 0 of ? (not yet planned)
+Status: AWAITING PLAN
+Last activity: 2026-01-19 — Gap closure phases created from audit
 
-Progress: [======] 100% (5/5 plans complete in Phase 12)
+Progress: [      ] 0% (Gap closure phases 12.1, 12.2 pending)
 
 ## Phase 12 Plans
 
@@ -196,9 +196,11 @@ Resume file: None
 
 ## Next Step
 
-Phase 12 (Dashboard & Visualization) is COMPLETE.
+Phases 7-12 completed, but **milestone audit found 2 integration gaps**.
 
-**MVP Phase 1 Complete!** All phases 7-12 finished.
+Gap closure phases created:
+- **Phase 12.1:** Project Detail & Navigation (closes INT-01, Flow 1)
+- **Phase 12.2:** Invoice Creation UI (closes INT-02, Flow 2)
 
-Next phase to plan:
-- **Phase 13:** Change Orders & Suppliers (Phase 2 Extension)
+Next action:
+- `/gsd:plan-phase 12.1` — Plan first gap closure phase

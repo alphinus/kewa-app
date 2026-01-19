@@ -10,7 +10,7 @@
 
 | Macro-Phase | Phases | Requirements | Focus |
 |-------------|--------|--------------|-------|
-| MVP (Phase 1) | 7-12 | 86 | Core system, external contractors, costs, dashboard |
+| MVP (Phase 1) | 7-12.2 | 86 | Core system, external contractors, costs, dashboard |
 | Extensions (Phase 2) | 13-15 | 19 | Change orders, suppliers, push, knowledge base |
 | Advanced (Phase 3) | 16-18 | 16 | Tenant portal, offline, integrations |
 
@@ -139,6 +139,42 @@
 
 ---
 
+## MVP Gap Closure Phases
+
+### Phase 12.1: Project Detail & Navigation
+
+**Goal:** Enable navigation to project details and template application
+
+**Gap Closure:**
+- INT-01: No project detail page
+- Flow 1: Create Project → Apply Template
+
+**Success Criteria:**
+- [ ] Project detail page at `/dashboard/projekte/[id]`
+- [ ] "Vorlage anwenden" button links to apply-template page
+- [ ] Project list cards navigate to detail page
+
+**Scope:** Small (1 page + navigation links)
+
+---
+
+### Phase 12.2: Invoice Creation UI
+
+**Goal:** Enable invoice creation from completed work orders
+
+**Gap Closure:**
+- INT-02: No invoice creation UI
+- Flow 2: Work Order → Invoice
+
+**Success Criteria:**
+- [ ] InvoiceForm component with work order pre-fill
+- [ ] "Neue Rechnung" page at `/dashboard/kosten/rechnungen/neu`
+- [ ] "Rechnung erstellen" action from completed work orders
+
+**Scope:** Small (1 form + 1 page + action button)
+
+---
+
 ## Extension Phases (Phase 2 Scope)
 
 ### Phase 13: Change Orders & Suppliers
@@ -259,6 +295,8 @@
 | 10 | COST-01-06, RENT-01-03 | 9 | ✓ Complete |
 | 11 | HIST-01-05 | 5 | ✓ Complete |
 | 12 | DASH-01-06, PARK-01-05, OCCU-01-04, COMM-01-03 | 18 | ✓ Complete |
+| 12.1 | INT-01 (Gap closure) | - | Pending |
+| 12.2 | INT-02 (Gap closure) | - | Pending |
 | **MVP Total** | | **92** | |
 | 13 | CHNG-01-03, SUPP-01-04 | 7 | Pending |
 | 14 | INSP-01-03, PUSH-01-05 | 8 | Pending |
@@ -285,7 +323,8 @@ Phase 8 ─> Phase 9 (Templates used in WorkOrders)
 Phase 9 ─> Phase 10 (WorkOrders create Costs)
 Phase 10 + 11 ─> Phase 12 (Dashboard needs data)
 
-Phase 12 (MVP Complete) ─> Phase 13, 14, 15 (Extensions)
+Phase 12 ─> Phase 12.1, 12.2 (Gap Closure)
+Phase 12.2 (MVP Complete) ─> Phase 13, 14, 15 (Extensions)
 
 Phase 14 (Push) ─> Phase 16 (Tenant Portal can use Push)
 Phase 7 (Auth) ─> Phase 17 (Offline needs auth sync)
@@ -297,7 +336,7 @@ Phase 7 (Auth) ─> Phase 17 (Offline needs auth sync)
 
 | Milestone | After Phase | Deliverable |
 |-----------|-------------|-------------|
-| **MVP** | 12 | Vollständiges Renovations-Management mit externen Handwerkern |
+| **MVP** | 12.2 | Vollständiges Renovations-Management mit externen Handwerkern |
 | **v2.1** | 15 | Change Orders, Lieferanten, Push, Knowledge Base |
 | **v2.2** | 18 | Mieter-Portal, Offline-Support, Integrationen |
 
