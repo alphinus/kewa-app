@@ -5,18 +5,26 @@
 See: .planning/PROJECT.md (updated 2026-01-18)
 
 **Core value:** KEWA AG hat volle Transparenz und Kontrolle uber alle Renovationen — mit standardisierten Workflows, externer Handwerker-Integration, Kostenuebersicht und automatischer Zustandshistorie.
-**Current focus:** v2.0 Renovation Operations System — Gap closure phases 12.1-12.2
+**Current focus:** v2.0 Renovation Operations System — MVP Complete (Phases 7-12.2)
 
 ## Current Position
 
 Phase: 12.2 of 18 (Invoice Creation UI)
-Plan: 0 of ? (not yet planned)
-Status: AWAITING PLAN
-Last activity: 2026-01-19 — Phase 12.1 verified and complete
+Plan: 1 of 1 (complete)
+Status: PHASE COMPLETE
+Last activity: 2026-01-19 — Completed 12.2-01-PLAN.md (Invoice Creation Form)
 
-Progress: [######] 50% (Phase 12.1 complete, Phase 12.2 pending)
+Progress: [############] 100% MVP (Phases 7-12.2 complete)
 
-## Phase 12 Plans
+## Phase 12.2 Plans
+
+| Plan | Name | Wave | Scope | Status |
+|------|------|------|-------|--------|
+| 12.2-01 | Invoice Creation Form & Page | 1 | small | COMPLETE |
+
+**Phase 12.2 Complete** - INT-02 gap closed
+
+## Phase 12 Plans (Original)
 
 | Plan | Name | Wave | Scope | Status |
 |------|------|------|-------|--------|
@@ -33,7 +41,7 @@ Progress: [######] 50% (Phase 12.1 complete, Phase 12.2 pending)
 **Goal:** Transformation von Task-App zu vollstaendigem Renovations-Management-System
 
 **Requirements:** 127 total
-- Phase 1 MVP: 86 (Phases 7-12)
+- Phase 1 MVP: 86 (Phases 7-12) - COMPLETE
 - Phase 2 Extensions: 19 (Phases 13-15)
 - Phase 3 Advanced: 16 (Phases 16-18)
 
@@ -61,7 +69,9 @@ Progress: [######] 50% (Phase 12.1 complete, Phase 12.2 pending)
 | 10 | Cost & Finance | 9 | COMPLETE |
 | 11 | History & Digital Twin | 5 | COMPLETE |
 | 12 | Dashboard & Visualization | 18 | COMPLETE |
-| **MVP Total** | | **92** | |
+| 12.1 | Project Detail & Navigation | - | COMPLETE |
+| 12.2 | Invoice Creation UI | - | COMPLETE |
+| **MVP Total** | | **92** | **COMPLETE** |
 | 13 | Change Orders & Suppliers | 7 | Pending |
 | 14 | Inspection & Push | 8 | Pending |
 | 15 | Knowledge Base | 4 | Pending |
@@ -189,19 +199,24 @@ Before production deployment:
 | Yellow/blue comment visibility | 12-05 | Visual distinction for internal vs shared comments |
 | Direct Supabase query in server component | 12.1-01 | Same pattern as wohnungen detail page, simpler than API fetch |
 | Follow wohnungen detail page pattern | 12.1-01 | Consistency with existing code conventions |
+| Swiss VAT 8.0% (updated) | 12.2-01 | 2024 Swiss VAT increase from 7.7% |
+| Draft as default invoice status | 12.2-01 | New invoices start as drafts, not received |
+| Document optional for draft invoices | 12.2-01 | Allow creating draft without uploading PDF |
+| Counter-offer radio buttons | 12.2-01 | Clear UX for estimated vs proposed selection |
+| Line items sync to net amount | 12.2-01 | Single source of truth for invoice total |
 
 ## Session Continuity
 
 Last session: 2026-01-19
-Stopped at: Completed 12.1-01-PLAN.md (Project Detail Page)
+Stopped at: Completed 12.2-01-PLAN.md (Invoice Creation Form)
 Resume file: None
 
 ## Next Step
 
-**Phase 12.1 complete** - Integration gap INT-01 (Flow 1) closed.
+**Phase 12.2 complete** - Integration gap INT-02 (Flow 2) closed.
 
-Remaining gap:
-- **Phase 12.2:** Invoice Creation UI (closes INT-02, Flow 2)
+**MVP COMPLETE** - All Phase 1 requirements (Phases 7-12.2) implemented.
 
 Next action:
-- `/gsd:plan-phase 12.2` — Plan invoice creation gap closure phase
+- Phase 2 begins with Phase 13 (Change Orders & Suppliers)
+- Or deploy MVP to production
