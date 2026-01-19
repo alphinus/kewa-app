@@ -9,10 +9,10 @@ See: .planning/PROJECT.md (updated 2026-01-18)
 
 ## Current Position
 
-Phase: 12.1 of 18 (Project Detail & Navigation)
-Plan: 1 of 1 COMPLETE
-Status: Phase 12.1 COMPLETE
-Last activity: 2026-01-19 — Completed 12.1-01-PLAN.md (Project Detail Page)
+Phase: 12.2 of 18 (Invoice Creation UI)
+Plan: 0 of ? (not yet planned)
+Status: AWAITING PLAN
+Last activity: 2026-01-19 — Phase 12.1 verified and complete
 
 Progress: [######] 50% (Phase 12.1 complete, Phase 12.2 pending)
 

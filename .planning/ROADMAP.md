@@ -150,11 +150,12 @@
 - Flow 1: Create Project → Apply Template
 
 **Success Criteria:**
-- [ ] Project detail page at `/dashboard/projekte/[id]`
-- [ ] "Vorlage anwenden" button links to apply-template page
-- [ ] Project list cards navigate to detail page
+- [x] Project detail page at `/dashboard/projekte/[id]`
+- [x] "Vorlage anwenden" button links to apply-template page
+- [x] Project list cards navigate to detail page
 
 **Scope:** Small (1 page + navigation links)
+**Status:** ✓ Complete (2026-01-19)
 
 ---
 
@@ -295,7 +296,7 @@
 | 10 | COST-01-06, RENT-01-03 | 9 | ✓ Complete |
 | 11 | HIST-01-05 | 5 | ✓ Complete |
 | 12 | DASH-01-06, PARK-01-05, OCCU-01-04, COMM-01-03 | 18 | ✓ Complete |
-| 12.1 | INT-01 (Gap closure) | - | Pending |
+| 12.1 | INT-01 (Gap closure) | - | ✓ Complete |
 | 12.2 | INT-02 (Gap closure) | - | Pending |
 | **MVP Total** | | **92** | |
 | 13 | CHNG-01-03, SUPP-01-04 | 7 | Pending |
