@@ -161,7 +161,7 @@ export default async function UnitDetailPage({ params }: PageProps) {
         {building && (
           <>
             <Link
-              href={`/dashboard/gebaeude/${building.id}`}
+              href="/dashboard/liegenschaft"
               className="hover:text-gray-700 dark:hover:text-gray-300"
             >
               {building.name}
