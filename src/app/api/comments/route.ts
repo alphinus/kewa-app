@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { fetchComments, createComment } from '@/lib/comments/comment-queries'
+import { SESSION_COOKIE_NAME } from '@/lib/session'
 import type { CommentEntityType, CommentVisibility } from '@/types/comments'
 
 export async function GET(request: Request) {
@@ -17,7 +18,7 @@ export async function GET(request: Request) {
 
   // Get viewer info from session
   const cookieStore = await cookies()
-  const sessionCookie = cookieStore.get('kewa-session')
+  const sessionCookie = cookieStore.get(SESSION_COOKIE_NAME)
   let viewerRole: 'kewa' | 'contractor' = 'contractor'
   let viewerEmail: string | undefined
 
@@ -38,7 +39,7 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   const cookieStore = await cookies()
-  const sessionCookie = cookieStore.get('kewa-session')
+  const sessionCookie = cookieStore.get(SESSION_COOKIE_NAME)
 
   if (!sessionCookie?.value) {
     return NextResponse.json({ error: 'Nicht autorisiert' }, { status: 401 })

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { updateParkingStatus, fetchParkingSpot } from '@/lib/parking/parking-queries'
+import { SESSION_COOKIE_NAME } from '@/lib/session'
 import type { ParkingStatus } from '@/types'
 
 interface RouteParams {
@@ -16,7 +17,7 @@ export async function GET(_request: Request, { params }: RouteParams) {
 
   // Check KEWA auth
   const cookieStore = await cookies()
-  const sessionCookie = cookieStore.get('kewa-session')
+  const sessionCookie = cookieStore.get(SESSION_COOKIE_NAME)
 
   if (!sessionCookie?.value) {
     return NextResponse.json({ error: 'Nicht autorisiert' }, { status: 401 })
@@ -52,7 +53,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
 
   // Check KEWA auth
   const cookieStore = await cookies()
-  const sessionCookie = cookieStore.get('kewa-session')
+  const sessionCookie = cookieStore.get(SESSION_COOKIE_NAME)
 
   if (!sessionCookie?.value) {
     return NextResponse.json({ error: 'Nicht autorisiert' }, { status: 401 })

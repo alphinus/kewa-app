@@ -14,7 +14,10 @@ import {
 import { validateContractorAccess } from '@/lib/magic-link'
 
 /**
- * Middleware for authentication and authorization
+ * Proxy for authentication and authorization (Next.js 16+)
+ *
+ * Renamed from middleware.ts to proxy.ts per Next.js 16 convention.
+ * See: https://nextjs.org/docs/messages/middleware-to-proxy
  *
  * Handles:
  * - Session validation for all protected routes
@@ -22,7 +25,7 @@ import { validateContractorAccess } from '@/lib/magic-link'
  * - Contractor portal access via magic link
  * - Response headers for downstream route handlers
  */
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
 
   // Special handling for contractor portal routes
@@ -72,7 +75,6 @@ export async function middleware(request: NextRequest) {
   }
 
   // Valid session - continue with session data in response headers
-  // Next.js 16+: Use response headers instead of deprecated request header mutation
   const response = NextResponse.next()
 
   // Legacy headers for backward compatibility

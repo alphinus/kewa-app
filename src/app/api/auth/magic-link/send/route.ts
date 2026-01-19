@@ -113,7 +113,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Build the magic link URL
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
     const magicLinkUrl = `${baseUrl}/contractor/${tokenData}`
 
     // Audit log
