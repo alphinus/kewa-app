@@ -177,6 +177,22 @@
 
 ---
 
+### Phase 12.3: Fix Navigation Links
+
+**Goal:** Fix broken navigation links identified in milestone audit
+
+**Gap Closure:**
+- Integration: 3 links to non-existent `/dashboard/renovationen` → `/dashboard/projekte`
+- Integration: 1 link to non-existent `/dashboard/gebaeude`
+
+**Success Criteria:**
+- [ ] Replace `/dashboard/renovationen` with `/dashboard/projekte` in 3 files
+- [ ] Remove or stub `/dashboard/gebaeude` link
+
+**Scope:** Tiny (string replacements only)
+
+---
+
 ## Extension Phases (Phase 2 Scope)
 
 ### Phase 13: Change Orders & Suppliers
@@ -299,6 +315,7 @@
 | 12 | DASH-01-06, PARK-01-05, OCCU-01-04, COMM-01-03 | 18 | ✓ Complete |
 | 12.1 | INT-01 (Gap closure) | - | ✓ Complete |
 | 12.2 | INT-02 (Gap closure) | - | ✓ Complete |
+| 12.3 | Navigation link fixes (Gap closure) | - | Pending |
 | **MVP Total** | | **92** | |
 | 13 | CHNG-01-03, SUPP-01-04 | 7 | Pending |
 | 14 | INSP-01-03, PUSH-01-05 | 8 | Pending |
@@ -325,8 +342,8 @@ Phase 8 ─> Phase 9 (Templates used in WorkOrders)
 Phase 9 ─> Phase 10 (WorkOrders create Costs)
 Phase 10 + 11 ─> Phase 12 (Dashboard needs data)
 
-Phase 12 ─> Phase 12.1, 12.2 (Gap Closure)
-Phase 12.2 (MVP Complete) ─> Phase 13, 14, 15 (Extensions)
+Phase 12 ─> Phase 12.1, 12.2, 12.3 (Gap Closure)
+Phase 12.3 (MVP Complete) ─> Phase 13, 14, 15 (Extensions)
 
 Phase 14 (Push) ─> Phase 16 (Tenant Portal can use Push)
 Phase 7 (Auth) ─> Phase 17 (Offline needs auth sync)
@@ -338,7 +355,7 @@ Phase 7 (Auth) ─> Phase 17 (Offline needs auth sync)
 
 | Milestone | After Phase | Deliverable |
 |-----------|-------------|-------------|
-| **MVP** | 12.2 | Vollständiges Renovations-Management mit externen Handwerkern |
+| **MVP** | 12.3 | Vollständiges Renovations-Management mit externen Handwerkern |
 | **v2.1** | 15 | Change Orders, Lieferanten, Push, Knowledge Base |
 | **v2.2** | 18 | Mieter-Portal, Offline-Support, Integrationen |
 
