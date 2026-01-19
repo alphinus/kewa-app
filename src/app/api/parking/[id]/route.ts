@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { updateParkingStatus, fetchParkingSpot } from '@/lib/parking/parking-queries'
-import { SESSION_COOKIE_NAME } from '@/lib/session'
+import { SESSION_COOKIE_NAME, validateSession } from '@/lib/session'
 import type { ParkingStatus } from '@/types'
 
 interface RouteParams {
@@ -23,13 +23,13 @@ export async function GET(_request: Request, { params }: RouteParams) {
     return NextResponse.json({ error: 'Nicht autorisiert' }, { status: 401 })
   }
 
-  try {
-    const session = JSON.parse(sessionCookie.value)
-    if (session.role !== 'kewa') {
-      return NextResponse.json({ error: 'Keine Berechtigung' }, { status: 403 })
-    }
-  } catch {
+  const session = await validateSession(sessionCookie.value)
+  if (!session) {
     return NextResponse.json({ error: 'Ungueltige Session' }, { status: 401 })
+  }
+
+  if (session.role !== 'kewa') {
+    return NextResponse.json({ error: 'Keine Berechtigung' }, { status: 403 })
   }
 
   const spot = await fetchParkingSpot(id)
@@ -59,13 +59,13 @@ export async function PATCH(request: Request, { params }: RouteParams) {
     return NextResponse.json({ error: 'Nicht autorisiert' }, { status: 401 })
   }
 
-  try {
-    const session = JSON.parse(sessionCookie.value)
-    if (session.role !== 'kewa') {
-      return NextResponse.json({ error: 'Keine Berechtigung' }, { status: 403 })
-    }
-  } catch {
+  const session = await validateSession(sessionCookie.value)
+  if (!session) {
     return NextResponse.json({ error: 'Ungueltige Session' }, { status: 401 })
+  }
+
+  if (session.role !== 'kewa') {
+    return NextResponse.json({ error: 'Keine Berechtigung' }, { status: 403 })
   }
 
   // Parse body

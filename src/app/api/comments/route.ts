@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { fetchComments, createComment } from '@/lib/comments/comment-queries'
-import { SESSION_COOKIE_NAME } from '@/lib/session'
+import { SESSION_COOKIE_NAME, validateSession } from '@/lib/session'
+import { createClient } from '@/lib/supabase/server'
 import type { CommentEntityType, CommentVisibility } from '@/types/comments'
 
 export async function GET(request: Request) {
@@ -23,12 +24,17 @@ export async function GET(request: Request) {
   let viewerEmail: string | undefined
 
   if (sessionCookie?.value) {
-    try {
-      const session = JSON.parse(sessionCookie.value)
+    const session = await validateSession(sessionCookie.value)
+    if (session) {
       viewerRole = session.role === 'kewa' ? 'kewa' : 'contractor'
-      viewerEmail = session.email
-    } catch {
-      // Keep default contractor role
+      // Fetch email from database for is_own_comment check
+      const supabase = await createClient()
+      const { data: user } = await supabase
+        .from('users')
+        .select('email')
+        .eq('id', session.userId)
+        .single()
+      viewerEmail = user?.email
     }
   }
 
@@ -45,20 +51,24 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Nicht autorisiert' }, { status: 401 })
   }
 
-  let authorId: string | undefined
-  let authorEmail: string | undefined
-  let authorName: string | undefined
-  let isKewa = false
-
-  try {
-    const session = JSON.parse(sessionCookie.value)
-    authorId = session.userId
-    authorEmail = session.email
-    authorName = session.displayName
-    isKewa = session.role === 'kewa'
-  } catch {
+  // Validate session JWT
+  const session = await validateSession(sessionCookie.value)
+  if (!session) {
     return NextResponse.json({ error: 'Ungueltige Session' }, { status: 401 })
   }
+
+  // Fetch user details from database
+  const supabase = await createClient()
+  const { data: user } = await supabase
+    .from('users')
+    .select('email, display_name')
+    .eq('id', session.userId)
+    .single()
+
+  const authorId = session.userId
+  const authorEmail = user?.email
+  const authorName = user?.display_name
+  const isKewa = session.role === 'kewa'
 
   const body = await request.json()
   const { entity_type, entity_id, content, visibility } = body as {
