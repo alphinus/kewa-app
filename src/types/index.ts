@@ -168,6 +168,7 @@ export type OfferStatus =
 
 // Invoice status workflow
 export type InvoiceStatus =
+  | 'draft'
   | 'received'
   | 'under_review'
   | 'approved'
