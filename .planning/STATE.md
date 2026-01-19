@@ -5,16 +5,24 @@
 See: .planning/PROJECT.md (updated 2026-01-18)
 
 **Core value:** KEWA AG hat volle Transparenz und Kontrolle uber alle Renovationen — mit standardisierten Workflows, externer Handwerker-Integration, Kostenuebersicht und automatischer Zustandshistorie.
-**Current focus:** v2.0 Renovation Operations System — MVP Complete (Phases 7-12.2)
+**Current focus:** v2.0 Renovation Operations System — MVP Complete (Phases 7-12.3)
 
 ## Current Position
 
-Phase: 12.2 of 18 (Invoice Creation UI)
+Phase: 12.3 of 18 (Fix Navigation Links)
 Plan: 1 of 1 (complete)
 Status: PHASE COMPLETE
-Last activity: 2026-01-19 — Completed 12.2-01-PLAN.md (Invoice Creation Form)
+Last activity: 2026-01-19 — Completed 12.3-01-PLAN.md (Fix Navigation Links)
 
-Progress: [############] 100% MVP (Phases 7-12.2 complete)
+Progress: [############] 100% MVP (Phases 7-12.3 complete)
+
+## Phase 12.3 Plans
+
+| Plan | Name | Wave | Scope | Status |
+|------|------|------|-------|--------|
+| 12.3-01 | Fix Navigation Links | 1 | tiny | COMPLETE |
+
+**Phase 12.3 Complete** - Navigation link gaps closed
 
 ## Phase 12.2 Plans
 
@@ -71,6 +79,7 @@ Progress: [############] 100% MVP (Phases 7-12.2 complete)
 | 12 | Dashboard & Visualization | 18 | COMPLETE |
 | 12.1 | Project Detail & Navigation | - | COMPLETE |
 | 12.2 | Invoice Creation UI | - | COMPLETE |
+| 12.3 | Fix Navigation Links | - | COMPLETE |
 | **MVP Total** | | **92** | **COMPLETE** |
 | 13 | Change Orders & Suppliers | 7 | Pending |
 | 14 | Inspection & Push | 8 | Pending |
@@ -204,18 +213,19 @@ Before production deployment:
 | Document optional for draft invoices | 12.2-01 | Allow creating draft without uploading PDF |
 | Counter-offer radio buttons | 12.2-01 | Clear UX for estimated vs proposed selection |
 | Line items sync to net amount | 12.2-01 | Single source of truth for invoice total |
+| Building link -> /liegenschaft | 12.3-01 | Property dashboard is closest existing route to non-existent /gebaeude |
 
 ## Session Continuity
 
 Last session: 2026-01-19
-Stopped at: Completed 12.2-01-PLAN.md (Invoice Creation Form)
+Stopped at: Completed 12.3-01-PLAN.md (Fix Navigation Links)
 Resume file: None
 
 ## Next Step
 
-**Phase 12.2 complete** - Integration gap INT-02 (Flow 2) closed.
+**Phase 12.3 complete** - Navigation link gaps closed.
 
-**MVP COMPLETE** - All Phase 1 requirements (Phases 7-12.2) implemented.
+**MVP COMPLETE** - All Phase 1 requirements (Phases 7-12.3) implemented.
 
 Next action:
 - Phase 2 begins with Phase 13 (Change Orders & Suppliers)
