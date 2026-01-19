@@ -186,10 +186,11 @@
 - Integration: 1 link to non-existent `/dashboard/gebaeude`
 
 **Success Criteria:**
-- [ ] Replace `/dashboard/renovationen` with `/dashboard/projekte` in 3 files
-- [ ] Remove or stub `/dashboard/gebaeude` link
+- [x] Replace `/dashboard/renovationen` with `/dashboard/projekte` in 3 files
+- [x] Remove or stub `/dashboard/gebaeude` link
 
 **Scope:** Tiny (string replacements only)
+**Status:** ✓ Complete (2026-01-19)
 
 ---
 
@@ -315,7 +316,7 @@
 | 12 | DASH-01-06, PARK-01-05, OCCU-01-04, COMM-01-03 | 18 | ✓ Complete |
 | 12.1 | INT-01 (Gap closure) | - | ✓ Complete |
 | 12.2 | INT-02 (Gap closure) | - | ✓ Complete |
-| 12.3 | Navigation link fixes (Gap closure) | - | Pending |
+| 12.3 | Navigation link fixes (Gap closure) | - | ✓ Complete |
 | **MVP Total** | | **92** | |
 | 13 | CHNG-01-03, SUPP-01-04 | 7 | Pending |
 | 14 | INSP-01-03, PUSH-01-05 | 8 | Pending |
