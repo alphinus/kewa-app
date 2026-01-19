@@ -52,8 +52,6 @@ function getUnitByFloor(units: HeatmapUnit[], floor: number): HeatmapUnit | null
 export interface BuildingHeatmapProps {
   /** Building to display heatmap for */
   buildingId: string
-  /** Click handler when unit is selected */
-  onUnitClick?: (unitId: string) => void
   /** Additional CSS classes */
   className?: string
 }
@@ -69,7 +67,6 @@ export interface BuildingHeatmapProps {
  */
 export async function BuildingHeatmap({
   buildingId,
-  onUnitClick,
   className
 }: BuildingHeatmapProps) {
   const units = await fetchHeatmapData(buildingId)
@@ -91,7 +88,7 @@ export async function BuildingHeatmap({
             cols === 1 ? 'grid-cols-1' : 'grid-cols-3'
           )}>
             {cols === 1 ? (
-              <DachCell units={units} floor={floor} onUnitClick={onUnitClick} />
+              <DachCell units={units} floor={floor} />
             ) : (
               POSITION_ORDER.map((position) => {
                 const unit = getUnitByFloorPosition(units, floor, position)
@@ -99,7 +96,6 @@ export async function BuildingHeatmap({
                   <HeatmapUnitCell
                     key={unit.id}
                     unit={unit}
-                    onClick={() => onUnitClick?.(unit.id)}
                     compact
                   />
                 ) : (
@@ -119,12 +115,10 @@ export async function BuildingHeatmap({
  */
 function DachCell({
   units,
-  floor,
-  onUnitClick
+  floor
 }: {
   units: HeatmapUnit[]
   floor: number
-  onUnitClick?: (id: string) => void
 }) {
   const unit = getUnitByFloor(units, floor)
 
@@ -133,7 +127,6 @@ function DachCell({
   return (
     <HeatmapUnitCell
       unit={unit}
-      onClick={() => onUnitClick?.(unit.id)}
       compact
     />
   )

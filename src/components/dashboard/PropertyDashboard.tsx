@@ -17,8 +17,6 @@ import { cn } from '@/lib/utils'
 export interface PropertyDashboardProps {
   /** Building to display dashboard for */
   buildingId: string
-  /** Click handler when unit is selected */
-  onUnitClick?: (unitId: string) => void
   /** Additional CSS classes */
   className?: string
 }
@@ -31,7 +29,6 @@ export interface PropertyDashboardProps {
  */
 export async function PropertyDashboard({
   buildingId,
-  onUnitClick,
   className
 }: PropertyDashboardProps) {
   const summary = await fetchDashboardSummary(buildingId)
@@ -72,7 +69,6 @@ export async function PropertyDashboard({
           </h3>
           <BuildingHeatmap
             buildingId={buildingId}
-            onUnitClick={onUnitClick}
           />
         </div>
 

@@ -36,8 +36,6 @@ const OVERALL_BG_COLORS: Record<RoomCondition, string> = {
 export interface HeatmapUnitCellProps {
   /** Unit data with condition info */
   unit: HeatmapUnit
-  /** Click handler for unit selection */
-  onClick: () => void
   /** Compact mode for smaller cells */
   compact?: boolean
 }
@@ -49,7 +47,7 @@ export interface HeatmapUnitCellProps {
  * - Renovation percentage
  * - Background colored by overall condition
  */
-export function HeatmapUnitCell({ unit, onClick, compact = false }: HeatmapUnitCellProps) {
+export function HeatmapUnitCell({ unit, compact = false }: HeatmapUnitCellProps) {
   const bgColor = unit.overall_condition
     ? OVERALL_BG_COLORS[unit.overall_condition]
     : 'bg-gray-50 dark:bg-gray-800'
@@ -58,10 +56,11 @@ export function HeatmapUnitCell({ unit, onClick, compact = false }: HeatmapUnitC
   const displayRooms = unit.rooms.slice(0, 6)
   const hasMoreRooms = unit.rooms.length > 6
 
+  // Click handling via event delegation in PropertyDashboardClient
+  // which captures clicks on [data-unit-id] elements
   return (
     <Card
       data-unit-id={unit.id}
-      onClick={onClick}
       className={cn(
         'cursor-pointer transition-all duration-200',
         'hover:shadow-md hover:scale-[1.02]',
