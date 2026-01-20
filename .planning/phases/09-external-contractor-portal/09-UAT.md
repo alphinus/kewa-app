@@ -114,22 +114,18 @@ skipped: 15
 ## Gaps
 
 - truth: "Projekt-Detail-Seite zeigt Auftrag erstellen Button"
-  status: failed
+  status: RESOLVED (2026-01-20)
   reason: "Next.js 16 gibt 404 fuer /dashboard/projekte/[id] trotz korrekt konfigurierter Route und 200 vom Server"
   severity: blocker
   test: 1
-  root_cause: "Next.js 16.1.2 Middleware-Deprecation - middleware.ts wird als veraltet markiert. Server rendert 200, aber Client zeigt 404."
-  artifacts:
-    - path: "src/middleware.ts"
-      issue: "Middleware deprecated in Next.js 16, needs migration to proxy"
-    - path: "src/app/dashboard/projekte/[id]/page.tsx"
-      issue: "Page renders successfully on server but 404 on client"
-  missing:
-    - "Migrate middleware.ts to Next.js 16 proxy pattern"
-    - "OR: Downgrade to Next.js 15 for compatibility"
+  root_cause: "Two issues: (1) proxy.ts incorrectly named - Next.js requires middleware.ts; (2) Page queried 'renovation_projects' table but data is in 'projects' table"
+  resolution:
+    - "Renamed src/proxy.ts to src/middleware.ts"
+    - "Updated page to query 'projects' table"
+    - "Commit: 1eb5c97"
 
 - truth: "Contractor kann Portal ohne vorherige Session oeffnen"
-  status: partial
+  status: partial (environment issue)
   reason: "Middleware validiert Tokens korrekt (invalid -> redirect). Volltest blockiert durch fehlende Testdaten (Partners, Work Orders, Magic Links)"
   severity: major
   test: 6
@@ -152,16 +148,22 @@ skipped: 15
    - Gefixt: src/app/dashboard/projekte/[id]/page.tsx, auftraege/page.tsx, wohnungen/[id]/page.tsx, kosten/wohnungen/[id]/page.tsx, kosten/wohnungen/page.tsx
    - 2 API-Routen noch mit altem Pattern (comments, parking) - funktionieren durch Middleware
 
-2. **Next.js 16 Middleware Deprecation** (UNRESOLVED)
-   - Server gibt 200, Client zeigt 404 fuer dynamische Routes
-   - Warnung: "The middleware file convention is deprecated. Please use proxy instead."
-   - Betrifft: /dashboard/projekte/[id], moeglicherweise andere [id] Routes
+2. **Next.js 16 Middleware + Table Name Mismatch** (FIXED 2026-01-20)
+   - **Root causes identified:**
+     a) proxy.ts was incorrectly named - Next.js requires middleware.ts
+     b) Project detail page queried 'renovation_projects' table but data is in 'projects' table
+   - **Fixes applied:**
+     a) Renamed src/proxy.ts to src/middleware.ts, function name to middleware()
+     b) Updated page to query 'projects' table (v1 schema)
+   - **Commit:** 1eb5c97
+   - **Note:** Deprecation warning still shows but middleware works correctly
 
 ## Verified Working
 
 1. Work Order List Page (/dashboard/auftraege) - PASS
 2. Work Order Create Form (/dashboard/auftraege/neu) - Form renders correctly
 3. Project List Page (/dashboard/projekte) - PASS
-4. Contractor Portal Token Validation - Invalid tokens correctly rejected
-5. Login Flow - PASS
-6. Session Management - PASS (after cookie fix)
+4. Project Detail Page (/dashboard/projekte/[id]) - PASS (fixed 2026-01-20)
+5. Contractor Portal Token Validation - Invalid tokens correctly rejected
+6. Login Flow - PASS
+7. Session Management - PASS (after cookie fix)
