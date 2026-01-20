@@ -114,21 +114,17 @@ export default async function ProjectDetailPage({ params }: PageProps) {
   }
 
   // Fetch project data directly from Supabase
+  // Note: Using 'projects' table (v1 schema) for compatibility with existing data
   const supabase = await createClient()
   const { data: project, error } = await supabase
-    .from('renovation_projects')
+    .from('projects')
     .select(`
       id,
       name,
       description,
       status,
-      template_id,
-      planned_start_date,
-      planned_end_date,
-      actual_start_date,
-      actual_end_date,
+      visible_to_imeri,
       created_at,
-      updated_at,
       unit:units (
         id,
         name,
@@ -152,7 +148,8 @@ export default async function ProjectDetailPage({ params }: PageProps) {
   } | null
 
   const statusBadge = getStatusBadge(project.status)
-  const canApplyTemplate = project.status === 'planned' && !project.template_id
+  // Template features available when using renovation_projects table
+  const canApplyTemplate = false // Disabled for v1 projects table
 
   return (
     <div className="space-y-6 pb-20">
@@ -234,59 +231,12 @@ export default async function ProjectDetailPage({ params }: PageProps) {
               </div>
             )}
 
-            {/* Template Status */}
-            <div className="flex items-center gap-2 text-sm mb-4">
-              <svg
-                className="w-4 h-4 text-gray-400"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                />
-              </svg>
-              <span className="text-gray-600 dark:text-gray-400">Vorlage:</span>
-              {project.template_id ? (
-                <span className="text-green-600 dark:text-green-400 font-medium">
-                  Angewendet
-                </span>
-              ) : (
-                <span className="text-gray-500 dark:text-gray-500">
-                  Keine
-                </span>
-              )}
-            </div>
-
-            {/* Dates */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
-              <div>
-                <p className="text-gray-500 dark:text-gray-400">Geplanter Start</p>
-                <p className="font-medium text-gray-900 dark:text-gray-100">
-                  {formatDate(project.planned_start_date)}
-                </p>
-              </div>
-              <div>
-                <p className="text-gray-500 dark:text-gray-400">Geplantes Ende</p>
-                <p className="font-medium text-gray-900 dark:text-gray-100">
-                  {formatDate(project.planned_end_date)}
-                </p>
-              </div>
-              <div>
-                <p className="text-gray-500 dark:text-gray-400">Tats. Start</p>
-                <p className="font-medium text-gray-900 dark:text-gray-100">
-                  {formatDate(project.actual_start_date)}
-                </p>
-              </div>
-              <div>
-                <p className="text-gray-500 dark:text-gray-400">Tats. Ende</p>
-                <p className="font-medium text-gray-900 dark:text-gray-100">
-                  {formatDate(project.actual_end_date)}
-                </p>
-              </div>
+            {/* Created Date */}
+            <div className="text-sm">
+              <span className="text-gray-500 dark:text-gray-400">Erstellt: </span>
+              <span className="font-medium text-gray-900 dark:text-gray-100">
+                {formatDate(project.created_at)}
+              </span>
             </div>
           </div>
         </div>
@@ -389,39 +339,8 @@ export default async function ProjectDetailPage({ params }: PageProps) {
           )}
         </div>
 
-        {/* Template eligibility hint */}
-        {!canApplyTemplate && !project.template_id && (
-          <p className="mt-3 text-sm text-gray-500 dark:text-gray-400">
-            Hinweis: Eine Vorlage kann nur auf Projekte im Status &quot;Geplant&quot; angewendet werden.
-          </p>
-        )}
-        {project.template_id && (
-          <p className="mt-3 text-sm text-gray-500 dark:text-gray-400">
-            Diesem Projekt wurde bereits eine Vorlage zugewiesen.
-          </p>
-        )}
       </div>
 
-      {/* Metadata */}
-      <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-4 sm:p-6">
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
-          Metadaten
-        </h2>
-        <div className="grid grid-cols-2 gap-4 text-sm">
-          <div>
-            <p className="text-gray-500 dark:text-gray-400">Erstellt am</p>
-            <p className="font-medium text-gray-900 dark:text-gray-100">
-              {formatDate(project.created_at)}
-            </p>
-          </div>
-          <div>
-            <p className="text-gray-500 dark:text-gray-400">Zuletzt aktualisiert</p>
-            <p className="font-medium text-gray-900 dark:text-gray-100">
-              {formatDate(project.updated_at)}
-            </p>
-          </div>
-        </div>
-      </div>
 
       {/* Back to projects list */}
       <div>

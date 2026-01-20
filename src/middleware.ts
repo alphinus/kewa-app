@@ -14,10 +14,7 @@ import {
 import { validateContractorAccess } from '@/lib/magic-link'
 
 /**
- * Proxy for authentication and authorization (Next.js 16+)
- *
- * Renamed from middleware.ts to proxy.ts per Next.js 16 convention.
- * See: https://nextjs.org/docs/messages/middleware-to-proxy
+ * Middleware for authentication and authorization
  *
  * Handles:
  * - Session validation for all protected routes
@@ -25,7 +22,7 @@ import { validateContractorAccess } from '@/lib/magic-link'
  * - Contractor portal access via magic link
  * - Response headers for downstream route handlers
  */
-export async function proxy(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
   // Special handling for contractor portal routes
