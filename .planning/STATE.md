@@ -10,32 +10,32 @@ See: .planning/PROJECT.md (updated 2026-01-22)
 ## Current Position
 
 Phase: 13 of 17 (Partner-Modul)
-Plan: 1 of 4 in current phase
-Status: In progress
-Last activity: 2026-01-22 — Completed 13-01-PLAN.md (Partner API CRUD)
+Plan: 4 of 4 in current phase
+Status: Phase complete
+Last activity: 2026-01-22 — Completed 13-04-PLAN.md (Partner Dropdown Integration)
 
-Progress: [█░░░░░░░░░░░] 4% (1/23 plans)
+Progress: [████░░░░░░░░] 17% (4/23 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 1 (v2.1)
-- Average duration: 4 min
-- Total execution time: 0.07 hours
+- Total plans completed: 4 (v2.1)
+- Average duration: 8 min
+- Total execution time: 0.53 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 13 | 1/4 | 4min | 4min |
+| 13 | 4/4 | 32min | 8min |
 | 14 | 0/5 | - | - |
 | 15 | 0/4 | - | - |
 | 16 | 0/4 | - | - |
 | 17 | 0/6 | - | - |
 
 **Recent Trend:**
-- Last 5 plans: 13-01 (4min)
-- Trend: Starting strong
+- Last 5 plans: 13-01 (4min), 13-02 (9min), 13-03 (8min), 13-04 (11min)
+- Trend: Consistent delivery, phase 13 complete
 
 *Updated after each plan completion*
 
@@ -56,6 +56,8 @@ Key features delivered: RBAC, Contractor Portal, Templates, Cost Module, Digital
 | 13-01 | Email validation required for contractors, optional for suppliers | Contractors need email for work order notifications, suppliers may only need phone contact |
 | 13-01 | Admin-only DELETE with soft validation warning for active work orders | Admin override needed for data cleanup, but logged warning prevents accidental deletions |
 | 13-01 | Manual validation pattern (no Zod) | Consistency with existing expenses/invoices codebase patterns |
+| 13-04 | Trade filtering fallback shows all partners if no matches | Prevents empty dropdown when trade categories don't perfectly match, allows manual override |
+| 13-04 | Partner interface aligned with database schema | Use trade_categories (not trades), is_active, nullable email for consistency |
 
 ### Pending Todos
 
@@ -68,9 +70,9 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-01-22 17:29 UTC
-Stopped at: Completed 13-01-PLAN.md (Partner API CRUD)
+Last session: 2026-01-22 19:20 UTC
+Stopped at: Completed 13-04-PLAN.md (Partner Dropdown Integration)
 Resume file: None
 
 ---
-*Next: Execute plan 13-02 (Partner Management UI)*
+*Next: Execute phase 14 plans (Contractor Portal)*
