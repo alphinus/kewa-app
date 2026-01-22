@@ -8,11 +8,21 @@ Ein umfassendes Renovations-Management-System für KEWA AG. Standardisierte Proj
 
 KEWA AG hat volle Transparenz und Kontrolle über alle Renovationen — mit standardisierten Workflows, externer Handwerker-Integration, Kostenübersicht und automatischer Zustandshistorie.
 
+## Current Milestone: v2.1 Master Data Management
+
+**Goal:** Komplette Stammdaten-Verwaltung — Partner, Liegenschaften, Templates, Onboarding
+
+**Target features:**
+- Partner/Handwerker-Modul (API + CRUD UI + WorkOrder-Integration)
+- Multi-Liegenschaft-Verwaltung (Properties/Buildings API + UI + Auswahl)
+- Template-Management (UI zum Erstellen/Bearbeiten/Auswählen)
+- Seed Data & Onboarding (Initiale Daten + Setup-Flow)
+
 ## Current State (v2.0 MVP Shipped)
 
 **Tech Stack:** Next.js 16 + React 19 + Supabase + Tailwind CSS 4
 **Codebase:** ~51,000 LOC TypeScript, ~400 files
-**Status:** v2.0 MVP shipped, ready for production deployment
+**Status:** v2.0 MVP shipped, starting v2.1 Master Data Management
 
 **Shipped Features (v2.0):**
 - Multi-Role RBAC (Admin, Manager, Accounting, Tenant, Contractor) mit 3 Auth-Methoden
@@ -128,5 +138,5 @@ KEWA AG hat volle Transparenz und Kontrolle über alle Renovationen — mit stan
 | Mieter-Portal in Phase 3 | MVP-Fokus auf Renovation, Mieter später | — Planned |
 
 ---
-*Last updated: 2026-01-19 after v2.0 milestone*
+*Last updated: 2026-01-22 after v2.1 milestone start*
 *Source: KEWA-RENOVATION-OPS-SPEC_v1 + Original v2.0 Scope*

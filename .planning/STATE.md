@@ -2,19 +2,19 @@
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-01-19)
+See: .planning/PROJECT.md (updated 2026-01-22)
 
 **Core value:** KEWA AG hat volle Transparenz und Kontrolle uber alle Renovationen — mit standardisierten Workflows, externer Handwerker-Integration, Kostenuebersicht und automatischer Zustandshistorie.
-**Current focus:** v2.0 MVP SHIPPED — UAT blockers resolved
+**Current focus:** v2.1 Master Data Management — Stammdaten-Verwaltung
 
 ## Current Position
 
-Phase: 09-external-contractor-portal (post-UAT fixes)
-Plan: 07 of 7 complete
-Status: UAT blockers resolved
-Last activity: 2026-01-19 — Completed 09-07-PLAN.md (work order UI integration)
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements for v2.1
+Last activity: 2026-01-22 — Milestone v2.1 started
 
-Progress: [############] 100% v2.0 MVP + UAT fixes complete
+Progress: [░░░░░░░░░░░░] 0% v2.1 starting
 
 ## v2.0 Milestone Summary
 
@@ -95,6 +95,6 @@ Choose one:
 
 ## Session Continuity
 
-Last session: 2026-01-19
-Stopped at: Completed 09-07-PLAN.md
+Last session: 2026-01-22
+Stopped at: Starting v2.1 milestone — defining requirements
 Resume file: None
