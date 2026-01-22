@@ -29,19 +29,20 @@ v2.1 delivers complete master data management: Partner/Handwerker CRUD with Work
 **Goal**: Admin can fully manage partner/contractor master data and assign partners to work orders
 **Depends on**: v2.0 shipped (Partner table exists, WorkOrder integration needed)
 **Requirements**: PART-01, PART-02, PART-03, PART-04, PART-05
+**Plans:** 4 plans
+
+Plans:
+- [ ] 13-01-PLAN.md — Partner API routes (GET/POST collection, GET/PATCH/DELETE single)
+- [ ] 13-02-PLAN.md — Partner list UI with PartnerCard and filtering
+- [ ] 13-03-PLAN.md — Partner create/edit form with validation
+- [ ] 13-04-PLAN.md — WorkOrderForm partner dropdown integration
+
 **Success Criteria** (what must be TRUE):
   1. Admin sees a list of all partners with company name, contact, and trade categories
   2. Admin can create a new partner with all required fields (Firma, Kontakt, Email, Gewerke)
   3. Admin can edit any partner's data and changes persist
   4. Admin can toggle partner active/inactive status and inactive partners are excluded from assignment
   5. WorkOrderForm shows dropdown of active partners and selected partner is saved to work order
-**Plans**: TBD
-
-Plans:
-- [ ] 13-01: Partner API routes (list, create, update, toggle status)
-- [ ] 13-02: Partner list UI with filtering
-- [ ] 13-03: Partner create/edit forms
-- [ ] 13-04: WorkOrderForm partner dropdown integration
 
 ### Phase 14: Multi-Liegenschaft
 **Goal**: Admin can manage multiple properties with buildings and switch active context
@@ -126,7 +127,7 @@ Phases execute in numeric order: 13 -> 14 -> 15 -> 16 -> 17
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 13. Partner-Modul | v2.1 | 0/4 | Not started | - |
+| 13. Partner-Modul | v2.1 | 0/4 | Planned | - |
 | 14. Multi-Liegenschaft | v2.1 | 0/5 | Not started | - |
 | 15. Einheiten-Verwaltung | v2.1 | 0/4 | Not started | - |
 | 16. Template-Management | v2.1 | 0/4 | Not started | - |
@@ -136,4 +137,5 @@ Phases execute in numeric order: 13 -> 14 -> 15 -> 16 -> 17
 
 ---
 *Roadmap created: 2026-01-22*
+*Phase 13 planned: 2026-01-22*
 *Milestone: v2.1 Master Data Management*
