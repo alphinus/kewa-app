@@ -31,8 +31,9 @@ interface Partner {
   id: string
   company_name: string
   contact_name: string | null
-  email: string
-  trades: TradeCategory[]
+  email: string | null
+  trade_categories: TradeCategory[]
+  is_active: boolean
 }
 
 interface WorkOrderFormProps {
@@ -112,7 +113,7 @@ export function WorkOrderForm({
     if (selectedTask?.trade_category) {
       // Filter partners by trade category
       const filtered = partners.filter(p =>
-        p.trades.includes(selectedTask.trade_category!)
+        p.trade_categories.includes(selectedTask.trade_category!)
       )
       setFilteredPartners(filtered.length > 0 ? filtered : partners)
     } else {
@@ -153,8 +154,8 @@ export function WorkOrderForm({
         setProjects(data.projects || [])
       }
 
-      // Load partners (contractors only)
-      const partnersRes = await fetch('/api/partners?type=contractor')
+      // Load partners (active contractors only)
+      const partnersRes = await fetch('/api/partners?type=contractor&is_active=true')
       if (partnersRes.ok) {
         const data = await partnersRes.json()
         setPartners(data.partners || [])
