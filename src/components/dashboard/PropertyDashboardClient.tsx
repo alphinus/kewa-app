@@ -12,7 +12,29 @@
 
 import { useState, useCallback } from 'react'
 import { UnitDetailPanel } from './UnitDetailPanel'
-import type { HeatmapUnit } from '@/lib/dashboard/heatmap-queries'
+import type { RoomCondition } from '@/types'
+
+// Local type definition to avoid server module import
+export interface HeatmapUnit {
+  id: string
+  name: string
+  floor: number | null
+  position: string | null
+  unit_type: string
+  tenant_name: string | null
+  total_rooms: number
+  new_rooms: number
+  partial_rooms: number
+  old_rooms: number
+  renovation_percentage: number | null
+  overall_condition: RoomCondition | null
+  rooms: Array<{
+    id: string
+    name: string
+    room_type: string
+    condition: RoomCondition
+  }>
+}
 
 interface PropertyDashboardClientProps {
   units: HeatmapUnit[]

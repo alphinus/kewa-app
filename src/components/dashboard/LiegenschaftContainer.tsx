@@ -5,7 +5,29 @@ import { useBuilding } from '@/contexts/BuildingContext'
 import { PropertyDashboard } from '@/components/dashboard/PropertyDashboard'
 import { PropertyDashboardClient } from '@/components/dashboard/PropertyDashboardClient'
 import { DrilldownBreadcrumb } from '@/components/dashboard/DrilldownBreadcrumb'
-import type { HeatmapUnit } from '@/lib/dashboard/heatmap-queries'
+import type { RoomCondition } from '@/types'
+
+// Local type definition to avoid server module import
+interface HeatmapUnit {
+  id: string
+  name: string
+  floor: number | null
+  position: string | null
+  unit_type: string
+  tenant_name: string | null
+  total_rooms: number
+  new_rooms: number
+  partial_rooms: number
+  old_rooms: number
+  renovation_percentage: number | null
+  overall_condition: RoomCondition | null
+  rooms: Array<{
+    id: string
+    name: string
+    room_type: string
+    condition: RoomCondition
+  }>
+}
 
 /**
  * Client-side container for Liegenschaft page
