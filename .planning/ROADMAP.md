@@ -90,13 +90,13 @@ Plans:
   3. Admin can create a new template with name and description
   4. Admin can add/edit/remove phases, packages, and tasks within a template
   5. Project creation form shows template dropdown and applies selected template to new project
-**Plans**: TBD
+**Plans**: 4 plans
 
 Plans:
-- [ ] 16-01: Template list and detail view UI
-- [ ] 16-02: Template create/edit form
-- [ ] 16-03: Template structure editor (phases, packages, tasks)
-- [ ] 16-04: Project creation template selection integration
+- [ ] 16-01-PLAN.md — List enhancements (inactive toggle) and create template page
+- [ ] 16-02-PLAN.md — Template duplicate API endpoint
+- [ ] 16-03-PLAN.md — Drag-drop reordering for hierarchy editor
+- [ ] 16-04-PLAN.md — Project creation with template selection
 
 ### Phase 17: Admin & Onboarding
 **Goal**: Admin has overview dashboard, search functionality, and new deployments have guided setup
