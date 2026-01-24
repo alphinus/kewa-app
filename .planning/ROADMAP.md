@@ -20,7 +20,7 @@ v2.1 delivers complete master data management: Partner/Handwerker CRUD with Work
 - [x] **Phase 13: Partner-Modul** - Partner/Handwerker CRUD with WorkOrder integration
 - [x] **Phase 14: Multi-Liegenschaft** - Property/Building management with context switching
 - [x] **Phase 15: Einheiten-Verwaltung** - Unit and room management within buildings
-- [ ] **Phase 16: Template-Management** - Template CRUD UI for project templates
+- [x] **Phase 16: Template-Management** - Template CRUD UI for project templates
 - [ ] **Phase 17: Admin & Onboarding** - Dashboard, search, migrations, and setup wizard
 
 ## Phase Details
@@ -90,13 +90,14 @@ Plans:
   3. Admin can create a new template with name and description
   4. Admin can add/edit/remove phases, packages, and tasks within a template
   5. Project creation form shows template dropdown and applies selected template to new project
-**Plans**: 4 plans
+**Plans**: 5 plans
 
 Plans:
-- [ ] 16-01-PLAN.md — List enhancements (inactive toggle) and create template page
-- [ ] 16-02-PLAN.md — Template duplicate API endpoint
-- [ ] 16-03-PLAN.md — Drag-drop reordering for hierarchy editor
-- [ ] 16-04-PLAN.md — Project creation with template selection
+- [x] 16-01-PLAN.md — List enhancements (inactive toggle) and create template page
+- [x] 16-02-PLAN.md — Template duplicate API endpoint
+- [x] 16-03-PLAN.md — Drag-drop reordering for hierarchy editor
+- [x] 16-04-PLAN.md — Project creation with template selection
+- [x] 16-05-PLAN.md — Template list phase count and last modified display (gap closure)
 
 ### Phase 17: Admin & Onboarding
 **Goal**: Admin has overview dashboard, search functionality, and new deployments have guided setup
@@ -130,14 +131,15 @@ Phases execute in numeric order: 13 -> 14 -> 15 -> 16 -> 17
 | 13. Partner-Modul | v2.1 | 4/4 | Complete | 2026-01-22 |
 | 14. Multi-Liegenschaft | v2.1 | 5/5 | Complete | 2026-01-24 |
 | 15. Einheiten-Verwaltung | v2.1 | 4/4 | Complete | 2026-01-24 |
-| 16. Template-Management | v2.1 | 0/4 | Not started | - |
+| 16. Template-Management | v2.1 | 5/5 | Complete | 2026-01-25 |
 | 17. Admin & Onboarding | v2.1 | 0/6 | Not started | - |
 
-**Total:** 13/23 plans complete (57%)
+**Total:** 18/24 plans complete (75%)
 
 ---
 *Roadmap created: 2026-01-22*
 *Phase 13 complete: 2026-01-22*
 *Phase 14 complete: 2026-01-24*
 *Phase 15 complete: 2026-01-24*
+*Phase 16 complete: 2026-01-25*
 *Milestone: v2.1 Master Data Management*

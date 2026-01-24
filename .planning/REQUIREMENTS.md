@@ -97,11 +97,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 | UNIT-02 | Phase 15 | Pending |
 | UNIT-03 | Phase 15 | Pending |
 | UNIT-04 | Phase 15 | Pending |
-| TMPL-01 | Phase 16 | Pending |
-| TMPL-02 | Phase 16 | Pending |
-| TMPL-03 | Phase 16 | Pending |
-| TMPL-04 | Phase 16 | Pending |
-| TMPL-05 | Phase 16 | Pending |
+| TMPL-01 | Phase 16 | Complete |
+| TMPL-02 | Phase 16 | Complete |
+| TMPL-03 | Phase 16 | Complete |
+| TMPL-04 | Phase 16 | Complete |
+| TMPL-05 | Phase 16 | Complete |
 | ADMN-01 | Phase 17 | Pending |
 | ADMN-02 | Phase 17 | Pending |
 | ADMN-03 | Phase 17 | Pending |
