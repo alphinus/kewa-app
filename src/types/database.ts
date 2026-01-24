@@ -401,6 +401,7 @@ export interface TaskWithProject extends Task {
     name: string
     unit_type: UnitType
     floor: number | null
+    building_id?: string | null
   }
 }
 

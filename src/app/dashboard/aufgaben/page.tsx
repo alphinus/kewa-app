@@ -6,7 +6,8 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { TaskList } from '@/components/tasks/TaskList'
 import { TaskForm } from '@/components/tasks/TaskForm'
-import type { TaskWithProject, TasksResponse, UnitWithStats, UnitsResponse } from '@/types/database'
+import { useBuilding } from '@/contexts/BuildingContext'
+import type { TaskWithProject, TasksResponse, UnitWithStats, UnitsResponse, Building } from '@/types/database'
 import type { TaskStatus } from '@/types'
 
 /**
@@ -17,10 +18,12 @@ function AufgabenPageContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const unitIdFromUrl = searchParams.get('unit_id')
+  const { selectedBuildingId, isAllSelected, isLoading: contextLoading } = useBuilding()
 
   // State
   const [tasks, setTasks] = useState<TaskWithProject[]>([])
   const [units, setUnits] = useState<UnitWithStats[]>([])
+  const [buildings, setBuildings] = useState<Record<string, string>>({})
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -33,8 +36,28 @@ function AufgabenPageContent() {
   const [editingTask, setEditingTask] = useState<TaskWithProject | null>(null)
   const [deleteConfirm, setDeleteConfirm] = useState<TaskWithProject | null>(null)
 
+  // Fetch buildings for name lookup (only when viewing all)
+  const fetchBuildings = useCallback(async () => {
+    try {
+      const response = await fetch('/api/buildings')
+      if (response.ok) {
+        const data = await response.json()
+        const buildingMap: Record<string, string> = {}
+        data.buildings.forEach((b: Building) => {
+          buildingMap[b.id] = b.name
+        })
+        setBuildings(buildingMap)
+      }
+    } catch {
+      // Silent fail - building names are optional enhancement
+    }
+  }, [])
+
   // Fetch tasks
   const fetchTasks = useCallback(async () => {
+    // Wait for building context to initialize
+    if (contextLoading || selectedBuildingId === null) return
+
     try {
       setLoading(true)
       setError(null)
@@ -45,6 +68,10 @@ function AufgabenPageContent() {
       }
       if (unitFilter) {
         params.set('unit_id', unitFilter)
+      }
+      // Add building_id filter when specific building is selected
+      if (selectedBuildingId && selectedBuildingId !== 'all') {
+        params.set('building_id', selectedBuildingId)
       }
 
       const url = `/api/tasks${params.toString() ? `?${params.toString()}` : ''}`
@@ -61,7 +88,7 @@ function AufgabenPageContent() {
     } finally {
       setLoading(false)
     }
-  }, [statusFilter, unitFilter])
+  }, [statusFilter, unitFilter, selectedBuildingId, contextLoading])
 
   // Fetch units for filter dropdown
   const fetchUnits = useCallback(async () => {
@@ -81,6 +108,13 @@ function AufgabenPageContent() {
     fetchTasks()
     fetchUnits()
   }, [fetchTasks, fetchUnits])
+
+  // Fetch buildings when viewing all (for building badges)
+  useEffect(() => {
+    if (isAllSelected) {
+      fetchBuildings()
+    }
+  }, [isAllSelected, fetchBuildings])
 
   // Update unit filter when URL changes
   useEffect(() => {
@@ -205,8 +239,8 @@ function AufgabenPageContent() {
         </Card>
       )}
 
-      {/* Loading state */}
-      {loading && !error && (
+      {/* Loading state (includes context loading) */}
+      {(loading || contextLoading) && !error && (
         <div className="space-y-3">
           {[1, 2, 3].map((i) => (
             <div
@@ -218,11 +252,12 @@ function AufgabenPageContent() {
       )}
 
       {/* Task list */}
-      {!loading && !error && (
+      {!loading && !contextLoading && !error && (
         <TaskList
           tasks={tasks}
           onTaskClick={handleTaskClick}
           onDeleteClick={handleDeleteClick}
+          buildingNames={isAllSelected ? buildings : undefined}
         />
       )}
 

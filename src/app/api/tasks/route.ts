@@ -124,6 +124,7 @@ export async function GET(
           name: task.project?.unit?.name || '',
           unit_type: task.project?.unit?.unit_type || 'apartment',
           floor: task.project?.unit?.floor ?? null,
+          building_id: task.project?.unit?.building_id || null,
         },
       }))
 

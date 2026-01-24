@@ -11,6 +11,8 @@ interface TaskListProps {
   onTaskClick: (task: TaskWithProject) => void
   /** Callback when delete is requested */
   onDeleteClick: (task: TaskWithProject) => void
+  /** Building name lookup map for "all" view badges */
+  buildingNames?: Record<string, string>
 }
 
 // Priority display configuration
@@ -61,7 +63,7 @@ function isOverdue(dateString: string | null): boolean {
  * Task list component
  * Displays tasks as cards with priority badge and due date
  */
-export function TaskList({ tasks, onTaskClick, onDeleteClick }: TaskListProps) {
+export function TaskList({ tasks, onTaskClick, onDeleteClick, buildingNames }: TaskListProps) {
   if (tasks.length === 0) {
     return (
       <Card>
@@ -82,6 +84,7 @@ export function TaskList({ tasks, onTaskClick, onDeleteClick }: TaskListProps) {
           task={task}
           onClick={() => onTaskClick(task)}
           onDelete={() => onDeleteClick(task)}
+          buildingName={task.unit.building_id && buildingNames ? buildingNames[task.unit.building_id] : undefined}
         />
       ))}
     </div>
@@ -92,12 +95,13 @@ interface TaskCardProps {
   task: TaskWithProject
   onClick: () => void
   onDelete: () => void
+  buildingName?: string
 }
 
 /**
  * Individual task card
  */
-function TaskCard({ task, onClick, onDelete }: TaskCardProps) {
+function TaskCard({ task, onClick, onDelete, buildingName }: TaskCardProps) {
   const priority = priorityConfig[task.priority]
   const dueDate = formatDate(task.due_date)
   const overdue = isOverdue(task.due_date) && task.status === 'open'
@@ -124,6 +128,11 @@ function TaskCard({ task, onClick, onDelete }: TaskCardProps) {
 
             {/* Project and unit subtitle */}
             <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
+              {buildingName && (
+                <span className="inline-flex items-center gap-1 mr-2 px-1.5 py-0.5 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs rounded">
+                  {buildingName}
+                </span>
+              )}
               {task.project.name} - {task.unit.name}
             </p>
 
