@@ -39,6 +39,7 @@ import { redirect, notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { validateSession, SESSION_COOKIE_NAME } from '@/lib/session'
 import { ConditionBadge, getConditionLabel } from '@/components/units/ConditionBadge'
+import { UnitActions } from '@/components/units/UnitActions'
 import UnitTimeline from '@/components/units/UnitTimeline'
 import {
   fetchUnitConditionData,
@@ -197,20 +198,7 @@ export default async function UnitDetailPage({ params }: PageProps) {
           </div>
 
           {/* Actions */}
-          <div className="flex gap-2">
-            <Link
-              href={`/dashboard/kosten/wohnungen/${id}`}
-              className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors"
-            >
-              Kosten
-            </Link>
-            <Link
-              href={`/dashboard/aufgaben?unit_id=${id}`}
-              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
-            >
-              Aufgaben
-            </Link>
-          </div>
+          <UnitActions unitId={id} unitName={unit.name} />
         </div>
       </div>
 
