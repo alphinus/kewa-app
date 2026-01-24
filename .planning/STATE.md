@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-01-22)
 ## Current Position
 
 Phase: 15 of 17 (Einheiten-Verwaltung)
-Plan: 0 of 4 in current phase
-Status: Ready for planning
-Last activity: 2026-01-24 — Completed phase 14 (5/5 plans verified)
+Plan: 2 of 4 in current phase
+Status: In progress
+Last activity: 2026-01-24 — Completed 15-02-PLAN.md (Room API)
 
-Progress: [████████░░░░] 39% (9/23 plans)
+Progress: [█████████░░░] 48% (11/23 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 9 (v2.1)
+- Total plans completed: 11 (v2.1)
 - Average duration: 10 min
-- Total execution time: 1.6 hours
+- Total execution time: 1.8 hours
 
 **By Phase:**
 
@@ -29,12 +29,12 @@ Progress: [████████░░░░] 39% (9/23 plans)
 |-------|-------|-------|----------|
 | 13 | 4/4 | 36min | 9min |
 | 14 | 5/5 | 60min | 12min |
-| 15 | 0/4 | - | - |
+| 15 | 2/4 | 16min | 8min |
 | 16 | 0/4 | - | - |
 | 17 | 0/6 | - | - |
 
 **Recent Trend:**
-- Last 5 plans: 14-02 (7min), 14-01 (8min), 14-03 (5min), 14-05 (19min), 14-04 (21min)
+- Last 5 plans: 15-02 (8min), 15-01 (8min), 14-05 (19min), 14-04 (21min), 14-03 (5min)
 - Trend: Consistent delivery
 
 *Updated after each plan completion*
@@ -71,6 +71,9 @@ Key features delivered: RBAC, Contractor Portal, Templates, Cost Module, Digital
 | 14-03 | 'all' or missing building_id returns unfiltered data | Backward compatibility with existing API consumers |
 | 14-05 | Liegenschaft converted to client component | Server components can't access BuildingContext; client-side API fetching required |
 | 14-05 | Heatmap shows prompt when 'all' selected | Heatmap is building-specific view, can't aggregate across buildings |
+| 15-02 | unit_id required for room listing | Rooms only make sense in unit context; prevents expensive full-table scans |
+| 15-02 | condition not updatable via API | Condition is managed by Digital Twin automation from completed projects |
+| 15-02 | kewa-only DELETE with history warning | Cascade delete of history is destructive; admin override but logged |
 
 ### Pending Todos
 
@@ -83,8 +86,8 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-01-24
-Stopped at: Completed phase 14 (Multi-Liegenschaft)
+Stopped at: Completed 15-02-PLAN.md (Room API)
 Resume file: None
 
 ---
-*Next: Plan phase 15 (Einheiten-Verwaltung)*
+*Next: Execute 15-03-PLAN.md (Unit UI) or 15-04-PLAN.md (Room UI)*
