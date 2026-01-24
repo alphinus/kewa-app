@@ -12,16 +12,16 @@ See: .planning/PROJECT.md (updated 2026-01-22)
 Phase: 16 of 17 (Template-Management)
 Plan: 2 of 4 in current phase
 Status: In progress
-Last activity: 2026-01-25 — Completed 16-02-PLAN.md (Template Duplication API)
+Last activity: 2026-01-25 — Completed 16-01-PLAN.md (Template Create & List Enhancements)
 
-Progress: [███████████░░] 61% (14/23 plans)
+Progress: [███████████░░] 65% (15/23 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 14 (v2.1)
+- Total plans completed: 15 (v2.1)
 - Average duration: 10 min
-- Total execution time: 2.2 hours
+- Total execution time: 2.4 hours
 
 **By Phase:**
 
@@ -34,7 +34,7 @@ Progress: [███████████░░] 61% (14/23 plans)
 | 17 | 0/6 | - | - |
 
 **Recent Trend:**
-- Last 5 plans: 16-02 (8min), 16-01 (8min), 15-04 (8min), 15-03 (10min), 15-02 (8min)
+- Last 5 plans: 16-01 (8min), 16-02 (8min), 15-04 (8min), 15-03 (10min), 15-02 (8min)
 - Trend: Consistent delivery
 
 *Updated after each plan completion*
@@ -85,6 +85,9 @@ Key features delivered: RBAC, Contractor Portal, Templates, Cost Module, Digital
 | 15-04 | Link to wohnungen/[id] for full timeline view | Reuse existing detailed timeline page |
 | 16-02 | Rollback via cascade delete on partial insert failure | Simplest error recovery: delete parent template cleans up all children |
 | 16-02 | ID maps built during hierarchical insert for dependency/gate remapping | Dependencies reference task IDs, gates reference phase/package IDs - need old->new mapping |
+| 16-01 | showInactive defaults to false | Active templates shown by default per CONTEXT.md |
+| 16-01 | Duplicate prompts for new name | User can customize copy name before creation |
+| 16-01 | New template redirects to edit page | WBS structure editing immediately after creation |
 
 ### Pending Todos
 
@@ -97,7 +100,7 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-01-25
-Stopped at: Completed 16-02-PLAN.md (Template Duplication API)
+Stopped at: Completed 16-01-PLAN.md (Template Create & List Enhancements)
 Resume file: None
 
 ---
