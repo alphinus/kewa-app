@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-01-22)
 ## Current Position
 
 Phase: 16 of 17 (Template-Management)
-Plan: 3 of 4 in current phase
-Status: In progress
-Last activity: 2026-01-25 — Completed 16-03-PLAN.md (Template Hierarchy Reordering)
+Plan: 4 of 4 in current phase
+Status: Phase complete
+Last activity: 2026-01-25 — Completed 16-04-PLAN.md (Project Creation Template Selection)
 
-Progress: [████████████░] 70% (16/23 plans)
+Progress: [█████████████░] 74% (17/23 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 16 (v2.1)
+- Total plans completed: 17 (v2.1)
 - Average duration: 10 min
-- Total execution time: 2.5 hours
+- Total execution time: 2.6 hours
 
 **By Phase:**
 
@@ -30,11 +30,11 @@ Progress: [████████████░] 70% (16/23 plans)
 | 13 | 4/4 | 36min | 9min |
 | 14 | 5/5 | 60min | 12min |
 | 15 | 4/4 | 34min | 9min |
-| 16 | 3/4 | 24min | 8min |
+| 16 | 4/4 | 32min | 8min |
 | 17 | 0/6 | - | - |
 
 **Recent Trend:**
-- Last 5 plans: 16-03 (8min), 16-01 (8min), 16-02 (8min), 15-04 (8min), 15-03 (10min)
+- Last 5 plans: 16-04 (8min), 16-03 (8min), 16-01 (8min), 16-02 (8min), 15-04 (8min)
 - Trend: Consistent delivery
 
 *Updated after each plan completion*
@@ -90,6 +90,8 @@ Key features delivered: RBAC, Contractor Portal, Templates, Cost Module, Digital
 | 16-01 | New template redirects to edit page | WBS structure editing immediately after creation |
 | 16-03 | Drag within parent only | Packages stay in same phase, tasks in same package - prevents accidental structure changes |
 | 16-03 | Batch update pattern for reorder | Update all sort_order values in parallel Promise.all for efficiency |
+| 16-04 | Template-first project creation flow | Select template before project details - matches KEWA workflow |
+| 16-04 | POST /api/renovation-projects endpoint | Template apply requires renovation_projects table, not simple projects |
 
 ### Pending Todos
 
@@ -102,8 +104,8 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-01-25
-Stopped at: Completed 16-03-PLAN.md (Template Hierarchy Reordering)
+Stopped at: Completed 16-04-PLAN.md (Project Creation Template Selection)
 Resume file: None
 
 ---
-*Next: 16-04-PLAN.md (Project Creation Template Selection)*
+*Phase 16 complete. Next: Phase 17 (Reporting & Data Management)*
