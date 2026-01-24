@@ -413,6 +413,7 @@ export interface ProjectWithUnit extends Project {
     name: string
     unit_type: UnitType
     floor: number | null
+    building_id?: string | null
   }
 }
 

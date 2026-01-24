@@ -4,11 +4,13 @@ import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { Card, CardContent } from '@/components/ui/card'
 import { ProjectCard } from '@/components/projects/ProjectCard'
-import type { ProjectWithUnit, ProjectsResponse, TasksResponse } from '@/types/database'
+import { useBuilding } from '@/contexts/BuildingContext'
+import type { ProjectWithUnit, ProjectsResponse, TasksResponse, Building } from '@/types/database'
 
 interface ProjectWithStats extends ProjectWithUnit {
   openTasksCount: number
   totalTasksCount: number
+  buildingName?: string
 }
 
 /**
@@ -36,25 +38,59 @@ function ProjectCardSkeleton() {
  */
 export default function ProjektePage() {
   const router = useRouter()
+  const { selectedBuildingId, isAllSelected, isLoading: contextLoading } = useBuilding()
   const [projects, setProjects] = useState<ProjectWithStats[]>([])
+  const [buildings, setBuildings] = useState<Record<string, string>>({})
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [showArchived, setShowArchived] = useState(false)
 
+  // Fetch buildings for name lookup (only when viewing all)
+  const fetchBuildings = useCallback(async () => {
+    try {
+      const response = await fetch('/api/buildings')
+      if (response.ok) {
+        const data = await response.json()
+        const buildingMap: Record<string, string> = {}
+        data.buildings.forEach((b: Building) => {
+          buildingMap[b.id] = b.name
+        })
+        setBuildings(buildingMap)
+      }
+    } catch {
+      // Silent fail - building names are optional enhancement
+    }
+  }, [])
+
   // Fetch projects with task counts
   const fetchProjects = useCallback(async () => {
+    // Wait for building context to initialize
+    if (contextLoading || selectedBuildingId === null) return
+
     try {
       setLoading(true)
       setError(null)
 
-      // Fetch projects with archive filter
-      const projectsUrl = showArchived
-        ? '/api/projects?include_archived=true'
-        : '/api/projects'
+      // Build projects URL with building_id filter
+      const params = new URLSearchParams()
+      if (showArchived) {
+        params.set('include_archived', 'true')
+      }
+      if (selectedBuildingId && selectedBuildingId !== 'all') {
+        params.set('building_id', selectedBuildingId)
+      }
+      const projectsUrl = `/api/projects${params.toString() ? `?${params.toString()}` : ''}`
+
+      // Build tasks URL with same building filter
+      const tasksParams = new URLSearchParams()
+      if (selectedBuildingId && selectedBuildingId !== 'all') {
+        tasksParams.set('building_id', selectedBuildingId)
+      }
+      const tasksUrl = `/api/tasks${tasksParams.toString() ? `?${tasksParams.toString()}` : ''}`
 
       const [projectsRes, tasksRes] = await Promise.all([
         fetch(projectsUrl),
-        fetch('/api/tasks'),
+        fetch(tasksUrl),
       ])
 
       if (!projectsRes.ok) {
@@ -104,11 +140,18 @@ export default function ProjektePage() {
     } finally {
       setLoading(false)
     }
-  }, [showArchived])
+  }, [showArchived, selectedBuildingId, contextLoading])
 
   useEffect(() => {
     fetchProjects()
   }, [fetchProjects])
+
+  // Fetch buildings when viewing all (for building badges)
+  useEffect(() => {
+    if (isAllSelected) {
+      fetchBuildings()
+    }
+  }, [isAllSelected, fetchBuildings])
 
   // Handle archive/unarchive
   const handleArchive = async (projectId: string, archive: boolean) => {
@@ -192,8 +235,8 @@ export default function ProjektePage() {
         </div>
       )}
 
-      {/* Loading state */}
-      {loading && (
+      {/* Loading state (includes context loading) */}
+      {(loading || contextLoading) && (
         <div className="space-y-3">
           <ProjectCardSkeleton />
           <ProjectCardSkeleton />
@@ -202,7 +245,7 @@ export default function ProjektePage() {
       )}
 
       {/* Empty state */}
-      {!loading && !error && projects.length === 0 && (
+      {!loading && !contextLoading && !error && projects.length === 0 && (
         <Card>
           <CardContent className="p-8 text-center">
             <h2 className="text-lg font-medium text-gray-900 dark:text-gray-100">
@@ -216,7 +259,7 @@ export default function ProjektePage() {
       )}
 
       {/* Projects list */}
-      {!loading && !error && projects.length > 0 && (
+      {!loading && !contextLoading && !error && projects.length > 0 && (
         <div className="space-y-3">
           {projects.map((project) => (
             <ProjectCard
@@ -226,6 +269,7 @@ export default function ProjektePage() {
               totalTasksCount={project.totalTasksCount}
               onArchive={handleArchive}
               onClick={handleProjectClick}
+              buildingName={isAllSelected && project.unit.building_id ? buildings[project.unit.building_id] : undefined}
             />
           ))}
         </div>

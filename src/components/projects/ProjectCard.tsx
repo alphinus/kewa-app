@@ -12,6 +12,7 @@ interface ProjectCardProps {
   totalTasksCount: number
   onArchive: (projectId: string, archive: boolean) => Promise<void>
   onClick?: (project: ProjectWithUnit) => void
+  buildingName?: string
 }
 
 /**
@@ -24,6 +25,7 @@ export function ProjectCard({
   totalTasksCount,
   onArchive,
   onClick,
+  buildingName,
 }: ProjectCardProps) {
   const [showConfirmDialog, setShowConfirmDialog] = useState(false)
   const [archiving, setArchiving] = useState(false)
@@ -85,6 +87,11 @@ export function ProjectCard({
               </div>
 
               <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                {buildingName && (
+                  <span className="inline-flex items-center gap-1 mr-2 px-1.5 py-0.5 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs rounded">
+                    {buildingName}
+                  </span>
+                )}
                 {project.unit.name}
               </p>
 
