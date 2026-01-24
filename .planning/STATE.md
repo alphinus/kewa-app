@@ -10,31 +10,31 @@ See: .planning/PROJECT.md (updated 2026-01-22)
 ## Current Position
 
 Phase: 14 of 17 (Multi-Liegenschaft)
-Plan: 2 of 5 in current phase
+Plan: 3 of 5 in current phase
 Status: In progress
-Last activity: 2026-01-24 — Completed 14-01-PLAN.md (Property & Building CRUD API)
+Last activity: 2026-01-24 — Completed 14-03-PLAN.md (Data Loading Patterns)
 
-Progress: [██████░░░░░░] 26% (6/23 plans)
+Progress: [███████░░░░░] 30% (7/23 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 6 (v2.1)
-- Average duration: 9 min
-- Total execution time: 0.85 hours
+- Total plans completed: 7 (v2.1)
+- Average duration: 8 min
+- Total execution time: 0.93 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 13 | 4/4 | 36min | 9min |
-| 14 | 2/5 | 15min | 7.5min |
+| 14 | 3/5 | 20min | 6.7min |
 | 15 | 0/4 | - | - |
 | 16 | 0/4 | - | - |
 | 17 | 0/6 | - | - |
 
 **Recent Trend:**
-- Last 5 plans: 13-02 (9min), 13-03 (12min), 13-04 (11min), 14-02 (7min), 14-01 (8min)
+- Last 5 plans: 13-03 (12min), 13-04 (11min), 14-02 (7min), 14-01 (8min), 14-03 (5min)
 - Trend: Consistent delivery
 
 *Updated after each plan completion*
@@ -67,6 +67,8 @@ Key features delivered: RBAC, Contractor Portal, Templates, Cost Module, Digital
 | 14-02 | Placeholder view for 'all' selection | Full data loading support in 14-03 |
 | 14-01 | DELETE restricted to kewa role only | Cascade delete is destructive - admin-only for safety |
 | 14-01 | Cascade warning log but proceed with delete | Admin override pattern consistent with partners API |
+| 14-03 | Client-side filtering for building_id via unit relation | Supabase doesn't support nested relation filtering in query builder |
+| 14-03 | 'all' or missing building_id returns unfiltered data | Backward compatibility with existing API consumers |
 
 ### Pending Todos
 
@@ -79,8 +81,8 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-01-24
-Stopped at: Completed 14-01-PLAN.md (Property & Building CRUD API)
+Stopped at: Completed 14-03-PLAN.md (Data Loading Patterns)
 Resume file: None
 
 ---
-*Next: Execute 14-03-PLAN.md (Data Loading Patterns)*
+*Next: Execute 14-04-PLAN.md*
