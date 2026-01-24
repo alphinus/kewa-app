@@ -17,21 +17,23 @@ export default function TemplatesPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [categoryFilter, setCategoryFilter] = useState<TemplateCategory | ''>('')
+  const [showInactive, setShowInactive] = useState(false)
   const [isAdmin, setIsAdmin] = useState(false)
 
   // Load templates and check admin status
   useEffect(() => {
     loadTemplates()
     checkAdminStatus()
-  }, [categoryFilter])
+  }, [categoryFilter, showInactive])
 
   async function loadTemplates() {
     setLoading(true)
     setError(null)
     try {
-      const data = await fetchTemplates(
-        categoryFilter ? { category: categoryFilter } : undefined
-      )
+      const options: { category?: TemplateCategory; active?: boolean } = {}
+      if (categoryFilter) options.category = categoryFilter
+      if (!showInactive) options.active = true
+      const data = await fetchTemplates(Object.keys(options).length > 0 ? options : undefined)
       setTemplates(data)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Fehler beim Laden der Templates')
@@ -104,8 +106,21 @@ export default function TemplatesPage() {
           </div>
         )}
 
-        {/* Category filter */}
-        <div className="mb-6 flex flex-wrap gap-2">
+        {/* Filters */}
+        <div className="mb-6 flex flex-wrap items-center gap-4">
+          {/* Inactive toggle */}
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={showInactive}
+              onChange={(e) => setShowInactive(e.target.checked)}
+              className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+            />
+            <span className="text-sm text-gray-700">Inaktive anzeigen</span>
+          </label>
+
+          {/* Category filter */}
+          <div className="flex flex-wrap gap-2">
           <button
             onClick={() => setCategoryFilter('')}
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors min-h-[44px] ${
@@ -146,6 +161,7 @@ export default function TemplatesPage() {
           >
             Gewerk-spezifisch
           </button>
+          </div>
         </div>
 
         {/* Content */}
