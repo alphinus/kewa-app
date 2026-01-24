@@ -1,9 +1,10 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { TemplateCard } from '@/components/templates/TemplateCard'
-import { fetchTemplates, deleteTemplate } from '@/lib/api/templates'
+import { fetchTemplates, deleteTemplate, duplicateTemplate } from '@/lib/api/templates'
 import type { Template, TemplateCategory } from '@/types/templates'
 
 /**
@@ -13,6 +14,7 @@ import type { Template, TemplateCategory } from '@/types/templates'
  * Admin users can create, edit, and delete templates.
  */
 export default function TemplatesPage() {
+  const router = useRouter()
   const [templates, setTemplates] = useState<Template[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -58,6 +60,19 @@ export default function TemplatesPage() {
       setTemplates(templates.filter(t => t.id !== id))
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Fehler beim Loeschen')
+    }
+  }
+
+  async function handleDuplicate(id: string) {
+    const template = templates.find(t => t.id === id)
+    const newName = prompt('Name fuer die Kopie:', template ? `${template.name} (Kopie)` : 'Kopie')
+    if (!newName) return
+
+    try {
+      const newTemplate = await duplicateTemplate(id, newName)
+      router.push(`/templates/${newTemplate.id}/edit`)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Fehler beim Duplizieren')
     }
   }
 
@@ -202,6 +217,7 @@ export default function TemplatesPage() {
                         key={template.id}
                         template={template}
                         onDelete={handleDelete}
+                        onDuplicate={handleDuplicate}
                         isAdmin={isAdmin}
                       />
                     ))}

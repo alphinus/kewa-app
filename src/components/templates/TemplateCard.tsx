@@ -6,6 +6,7 @@ import type { Template } from '@/types/templates'
 interface TemplateCardProps {
   template: Template
   onDelete?: (id: string) => void
+  onDuplicate?: (id: string) => void
   isAdmin?: boolean
 }
 
@@ -35,10 +36,16 @@ const roomTypeLabels: Record<string, string> = {
  * Displays a template in the library view with category badge,
  * duration/cost info, and action buttons for view/edit/delete.
  */
-export function TemplateCard({ template, onDelete, isAdmin }: TemplateCardProps) {
+export function TemplateCard({ template, onDelete, onDuplicate, isAdmin }: TemplateCardProps) {
   const handleDelete = () => {
     if (onDelete && confirm('Template wirklich loeschen?')) {
       onDelete(template.id)
+    }
+  }
+
+  const handleDuplicate = () => {
+    if (onDuplicate) {
+      onDuplicate(template.id)
     }
   }
 
@@ -97,6 +104,12 @@ export function TemplateCard({ template, onDelete, isAdmin }: TemplateCardProps)
             >
               Bearbeiten
             </Link>
+            <button
+              onClick={handleDuplicate}
+              className="py-2 px-3 bg-purple-100 hover:bg-purple-200 rounded text-sm font-medium text-purple-700 transition-colors min-h-[44px] flex items-center justify-center"
+            >
+              Duplizieren
+            </button>
             <button
               onClick={handleDelete}
               className="py-2 px-3 bg-red-100 hover:bg-red-200 rounded text-sm font-medium text-red-700 transition-colors min-h-[44px] flex items-center justify-center"
