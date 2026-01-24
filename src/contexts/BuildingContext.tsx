@@ -1,45 +1,40 @@
 'use client'
 
-import { createContext, useContext, useState, useEffect, useCallback } from 'react'
+import { createContext, useContext, useState, useCallback } from 'react'
 import type { ReactNode } from 'react'
 
+export type BuildingSelectionId = string | 'all' | null
+
 interface BuildingContextValue {
-  selectedBuildingId: string | null
-  selectBuilding: (buildingId: string) => void
+  selectedBuildingId: BuildingSelectionId
+  selectBuilding: (buildingId: BuildingSelectionId) => void
+  isAllSelected: boolean
   isLoading: boolean
 }
 
 const BuildingContext = createContext<BuildingContextValue | undefined>(undefined)
 
-const STORAGE_KEY = 'kewa-selected-building'
-
 /**
  * Provides building selection state across the dashboard
- * Persists selection in localStorage
+ * Session-only state - resets on page refresh
  */
 export function BuildingProvider({ children }: { children: ReactNode }) {
-  const [selectedBuildingId, setSelectedBuildingId] = useState<string | null>(null)
+  const [selectedBuildingId, setSelectedBuildingId] = useState<BuildingSelectionId>(null)
   const [isLoading, setIsLoading] = useState(true)
 
-  // Load stored selection on mount
-  useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY)
-    if (stored) {
-      setSelectedBuildingId(stored)
-    }
+  const selectBuilding = useCallback((buildingId: BuildingSelectionId) => {
+    setSelectedBuildingId(buildingId)
     setIsLoading(false)
   }, [])
 
-  const selectBuilding = useCallback((buildingId: string) => {
-    setSelectedBuildingId(buildingId)
-    localStorage.setItem(STORAGE_KEY, buildingId)
-  }, [])
+  const isAllSelected = selectedBuildingId === 'all'
 
   return (
     <BuildingContext.Provider
       value={{
         selectedBuildingId,
         selectBuilding,
+        isAllSelected,
         isLoading
       }}
     >
