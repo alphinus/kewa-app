@@ -72,13 +72,13 @@ Plans:
   2. Admin can edit unit details and changes persist correctly
   3. Admin can add rooms to a unit with room type and description
   4. Rooms are available in task assignment for Digital Twin condition tracking
-**Plans**: TBD
+**Plans**: 4 plans
 
 Plans:
-- [ ] 15-01: Unit API routes (list, create, update within building)
-- [ ] 15-02: Room API routes (list, create within unit)
-- [ ] 15-03: Unit management UI (list, create, edit)
-- [ ] 15-04: Room management UI and task integration
+- [ ] 15-01-PLAN.md — Unit API with building filter, POST, PATCH, DELETE
+- [ ] 15-02-PLAN.md — Room API with full CRUD operations
+- [ ] 15-03-PLAN.md — Unit management UI (list, create, edit forms)
+- [ ] 15-04-PLAN.md — Room management UI and unit detail page
 
 ### Phase 16: Template-Management
 **Goal**: Admin can view, create, and edit project templates through the UI
@@ -129,7 +129,7 @@ Phases execute in numeric order: 13 -> 14 -> 15 -> 16 -> 17
 |-------|-----------|----------------|--------|-----------|
 | 13. Partner-Modul | v2.1 | 4/4 | Complete | 2026-01-22 |
 | 14. Multi-Liegenschaft | v2.1 | 5/5 | Complete | 2026-01-24 |
-| 15. Einheiten-Verwaltung | v2.1 | 0/4 | Not started | - |
+| 15. Einheiten-Verwaltung | v2.1 | 0/4 | Planning complete | - |
 | 16. Template-Management | v2.1 | 0/4 | Not started | - |
 | 17. Admin & Onboarding | v2.1 | 0/6 | Not started | - |
 
@@ -139,4 +139,5 @@ Phases execute in numeric order: 13 -> 14 -> 15 -> 16 -> 17
 *Roadmap created: 2026-01-22*
 *Phase 13 complete: 2026-01-22*
 *Phase 14 complete: 2026-01-24*
+*Phase 15 planned: 2026-01-24*
 *Milestone: v2.1 Master Data Management*
