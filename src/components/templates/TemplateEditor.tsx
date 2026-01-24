@@ -24,6 +24,25 @@ import {
   deleteTask
 } from '@/lib/api/templates'
 
+interface DraggedItem {
+  type: 'phase' | 'package' | 'task'
+  id: string
+  parentId?: string
+}
+
+async function reorderItems(
+  templateId: string,
+  type: 'phase' | 'package' | 'task',
+  items: Array<{ id: string; sort_order: number }>
+) {
+  const response = await fetch(`/api/templates/${templateId}/reorder`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ type, items })
+  })
+  if (!response.ok) throw new Error('Reorder failed')
+}
+
 interface TemplateEditorProps {
   template: TemplateWithHierarchy
   onUpdate?: () => void
@@ -599,12 +618,14 @@ export function TemplateEditor({ template, onUpdate }: TemplateEditorProps) {
       <div className="bg-white rounded-lg border p-4">
         <h3 className="font-semibold text-gray-900 mb-4">WBS-Struktur</h3>
         <EditorTree
+          templateId={template.id}
           phases={template.phases}
           onAddPackage={openAddPackage}
           onAddTask={openAddTask}
           onDeletePhase={handleDeletePhase}
           onDeletePackage={handleDeletePackage}
           onDeleteTask={handleDeleteTask}
+          onUpdate={onUpdate}
         />
       </div>
     </div>
@@ -630,26 +651,32 @@ function FormCard({ title, onClose, children }: { title: string; onClose: () => 
 
 // Editor tree with action buttons
 interface EditorTreeProps {
+  templateId: string
   phases: TemplatePhaseWithPackages[]
   onAddPackage: (phaseId: string) => void
   onAddTask: (packageId: string) => void
   onDeletePhase: (phaseId: string) => void
   onDeletePackage: (packageId: string) => void
   onDeleteTask: (taskId: string) => void
+  onUpdate?: () => void
 }
 
 function EditorTree({
+  templateId,
   phases,
   onAddPackage,
   onAddTask,
   onDeletePhase,
   onDeletePackage,
-  onDeleteTask
+  onDeleteTask,
+  onUpdate
 }: EditorTreeProps) {
   const [expandedPhases, setExpandedPhases] = useState<Set<string>>(new Set(phases.map(p => p.id)))
   const [expandedPackages, setExpandedPackages] = useState<Set<string>>(
     new Set(phases.flatMap(p => p.packages?.map(pkg => pkg.id) || []))
   )
+  const [draggedItem, setDraggedItem] = useState<DraggedItem | null>(null)
+  const [dragOverId, setDragOverId] = useState<string | null>(null)
 
   const togglePhase = (id: string) => {
     setExpandedPhases(prev => {
@@ -669,6 +696,139 @@ function EditorTree({
     })
   }
 
+  // Drag handlers for phases
+  const handlePhaseDragStart = (e: React.DragEvent, phaseId: string) => {
+    e.dataTransfer.effectAllowed = 'move'
+    setDraggedItem({ type: 'phase', id: phaseId })
+  }
+
+  const handlePhaseDragOver = (e: React.DragEvent, phaseId: string) => {
+    if (draggedItem?.type === 'phase' && draggedItem.id !== phaseId) {
+      e.preventDefault()
+      e.dataTransfer.dropEffect = 'move'
+      setDragOverId(phaseId)
+    }
+  }
+
+  const handlePhaseDrop = async (e: React.DragEvent, targetPhaseId: string) => {
+    if (draggedItem?.type !== 'phase') return
+    e.preventDefault()
+    setDragOverId(null)
+
+    const draggedIndex = phases.findIndex(p => p.id === draggedItem.id)
+    const dropIndex = phases.findIndex(p => p.id === targetPhaseId)
+    if (draggedIndex === dropIndex) return
+
+    const reordered = [...phases]
+    const [removed] = reordered.splice(draggedIndex, 1)
+    reordered.splice(dropIndex, 0, removed)
+
+    const items = reordered.map((p, i) => ({ id: p.id, sort_order: i + 1 }))
+    try {
+      await reorderItems(templateId, 'phase', items)
+      onUpdate?.()
+    } catch (err) {
+      console.error('Failed to reorder phases:', err)
+    }
+    setDraggedItem(null)
+  }
+
+  // Drag handlers for packages
+  const handlePackageDragStart = (e: React.DragEvent, pkgId: string, phaseId: string) => {
+    e.dataTransfer.effectAllowed = 'move'
+    setDraggedItem({ type: 'package', id: pkgId, parentId: phaseId })
+  }
+
+  const handlePackageDragOver = (e: React.DragEvent, pkgId: string, phaseId: string) => {
+    if (draggedItem?.type === 'package' && draggedItem.parentId === phaseId && draggedItem.id !== pkgId) {
+      e.preventDefault()
+      e.dataTransfer.dropEffect = 'move'
+      setDragOverId(pkgId)
+    }
+  }
+
+  const handlePackageDrop = async (e: React.DragEvent, targetPkgId: string, phaseId: string) => {
+    if (draggedItem?.type !== 'package' || draggedItem.parentId !== phaseId) return
+    e.preventDefault()
+    setDragOverId(null)
+
+    const phase = phases.find(p => p.id === phaseId)
+    if (!phase?.packages) return
+
+    const draggedIndex = phase.packages.findIndex(p => p.id === draggedItem.id)
+    const dropIndex = phase.packages.findIndex(p => p.id === targetPkgId)
+    if (draggedIndex === dropIndex) return
+
+    const reordered = [...phase.packages]
+    const [removed] = reordered.splice(draggedIndex, 1)
+    reordered.splice(dropIndex, 0, removed)
+
+    const items = reordered.map((p, i) => ({ id: p.id, sort_order: i + 1 }))
+    try {
+      await reorderItems(templateId, 'package', items)
+      onUpdate?.()
+    } catch (err) {
+      console.error('Failed to reorder packages:', err)
+    }
+    setDraggedItem(null)
+  }
+
+  // Drag handlers for tasks
+  const handleTaskDragStart = (e: React.DragEvent, taskId: string, pkgId: string) => {
+    e.dataTransfer.effectAllowed = 'move'
+    setDraggedItem({ type: 'task', id: taskId, parentId: pkgId })
+  }
+
+  const handleTaskDragOver = (e: React.DragEvent, taskId: string, pkgId: string) => {
+    if (draggedItem?.type === 'task' && draggedItem.parentId === pkgId && draggedItem.id !== taskId) {
+      e.preventDefault()
+      e.dataTransfer.dropEffect = 'move'
+      setDragOverId(taskId)
+    }
+  }
+
+  const handleTaskDrop = async (e: React.DragEvent, targetTaskId: string, pkgId: string) => {
+    if (draggedItem?.type !== 'task' || draggedItem.parentId !== pkgId) return
+    e.preventDefault()
+    setDragOverId(null)
+
+    let tasks: TemplateTask[] | undefined
+    for (const phase of phases) {
+      const pkg = phase.packages?.find(p => p.id === pkgId)
+      if (pkg) {
+        tasks = pkg.tasks
+        break
+      }
+    }
+    if (!tasks) return
+
+    const draggedIndex = tasks.findIndex(t => t.id === draggedItem.id)
+    const dropIndex = tasks.findIndex(t => t.id === targetTaskId)
+    if (draggedIndex === dropIndex) return
+
+    const reordered = [...tasks]
+    const [removed] = reordered.splice(draggedIndex, 1)
+    reordered.splice(dropIndex, 0, removed)
+
+    const items = reordered.map((t, i) => ({ id: t.id, sort_order: i + 1 }))
+    try {
+      await reorderItems(templateId, 'task', items)
+      onUpdate?.()
+    } catch (err) {
+      console.error('Failed to reorder tasks:', err)
+    }
+    setDraggedItem(null)
+  }
+
+  const handleDragEnd = () => {
+    setDraggedItem(null)
+    setDragOverId(null)
+  }
+
+  const handleDragLeave = () => {
+    setDragOverId(null)
+  }
+
   if (phases.length === 0) {
     return <div className="text-gray-500 text-sm p-4 text-center">Keine Phasen vorhanden</div>
   }
@@ -678,7 +838,17 @@ function EditorTree({
       {phases.map(phase => (
         <div key={phase.id} className="border rounded">
           {/* Phase */}
-          <div className="flex items-center gap-2 p-2 bg-blue-50">
+          <div
+            draggable
+            onDragStart={(e) => handlePhaseDragStart(e, phase.id)}
+            onDragOver={(e) => handlePhaseDragOver(e, phase.id)}
+            onDrop={(e) => handlePhaseDrop(e, phase.id)}
+            onDragEnd={handleDragEnd}
+            onDragLeave={handleDragLeave}
+            className={`flex items-center gap-2 p-2 bg-blue-50 cursor-grab active:cursor-grabbing ${
+              dragOverId === phase.id ? 'bg-blue-100 border-2 border-blue-400' : ''
+            } ${draggedItem?.id === phase.id ? 'opacity-50' : ''}`}
+          >
             <button onClick={() => togglePhase(phase.id)} className="text-gray-400 hover:text-gray-600">
               <svg className={`w-4 h-4 transition-transform ${expandedPhases.has(phase.id) ? 'rotate-90' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -703,7 +873,17 @@ function EditorTree({
           {/* Packages */}
           {expandedPhases.has(phase.id) && phase.packages?.map(pkg => (
             <div key={pkg.id} className="ml-6 border-t">
-              <div className="flex items-center gap-2 p-2 bg-gray-50">
+              <div
+                draggable
+                onDragStart={(e) => handlePackageDragStart(e, pkg.id, phase.id)}
+                onDragOver={(e) => handlePackageDragOver(e, pkg.id, phase.id)}
+                onDrop={(e) => handlePackageDrop(e, pkg.id, phase.id)}
+                onDragEnd={handleDragEnd}
+                onDragLeave={handleDragLeave}
+                className={`flex items-center gap-2 p-2 bg-gray-50 cursor-grab active:cursor-grabbing ${
+                  dragOverId === pkg.id ? 'bg-blue-100 border-2 border-blue-400' : ''
+                } ${draggedItem?.id === pkg.id ? 'opacity-50' : ''}`}
+              >
                 <button onClick={() => togglePackage(pkg.id)} className="text-gray-400 hover:text-gray-600">
                   <svg className={`w-4 h-4 transition-transform ${expandedPackages.has(pkg.id) ? 'rotate-90' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -730,7 +910,18 @@ function EditorTree({
 
               {/* Tasks */}
               {expandedPackages.has(pkg.id) && pkg.tasks?.map(task => (
-                <div key={task.id} className="ml-6 flex items-center gap-2 p-2 border-t">
+                <div
+                  key={task.id}
+                  draggable
+                  onDragStart={(e) => handleTaskDragStart(e, task.id, pkg.id)}
+                  onDragOver={(e) => handleTaskDragOver(e, task.id, pkg.id)}
+                  onDrop={(e) => handleTaskDrop(e, task.id, pkg.id)}
+                  onDragEnd={handleDragEnd}
+                  onDragLeave={handleDragLeave}
+                  className={`ml-6 flex items-center gap-2 p-2 border-t cursor-grab active:cursor-grabbing ${
+                    dragOverId === task.id ? 'bg-blue-100 border-2 border-blue-400' : ''
+                  } ${draggedItem?.id === task.id ? 'opacity-50' : ''}`}
+                >
                   <span className="w-4" />
                   <span className="font-mono text-xs text-gray-500">{task.wbs_code}</span>
                   <span className="text-sm flex-1">{task.name}</span>
