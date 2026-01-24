@@ -10,31 +10,31 @@ See: .planning/PROJECT.md (updated 2026-01-22)
 ## Current Position
 
 Phase: 14 of 17 (Multi-Liegenschaft)
-Plan: 3 of 5 in current phase
+Plan: 5 of 5 in current phase
 Status: In progress
-Last activity: 2026-01-24 — Completed 14-03-PLAN.md (Data Loading Patterns)
+Last activity: 2026-01-24 — Completed 14-05-PLAN.md (Dashboard Context Wiring)
 
-Progress: [███████░░░░░] 30% (7/23 plans)
+Progress: [████████░░░░] 35% (8/23 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 7 (v2.1)
-- Average duration: 8 min
-- Total execution time: 0.93 hours
+- Total plans completed: 8 (v2.1)
+- Average duration: 9 min
+- Total execution time: 1.25 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 13 | 4/4 | 36min | 9min |
-| 14 | 3/5 | 20min | 6.7min |
+| 14 | 4/5 | 39min | 9.8min |
 | 15 | 0/4 | - | - |
 | 16 | 0/4 | - | - |
 | 17 | 0/6 | - | - |
 
 **Recent Trend:**
-- Last 5 plans: 13-03 (12min), 13-04 (11min), 14-02 (7min), 14-01 (8min), 14-03 (5min)
+- Last 5 plans: 13-04 (11min), 14-02 (7min), 14-01 (8min), 14-03 (5min), 14-05 (19min)
 - Trend: Consistent delivery
 
 *Updated after each plan completion*
@@ -69,6 +69,8 @@ Key features delivered: RBAC, Contractor Portal, Templates, Cost Module, Digital
 | 14-01 | Cascade warning log but proceed with delete | Admin override pattern consistent with partners API |
 | 14-03 | Client-side filtering for building_id via unit relation | Supabase doesn't support nested relation filtering in query builder |
 | 14-03 | 'all' or missing building_id returns unfiltered data | Backward compatibility with existing API consumers |
+| 14-05 | Liegenschaft converted to client component | Server components can't access BuildingContext; client-side API fetching required |
+| 14-05 | Heatmap shows prompt when 'all' selected | Heatmap is building-specific view, can't aggregate across buildings |
 
 ### Pending Todos
 
@@ -81,8 +83,8 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-01-24
-Stopped at: Completed 14-03-PLAN.md (Data Loading Patterns)
+Stopped at: Completed 14-05-PLAN.md (Dashboard Context Wiring)
 Resume file: None
 
 ---
-*Next: Execute 14-04-PLAN.md*
+*Next: Execute 14-04-PLAN.md (if exists) or next phase*
