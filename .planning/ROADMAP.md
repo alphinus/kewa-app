@@ -17,8 +17,8 @@ v2.1 delivers complete master data management: Partner/Handwerker CRUD with Work
 - Integer phases (13, 14, 15): Planned milestone work
 - Decimal phases (13.1, 13.2): Urgent insertions if needed
 
-- [ ] **Phase 13: Partner-Modul** - Partner/Handwerker CRUD with WorkOrder integration
-- [ ] **Phase 14: Multi-Liegenschaft** - Property/Building management with context switching
+- [x] **Phase 13: Partner-Modul** - Partner/Handwerker CRUD with WorkOrder integration
+- [x] **Phase 14: Multi-Liegenschaft** - Property/Building management with context switching
 - [ ] **Phase 15: Einheiten-Verwaltung** - Unit and room management within buildings
 - [ ] **Phase 16: Template-Management** - Template CRUD UI for project templates
 - [ ] **Phase 17: Admin & Onboarding** - Dashboard, search, migrations, and setup wizard
@@ -57,11 +57,11 @@ Plans:
 **Plans**: 5 plans
 
 Plans:
-- [ ] 14-01-PLAN.md — Property/Building UPDATE and DELETE API routes
-- [ ] 14-02-PLAN.md — PropertySelector "Alle Liegenschaften" option and session behavior
-- [ ] 14-03-PLAN.md — Projects/Tasks API building_id filter support
-- [ ] 14-04-PLAN.md — Projects/Tasks pages building context wiring
-- [ ] 14-05-PLAN.md — Dashboard/Heatmap building context wiring
+- [x] 14-01-PLAN.md — Property/Building UPDATE and DELETE API routes
+- [x] 14-02-PLAN.md — PropertySelector "Alle Liegenschaften" option and session behavior
+- [x] 14-03-PLAN.md — Projects/Tasks API building_id filter support
+- [x] 14-04-PLAN.md — Projects/Tasks pages building context wiring
+- [x] 14-05-PLAN.md — Dashboard/Heatmap building context wiring
 
 ### Phase 15: Einheiten-Verwaltung
 **Goal**: Admin can manage units (apartments) and rooms within buildings for condition tracking
@@ -127,16 +127,16 @@ Phases execute in numeric order: 13 -> 14 -> 15 -> 16 -> 17
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 13. Partner-Modul | v2.1 | 0/4 | Planned | - |
-| 14. Multi-Liegenschaft | v2.1 | 0/5 | Planned | - |
+| 13. Partner-Modul | v2.1 | 4/4 | Complete | 2026-01-22 |
+| 14. Multi-Liegenschaft | v2.1 | 5/5 | Complete | 2026-01-24 |
 | 15. Einheiten-Verwaltung | v2.1 | 0/4 | Not started | - |
 | 16. Template-Management | v2.1 | 0/4 | Not started | - |
 | 17. Admin & Onboarding | v2.1 | 0/6 | Not started | - |
 
-**Total:** 0/23 plans complete (0%)
+**Total:** 9/23 plans complete (39%)
 
 ---
 *Roadmap created: 2026-01-22*
-*Phase 13 planned: 2026-01-22*
-*Phase 14 planned: 2026-01-24*
+*Phase 13 complete: 2026-01-22*
+*Phase 14 complete: 2026-01-24*
 *Milestone: v2.1 Master Data Management*

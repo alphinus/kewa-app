@@ -5,14 +5,14 @@
 See: .planning/PROJECT.md (updated 2026-01-22)
 
 **Core value:** KEWA AG hat volle Transparenz und Kontrolle uber alle Renovationen — mit standardisierten Workflows, externer Handwerker-Integration, Kostenuebersicht und automatischer Zustandshistorie.
-**Current focus:** v2.1 Master Data Management — Phase 14 Multi-Liegenschaft
+**Current focus:** v2.1 Master Data Management — Phase 15 Einheiten-Verwaltung
 
 ## Current Position
 
-Phase: 14 of 17 (Multi-Liegenschaft)
-Plan: 5 of 5 in current phase
-Status: In progress
-Last activity: 2026-01-24 — Completed 14-04-PLAN.md (Data Page Wiring)
+Phase: 15 of 17 (Einheiten-Verwaltung)
+Plan: 0 of 4 in current phase
+Status: Ready for planning
+Last activity: 2026-01-24 — Completed phase 14 (5/5 plans verified)
 
 Progress: [████████░░░░] 39% (9/23 plans)
 
@@ -83,8 +83,8 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-01-24
-Stopped at: Completed 14-04-PLAN.md (Data Page Wiring)
+Stopped at: Completed phase 14 (Multi-Liegenschaft)
 Resume file: None
 
 ---
-*Next: Phase 14 complete - proceed to Phase 15*
+*Next: Plan phase 15 (Einheiten-Verwaltung)*
