@@ -79,12 +79,28 @@ export function TemplateCard({ template, onDelete, onDuplicate, isAdmin }: Templ
       </div>
 
       {/* Duration and cost info */}
-      <div className="flex items-center gap-4 text-sm text-gray-500 mb-4">
+      <div className="flex items-center gap-4 text-sm text-gray-500 mb-3">
         {template.total_duration_days !== null && template.total_duration_days > 0 && (
           <span>{template.total_duration_days} Tage</span>
         )}
         {template.total_estimated_cost !== null && template.total_estimated_cost > 0 && (
           <span>CHF {template.total_estimated_cost.toLocaleString('de-CH')}</span>
+        )}
+      </div>
+
+      {/* Phase count and last modified */}
+      <div className="flex items-center gap-4 text-sm text-gray-500 mb-4">
+        {typeof template.phase_count === 'number' && (
+          <span>{template.phase_count} {template.phase_count === 1 ? 'Phase' : 'Phasen'}</span>
+        )}
+        {template.updated_at && (
+          <span>
+            Aktualisiert: {new Date(template.updated_at).toLocaleDateString('de-CH', {
+              day: '2-digit',
+              month: '2-digit',
+              year: 'numeric'
+            })}
+          </span>
         )}
       </div>
 
