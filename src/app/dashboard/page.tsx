@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import { useSession } from '@/hooks/useSession'
+import { useBuilding } from '@/contexts/BuildingContext'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import type { TaskWithProject, TasksResponse } from '@/types/database'
@@ -112,6 +113,7 @@ function TaskPreviewCard({ task }: { task: TaskWithProject }) {
  */
 export default function DashboardPage() {
   const { session, loading: sessionLoading } = useSession()
+  const { selectedBuildingId, isAllSelected, isLoading: buildingLoading } = useBuilding()
   const role = session.user?.role
 
   // Task data
@@ -119,15 +121,20 @@ export default function DashboardPage() {
   const [completedTasks, setCompletedTasks] = useState<TaskWithProject[]>([])
   const [loading, setLoading] = useState(true)
 
-  // Fetch tasks
+  // Fetch tasks with building filter
   const fetchTasks = useCallback(async () => {
     try {
       setLoading(true)
 
+      // Build query params with building_id filter
+      const buildingParam = selectedBuildingId && selectedBuildingId !== 'all'
+        ? `&building_id=${selectedBuildingId}`
+        : ''
+
       // Fetch open and completed tasks in parallel
       const [openRes, completedRes] = await Promise.all([
-        fetch('/api/tasks?status=open'),
-        fetch('/api/tasks?status=completed'),
+        fetch(`/api/tasks?status=open${buildingParam}`),
+        fetch(`/api/tasks?status=completed${buildingParam}`),
       ])
 
       if (openRes.ok) {
@@ -144,13 +151,14 @@ export default function DashboardPage() {
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [selectedBuildingId])
 
+  // Re-fetch when building selection changes
   useEffect(() => {
-    if (!sessionLoading && session.authenticated) {
+    if (!sessionLoading && session.authenticated && !buildingLoading) {
       fetchTasks()
     }
-  }, [sessionLoading, session.authenticated, fetchTasks])
+  }, [sessionLoading, session.authenticated, buildingLoading, selectedBuildingId, fetchTasks])
 
   // Calculate today's completed tasks
   const today = new Date()
