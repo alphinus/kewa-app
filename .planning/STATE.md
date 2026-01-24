@@ -12,7 +12,7 @@ See: .planning/PROJECT.md (updated 2026-01-22)
 Phase: 15 of 17 (Einheiten-Verwaltung)
 Plan: 2 of 4 in current phase
 Status: In progress
-Last activity: 2026-01-24 — Completed 15-02-PLAN.md (Room API)
+Last activity: 2026-01-24 — Completed 15-01-PLAN.md and 15-02-PLAN.md (Unit & Room APIs)
 
 Progress: [█████████░░░] 48% (11/23 plans)
 
@@ -71,6 +71,9 @@ Key features delivered: RBAC, Contractor Portal, Templates, Cost Module, Digital
 | 14-03 | 'all' or missing building_id returns unfiltered data | Backward compatibility with existing API consumers |
 | 14-05 | Liegenschaft converted to client component | Server components can't access BuildingContext; client-side API fetching required |
 | 14-05 | Heatmap shows prompt when 'all' selected | Heatmap is building-specific view, can't aggregate across buildings |
+| 15-01 | Extended Unit fields optional for backward compat | DB columns may not exist yet; optional prevents runtime errors |
+| 15-01 | PATCH replaces PUT for REST consistency | Partial updates are the common case for unit edits |
+| 15-01 | DELETE restricted to kewa role for safety | Cascade delete destructive; admin override with warning log |
 | 15-02 | unit_id required for room listing | Rooms only make sense in unit context; prevents expensive full-table scans |
 | 15-02 | condition not updatable via API | Condition is managed by Digital Twin automation from completed projects |
 | 15-02 | kewa-only DELETE with history warning | Cascade delete of history is destructive; admin override but logged |
@@ -86,7 +89,7 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-01-24
-Stopped at: Completed 15-02-PLAN.md (Room API)
+Stopped at: Completed 15-01-PLAN.md (Unit API) and 15-02-PLAN.md (Room API)
 Resume file: None
 
 ---
