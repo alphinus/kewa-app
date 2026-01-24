@@ -95,7 +95,7 @@ export default function EinheitenPage() {
    * Handle view button click on unit card
    */
   function handleViewClick(unit: Unit) {
-    router.push(`/dashboard/wohnungen/${unit.id}`)
+    router.push(`/dashboard/einheiten/${unit.id}`)
   }
 
   /**
