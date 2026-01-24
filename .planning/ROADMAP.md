@@ -54,14 +54,14 @@ Plans:
   3. Admin can add buildings to a property and buildings appear in property detail view
   4. Header shows current active property with dropdown to switch context
   5. Dashboard and heatmap reflect the currently selected property (not hardcoded)
-**Plans**: TBD
+**Plans**: 5 plans
 
 Plans:
-- [ ] 14-01: Property API routes (list, create, update)
-- [ ] 14-02: Building API routes (list, create within property)
-- [ ] 14-03: Property list and detail UI
-- [ ] 14-04: Property context switcher in header
-- [ ] 14-05: Dashboard/heatmap property filtering
+- [ ] 14-01-PLAN.md — Property/Building UPDATE and DELETE API routes
+- [ ] 14-02-PLAN.md — PropertySelector "Alle Liegenschaften" option and session behavior
+- [ ] 14-03-PLAN.md — Projects/Tasks API building_id filter support
+- [ ] 14-04-PLAN.md — Projects/Tasks pages building context wiring
+- [ ] 14-05-PLAN.md — Dashboard/Heatmap building context wiring
 
 ### Phase 15: Einheiten-Verwaltung
 **Goal**: Admin can manage units (apartments) and rooms within buildings for condition tracking
@@ -128,7 +128,7 @@ Phases execute in numeric order: 13 -> 14 -> 15 -> 16 -> 17
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 13. Partner-Modul | v2.1 | 0/4 | Planned | - |
-| 14. Multi-Liegenschaft | v2.1 | 0/5 | Not started | - |
+| 14. Multi-Liegenschaft | v2.1 | 0/5 | Planned | - |
 | 15. Einheiten-Verwaltung | v2.1 | 0/4 | Not started | - |
 | 16. Template-Management | v2.1 | 0/4 | Not started | - |
 | 17. Admin & Onboarding | v2.1 | 0/6 | Not started | - |
@@ -138,4 +138,5 @@ Phases execute in numeric order: 13 -> 14 -> 15 -> 16 -> 17
 ---
 *Roadmap created: 2026-01-22*
 *Phase 13 planned: 2026-01-22*
+*Phase 14 planned: 2026-01-24*
 *Milestone: v2.1 Master Data Management*
