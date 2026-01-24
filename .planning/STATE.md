@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-01-22)
 
 **Core value:** KEWA AG hat volle Transparenz und Kontrolle uber alle Renovationen — mit standardisierten Workflows, externer Handwerker-Integration, Kostenuebersicht und automatischer Zustandshistorie.
-**Current focus:** v2.1 Master Data Management — Phase 15 Einheiten-Verwaltung
+**Current focus:** v2.1 Master Data Management — Phase 15 Complete
 
 ## Current Position
 
 Phase: 15 of 17 (Einheiten-Verwaltung)
-Plan: 3 of 4 in current phase
-Status: In progress
-Last activity: 2026-01-24 — Completed 15-03-PLAN.md (Unit Management UI)
+Plan: 4 of 4 in current phase
+Status: Phase complete
+Last activity: 2026-01-24 — Completed 15-04-PLAN.md (Unit Detail Page)
 
-Progress: [█████████░░░] 52% (12/23 plans)
+Progress: [██████████░░] 57% (13/23 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 12 (v2.1)
+- Total plans completed: 13 (v2.1)
 - Average duration: 10 min
-- Total execution time: 2.0 hours
+- Total execution time: 2.1 hours
 
 **By Phase:**
 
@@ -29,12 +29,12 @@ Progress: [█████████░░░] 52% (12/23 plans)
 |-------|-------|-------|----------|
 | 13 | 4/4 | 36min | 9min |
 | 14 | 5/5 | 60min | 12min |
-| 15 | 3/4 | 26min | 9min |
+| 15 | 4/4 | 34min | 9min |
 | 16 | 0/4 | - | - |
 | 17 | 0/6 | - | - |
 
 **Recent Trend:**
-- Last 5 plans: 15-03 (10min), 15-02 (8min), 15-01 (8min), 14-05 (19min), 14-04 (21min)
+- Last 5 plans: 15-04 (8min), 15-03 (10min), 15-02 (8min), 15-01 (8min), 14-05 (19min)
 - Trend: Consistent delivery
 
 *Updated after each plan completion*
@@ -80,6 +80,9 @@ Key features delivered: RBAC, Contractor Portal, Templates, Cost Module, Digital
 | 15-03 | Unit list filters to apartments and common areas only | Parking spots shown in separate section on liegenschaft page |
 | 15-03 | View button navigates to existing wohnungen/[id] detail page | Reuse existing unit detail page rather than creating new one |
 | 15-03 | Vacancy auto-derived when no tenant name, with manual override | Matches CONTEXT.md vacancy logic requirements |
+| 15-04 | View button navigates to /dashboard/einheiten/[id] | Dedicated unit management page with room CRUD |
+| 15-04 | Condition shown but not editable | Managed by Digital Twin automation from completed projects |
+| 15-04 | Link to wohnungen/[id] for full timeline view | Reuse existing detailed timeline page |
 
 ### Pending Todos
 
@@ -92,8 +95,8 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-01-24
-Stopped at: Completed 15-03-PLAN.md (Unit Management UI)
+Stopped at: Completed 15-04-PLAN.md (Unit Detail Page)
 Resume file: None
 
 ---
-*Next: Execute 15-04-PLAN.md (Room UI)*
+*Next: Plan Phase 16 (Template-Management)*
