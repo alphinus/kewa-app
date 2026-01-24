@@ -149,6 +149,14 @@ export interface Unit {
   rent_currency: string
   parking_number: number | null
   parking_status: ParkingStatus | null
+  // Extended tenant fields (Phase 15)
+  unit_number?: string | null
+  size_class?: string | null
+  tenant_phone?: string | null
+  tenant_email?: string | null
+  tenant_move_in_date?: string | null
+  is_vacant?: boolean
+  vacancy_reason?: string | null
   created_at: string
   updated_at: string
 }
@@ -473,10 +481,41 @@ export interface UpdateProjectInput {
 }
 
 /**
- * Input for updating a unit
+ * Input for creating a unit (Phase 15)
+ */
+export interface CreateUnitInput {
+  building_id: string
+  name: string
+  unit_type: UnitType
+  floor?: number | null
+  position?: string | null
+  unit_number?: string | null
+  size_class?: string | null
+  tenant_name?: string | null
+  tenant_phone?: string | null
+  tenant_email?: string | null
+  tenant_move_in_date?: string | null
+  is_vacant?: boolean
+  vacancy_reason?: string | null
+  tenant_visible_to_imeri?: boolean
+}
+
+/**
+ * Input for updating a unit (Phase 15 extended)
  */
 export interface UpdateUnitInput {
+  name?: string
+  unit_type?: UnitType
+  floor?: number | null
+  position?: string | null
+  unit_number?: string | null
+  size_class?: string | null
   tenant_name?: string | null
+  tenant_phone?: string | null
+  tenant_email?: string | null
+  tenant_move_in_date?: string | null
+  is_vacant?: boolean
+  vacancy_reason?: string | null
   tenant_visible_to_imeri?: boolean
 }
 
@@ -1098,3 +1137,29 @@ export type {
   TemplateDependenciesResponse,
   TemplateQualityGatesResponse
 } from './templates'
+
+// =============================================
+// ROOM API INPUT TYPES (Phase 15-02)
+// =============================================
+
+/**
+ * Input for creating a new room
+ */
+export interface CreateRoomInput {
+  unit_id: string
+  name: string
+  room_type: RoomType
+  area_sqm?: number | null
+  notes?: string | null
+}
+
+/**
+ * Input for updating a room
+ */
+export interface UpdateRoomInput {
+  name?: string
+  room_type?: RoomType
+  area_sqm?: number | null
+  notes?: string | null
+  // Note: condition is NOT updatable via API - managed by Digital Twin automation
+}
