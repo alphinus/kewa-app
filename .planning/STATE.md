@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-01-22)
 
 **Core value:** KEWA AG hat volle Transparenz und Kontrolle uber alle Renovationen — mit standardisierten Workflows, externer Handwerker-Integration, Kostenuebersicht und automatischer Zustandshistorie.
-**Current focus:** v2.1 Master Data Management — Phase 15 Complete
+**Current focus:** v2.1 Master Data Management — Phase 16 Executing
 
 ## Current Position
 
-Phase: 15 of 17 (Einheiten-Verwaltung)
-Plan: 4 of 4 in current phase
-Status: Phase complete
-Last activity: 2026-01-24 — Completed 15-04-PLAN.md (Unit Detail Page)
+Phase: 16 of 17 (Template-Management)
+Plan: 2 of 4 in current phase
+Status: In progress
+Last activity: 2026-01-25 — Completed 16-02-PLAN.md (Template Duplication API)
 
-Progress: [██████████░░] 57% (13/23 plans)
+Progress: [███████████░░] 61% (14/23 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 13 (v2.1)
+- Total plans completed: 14 (v2.1)
 - Average duration: 10 min
-- Total execution time: 2.1 hours
+- Total execution time: 2.2 hours
 
 **By Phase:**
 
@@ -30,11 +30,11 @@ Progress: [██████████░░] 57% (13/23 plans)
 | 13 | 4/4 | 36min | 9min |
 | 14 | 5/5 | 60min | 12min |
 | 15 | 4/4 | 34min | 9min |
-| 16 | 0/4 | - | - |
+| 16 | 2/4 | 16min | 8min |
 | 17 | 0/6 | - | - |
 
 **Recent Trend:**
-- Last 5 plans: 15-04 (8min), 15-03 (10min), 15-02 (8min), 15-01 (8min), 14-05 (19min)
+- Last 5 plans: 16-02 (8min), 16-01 (8min), 15-04 (8min), 15-03 (10min), 15-02 (8min)
 - Trend: Consistent delivery
 
 *Updated after each plan completion*
@@ -83,6 +83,8 @@ Key features delivered: RBAC, Contractor Portal, Templates, Cost Module, Digital
 | 15-04 | View button navigates to /dashboard/einheiten/[id] | Dedicated unit management page with room CRUD |
 | 15-04 | Condition shown but not editable | Managed by Digital Twin automation from completed projects |
 | 15-04 | Link to wohnungen/[id] for full timeline view | Reuse existing detailed timeline page |
+| 16-02 | Rollback via cascade delete on partial insert failure | Simplest error recovery: delete parent template cleans up all children |
+| 16-02 | ID maps built during hierarchical insert for dependency/gate remapping | Dependencies reference task IDs, gates reference phase/package IDs - need old->new mapping |
 
 ### Pending Todos
 
@@ -94,9 +96,9 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-01-24
-Stopped at: Completed 15-04-PLAN.md (Unit Detail Page)
+Last session: 2026-01-25
+Stopped at: Completed 16-02-PLAN.md (Template Duplication API)
 Resume file: None
 
 ---
-*Next: Plan Phase 16 (Template-Management)*
+*Next: 16-03-PLAN.md (Template Detail Page)*
