@@ -12,29 +12,29 @@ See: .planning/PROJECT.md (updated 2026-01-22)
 Phase: 14 of 17 (Multi-Liegenschaft)
 Plan: 2 of 5 in current phase
 Status: In progress
-Last activity: 2026-01-24 — Completed 14-02-PLAN.md (Property Selector Enhancement)
+Last activity: 2026-01-24 — Completed 14-01-PLAN.md (Property & Building CRUD API)
 
-Progress: [█████░░░░░░░] 22% (5/23 plans)
+Progress: [██████░░░░░░] 26% (6/23 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 5 (v2.1)
+- Total plans completed: 6 (v2.1)
 - Average duration: 9 min
-- Total execution time: 0.72 hours
+- Total execution time: 0.85 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 13 | 4/4 | 36min | 9min |
-| 14 | 1/5 | 7min | 7min |
+| 14 | 2/5 | 15min | 7.5min |
 | 15 | 0/4 | - | - |
 | 16 | 0/4 | - | - |
 | 17 | 0/6 | - | - |
 
 **Recent Trend:**
-- Last 5 plans: 13-01 (4min), 13-02 (9min), 13-03 (12min), 13-04 (11min), 14-02 (7min)
+- Last 5 plans: 13-02 (9min), 13-03 (12min), 13-04 (11min), 14-02 (7min), 14-01 (8min)
 - Trend: Consistent delivery
 
 *Updated after each plan completion*
@@ -65,6 +65,8 @@ Key features delivered: RBAC, Contractor Portal, Templates, Cost Module, Digital
 | 14-02 | BuildingSelectionId type exported for consistent typing | String, 'all', or null covers all selection states |
 | 14-02 | Initial load auto-selects first building (not 'all') | Global view requires explicit user action per CONTEXT.md |
 | 14-02 | Placeholder view for 'all' selection | Full data loading support in 14-03 |
+| 14-01 | DELETE restricted to kewa role only | Cascade delete is destructive - admin-only for safety |
+| 14-01 | Cascade warning log but proceed with delete | Admin override pattern consistent with partners API |
 
 ### Pending Todos
 
@@ -76,8 +78,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-01-24 10:07 UTC
-Stopped at: Completed 14-02-PLAN.md (Property Selector Enhancement)
+Last session: 2026-01-24
+Stopped at: Completed 14-01-PLAN.md (Property & Building CRUD API)
 Resume file: None
 
 ---
