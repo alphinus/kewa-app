@@ -113,8 +113,12 @@ export async function deleteTemplate(id: string): Promise<void> {
 /**
  * Duplicate a template (creates a copy with all phases, packages, tasks)
  */
-export async function duplicateTemplate(id: string): Promise<Template> {
-  const res = await fetch(`${API_BASE}/${id}/duplicate`, { method: 'POST' })
+export async function duplicateTemplate(id: string, name?: string): Promise<Template> {
+  const res = await fetch(`${API_BASE}/${id}/duplicate`, {
+    method: 'POST',
+    headers: name ? { 'Content-Type': 'application/json' } : undefined,
+    body: name ? JSON.stringify({ name }) : undefined
+  })
   if (!res.ok) {
     const error = await res.json()
     throw new Error(error.error || 'Failed to duplicate template')
