@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-01-22)
 ## Current Position
 
 Phase: 16 of 17 (Template-Management)
-Plan: 2 of 4 in current phase
+Plan: 3 of 4 in current phase
 Status: In progress
-Last activity: 2026-01-25 — Completed 16-01-PLAN.md (Template Create & List Enhancements)
+Last activity: 2026-01-25 — Completed 16-03-PLAN.md (Template Hierarchy Reordering)
 
-Progress: [███████████░░] 65% (15/23 plans)
+Progress: [████████████░] 70% (16/23 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 15 (v2.1)
+- Total plans completed: 16 (v2.1)
 - Average duration: 10 min
-- Total execution time: 2.4 hours
+- Total execution time: 2.5 hours
 
 **By Phase:**
 
@@ -30,11 +30,11 @@ Progress: [███████████░░] 65% (15/23 plans)
 | 13 | 4/4 | 36min | 9min |
 | 14 | 5/5 | 60min | 12min |
 | 15 | 4/4 | 34min | 9min |
-| 16 | 2/4 | 16min | 8min |
+| 16 | 3/4 | 24min | 8min |
 | 17 | 0/6 | - | - |
 
 **Recent Trend:**
-- Last 5 plans: 16-01 (8min), 16-02 (8min), 15-04 (8min), 15-03 (10min), 15-02 (8min)
+- Last 5 plans: 16-03 (8min), 16-01 (8min), 16-02 (8min), 15-04 (8min), 15-03 (10min)
 - Trend: Consistent delivery
 
 *Updated after each plan completion*
@@ -88,6 +88,8 @@ Key features delivered: RBAC, Contractor Portal, Templates, Cost Module, Digital
 | 16-01 | showInactive defaults to false | Active templates shown by default per CONTEXT.md |
 | 16-01 | Duplicate prompts for new name | User can customize copy name before creation |
 | 16-01 | New template redirects to edit page | WBS structure editing immediately after creation |
+| 16-03 | Drag within parent only | Packages stay in same phase, tasks in same package - prevents accidental structure changes |
+| 16-03 | Batch update pattern for reorder | Update all sort_order values in parallel Promise.all for efficiency |
 
 ### Pending Todos
 
@@ -100,8 +102,8 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-01-25
-Stopped at: Completed 16-01-PLAN.md (Template Create & List Enhancements)
+Stopped at: Completed 16-03-PLAN.md (Template Hierarchy Reordering)
 Resume file: None
 
 ---
-*Next: 16-03-PLAN.md (Template Detail Page)*
+*Next: 16-04-PLAN.md (Project Creation Template Selection)*
