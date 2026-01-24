@@ -5,37 +5,37 @@
 See: .planning/PROJECT.md (updated 2026-01-22)
 
 **Core value:** KEWA AG hat volle Transparenz und Kontrolle uber alle Renovationen — mit standardisierten Workflows, externer Handwerker-Integration, Kostenuebersicht und automatischer Zustandshistorie.
-**Current focus:** v2.1 Master Data Management — Phase 13 Partner-Modul
+**Current focus:** v2.1 Master Data Management — Phase 14 Multi-Liegenschaft
 
 ## Current Position
 
-Phase: 13 of 17 (Partner-Modul)
-Plan: 4 of 4 in current phase
-Status: Phase complete
-Last activity: 2026-01-22 — Completed 13-04-PLAN.md (Partner Dropdown Integration)
+Phase: 14 of 17 (Multi-Liegenschaft)
+Plan: 2 of 5 in current phase
+Status: In progress
+Last activity: 2026-01-24 — Completed 14-02-PLAN.md (Property Selector Enhancement)
 
-Progress: [████░░░░░░░░] 17% (4/23 plans)
+Progress: [█████░░░░░░░] 22% (5/23 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 4 (v2.1)
+- Total plans completed: 5 (v2.1)
 - Average duration: 9 min
-- Total execution time: 0.60 hours
+- Total execution time: 0.72 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 13 | 4/4 | 36min | 9min |
-| 14 | 0/5 | - | - |
+| 14 | 1/5 | 7min | 7min |
 | 15 | 0/4 | - | - |
 | 16 | 0/4 | - | - |
 | 17 | 0/6 | - | - |
 
 **Recent Trend:**
-- Last 5 plans: 13-01 (4min), 13-02 (9min), 13-03 (12min), 13-04 (11min)
-- Trend: Consistent delivery, phase 13 complete
+- Last 5 plans: 13-01 (4min), 13-02 (9min), 13-03 (12min), 13-04 (11min), 14-02 (7min)
+- Trend: Consistent delivery
 
 *Updated after each plan completion*
 
@@ -62,6 +62,9 @@ Key features delivered: RBAC, Contractor Portal, Templates, Cost Module, Digital
 | 13-03 | Created missing PartnerList and page.tsx (Rule 3) | Plan 13-02 dependencies missing, blocking form integration - created inline to unblock |
 | 13-04 | Trade filtering fallback shows all partners if no matches | Prevents empty dropdown when trade categories don't perfectly match, allows manual override |
 | 13-04 | Partner interface aligned with database schema | Use trade_categories (not trades), is_active, nullable email for consistency |
+| 14-02 | BuildingSelectionId type exported for consistent typing | String, 'all', or null covers all selection states |
+| 14-02 | Initial load auto-selects first building (not 'all') | Global view requires explicit user action per CONTEXT.md |
+| 14-02 | Placeholder view for 'all' selection | Full data loading support in 14-03 |
 
 ### Pending Todos
 
@@ -73,9 +76,9 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-01-22 20:30 UTC
-Stopped at: Completed 13-04-PLAN.md (Partner Dropdown Integration)
+Last session: 2026-01-24 10:07 UTC
+Stopped at: Completed 14-02-PLAN.md (Property Selector Enhancement)
 Resume file: None
 
 ---
-*Next: Execute phase 14 plans (Contractor Portal)*
+*Next: Execute 14-03-PLAN.md (Data Loading Patterns)*
