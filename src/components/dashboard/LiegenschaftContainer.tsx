@@ -86,6 +86,16 @@ export function LiegenschaftContainer() {
     )
   }
 
+  // Show placeholder for "all buildings" view - full support coming in 14-03
+  if (selectedBuildingId === 'all') {
+    return (
+      <div className="p-8 text-center text-gray-500 dark:text-gray-400">
+        <p className="text-lg font-medium">Alle Liegenschaften</p>
+        <p className="text-sm mt-2">Globale Uebersicht wird eingerichtet...</p>
+      </div>
+    )
+  }
+
   if (error) {
     return (
       <div className="p-8 text-center text-red-600 dark:text-red-400">

@@ -6,21 +6,23 @@ import { LogOut } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { PropertySelector } from './PropertySelector'
 import type { User } from '@/types'
+import type { BuildingSelectionId } from '@/contexts/BuildingContext'
 
 interface HeaderProps {
   user?: User
-  onBuildingSelect?: (buildingId: string) => void
+  selectedBuildingId: BuildingSelectionId
+  onBuildingSelect?: (buildingId: BuildingSelectionId) => void
 }
 
 /**
  * App header with logo, property selector (for KEWA), and logout button
  * Sticky top, h-16 for touch-friendly interaction
  */
-export function Header({ user, onBuildingSelect }: HeaderProps) {
+export function Header({ user, selectedBuildingId, onBuildingSelect }: HeaderProps) {
   const router = useRouter()
   const [loggingOut, setLoggingOut] = useState(false)
 
-  function handleBuildingSelect(buildingId: string) {
+  function handleBuildingSelect(buildingId: BuildingSelectionId) {
     if (onBuildingSelect) {
       onBuildingSelect(buildingId)
     }
@@ -57,7 +59,10 @@ export function Header({ user, onBuildingSelect }: HeaderProps) {
         {/* Property selector (only for KEWA role) */}
         {user?.role === 'kewa' && (
           <div className="flex-shrink-0">
-            <PropertySelector onSelect={handleBuildingSelect} />
+            <PropertySelector
+              selectedBuildingId={selectedBuildingId}
+              onSelect={handleBuildingSelect}
+            />
           </div>
         )}
 

@@ -4,7 +4,7 @@ import { useSession } from '@/hooks/useSession'
 import { Header } from '@/components/navigation/header'
 import { MobileNav } from '@/components/navigation/mobile-nav'
 import { BuildingProvider, useBuilding } from '@/contexts/BuildingContext'
-import type { User, Role } from '@/types'
+import type { User } from '@/types'
 
 /**
  * Inner layout component that uses BuildingContext
@@ -16,12 +16,16 @@ function DashboardLayoutInner({
   children: React.ReactNode
   user: User | undefined
 }) {
-  const { selectBuilding } = useBuilding()
+  const { selectedBuildingId, selectBuilding } = useBuilding()
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
       {/* Header with user info, property selector, and logout */}
-      <Header user={user} onBuildingSelect={selectBuilding} />
+      <Header
+        user={user}
+        selectedBuildingId={selectedBuildingId}
+        onBuildingSelect={selectBuilding}
+      />
 
       {/* Main content area with padding for header and nav */}
       <main className="pb-20 pt-4 px-4">
