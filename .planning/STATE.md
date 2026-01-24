@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-01-22)
 ## Current Position
 
 Phase: 15 of 17 (Einheiten-Verwaltung)
-Plan: 2 of 4 in current phase
+Plan: 3 of 4 in current phase
 Status: In progress
-Last activity: 2026-01-24 — Completed 15-01-PLAN.md and 15-02-PLAN.md (Unit & Room APIs)
+Last activity: 2026-01-24 — Completed 15-03-PLAN.md (Unit Management UI)
 
-Progress: [█████████░░░] 48% (11/23 plans)
+Progress: [█████████░░░] 52% (12/23 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 11 (v2.1)
+- Total plans completed: 12 (v2.1)
 - Average duration: 10 min
-- Total execution time: 1.8 hours
+- Total execution time: 2.0 hours
 
 **By Phase:**
 
@@ -29,12 +29,12 @@ Progress: [█████████░░░] 48% (11/23 plans)
 |-------|-------|-------|----------|
 | 13 | 4/4 | 36min | 9min |
 | 14 | 5/5 | 60min | 12min |
-| 15 | 2/4 | 16min | 8min |
+| 15 | 3/4 | 26min | 9min |
 | 16 | 0/4 | - | - |
 | 17 | 0/6 | - | - |
 
 **Recent Trend:**
-- Last 5 plans: 15-02 (8min), 15-01 (8min), 14-05 (19min), 14-04 (21min), 14-03 (5min)
+- Last 5 plans: 15-03 (10min), 15-02 (8min), 15-01 (8min), 14-05 (19min), 14-04 (21min)
 - Trend: Consistent delivery
 
 *Updated after each plan completion*
@@ -77,6 +77,9 @@ Key features delivered: RBAC, Contractor Portal, Templates, Cost Module, Digital
 | 15-02 | unit_id required for room listing | Rooms only make sense in unit context; prevents expensive full-table scans |
 | 15-02 | condition not updatable via API | Condition is managed by Digital Twin automation from completed projects |
 | 15-02 | kewa-only DELETE with history warning | Cascade delete of history is destructive; admin override but logged |
+| 15-03 | Unit list filters to apartments and common areas only | Parking spots shown in separate section on liegenschaft page |
+| 15-03 | View button navigates to existing wohnungen/[id] detail page | Reuse existing unit detail page rather than creating new one |
+| 15-03 | Vacancy auto-derived when no tenant name, with manual override | Matches CONTEXT.md vacancy logic requirements |
 
 ### Pending Todos
 
@@ -89,8 +92,8 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-01-24
-Stopped at: Completed 15-01-PLAN.md (Unit API) and 15-02-PLAN.md (Room API)
+Stopped at: Completed 15-03-PLAN.md (Unit Management UI)
 Resume file: None
 
 ---
-*Next: Execute 15-03-PLAN.md (Unit UI) or 15-04-PLAN.md (Room UI)*
+*Next: Execute 15-04-PLAN.md (Room UI)*
