@@ -34,7 +34,12 @@ export async function GET(request: NextRequest) {
 
     let query = supabase
       .from('templates')
-      .select('*')
+      .select(`
+        *,
+        template_phases (
+          id
+        )
+      `)
       .order('category')
       .order('name')
 
@@ -55,7 +60,14 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
-    return NextResponse.json({ templates: data })
+    // Transform data to include phase_count
+    const templates = data.map((template: any) => ({
+      ...template,
+      phase_count: template.template_phases?.length || 0,
+      template_phases: undefined
+    }))
+
+    return NextResponse.json({ templates })
   } catch (error) {
     console.error('Unexpected error in GET /api/templates:', error)
     return NextResponse.json(

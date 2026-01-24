@@ -61,6 +61,7 @@ export interface Template {
   created_by: string | null
   created_at: string
   updated_at: string
+  phase_count?: number
 }
 
 /**
