@@ -14,7 +14,7 @@ import type { Role } from '@/types'
  * GET /api/tasks
  *
  * Returns all tasks with project and unit info.
- * Supports query params: ?status=open|completed, ?project_id=uuid, ?unit_id=uuid
+ * Supports query params: ?status=open|completed, ?project_id=uuid, ?unit_id=uuid, ?building_id=uuid
  * For Imeri role: filters to visible_to_imeri=true projects only
  *
  * Sorted by: due_date (nulls last), priority (urgent first), created_at
@@ -41,8 +41,9 @@ export async function GET(
     const statusFilter = searchParams.get('status')
     const projectIdFilter = searchParams.get('project_id')
     const unitIdFilter = searchParams.get('unit_id')
+    const buildingIdFilter = searchParams.get('building_id')
 
-    // Build query for tasks with project and unit info
+    // Build query for tasks with project and unit info (including building_id for filtering)
     let query = supabase
       .from('tasks')
       .select(`
@@ -56,7 +57,8 @@ export async function GET(
             id,
             name,
             unit_type,
-            floor
+            floor,
+            building_id
           )
         )
       `)
@@ -83,6 +85,11 @@ export async function GET(
     // Transform and filter tasks
     let transformedTasks: TaskWithProject[] = (tasks || [])
       .filter(task => {
+        // Filter by building_id if specified (via project -> unit -> building chain)
+        // 'all' or missing building_id = no filter (backward compatible)
+        if (buildingIdFilter && buildingIdFilter !== 'all' && task.project?.unit?.building_id !== buildingIdFilter) {
+          return false
+        }
         // Filter by unit_id if specified
         if (unitIdFilter && task.project?.unit_id !== unitIdFilter) {
           return false
