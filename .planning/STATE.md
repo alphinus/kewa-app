@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-01-25)
 ## Current Position
 
 Phase: 18 of 24 (Knowledge Base)
-Plan: 0 of 3 in current phase
-Status: Ready to plan
-Last activity: 2026-01-25 — Roadmap created for v2.2 Extensions
+Plan: 1 of 5 in current phase
+Status: In progress
+Last activity: 2026-01-25 — Completed 18-01-PLAN.md
 
-Progress: [░░░░░░░░░░] 0%
+Progress: [██░░░░░░░░] 3% (1/35 v2.2 plans)
 
 ## Milestones Completed
 
@@ -26,7 +26,7 @@ Progress: [░░░░░░░░░░] 0%
 
 | Phase | Name | Requirements | Status |
 |-------|------|--------------|--------|
-| 18 | Knowledge Base | 10 | Ready to plan |
+| 18 | Knowledge Base | 10 | In progress (1/5 plans) |
 | 19 | Supplier Core | 7 | Not started |
 | 20 | Supplier Advanced | 5 | Not started |
 | 21 | Change Orders | 10 | Not started |
@@ -37,15 +37,15 @@ Progress: [░░░░░░░░░░] 0%
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 0 (v2.2)
-- Average duration: —
-- Total execution time: 0 hours
+- Total plans completed: 1 (v2.2)
+- Average duration: 9 min
+- Total execution time: 9 min
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| - | - | - | - |
+| 18 | 1 | 9 min | 9 min |
 
 *Updated after each plan completion*
 
@@ -59,6 +59,9 @@ Recent decisions affecting current work:
 - [v2.2]: Research recommends MDX for knowledge base content (no CMS)
 - [v2.2]: Supplier Module extends existing Partner entity
 - [v2.2]: Push Notifications built last so all event sources exist
+- [18-01]: Generated tsvector column with weighted search (title A, content B, tags C)
+- [18-01]: Temporal tables pattern for version history
+- [18-01]: Workflow FSM with trigger enforcement
 
 ### Pending Todos
 
@@ -70,9 +73,9 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-01-25
-Stopped at: Roadmap created, ready to plan phase 18
+Last session: 2026-01-25 11:18 UTC
+Stopped at: Completed 18-01-PLAN.md
 Resume file: None
 
 ---
-*v2.2 Extensions milestone started. Ready to plan phase 18.*
+*v2.2 Extensions milestone in progress. Phase 18 Plan 01 complete.*
