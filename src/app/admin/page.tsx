@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/server'
 import { CounterCard } from '@/components/admin/CounterCard'
 import { AlertSection } from '@/components/admin/AlertSection'
 import { QuickActions } from '@/components/admin/QuickActions'
+import { AdminDashboardClient } from './AdminDashboardClient'
 
 /**
  * Admin Dashboard
@@ -87,58 +88,60 @@ export default async function AdminDashboardPage() {
   const partnerAlertCount = inactivePartners.length
 
   return (
-    <div className="p-4 pb-20 sm:p-6 max-w-6xl mx-auto">
-      {/* Header */}
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-          Admin Dashboard
-        </h1>
-        <p className="text-gray-600 dark:text-gray-400">
-          Uebersicht aller Stammdaten und Systemstatus
-        </p>
-      </div>
+    <AdminDashboardClient propertyCount={propertyCount}>
+      <div className="p-4 pb-20 sm:p-6 max-w-6xl mx-auto">
+        {/* Header */}
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+            Admin Dashboard
+          </h1>
+          <p className="text-gray-600 dark:text-gray-400">
+            Uebersicht aller Stammdaten und Systemstatus
+          </p>
+        </div>
 
-      {/* Counter Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <CounterCard
-          title="Liegenschaften"
-          count={propertyCount}
-          href="/dashboard/admin/properties"
-          icon={<Building2 className="h-6 w-6" />}
-        />
-        <CounterCard
-          title="Partner"
-          count={partnerCount}
-          href="/dashboard/partner"
-          icon={<Users className="h-6 w-6" />}
-          alert={partnerAlertCount > 0 ? { count: partnerAlertCount, severity: 'warning' } : undefined}
-        />
-        <CounterCard
-          title="Projekte"
-          count={projectCount}
-          href="/dashboard/kosten/projekte"
-          icon={<FolderKanban className="h-6 w-6" />}
-          alert={projectAlertCount > 0 ? { count: projectAlertCount, severity: 'error' } : undefined}
-        />
-        <CounterCard
-          title="Templates"
-          count={templateCount}
-          href="/templates"
-          icon={<FileText className="h-6 w-6" />}
-        />
-      </div>
+        {/* Counter Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+          <CounterCard
+            title="Liegenschaften"
+            count={propertyCount}
+            href="/dashboard/admin/properties"
+            icon={<Building2 className="h-6 w-6" />}
+          />
+          <CounterCard
+            title="Partner"
+            count={partnerCount}
+            href="/dashboard/partner"
+            icon={<Users className="h-6 w-6" />}
+            alert={partnerAlertCount > 0 ? { count: partnerAlertCount, severity: 'warning' } : undefined}
+          />
+          <CounterCard
+            title="Projekte"
+            count={projectCount}
+            href="/dashboard/kosten/projekte"
+            icon={<FolderKanban className="h-6 w-6" />}
+            alert={projectAlertCount > 0 ? { count: projectAlertCount, severity: 'error' } : undefined}
+          />
+          <CounterCard
+            title="Templates"
+            count={templateCount}
+            href="/templates"
+            icon={<FileText className="h-6 w-6" />}
+          />
+        </div>
 
-      {/* Alerts Section */}
-      <div className="mb-6">
-        <AlertSection
-          overdueProjects={overdueProjects}
-          stalledProjects={stalledProjects}
-          inactivePartners={inactivePartners}
-        />
-      </div>
+        {/* Alerts Section */}
+        <div className="mb-6">
+          <AlertSection
+            overdueProjects={overdueProjects}
+            stalledProjects={stalledProjects}
+            inactivePartners={inactivePartners}
+          />
+        </div>
 
-      {/* Quick Actions */}
-      <QuickActions />
-    </div>
+        {/* Quick Actions */}
+        <QuickActions />
+      </div>
+    </AdminDashboardClient>
   )
 }
