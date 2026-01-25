@@ -8,6 +8,17 @@ Ein umfassendes Renovations-Management-System für KEWA AG. Standardisierte Proj
 
 KEWA AG hat volle Transparenz und Kontrolle über alle Renovationen — mit standardisierten Workflows, externer Handwerker-Integration, Kostenübersicht und automatischer Zustandshistorie.
 
+## Current Milestone: v2.2 Extensions
+
+**Goal:** Extend renovation workflow with change orders, supplier management, inspection workflows, push notifications, and knowledge base.
+
+**Target features:**
+- Change Orders for in-flight project modifications
+- Supplier Module (Pellets tracking and ordering)
+- Inspection/Abnahme Workflow for project handoffs
+- Push Notifications for real-time updates
+- Knowledge Base for FAQ and documentation
+
 ## Current State (v2.1 Shipped)
 
 **Tech Stack:** Next.js 16 + React 19 + Supabase + Tailwind CSS 4
@@ -141,5 +152,5 @@ KEWA AG hat volle Transparenz und Kontrolle über alle Renovationen — mit stan
 | Mieter-Portal in Phase 3 | MVP-Fokus auf Renovation, Mieter später | — Planned |
 
 ---
-*Last updated: 2026-01-25 after v2.1 milestone complete*
+*Last updated: 2026-01-25 — v2.2 Extensions milestone started*
 *Source: KEWA-RENOVATION-OPS-SPEC_v1 + Original v2.0 Scope*
