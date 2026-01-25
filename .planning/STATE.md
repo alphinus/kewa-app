@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-01-25)
 ## Current Position
 
 Phase: 18 of 24 (Knowledge Base)
-Plan: 1 of 5 in current phase
+Plan: 2 of 5 in current phase
 Status: In progress
-Last activity: 2026-01-25 — Completed 18-01-PLAN.md
+Last activity: 2026-01-25 — Completed 18-02-PLAN.md
 
-Progress: [██░░░░░░░░] 3% (1/35 v2.2 plans)
+Progress: [███░░░░░░░] 6% (2/35 v2.2 plans)
 
 ## Milestones Completed
 
@@ -26,7 +26,7 @@ Progress: [██░░░░░░░░] 3% (1/35 v2.2 plans)
 
 | Phase | Name | Requirements | Status |
 |-------|------|--------------|--------|
-| 18 | Knowledge Base | 10 | In progress (1/5 plans) |
+| 18 | Knowledge Base | 10 | In progress (2/5 plans) |
 | 19 | Supplier Core | 7 | Not started |
 | 20 | Supplier Advanced | 5 | Not started |
 | 21 | Change Orders | 10 | Not started |
@@ -37,15 +37,15 @@ Progress: [██░░░░░░░░] 3% (1/35 v2.2 plans)
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 1 (v2.2)
-- Average duration: 9 min
-- Total execution time: 9 min
+- Total plans completed: 2 (v2.2)
+- Average duration: 10.5 min
+- Total execution time: 21 min
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 18 | 1 | 9 min | 9 min |
+| 18 | 2 | 21 min | 10.5 min |
 
 *Updated after each plan completion*
 
@@ -62,6 +62,9 @@ Recent decisions affecting current work:
 - [18-01]: Generated tsvector column with weighted search (title A, content B, tags C)
 - [18-01]: Temporal tables pattern for version history
 - [18-01]: Workflow FSM with trigger enforcement
+- [18-02]: Tiptap with immediatelyRender: false for SSR safety
+- [18-02]: Template scaffolds as Tiptap JSON with section headings
+- [18-02]: Manual toolbar (no shadcn minimal-tiptap, no components.json)
 
 ### Pending Todos
 
@@ -73,9 +76,9 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-01-25 11:18 UTC
-Stopped at: Completed 18-01-PLAN.md
+Last session: 2026-01-25
+Stopped at: Completed 18-02-PLAN.md
 Resume file: None
 
 ---
-*v2.2 Extensions milestone in progress. Phase 18 Plan 01 complete.*
+*v2.2 Extensions milestone in progress. Phase 18 Plan 02 complete.*
