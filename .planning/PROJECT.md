@@ -2,37 +2,30 @@
 
 ## What This Is
 
-Ein umfassendes Renovations-Management-System für KEWA AG. Standardisierte Projektvorlagen (WBS), externes Handwerker-Portal via Magic-Link, vollständige Kostenübersicht mit Offerten→Rechnungen→Zahlungen, automatische Zustandshistorie ("Digital Twin") pro Raum/Wohnung, und Property-Dashboard mit Heatmap-Visualisierung. Aufbauend auf dem v1 Task-Management-System.
+Ein umfassendes Renovations-Management-System für KEWA AG. Standardisierte Projektvorlagen (WBS), externes Handwerker-Portal via Magic-Link, vollständige Kostenübersicht mit Offerten→Rechnungen→Zahlungen, automatische Zustandshistorie ("Digital Twin") pro Raum/Wohnung, Property-Dashboard mit Heatmap-Visualisierung, und komplette Stammdaten-Verwaltung für Partner, Liegenschaften und Templates.
 
 ## Core Value
 
 KEWA AG hat volle Transparenz und Kontrolle über alle Renovationen — mit standardisierten Workflows, externer Handwerker-Integration, Kostenübersicht und automatischer Zustandshistorie.
 
-## Current Milestone: v2.1 Master Data Management
-
-**Goal:** Komplette Stammdaten-Verwaltung — Partner, Liegenschaften, Templates, Onboarding
-
-**Target features:**
-- Partner/Handwerker-Modul (API + CRUD UI + WorkOrder-Integration)
-- Multi-Liegenschaft-Verwaltung (Properties/Buildings API + UI + Auswahl)
-- Template-Management (UI zum Erstellen/Bearbeiten/Auswählen)
-- Seed Data & Onboarding (Initiale Daten + Setup-Flow)
-
-## Current State (v2.0 MVP Shipped)
+## Current State (v2.1 Shipped)
 
 **Tech Stack:** Next.js 16 + React 19 + Supabase + Tailwind CSS 4
-**Codebase:** ~51,000 LOC TypeScript, ~400 files
-**Status:** v2.0 MVP shipped, starting v2.1 Master Data Management
+**Codebase:** ~75,000 LOC TypeScript, ~530 files
+**Status:** v2.1 Master Data Management shipped
 
-**Shipped Features (v2.0):**
-- Multi-Role RBAC (Admin, Manager, Accounting, Tenant, Contractor) mit 3 Auth-Methoden
-- Externes Handwerker-Portal mit Magic-Link, PDF-WorkOrders, Accept/Reject, Counter-Offers
-- Template-System (WBS) mit Phasen, Paketen, Tasks, Abhängigkeiten, Quality Gates
-- Kosten-Modul: Offer → Invoice → Payment mit CSV-Export und Investment-Amortisation
-- Digital Twin: Automatische Raum-Condition-Ableitung aus abgeschlossenen Projekten
-- Property-Dashboard mit Building-Heatmap, Occupancy-Gauge, Drilldown-Navigation
-- Parkplatz-Management und Auslastungs-Tracking
-- Kommentar-System für Tasks und WorkOrders
+**Shipped Features (v2.1):**
+- Partner/Contractor Master Data with trade categories and WorkOrder integration
+- Multi-Property Management with BuildingContext for cross-app filtering
+- Unit & Room CRUD with tenant data and condition tracking
+- Template UI with create/edit, drag-drop reordering, and project creation flow
+- Admin Dashboard with counters, quick actions, and search/filter
+- Setup Wizard for first-time onboarding
+- Demo data seed script and deployment README
+
+**Previous Milestones:**
+- v2.0 Advanced Features (shipped 2026-01-19) — See milestones/v2.0-ROADMAP.md
+- v1.0 MVP (shipped 2025-03-XX) — See milestones/v1.0-ROADMAP.md
 
 ## Requirements
 
@@ -63,7 +56,15 @@ KEWA AG hat volle Transparenz und Kontrolle über alle Renovationen — mit stan
 - ✓ DEBT-01 to DEBT-04: Tech Debt bereinigt — v2.0
 - ✓ NFR-01 to NFR-06: Audit, Datenschutz, Storage, Security — v2.0
 
-### Active (v2.1+)
+**v2.1:**
+- ✓ PART-01 to PART-05: Partner CRUD, Dropdown, Trade Filtering — v2.1
+- ✓ PROP-01 to PROP-05: Multi-Property, Building Context, Heatmap Filtering — v2.1
+- ✓ UNIT-01 to UNIT-04: Unit/Room CRUD, Tenant Data, Condition Tracking — v2.1
+- ✓ TMPL-01 to TMPL-05: Template UI, Create/Edit, Project Creation Flow — v2.1
+- ✓ ADMN-01 to ADMN-03: Admin Dashboard, Quick Actions, Search — v2.1
+- ✓ SEED-01 to SEED-04: Migrations, Seed Script, Setup Wizard, README — v2.1
+
+### Active (v2.2+)
 
 **Phase 2 Extensions (19 req):**
 - [ ] CHNG-01 to CHNG-03: Change Orders
@@ -106,10 +107,9 @@ KEWA AG hat volle Transparenz und Kontrolle über alle Renovationen — mit stan
 - Mieter: Mobile-first, von zuhause
 
 **Gebäude:**
-- 13 Wohnungen über 5 Ebenen
-- 9 Gemeinschaftsräume
-- 8 Parkplätze
-- Räume mit Condition-Tracking (old/partial/new)
+- Multi-Property Support (expandable)
+- Units with tenant data and vacancy tracking
+- Rooms with Condition-Tracking (old/partial/new)
 
 ## Constraints
 
@@ -135,8 +135,11 @@ KEWA AG hat volle Transparenz und Kontrolle über alle Renovationen — mit stan
 | CSS Gantt over library | Simpler, no license, full control | ✓ v2.0 |
 | Server Components for Dashboard | Direct DB access, no client-side query overhead | ✓ v2.0 |
 | Swiss VAT 8.0% default | 2024 Swiss VAT rate for invoices | ✓ v2.0 |
+| BuildingContext for filtering | Cross-app building selection with 'all' option | ✓ v2.1 |
+| Template-first project flow | Select template before project details (KEWA workflow) | ✓ v2.1 |
+| Setup wizard for onboarding | Guided first-time setup for new deployments | ✓ v2.1 |
 | Mieter-Portal in Phase 3 | MVP-Fokus auf Renovation, Mieter später | — Planned |
 
 ---
-*Last updated: 2026-01-22 after v2.1 milestone start*
+*Last updated: 2026-01-25 after v2.1 milestone complete*
 *Source: KEWA-RENOVATION-OPS-SPEC_v1 + Original v2.0 Scope*

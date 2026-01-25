@@ -1,5 +1,35 @@
 # Project Milestones: KEWA Liegenschafts-Aufgabenverwaltung
 
+## v2.1 Master Data Management (Shipped: 2026-01-25)
+
+**Delivered:** Complete master data management — Partner/Contractor CRUD with WorkOrder integration, multi-property administration with context switching, unit and room management, template creation and editing UI, admin dashboard with setup wizard for first-time onboarding.
+
+**Phases completed:** 13-17 (24 plans total)
+
+**Key accomplishments:**
+
+- Partner/Contractor master data with trade categories, active status, and WorkOrderForm dropdown integration
+- Multi-property management with Property/Building hierarchy and BuildingContext for cross-app filtering
+- Unit and room CRUD with tenant data (phone, email, move-in date, vacancy) and condition tracking
+- Template UI with create/edit forms, drag-drop reordering, and template-first project creation flow
+- Admin dashboard with counters, quick actions, search/filter on lists, and deployment README
+- Setup wizard for first-time onboarding (creates property → building → partner)
+
+**Stats:**
+
+- 139 files created/modified
+- ~75,000 lines of TypeScript (project total)
+- ~24,800 lines added in v2.1
+- 5 phases (13-17), 24 plans
+- 84 commits
+- 4 days from milestone start to ship (2026-01-22 → 2026-01-25)
+
+**Git range:** `e347db6` → `995e8a1`
+
+**What's next:** v2.2 Extensions (Change Orders, Suppliers, Inspection Workflow) or v3.0 Tenant Portal
+
+---
+
 ## v2.0 Renovation Operations MVP (Shipped: 2026-01-19)
 
 **Delivered:** Complete renovation management system with external contractor portal (magic-link), template-based WBS workflows, full cost tracking (offers → invoices → payments), digital twin with automatic condition tracking, and property dashboard with heatmap visualization.
