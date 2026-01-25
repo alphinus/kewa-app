@@ -2,15 +2,17 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { useParams, useRouter } from 'next/navigation'
+import { Pin, PinOff } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { ArticleViewer } from '@/components/knowledge/ArticleViewer'
 import { VersionHistory } from '@/components/knowledge/VersionHistory'
+import { RelatedArticles } from '@/components/knowledge/RelatedArticles'
 import type { KBArticleWithMeta, KBArticleResponse } from '@/types/knowledge-base'
 
 /**
  * View article page
- * Displays article content with metadata and edit button
+ * Displays article content with metadata, version history, related articles, and actions
  */
 export default function ArticleViewPage() {
   const params = useParams()
@@ -21,6 +23,8 @@ export default function ArticleViewPage() {
   const [article, setArticle] = useState<KBArticleWithMeta | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [isPinned, setIsPinned] = useState(false)
+  const [pinLoading, setPinLoading] = useState(false)
 
   // Fetch article
   const fetchArticle = useCallback(async () => {
@@ -45,10 +49,49 @@ export default function ArticleViewPage() {
     }
   }, [articleId])
 
+  // Check if article is pinned
+  const checkPinned = useCallback(async () => {
+    try {
+      const res = await fetch('/api/knowledge/shortcuts')
+      if (res.ok) {
+        const data = await res.json()
+        const isPinnedArticle = (data.shortcuts || []).some(
+          (s: { article_id: string }) => s.article_id === articleId
+        )
+        setIsPinned(isPinnedArticle)
+      }
+    } catch {
+      // Ignore errors
+    }
+  }, [articleId])
+
   // Initial load
   useEffect(() => {
     fetchArticle()
-  }, [fetchArticle])
+    checkPinned()
+  }, [fetchArticle, checkPinned])
+
+  // Toggle pin state
+  const togglePin = async () => {
+    setPinLoading(true)
+    try {
+      if (isPinned) {
+        const res = await fetch(`/api/knowledge/${articleId}/pin`, { method: 'DELETE' })
+        if (res.ok) {
+          setIsPinned(false)
+        }
+      } else {
+        const res = await fetch(`/api/knowledge/${articleId}/pin`, { method: 'POST' })
+        if (res.ok) {
+          setIsPinned(true)
+        }
+      }
+    } catch (err) {
+      console.error('Failed to toggle pin:', err)
+    } finally {
+      setPinLoading(false)
+    }
+  }
 
   // Loading state
   if (loading) {
@@ -82,14 +125,35 @@ export default function ArticleViewPage() {
 
   return (
     <div className="space-y-4 pb-24">
-      {/* Back button */}
-      <button
-        onClick={() => router.back()}
-        className="inline-flex items-center text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 min-h-[48px]"
-      >
-        <ChevronLeftIcon className="w-5 h-5 mr-1" />
-        Zurueck
-      </button>
+      {/* Header with back button and pin action */}
+      <div className="flex items-center justify-between">
+        <button
+          onClick={() => router.back()}
+          className="inline-flex items-center text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 min-h-[48px]"
+        >
+          <ChevronLeftIcon className="w-5 h-5 mr-1" />
+          Zurueck
+        </button>
+
+        <button
+          onClick={togglePin}
+          disabled={pinLoading}
+          className="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium rounded-lg transition-colors min-h-[48px] border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-50"
+          aria-label={isPinned ? 'Vom Dashboard entfernen' : 'Zum Dashboard hinzufuegen'}
+        >
+          {isPinned ? (
+            <>
+              <PinOff className="w-4 h-4" />
+              <span className="hidden sm:inline">Entfernen</span>
+            </>
+          ) : (
+            <>
+              <Pin className="w-4 h-4" />
+              <span className="hidden sm:inline">Anpinnen</span>
+            </>
+          )}
+        </button>
+      </div>
 
       {/* Article content */}
       <Card>
@@ -98,7 +162,14 @@ export default function ArticleViewPage() {
         </CardContent>
       </Card>
 
-      {/* Version history sidebar */}
+      {/* Related articles */}
+      <Card>
+        <CardContent className="p-4">
+          <RelatedArticles articleId={articleId} />
+        </CardContent>
+      </Card>
+
+      {/* Version history */}
       <Card>
         <CardContent className="p-4">
           <VersionHistory articleId={articleId} />
