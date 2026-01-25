@@ -6,6 +6,7 @@ import { useSession } from '@/hooks/useSession'
 import { useBuilding } from '@/contexts/BuildingContext'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { DashboardShortcuts } from '@/components/knowledge/DashboardShortcuts'
 import type { TaskWithProject, TasksResponse } from '@/types/database'
 import type { Priority } from '@/types'
 
@@ -251,6 +252,13 @@ export default function DashboardPage() {
                 ))}
               </ul>
             )}
+          </CardContent>
+        </Card>
+
+        {/* Pinned KB articles shortcuts */}
+        <Card>
+          <CardContent className="p-4">
+            <DashboardShortcuts />
           </CardContent>
         </Card>
       </div>
