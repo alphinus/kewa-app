@@ -124,6 +124,33 @@ export interface KBWorkflowTransition {
 }
 
 // =============================================
+// ATTACHMENT TYPES
+// =============================================
+
+/**
+ * Knowledge base article attachment
+ * Stores file metadata for uploaded attachments (PDFs, images, docs)
+ */
+export interface KBAttachment {
+  id: string
+  article_id: string
+  file_name: string
+  file_size: number
+  mime_type: string
+  storage_path: string
+  description: string | null
+  uploaded_by: string | null
+  created_at: string
+}
+
+/**
+ * Attachment with signed URL for download
+ */
+export interface KBAttachmentWithUrl extends KBAttachment {
+  url: string
+}
+
+// =============================================
 // API INPUT TYPES
 // =============================================
 
@@ -271,6 +298,20 @@ export interface KBArticleHistoryResponse {
  */
 export interface KBShortcutsResponse {
   shortcuts: KBDashboardShortcut[]
+}
+
+/**
+ * Response for attachments list
+ */
+export interface KBAttachmentsResponse {
+  attachments: KBAttachmentWithUrl[]
+}
+
+/**
+ * Response for single attachment operations
+ */
+export interface KBAttachmentResponse {
+  attachment: KBAttachment
 }
 
 /**
