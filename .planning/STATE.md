@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-01-25)
 ## Current Position
 
 Phase: 18 of 24 (Knowledge Base)
-Plan: 2 of 5 in current phase
+Plan: 3 of 5 in current phase
 Status: In progress
-Last activity: 2026-01-25 — Completed 18-02-PLAN.md
+Last activity: 2026-01-25 — Completed 18-03-PLAN.md
 
-Progress: [███░░░░░░░] 6% (2/35 v2.2 plans)
+Progress: [████░░░░░░] 9% (3/35 v2.2 plans)
 
 ## Milestones Completed
 
@@ -26,7 +26,7 @@ Progress: [███░░░░░░░] 6% (2/35 v2.2 plans)
 
 | Phase | Name | Requirements | Status |
 |-------|------|--------------|--------|
-| 18 | Knowledge Base | 10 | In progress (2/5 plans) |
+| 18 | Knowledge Base | 10 | In progress (3/5 plans) |
 | 19 | Supplier Core | 7 | Not started |
 | 20 | Supplier Advanced | 5 | Not started |
 | 21 | Change Orders | 10 | Not started |
@@ -37,15 +37,15 @@ Progress: [███░░░░░░░] 6% (2/35 v2.2 plans)
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 2 (v2.2)
-- Average duration: 10.5 min
-- Total execution time: 21 min
+- Total plans completed: 3 (v2.2)
+- Average duration: 11 min
+- Total execution time: 33 min
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 18 | 2 | 21 min | 10.5 min |
+| 18 | 3 | 33 min | 11 min |
 
 *Updated after each plan completion*
 
@@ -65,6 +65,9 @@ Recent decisions affecting current work:
 - [18-02]: Tiptap with immediatelyRender: false for SSR safety
 - [18-02]: Template scaffolds as Tiptap JSON with section headings
 - [18-02]: Manual toolbar (no shadcn minimal-tiptap, no components.json)
+- [18-03]: websearch_to_tsquery for safe FTS user input handling
+- [18-03]: pg_trgm similarity for fuzzy autocomplete suggestions
+- [18-03]: 300ms debounce for search suggestions
 
 ### Pending Todos
 
@@ -77,8 +80,8 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-01-25
-Stopped at: Completed 18-02-PLAN.md
+Stopped at: Completed 18-03-PLAN.md
 Resume file: None
 
 ---
-*v2.2 Extensions milestone in progress. Phase 18 Plan 02 complete.*
+*v2.2 Extensions milestone in progress. Phase 18 Plan 03 complete.*
