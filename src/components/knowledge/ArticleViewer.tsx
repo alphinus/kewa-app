@@ -15,7 +15,8 @@ interface ArticleViewerProps {
  * Read-only article display with Tiptap rendering
  * Displays article content, metadata, and optional search term highlighting
  */
-export function ArticleViewer({ article, highlightTerms = [] }: ArticleViewerProps) {
+export function ArticleViewer({ article, highlightTerms: _highlightTerms = [] }: ArticleViewerProps) {
+  // TODO (Plan 18-05): Implement search term highlighting using _highlightTerms
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
