@@ -1,196 +1,184 @@
-# Research Summary: KEWA Liegenschafts-Aufgabenverwaltung
+# Research Summary: v2.2 Extensions
 
-**Synthesized:** 2026-01-16
+**Project:** KEWA Renovation Operations System
+**Domain:** Property renovation management (Swiss context)
+**Synthesized:** 2026-01-25
 **Confidence:** HIGH
-
-## Executive Summary
-
-Die KEWA-App ist ein Property-Task-Management-System für 2 Nutzer (Eigentümerin + Handwerker) mit klarem Fokus: Aufgaben zuweisen, mit Fotos dokumentieren, Transparenz schaffen. Der Tech-Stack (Next.js 15 + Supabase + Vercel) ist solide gewählt.
-
-**Kritische Erkenntnisse:**
-
-1. **Offline-First ist Pflicht** — Foto-Uploads auf Baustellen mit schlechtem Netz scheitern still. Imeri verliert Vertrauen binnen Tagen, wenn Fotos "verschwinden". IndexedDB-Queue + Client-seitige Kompression von Tag 1.
-
-2. **Schweizerdeutsch-Transkription funktioniert nicht zuverlässig** — 15-30% Wortfehlerrate selbst mit optimierten Modellen. Spracheingabe nur für KEWA AG (Hochdeutsch), Imeri nur Audio-Speicherung ohne Transkription.
-
-3. **Touch-Targets für Baustelle: 76dp minimum** — Standard 44px ist zu klein für Arbeitshandschuhe. Mobile-first bedeutet wirklich: Design für Imeris Smartphone mit Handschuhen.
-
-4. **Einfachheit über alles** — Keine Settings, keine Konfiguration, ein klarer Pfad pro Screen. Imeri ist kein Tech-User.
 
 ---
 
-## Key Findings by Dimension
+## Executive Summary
 
-### Stack (STACK.md)
+The v2.2 Extensions milestone adds five feature areas to an already mature 75,000 LOC Next.js 16 + Supabase codebase: Change Orders, Supplier Module, Inspection Workflow, Push Notifications, and Knowledge Base. Research confirms these are well-established patterns in construction/property management software. The existing architecture handles most requirements through database extensions and pattern reuse rather than new libraries or architectural changes. Only two library additions are needed: `web-push` for push notifications and `@next/mdx` for knowledge base content.
 
-| Bereich | Empfehlung | Confidence |
-|---------|------------|------------|
-| UI | shadcn/ui + Tailwind CSS 4 | HIGH |
-| State | TanStack Query + Zustand | HIGH |
-| Audio | react-audio-voice-recorder | HIGH |
-| Speech-to-Text | Deepgram Nova-3 (DE) @ $0.004/min | HIGH |
-| Bilder | Supabase Storage + Image Transformations | HIGH |
-| Realtime | Supabase Postgres Changes | HIGH |
-| Auth | Custom PIN + Cookie Sessions (kein Supabase Auth) | MEDIUM |
+The recommended approach is **extend, don't reinvent**. Change Orders should model as work order amendments feeding into existing cost views. Supplier Module extends the existing Partner entity. Inspection Workflow leverages existing quality gates and the work order status machine's `done -> inspected -> closed` flow. Knowledge Base uses MDX for file-based content. Push Notifications integrate with the existing Supabase Realtime and add Web Push API via service worker.
 
-**Anti-Pattern:** Redux, MUI, NextAuth — alle Overkill für 2 Nutzer.
+Critical risks are architectural: Change order cost tracking must integrate with existing `project_costs` views (not create parallel tracking). Push notification service worker must merge with existing PWA caching (not create conflicts). VAPID keys must be generated once and stored permanently (not regenerated per deploy). The 2-user internal context means simpler workflows are appropriate - avoid enterprise patterns like multi-tier approvals or complex CMS capabilities.
 
-### Features (FEATURES.md)
+---
 
-**Table Stakes (Phase 1):**
-- PIN-Auth, Task-CRUD, Foto-Upload, Dashboards, Mobile-Responsive
+## Key Findings
 
-**Differentiators (Phase 2-3):**
-- Grafische Gebäudeansicht (echtes UX-Differenzierungsmerkmal)
-- Sprachnotizen mit Transkription
-- Wöchentliche Berichte
-- Wiederkehrende Aufgaben
+### Recommended Stack
 
-**Anti-Features (NICHT bauen):**
-- Multi-User-Management, Multi-Building, Tenant-Portal
-- Invoicing, komplexes Scheduling, Analytics-Dashboards
-- Push-Notifications (später), Offline-Sync (später)
+**Minimal additions required.** The existing stack handles all features except push delivery and MDX rendering.
 
-### Architecture (ARCHITECTURE.md)
+| Addition | Purpose | Confidence |
+|----------|---------|------------|
+| `web-push` v3.6.7 | Server-side VAPID push notification delivery | HIGH |
+| `@next/mdx` v16.1.4 | MDX processing for knowledge base articles | HIGH |
+| `@mdx-js/loader`, `@mdx-js/react` | MDX webpack and React integration | HIGH |
+| `remark-gfm`, `rehype-slug`, `rehype-autolink-headings` | Markdown enhancements (tables, heading links) | HIGH |
 
-**Datenmodell:**
-```
-buildings → units → projects → tasks → task_photos/task_audio
-```
+**No new libraries needed for:**
+- Change Orders (database + existing patterns)
+- Supplier Module (database + existing Partner entity)
+- Inspection Workflow (database + existing quality gates)
+- In-app notifications (Supabase Realtime already bundled in @supabase/supabase-js v2.90.1)
 
-**Auth-Pattern:**
-- Custom PIN-Validation mit bcrypt
-- HTTP-only Cookie Sessions (7 Tage)
-- Service Role für alle DB-Operationen (bypass RLS)
+**Anti-recommendations:** Firebase Cloud Messaging (external dependency), Contentful/CMS (overkill), Nextra (too heavy), XState (database state machines sufficient).
 
-**Storage:**
-```
-task-photos/{task_id}/before-{uuid}.jpg
-task-audio/{task_id}/instruction-{uuid}.webm
-```
+### Expected Features
 
-**Build-Reihenfolge:**
-1. Foundation (Supabase, Schema, Auth)
-2. Core Data (UI, Task-CRUD, Rollen)
-3. Files (Foto/Audio)
-4. Polish (Realtime, Reports)
+**Change Orders:**
+- Table stakes: Create CO from work order, cost/schedule impact tracking, approval workflow, audit trail
+- Differentiators: CO PDF generation, cumulative tracking per project, photo evidence
+- Defer: Multi-tier approval chains, automated RFI integration
 
-### Pitfalls (PITFALLS.md)
+**Supplier Module:**
+- Table stakes: Supplier CRUD, order creation/tracking, delivery confirmation, invoice linking
+- Differentiators: Consumption tracking, reorder alerts, price history
+- Defer: IoT tank sensors, automated reordering
 
-**Kritisch (Phase 1):**
-| Pitfall | Prevention |
-|---------|------------|
-| Silent Upload Failures | Offline-Queue + IndexedDB + klare Status-Indikatoren |
-| Touch-Targets zu klein | 76dp minimum, testen mit Handschuhen |
-| Technische Fehlermeldungen | Human-readable + Action-Button |
-| Desktop-First Design | Smartphone als Referenzgerät |
+**Inspection Workflow:**
+- Table stakes: Checklist-based inspection, item-level pass/fail, photo documentation, digital signature
+- Differentiators: Snag list generation, re-inspection tracking, Abnahmeprotokoll PDF
+- Defer: Third-party inspector management, regulatory certificates
 
-**Wichtig (Phase 2+):**
-| Pitfall | Prevention |
-|---------|------------|
-| Swiss German STT | Nur Audio speichern, keine Transkription für Imeri |
-| Web Speech API inkompatibel | Server-side Whisper statt Browser API |
-| Building-Visualization Overengineering | CSS-Grid first, SVG später |
+**Push Notifications:**
+- Table stakes: Web push subscription, notification preferences, in-app notification center
+- Differentiators: Deadline reminders, batch digest
+- Defer: SMS, native mobile push, contractor push (use email)
+
+**Knowledge Base:**
+- Table stakes: Article CRUD, categories, full-text search, markdown rendering
+- Differentiators: Contractor-visible articles, contextual help links
+- Defer: Tenant portal, multi-language, AI chatbot
+
+### Architecture Approach
+
+All features integrate with existing patterns. Server Components for dashboards, JSONB-based state machines with PostgreSQL trigger enforcement, polymorphic entity patterns for comments/media, event logging for audit trails.
+
+**New tables:**
+- `change_orders` with `change_order_status` enum
+- `supplier_products`, `supplier_orders`, `inventory_movements`
+- `inspections`, `inspection_items`, `inspection_templates`
+- `notification_subscriptions`, `notifications`, `notification_preferences`
+- `kb_categories`, `kb_articles`, `kb_article_feedback`
+
+**Modified components:**
+- `project_costs` view to include change order amounts and supplier costs
+- Work order detail pages to show change orders and trigger inspections
+- Header to include notification bell component
+- Contractor portal for KB help articles
+
+### Critical Pitfalls
+
+| Priority | Pitfall | Prevention |
+|----------|---------|------------|
+| CRITICAL | **CO-1: Cost tracking fragmentation** - Change orders as separate entity breaks project cost views | Model change orders as work order amendments, update `project_costs` view in same migration |
+| CRITICAL | **PN-1: Service worker conflicts** - Separate push SW conflicts with existing PWA caching | Merge push handling into existing service worker, don't create second SW |
+| CRITICAL | **PN-3: VAPID key regeneration** - New keys invalidate all subscriptions | Generate VAPID keys once, store in Vercel environment secrets, never regenerate |
+| MODERATE | **IW-4: Disconnected status machine** - Inspection exists parallel to work order status | Integrate with existing `done -> inspected -> closed` transitions via trigger |
+| MODERATE | **KB-1: CMS scope creep** - Knowledge base becomes multi-week feature | Time-box to 1 week, use MDX files, single editor, no WYSIWYG |
 
 ---
 
 ## Implications for Roadmap
 
-Basierend auf Research, empfohlene Phasen-Struktur:
+### Suggested Phase Structure
 
-### Phase 1: Foundation + Core Task Loop
-**Ziel:** Arbeitsfähiges System — KEWA erstellt Tasks, Imeri sieht sie
+Based on dependencies, complexity, and integration requirements:
 
-- Supabase Setup (DB, Storage, Realtime Publication)
-- Custom PIN Auth mit Cookie Sessions
-- Building/Unit/Project/Task Schema
-- Mobile-first UI Components (76dp touch targets)
-- KEWA Dashboard: Task-CRUD
-- Imeri Dashboard: Task-Liste
-- **Pitfall-Prevention:** Offline-Queue-Architektur von Tag 1
-
-**Rationale:** Core Loop muss zuerst funktionieren. Auth + Data + Basic UI.
-
-### Phase 2: Photo Documentation
-**Ziel:** Fotobeweis für erledigte Arbeiten
-
-- Supabase Storage Buckets
-- Client-seitige Bildkompression (720px, WebP)
-- Foto-Upload mit Retry-Logic
-- Photo Gallery pro Task
-- Before/After Darstellung (einfach, side-by-side)
-- **Pitfall-Prevention:** Compression + Offline-Queue + Clear Status
-
-**Rationale:** Fotos sind Kernwert ("Fotobeweis"). Ohne Fotos kein Vertrauen.
-
-### Phase 3: Voice Notes + Reports
-**Ziel:** Spracheingabe für KEWA, Berichte für Transparenz
-
-- Audio Recording (MediaRecorder API)
-- Deepgram Integration (nur KEWA AG, Hochdeutsch)
-- Audio-Speicherung für Imeri (keine Transkription)
-- Audio Playback Component
-- Wöchentlicher Report Generator
-- **Pitfall-Prevention:** Whisper/Deepgram server-side, nicht Web Speech API
-
-**Rationale:** Voice ist Convenience, nicht Core. Reports sind dokumentierte Transparenz.
-
-### Phase 4: Building View + Polish
-**Ziel:** Grafische Übersicht, Feinschliff
-
-- Grafische Gebäudeansicht (CSS Grid first, dann polish)
-- Mieternamen pro Wohnung
-- Fortschrittsbalken pro Einheit
-- Wiederkehrende Aufgaben
-- Realtime Task Updates
-- Archivierung abgeschlossener Projekte
-- **Pitfall-Prevention:** Time-box Visualization auf max 1 Woche
-
-**Rationale:** Polish nach Core. Building View ist Differentiator, nicht Blocker.
+| Phase | Feature | Rationale |
+|-------|---------|-----------|
+| 18 | Knowledge Base | Simplest, no dependencies on other v2.2 features, establishes MDX patterns |
+| 19 | Supplier Module | Extends existing partners, foundation for material tracking |
+| 20 | Change Orders | Core workflow enhancement, integrates with existing cost tracking |
+| 21 | Inspection Workflow | Depends on work order flow, leverages quality gates |
+| 22 | Push Notifications | Built last so all event sources exist to trigger from |
 
 ### Phase Ordering Rationale
 
-1. **Auth vor allem** — Ohne Auth keine Rollen, keine geschützten Routen
-2. **Tasks vor Fotos** — Task-Struktur muss existieren bevor Fotos angehängt werden
-3. **Fotos vor Audio** — Fotos sind Kernwert, Audio ist Enhancement
-4. **Reports vor Building View** — Reports liefern echten Business Value, Building View ist UX Polish
+1. **Knowledge Base first**: Zero dependencies, immediate value, establishes content patterns that could be referenced by other features (e.g., contextual help for change orders).
 
-### Research Flags für Phasen
+2. **Supplier Module second**: Independent of other v2.2 features but provides foundation. Material costs from suppliers feed into project costs (relevant when change orders modify material requirements).
 
-- **Phase 1:** Standard Patterns, keine tiefere Research nötig
-- **Phase 2:** Image Compression Libraries — validieren welche mit Next.js 15 kompatibel
-- **Phase 3:** Deepgram vs OpenAI Whisper — testen mit echten deutschen Sprachproben
-- **Phase 4:** CSS Grid vs SVG für Building — Decision based on complexity
+3. **Change Orders third**: Integrates with existing work order and cost systems. Must be complete before inspection workflow since inspections need to handle pending change orders.
+
+4. **Inspection Workflow fourth**: Depends on work order status machine integration. Can generate snag items that might spawn change orders (existing CO system required).
+
+5. **Push Notifications last**: Cross-cutting concern that triggers from all other features. Building it last means all notification sources (change order submitted, inspection scheduled, low stock alert) exist.
+
+### Research Flags
+
+**Needs deeper research during planning:**
+- **Phase 22 (Push Notifications)**: iOS PWA installation requirements, service worker merging strategy, Supabase Realtime broadcast patterns
+
+**Standard patterns (skip research-phase):**
+- **Phase 18 (Knowledge Base)**: Well-documented MDX patterns, standard CRUD
+- **Phase 19 (Supplier Module)**: Standard inventory patterns, extends existing Partner
+- **Phase 20 (Change Orders)**: Follows existing work order patterns
+- **Phase 21 (Inspection Workflow)**: Mirrors existing quality gate + event patterns
 
 ---
 
 ## Confidence Assessment
 
-| Bereich | Level | Grund |
-|---------|-------|-------|
-| Stack Recommendations | HIGH | 2025 Best Practices verifiziert |
-| Feature Prioritization | HIGH | Klare Table Stakes vs Differentiators |
-| Architecture Patterns | HIGH | Supabase + Next.js offizielle Docs |
-| Pitfall Prevention | HIGH | Mehrere autoritative Quellen |
-| Phase Structure | MEDIUM | Basiert auf Dependency-Analyse |
+| Area | Confidence | Notes |
+|------|------------|-------|
+| Stack | HIGH | Verified npm packages, official Next.js 16 docs, version compatibility confirmed |
+| Features | MEDIUM-HIGH | Construction industry patterns documented; pellet-specific needs assumed |
+| Architecture | HIGH | Based on direct analysis of existing 75,000 LOC codebase patterns |
+| Pitfalls | HIGH | Construction software patterns + existing codebase integration points analyzed |
+
+**Overall confidence:** HIGH
+
+### Gaps to Address
+
+| Gap | How to Handle |
+|-----|---------------|
+| Pellet consumption tracking specifics | Validate with KEWA during Supplier Module planning - MVP may be order tracking only |
+| Contractor push notification scope | Confirm email-only for v2.2, defer push to contractors to future phase |
+| Inspection template library | Determine if existing quality gates suffice or need dedicated inspection templates |
+| VAPID key storage location | Verify Supabase Vault vs Vercel environment secrets during Push phase planning |
 
 ---
 
-## Open Questions for Planning
+## Sources
 
-1. **Imeri's Gerät** — iOS oder Android? Safari vs Chrome?
-2. **PIN-Länge** — 4-stellig oder 6-stellig?
-3. **Offline-Tiefe** — Reicht "Queue + Retry" oder braucht es echten Offline-Mode?
-4. **Report-Format** — PDF-Export oder nur In-App-Ansicht?
+### Primary (HIGH confidence)
+- [Next.js PWA Guide](https://nextjs.org/docs/app/guides/progressive-web-apps) - Push notification patterns
+- [Next.js MDX Guide](https://nextjs.org/docs/app/guides/mdx) - Knowledge base content
+- [Supabase Realtime Docs](https://supabase.com/docs/guides/realtime) - In-app notifications
+- [web-push npm](https://www.npmjs.com/package/web-push) - v3.6.7 verified
+- [@next/mdx npm](https://www.npmjs.com/package/@next/mdx) - v16.1.4 verified
+- [MDN: Push API](https://developer.mozilla.org/en-US/docs/Web/API/Push_API) - Web standards
+
+### Secondary (MEDIUM confidence)
+- [Procore: Change Orders](https://www.procore.com/library/how-construction-change-orders-work)
+- [Buildertrend: Construction Handover](https://buildertrend.com/blog/construction-project-handover/)
+- [MagicBell: PWA Push Notifications](https://www.magicbell.com/blog/using-push-notifications-in-pwas)
+- [KnowledgeOwl: KB Best Practices](https://www.knowledgeowl.com/blog/posts/find-best-knowledge-base-software)
+
+### Codebase Analysis
+- Existing state machine patterns (migrations 025/026)
+- Event logging patterns (migration 038)
+- Quality gates system
+- Partner entity structure
+- Cost view aggregations
 
 ---
 
-## Files in this Research
-
-| File | Purpose |
-|------|---------|
-| STACK.md | Tech-Stack Empfehlungen mit Versionen und Rationale |
-| FEATURES.md | Feature-Kategorisierung (Table Stakes / Differentiators / Anti) |
-| ARCHITECTURE.md | System-Architektur, Schema, Data Flow |
-| PITFALLS.md | 16 dokumentierte Risiken mit Prevention Strategies |
-| SUMMARY.md | Diese Zusammenfassung mit Roadmap-Implikationen |
+*Research completed: 2026-01-25*
+*Ready for roadmap: yes*

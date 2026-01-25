@@ -1,763 +1,869 @@
-# Architecture Research: KEWA Property Task Management App
+# Architecture Research: v2.2 Extensions
 
-**Researched:** 2026-01-16
-**Domain:** Next.js 15 + Supabase Task Management
-**Confidence:** HIGH (verified with official Supabase docs and established Next.js patterns)
+**Domain:** Renovation Management System Extensions
+**Researched:** 2026-01-25
+**Confidence:** HIGH (based on existing codebase patterns)
 
-## Executive Summary
+## Integration Overview
 
-The KEWA Property Task Management App should follow a layered Next.js App Router architecture with Supabase as the backend. The hierarchical data model (Building -> Units -> Projects -> Tasks) maps cleanly to relational tables with foreign key relationships. For the simple PIN-based authentication requirement, a custom lightweight session system using HTTP-only cookies is more appropriate than Supabase Auth.
+The v2.2 extensions integrate with a mature Next.js 16 + Supabase architecture with established patterns:
 
-**Key architectural decisions:**
-1. **Database-first design**: Define Supabase schema to match the hierarchical domain model with proper foreign keys
-2. **Server Actions for mutations**: Use Next.js Server Actions for all database writes, leveraging Supabase service role for bypassing RLS complexity
-3. **Custom PIN auth**: Implement simple cookie-based sessions without Supabase Auth (simpler for 2-user system)
-4. **Supabase Storage**: Organized by task ID for photos and audio files
-5. **Realtime via Postgres Changes**: For task status updates (acceptable scale for 2 users)
+- **Server Components** for dashboards with direct Supabase queries
+- **JSONB-based state machines** with PostgreSQL trigger enforcement
+- **Polymorphic entity patterns** (comments, media attach to any entity type)
+- **Event logging** for audit trails (work_order_events pattern)
+- **Multi-role auth** with PIN (internal) and magic-link (external)
+- **BuildingContext** for cross-app property filtering
 
-## System Components
+All five new features can integrate using these existing patterns without architectural changes.
 
-### 1. Presentation Layer (Next.js App Router)
+## Change Orders
 
-**Responsibility:** Routing, UI rendering, form handling, session management
+Change Orders represent modifications to active projects. They fit naturally into the existing cost workflow (Offer -> Invoice -> Payment) and project hierarchy.
 
-```
-app/
-├── (auth)/
-│   └── login/page.tsx           # PIN entry screen
-├── (app)/
-│   ├── layout.tsx               # Auth-protected layout with role context
-│   ├── dashboard/page.tsx       # Role-based dashboard redirect
-│   ├── kewa/                    # KEWA AG views
-│   │   ├── tasks/page.tsx       # Task management (CRUD)
-│   │   ├── projects/page.tsx    # Project overview
-│   │   ├── reports/page.tsx     # Weekly reports
-│   │   └── settings/page.tsx    # Visibility settings
-│   └── imeri/                   # Imeri (handyman) views
-│       ├── tasks/page.tsx       # Assigned tasks list
-│       └── task/[id]/page.tsx   # Task detail with file upload
-└── api/
-    └── auth/
-        ├── login/route.ts       # PIN verification
-        └── logout/route.ts      # Session termination
-```
+### New Components
 
-### 2. Business Logic Layer (lib/)
+| Component | Location | Purpose |
+|-----------|----------|---------|
+| `change_orders` table | `supabase/migrations/` | Core data model with status workflow |
+| `change_order_status` enum | `supabase/migrations/` | `draft` -> `submitted` -> `under_review` -> `approved`/`rejected` -> `applied` |
+| `ChangeOrderForm.tsx` | `src/components/change-orders/` | Create/edit form with line items |
+| `ChangeOrderList.tsx` | `src/components/change-orders/` | List with status badges, filtering |
+| `ChangeOrderDetail.tsx` | `src/components/change-orders/` | Full detail view with approval actions |
+| `ChangeOrderPDF.tsx` | `src/components/change-orders/` | PDF generation (follows WorkOrderPDF pattern) |
+| `change-order-queries.ts` | `src/lib/change-orders/` | Server-side query functions |
+| `/dashboard/aenderungen/` | `src/app/dashboard/` | Change order pages (list, detail, new) |
+| `/api/change-orders/` | `src/app/api/` | API routes for CRUD + approval workflow |
 
-**Responsibility:** Database queries, mutations, validation, utilities
+### Modified Components
 
-```
-lib/
-├── supabase/
-│   ├── client.ts               # Browser client (anon key)
-│   ├── server.ts               # Server client (service role)
-│   └── admin.ts                # Admin operations (service role)
-├── auth/
-│   ├── session.ts              # Cookie-based session management
-│   └── middleware.ts           # Route protection
-├── tasks/
-│   ├── queries.ts              # Task fetching (with relations)
-│   ├── mutations.ts            # Task CRUD operations
-│   └── types.ts                # Task-related TypeScript types
-├── projects/
-│   ├── queries.ts
-│   ├── mutations.ts
-│   └── types.ts
-├── reports/
-│   ├── generator.ts            # Weekly report generation
-│   └── types.ts
-└── storage/
-    ├── upload.ts               # File upload utilities
-    └── types.ts
-```
+| Component | Modification |
+|-----------|-------------|
+| `renovation_projects` table | Add `has_change_orders` boolean flag (optional, for quick filtering) |
+| Project detail page | Add "Change Orders" tab/section with count badge |
+| ProjectCostDashboard | Include approved change order amounts in totals |
+| CSV export | Include change order line items in cost export |
 
-### 3. Shared Components Layer
-
-**Responsibility:** Reusable UI components
-
-```
-components/
-├── ui/                         # Base components (Button, Input, Card, etc.)
-├── tasks/
-│   ├── TaskCard.tsx
-│   ├── TaskList.tsx
-│   ├── TaskForm.tsx
-│   └── StatusBadge.tsx
-├── files/
-│   ├── PhotoUpload.tsx
-│   ├── PhotoGallery.tsx
-│   └── AudioPlayer.tsx
-├── layout/
-│   ├── Header.tsx
-│   ├── Navigation.tsx
-│   └── RoleSwitcher.tsx        # (if needed for dev)
-└── reports/
-    └── ReportPreview.tsx
-```
-
-### 4. Data Layer (Supabase)
-
-**Responsibility:** PostgreSQL database, file storage, realtime subscriptions
-
-- **Database:** PostgreSQL with foreign key relationships
-- **Storage:** Buckets for task-related files
-- **Realtime:** Postgres Changes for task status updates
-
-## Database Schema
-
-### Schema Design (Supabase PostgreSQL)
+### Data Model
 
 ```sql
--- Users table (simple, no Supabase Auth)
-CREATE TABLE users (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  name TEXT NOT NULL,
-  role TEXT NOT NULL CHECK (role IN ('kewa', 'imeri')),
-  pin_hash TEXT NOT NULL,  -- bcrypt hashed 4-6 digit PIN
-  created_at TIMESTAMPTZ DEFAULT NOW()
+-- change_order_status enum
+CREATE TYPE change_order_status AS ENUM (
+  'draft',
+  'submitted',
+  'under_review',
+  'approved',
+  'rejected',
+  'applied',
+  'cancelled'
 );
 
--- Building (single building, but extensible)
-CREATE TABLE buildings (
+-- change_orders table
+CREATE TABLE change_orders (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  name TEXT NOT NULL,
-  address TEXT,
-  created_at TIMESTAMPTZ DEFAULT NOW()
-);
 
--- Units (13 apartments + 9 common areas = 22 total)
-CREATE TABLE units (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  building_id UUID NOT NULL REFERENCES buildings(id) ON DELETE CASCADE,
-  name TEXT NOT NULL,                    -- e.g., "Wohnung 1.OG links", "Keller"
-  type TEXT NOT NULL CHECK (type IN ('apartment', 'common_area')),
-  floor INTEGER,                         -- Optional: for sorting
-  sort_order INTEGER DEFAULT 0,          -- Custom sort order
-  created_at TIMESTAMPTZ DEFAULT NOW()
-);
+  -- Relationships
+  project_id UUID NOT NULL REFERENCES renovation_projects(id),
+  work_order_id UUID REFERENCES work_orders(id),  -- Optional link to originating work order
 
--- Projects (work scopes per unit)
-CREATE TABLE projects (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  unit_id UUID NOT NULL REFERENCES units(id) ON DELETE CASCADE,
-  title TEXT NOT NULL,                   -- e.g., "Badezimmer Renovation"
-  description TEXT,
-  status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'completed', 'archived')),
-  visible_to_imeri BOOLEAN DEFAULT true, -- KEWA can hide projects
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW()
-);
-
--- Tasks (individual work items)
-CREATE TABLE tasks (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  project_id UUID NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+  -- Identification
+  change_order_number TEXT NOT NULL,  -- CO-2026-001 format
   title TEXT NOT NULL,
   description TEXT,
-  audio_url TEXT,                        -- Optional audio instruction from KEWA
-  status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'in_progress', 'completed')),
-  priority INTEGER DEFAULT 0,            -- Higher = more urgent
-  visible_to_imeri BOOLEAN DEFAULT true, -- KEWA can hide tasks
-  due_date DATE,
-  completed_at TIMESTAMPTZ,
-  completed_by UUID REFERENCES users(id),
+  reason TEXT NOT NULL,  -- Why change is needed
+
+  -- Status workflow (JSONB trigger enforced)
+  status change_order_status DEFAULT 'draft',
+
+  -- Cost impact (follows invoice pattern)
+  line_items JSONB DEFAULT '[]',  -- [{description, quantity, unit_price, total}]
+  subtotal DECIMAL(12,2),
+  tax_rate DECIMAL(5,2) DEFAULT 8.0,
+  tax_amount DECIMAL(12,2),
+  total_amount DECIMAL(12,2),
+
+  -- Original vs new cost (for variance tracking)
+  original_estimated_cost DECIMAL(12,2),
+  revised_estimated_cost DECIMAL(12,2),
+  cost_variance DECIMAL(12,2),  -- Computed: revised - original
+
+  -- Schedule impact
+  schedule_impact_days INTEGER,  -- Positive = delay, negative = acceleration
+  revised_end_date DATE,
+
+  -- Approval workflow
+  requested_by UUID REFERENCES users(id),
+  requested_at TIMESTAMPTZ DEFAULT NOW(),
+  reviewed_by UUID REFERENCES users(id),
+  reviewed_at TIMESTAMPTZ,
+  approved_by UUID REFERENCES users(id),
+  approved_at TIMESTAMPTZ,
+  rejection_reason TEXT,
+
+  -- Application tracking
+  applied_at TIMESTAMPTZ,
+  applied_by UUID REFERENCES users(id),
+
+  -- Documents
+  attachments UUID[],  -- References to media table
+
+  -- Timestamps
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+```
+
+### Integration Points
+
+1. **Project Detail Page**: Add "Aenderungen" tab showing change orders for project
+2. **Cost Dashboard**: Include `SUM(approved change orders)` in project cost calculations
+3. **Work Order Detail**: "Request Change Order" button to create CO from work order
+4. **PDF Generation**: Use existing `@react-pdf/renderer` pattern from WorkOrderPDF
+5. **Audit Logging**: Extend existing audit_log table (entity_type = 'change_order')
+6. **Comments**: Use polymorphic comments pattern (entity_type = 'change_order')
+
+### Status Transitions (JSONB trigger)
+
+```json
+{
+  "draft": ["submitted", "cancelled"],
+  "submitted": ["under_review", "draft"],
+  "under_review": ["approved", "rejected", "submitted"],
+  "approved": ["applied"],
+  "rejected": ["draft"],
+  "applied": [],
+  "cancelled": []
+}
+```
+
+## Supplier Module
+
+Supplier management for tracking Pellets inventory and ordering. Extends existing `partners` table (already has `partner_type = 'supplier'`).
+
+### New Components
+
+| Component | Location | Purpose |
+|-----------|----------|---------|
+| `supplier_products` table | `supabase/migrations/` | Products/materials from suppliers |
+| `supplier_orders` table | `supabase/migrations/` | Purchase orders with line items |
+| `supplier_inventory` table | `supabase/migrations/` | Inventory tracking with levels |
+| `SupplierList.tsx` | `src/components/suppliers/` | List of suppliers (filtered from partners) |
+| `SupplierDetail.tsx` | `src/components/suppliers/` | Supplier with products, orders |
+| `ProductCatalog.tsx` | `src/components/suppliers/` | Products grid with stock levels |
+| `OrderForm.tsx` | `src/components/suppliers/` | Create purchase order |
+| `InventoryDashboard.tsx` | `src/components/suppliers/` | Stock levels, low-stock alerts |
+| `/dashboard/lieferanten/` | `src/app/dashboard/` | Supplier pages |
+| `/api/suppliers/` | `src/app/api/` | API routes |
+
+### Modified Components
+
+| Component | Modification |
+|-----------|-------------|
+| `partners` table | Already has `partner_type = 'supplier'` - no changes needed |
+| PartnerList | Add filter toggle for Contractors vs Suppliers |
+| Template tasks | Link `materials_list` JSONB to actual products (optional enhancement) |
+| Expense tracking | Link material expenses to supplier orders |
+
+### Data Model
+
+```sql
+-- Products from suppliers
+CREATE TABLE supplier_products (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  partner_id UUID NOT NULL REFERENCES partners(id),
+
+  -- Identification
+  sku TEXT,
+  name TEXT NOT NULL,
+  description TEXT,
+  category TEXT,  -- e.g., 'pellets', 'insulation', 'paint'
+  unit TEXT NOT NULL,  -- e.g., 'kg', 'sack', 'liter', 'stueck'
+
+  -- Pricing
+  unit_price DECIMAL(10,2),
+  currency TEXT DEFAULT 'CHF',
+  min_order_quantity INTEGER DEFAULT 1,
+
+  -- Inventory
+  current_stock DECIMAL(12,2) DEFAULT 0,
+  reorder_level DECIMAL(12,2),  -- Alert when below
+  reorder_quantity DECIMAL(12,2),  -- Standard order amount
+
+  -- Status
+  is_active BOOLEAN DEFAULT true,
+
+  -- Metadata
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Task Photos (max 2 per task, from either role)
-CREATE TABLE task_photos (
+-- Purchase orders
+CREATE TABLE supplier_orders (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  task_id UUID NOT NULL REFERENCES tasks(id) ON DELETE CASCADE,
-  storage_path TEXT NOT NULL,            -- Path in Supabase Storage
-  uploaded_by UUID NOT NULL REFERENCES users(id),
-  type TEXT NOT NULL CHECK (type IN ('before', 'after', 'reference')),
+  partner_id UUID NOT NULL REFERENCES partners(id),
+
+  -- Identification
+  order_number TEXT NOT NULL,  -- PO-2026-001
+
+  -- Status workflow
+  status TEXT DEFAULT 'draft' CHECK (status IN (
+    'draft', 'submitted', 'confirmed', 'shipped', 'received', 'cancelled'
+  )),
+
+  -- Line items
+  line_items JSONB NOT NULL DEFAULT '[]',
+  -- [{product_id, product_name, quantity, unit, unit_price, total}]
+
+  -- Totals
+  subtotal DECIMAL(12,2),
+  tax_rate DECIMAL(5,2) DEFAULT 8.0,
+  tax_amount DECIMAL(12,2),
+  total_amount DECIMAL(12,2),
+
+  -- Dates
+  order_date DATE DEFAULT CURRENT_DATE,
+  expected_delivery DATE,
+  actual_delivery DATE,
+
+  -- Receiving
+  received_by UUID REFERENCES users(id),
+  received_at TIMESTAMPTZ,
+  receiving_notes TEXT,
+
+  -- Links
+  renovation_project_id UUID REFERENCES renovation_projects(id),  -- Optional project link
+  invoice_id UUID REFERENCES invoices(id),  -- Link to supplier invoice
+
+  -- Metadata
+  created_by UUID REFERENCES users(id),
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Inventory movements (for audit trail)
+CREATE TABLE inventory_movements (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  product_id UUID NOT NULL REFERENCES supplier_products(id),
+
+  movement_type TEXT NOT NULL CHECK (movement_type IN (
+    'received', 'used', 'adjustment', 'return', 'transfer'
+  )),
+  quantity DECIMAL(12,2) NOT NULL,  -- Positive for in, negative for out
+  balance_after DECIMAL(12,2) NOT NULL,
+
+  -- References
+  supplier_order_id UUID REFERENCES supplier_orders(id),
+  work_order_id UUID REFERENCES work_orders(id),
+  project_id UUID REFERENCES renovation_projects(id),
+
+  notes TEXT,
+  created_by UUID REFERENCES users(id),
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+```
+
+### Integration Points
+
+1. **Partners List**: Filter toggle between contractors and suppliers (already have `partner_type`)
+2. **Work Orders**: "Order Materials" action to create supplier order
+3. **Template Tasks**: `materials_list` JSONB could reference `supplier_products.id`
+4. **Invoice Linking**: When supplier invoice arrives, link to `supplier_orders`
+5. **Low Stock Alerts**: Dashboard widget showing products below reorder level
+6. **Cost Tracking**: Material costs flow through supplier orders to project costs
+
+### Pellets-Specific Features
+
+Pellets tracking is a primary use case:
+
+```sql
+-- Pellets-specific view
+CREATE VIEW pellets_inventory AS
+SELECT
+  sp.*,
+  p.company_name as supplier_name,
+  (sp.current_stock < sp.reorder_level) as needs_reorder
+FROM supplier_products sp
+JOIN partners p ON sp.partner_id = p.id
+WHERE sp.category = 'pellets';
+```
+
+## Inspection Workflow
+
+Formal handoff process for project completion. Extends existing `project_quality_gates` and work order `inspected` status.
+
+### New Components
+
+| Component | Location | Purpose |
+|-----------|----------|---------|
+| `inspections` table | `supabase/migrations/` | Formal inspection records |
+| `inspection_items` table | `supabase/migrations/` | Checklist items with sign-off |
+| `InspectionChecklist.tsx` | `src/components/inspections/` | Interactive checklist with photos |
+| `InspectionSignOff.tsx` | `src/components/inspections/` | Digital signature capture |
+| `InspectionReport.tsx` | `src/components/inspections/` | Summary report with deficiencies |
+| `InspectionPDF.tsx` | `src/components/inspections/` | Abnahmeprotokoll PDF |
+| `/dashboard/abnahme/` | `src/app/dashboard/` | Inspection pages |
+| `/api/inspections/` | `src/app/api/` | API routes |
+
+### Modified Components
+
+| Component | Modification |
+|-----------|-------------|
+| `renovation_projects.status` | 'finished' triggers inspection availability; 'approved' requires passed inspection |
+| `project_quality_gates` | Existing structure supports inspection checklists |
+| Work order status flow | 'done' -> 'inspected' -> 'closed' already exists |
+| Project detail page | "Start Abnahme" button when status = 'finished' |
+
+### Data Model
+
+```sql
+-- Formal inspection records
+CREATE TABLE inspections (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+  -- What's being inspected
+  entity_type TEXT NOT NULL CHECK (entity_type IN ('project', 'work_order', 'unit', 'room')),
+  entity_id UUID NOT NULL,
+  project_id UUID REFERENCES renovation_projects(id),  -- Always link to project for context
+
+  -- Inspection type
+  inspection_type TEXT NOT NULL CHECK (inspection_type IN (
+    'intermediate',  -- Zwischenabnahme
+    'final',         -- Endabnahme
+    'followup'       -- Nachkontrolle
+  )),
+
+  -- Status
+  status TEXT DEFAULT 'scheduled' CHECK (status IN (
+    'scheduled', 'in_progress', 'completed', 'passed', 'failed', 'cancelled'
+  )),
+
+  -- Scheduling
+  scheduled_date DATE,
+  scheduled_time TIME,
+  actual_date DATE,
+
+  -- Participants
+  inspector_id UUID REFERENCES users(id),  -- KEWA staff
+  contractor_rep TEXT,  -- Contractor representative name
+  tenant_rep TEXT,      -- Tenant representative (for handover)
+
+  -- Results
+  overall_result TEXT CHECK (overall_result IN ('passed', 'passed_with_deficiencies', 'failed')),
+  notes TEXT,
+
+  -- Sign-off
+  signed_at TIMESTAMPTZ,
+  signature_data TEXT,  -- Base64 signature image or signature pad data
+
+  -- Links
+  deficiency_count INTEGER DEFAULT 0,
+
+  -- Metadata
+  created_by UUID REFERENCES users(id),
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Inspection checklist items
+CREATE TABLE inspection_items (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  inspection_id UUID NOT NULL REFERENCES inspections(id) ON DELETE CASCADE,
+
+  -- Item definition
+  category TEXT NOT NULL,  -- e.g., 'Elektro', 'Sanitaer', 'Malerarbeiten'
+  description TEXT NOT NULL,
+  sort_order INTEGER DEFAULT 0,
+
+  -- Result
+  status TEXT DEFAULT 'pending' CHECK (status IN (
+    'pending', 'passed', 'failed', 'na'  -- na = not applicable
+  )),
+
+  -- Deficiency details (if failed)
+  deficiency_description TEXT,
+  deficiency_severity TEXT CHECK (deficiency_severity IN ('minor', 'major', 'critical')),
+  remediation_deadline DATE,
+  remediated_at TIMESTAMPTZ,
+
+  -- Evidence
+  media_ids UUID[],  -- Before/after photos
+
+  -- Sign-off
+  inspected_by UUID REFERENCES users(id),
+  inspected_at TIMESTAMPTZ,
+
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Sessions table (for custom PIN auth)
-CREATE TABLE sessions (
+-- Predefined checklist templates (could be derived from quality gates)
+CREATE TABLE inspection_templates (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  token TEXT NOT NULL UNIQUE,            -- Random session token
-  expires_at TIMESTAMPTZ NOT NULL,
+  name TEXT NOT NULL,
+  description TEXT,
+  inspection_type TEXT NOT NULL,
+  items JSONB NOT NULL DEFAULT '[]',
+  -- [{category, description, sort_order}]
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+```
+
+### Integration Points
+
+1. **Project Status Flow**: `finished` -> inspection -> `approved`
+2. **Quality Gates**: Existing `project_quality_gates` provide checklist structure
+3. **Work Order Flow**: `done` -> `inspected` -> `closed` status already exists
+4. **Media System**: Photos attach via existing polymorphic media pattern
+5. **PDF Generation**: Abnahmeprotokoll using `@react-pdf/renderer`
+6. **Condition Update**: Passing final inspection triggers room condition updates (existing trigger)
+
+### Workflow Integration
+
+```
+Project Status Flow:
+planned -> active -> [blocked] -> finished -> [inspection] -> approved
+
+When project.status = 'finished':
+  - "Endabnahme starten" button appears
+  - Creates inspection record with checklist from quality gates
+
+Inspection completion:
+  - passed -> project.status = 'approved' (triggers condition updates)
+  - failed -> remediation items created, followup inspection scheduled
+```
+
+## Push Notifications
+
+Real-time alerts for key events. Uses Supabase Realtime + Web Push API.
+
+### New Components
+
+| Component | Location | Purpose |
+|-----------|----------|---------|
+| `notification_subscriptions` table | `supabase/migrations/` | Push subscription storage |
+| `notifications` table | `supabase/migrations/` | Notification history/queue |
+| `notification_preferences` table | `supabase/migrations/` | Per-user notification settings |
+| `NotificationBell.tsx` | `src/components/notifications/` | Header bell icon with badge |
+| `NotificationDropdown.tsx` | `src/components/notifications/` | Dropdown list of notifications |
+| `NotificationSettings.tsx` | `src/components/notifications/` | Preference toggles |
+| `usePushNotifications.ts` | `src/hooks/` | Push subscription hook |
+| `useRealtimeNotifications.ts` | `src/hooks/` | Supabase Realtime hook |
+| `/api/notifications/` | `src/app/api/` | API routes |
+| `service-worker.js` | `public/` | Service worker for push |
+
+### Modified Components
+
+| Component | Modification |
+|-----------|-------------|
+| Header | Add NotificationBell component |
+| DashboardLayout | Initialize push subscription on mount |
+| Contractor portal | Subscribe to work order updates |
+| Settings page | Add notification preferences section |
+
+### Data Model
+
+```sql
+-- Push subscription storage (Web Push)
+CREATE TABLE notification_subscriptions (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+  -- User link (nullable for contractor subscriptions)
+  user_id UUID REFERENCES users(id),
+  contractor_token TEXT,  -- For magic-link users
+
+  -- Web Push subscription
+  endpoint TEXT NOT NULL,
+  p256dh_key TEXT NOT NULL,
+  auth_key TEXT NOT NULL,
+
+  -- Device info
+  user_agent TEXT,
+  device_type TEXT,  -- 'mobile', 'desktop', 'tablet'
+
+  -- Status
+  is_active BOOLEAN DEFAULT true,
+  last_used_at TIMESTAMPTZ,
+
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+
+  UNIQUE(endpoint)
+);
+
+-- Notification history
+CREATE TABLE notifications (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+  -- Recipient
+  user_id UUID REFERENCES users(id),
+  contractor_email TEXT,  -- For external recipients
+
+  -- Content
+  title TEXT NOT NULL,
+  body TEXT NOT NULL,
+  icon TEXT,
+  action_url TEXT,  -- Deep link
+
+  -- Source
+  notification_type TEXT NOT NULL,
+  -- 'work_order_sent', 'work_order_accepted', 'invoice_approved',
+  -- 'change_order_submitted', 'inspection_scheduled', etc.
+
+  entity_type TEXT,
+  entity_id UUID,
+
+  -- Status
+  status TEXT DEFAULT 'pending' CHECK (status IN (
+    'pending', 'sent', 'delivered', 'read', 'failed'
+  )),
+  read_at TIMESTAMPTZ,
+  sent_at TIMESTAMPTZ,
+  error_message TEXT,
+
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Indexes for performance
-CREATE INDEX idx_units_building ON units(building_id);
-CREATE INDEX idx_projects_unit ON projects(unit_id);
-CREATE INDEX idx_tasks_project ON tasks(project_id);
-CREATE INDEX idx_tasks_status ON tasks(status);
-CREATE INDEX idx_task_photos_task ON task_photos(task_id);
-CREATE INDEX idx_sessions_token ON sessions(token);
-CREATE INDEX idx_sessions_expires ON sessions(expires_at);
-```
+-- User notification preferences
+CREATE TABLE notification_preferences (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES users(id),
 
-### Row Level Security Strategy
+  -- Channel preferences
+  push_enabled BOOLEAN DEFAULT true,
+  email_enabled BOOLEAN DEFAULT false,  -- Future
 
-**Recommended approach:** Use RLS for SELECT operations only; route all mutations through Server Actions with service role key.
+  -- Event type preferences (JSONB for flexibility)
+  event_preferences JSONB DEFAULT '{
+    "work_order_received": true,
+    "work_order_status_change": true,
+    "invoice_pending": true,
+    "change_order_submitted": true,
+    "inspection_scheduled": true,
+    "low_stock_alert": true
+  }'::JSONB,
 
-```sql
--- Enable RLS on all tables
-ALTER TABLE users ENABLE ROW LEVEL SECURITY;
-ALTER TABLE buildings ENABLE ROW LEVEL SECURITY;
-ALTER TABLE units ENABLE ROW LEVEL SECURITY;
-ALTER TABLE projects ENABLE ROW LEVEL SECURITY;
-ALTER TABLE tasks ENABLE ROW LEVEL SECURITY;
-ALTER TABLE task_photos ENABLE ROW LEVEL SECURITY;
-ALTER TABLE sessions ENABLE ROW LEVEL SECURITY;
+  -- Quiet hours
+  quiet_hours_start TIME,
+  quiet_hours_end TIME,
 
--- Since we're not using Supabase Auth, RLS policies would need
--- custom JWT handling or service role bypass.
---
--- RECOMMENDED: Use service_role key for ALL database operations
--- and handle authorization in Server Actions.
---
--- This is simpler for a 2-user system and avoids RLS complexity.
-```
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
 
-**Why bypass RLS for this app:**
-1. Only 2 users - complex RLS overhead not justified
-2. Custom PIN auth doesn't integrate with `auth.uid()`
-3. Server Actions provide natural authorization checkpoint
-4. All mutations already server-side (Next.js Server Actions)
-
-### Querying Hierarchical Data
-
-Supabase automatically detects foreign key relationships for nested queries:
-
-```typescript
-// Fetch building with all units, projects, and tasks
-const { data } = await supabase
-  .from('buildings')
-  .select(`
-    id,
-    name,
-    units (
-      id,
-      name,
-      type,
-      projects (
-        id,
-        title,
-        status,
-        visible_to_imeri,
-        tasks (
-          id,
-          title,
-          status,
-          priority,
-          visible_to_imeri,
-          due_date
-        )
-      )
-    )
-  `)
-  .single();
-
-// Filter for Imeri (only visible items)
-const { data } = await supabase
-  .from('projects')
-  .select(`
-    id,
-    title,
-    unit:units(name),
-    tasks (
-      id,
-      title,
-      status,
-      priority
-    )
-  `)
-  .eq('visible_to_imeri', true)
-  .eq('tasks.visible_to_imeri', true);
-```
-
-**Source:** [Supabase Joins and Nesting Documentation](https://supabase.com/docs/guides/database/joins-and-nesting)
-
-## File Storage Strategy
-
-### Bucket Organization
-
-```
-Storage Buckets:
-├── task-photos/          # Task photos (before/after/reference)
-│   └── {task_id}/
-│       ├── before-{uuid}.jpg
-│       ├── after-{uuid}.jpg
-│       └── reference-{uuid}.jpg
-└── task-audio/           # Audio instructions from KEWA
-    └── {task_id}/
-        └── instruction-{uuid}.webm
-```
-
-### Storage Policies
-
-Since we're using service role for mutations, storage policies can be permissive:
-
-```sql
--- Create buckets
-INSERT INTO storage.buckets (id, name, public)
-VALUES
-  ('task-photos', 'task-photos', false),
-  ('task-audio', 'task-audio', false);
-
--- For service role access, no RLS policies needed
--- Service role bypasses all RLS
-
--- If using anon key for downloads, add SELECT policy:
-CREATE POLICY "Allow authenticated read" ON storage.objects
-FOR SELECT USING (
-  bucket_id IN ('task-photos', 'task-audio')
+  UNIQUE(user_id)
 );
 ```
 
-### Upload Implementation Pattern
+### Integration Points
+
+1. **Work Order Events**: Existing `work_order_events` can trigger notifications
+2. **Supabase Realtime**: Subscribe to table changes for real-time UI updates
+3. **Service Worker**: Standard Web Push API for background notifications
+4. **Contractor Portal**: Subscribe to work order updates via magic-link token
+5. **Header Integration**: Bell icon in existing Header component
+
+### Notification Triggers
+
+| Event | Recipients | Trigger |
+|-------|------------|---------|
+| Work order sent | Contractor | `work_orders` INSERT with status='sent' |
+| Work order accepted/rejected | KEWA admin | `work_order_events` INSERT |
+| Counter-offer submitted | KEWA admin | `work_order_events` INSERT |
+| Invoice received | Accounting | `invoices` INSERT |
+| Invoice approved | Contractor | `invoices` UPDATE status='approved' |
+| Change order submitted | Project manager | `change_orders` INSERT |
+| Inspection scheduled | All parties | `inspections` INSERT |
+| Low stock alert | Property manager | `supplier_products` UPDATE (check threshold) |
+
+### Implementation Pattern
 
 ```typescript
-// lib/storage/upload.ts
-import { createServerClient } from '@/lib/supabase/server';
+// Supabase Realtime for UI updates
+const channel = supabase
+  .channel('work-order-updates')
+  .on('postgres_changes', {
+    event: 'UPDATE',
+    schema: 'public',
+    table: 'work_orders',
+    filter: `partner_id=eq.${partnerId}`
+  }, (payload) => {
+    // Update UI, show toast, increment badge
+  })
+  .subscribe()
 
-export async function uploadTaskPhoto(
-  taskId: string,
-  file: File,
-  type: 'before' | 'after' | 'reference',
-  uploadedBy: string
-): Promise<{ path: string; error: Error | null }> {
-  const supabase = createServerClient();
-
-  // Validate file
-  const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
-  if (!allowedTypes.includes(file.type)) {
-    return { path: '', error: new Error('Invalid file type') };
-  }
-
-  // Max 5MB
-  if (file.size > 5 * 1024 * 1024) {
-    return { path: '', error: new Error('File too large (max 5MB)') };
-  }
-
-  const fileName = `${type}-${crypto.randomUUID()}.${file.type.split('/')[1]}`;
-  const storagePath = `${taskId}/${fileName}`;
-
-  const { error: uploadError } = await supabase.storage
-    .from('task-photos')
-    .upload(storagePath, file);
-
-  if (uploadError) {
-    return { path: '', error: uploadError };
-  }
-
-  // Record in database
-  await supabase.from('task_photos').insert({
-    task_id: taskId,
-    storage_path: storagePath,
-    uploaded_by: uploadedBy,
-    type,
-  });
-
-  return { path: storagePath, error: null };
-}
+// Push notification trigger (database function)
+CREATE OR REPLACE FUNCTION notify_on_work_order_sent()
+RETURNS TRIGGER AS $$
+BEGIN
+  IF NEW.status = 'sent' AND (OLD.status IS NULL OR OLD.status = 'draft') THEN
+    INSERT INTO notifications (user_id, title, body, notification_type, entity_type, entity_id)
+    VALUES (
+      -- contractor's user_id or contractor_email
+      NEW.partner_id,  -- resolve to user
+      'Neuer Auftrag',
+      'Sie haben einen neuen Auftrag erhalten: ' || NEW.title,
+      'work_order_sent',
+      'work_order',
+      NEW.id
+    );
+  END IF;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
 ```
 
-**Source:** [Supabase Storage Access Control](https://supabase.com/docs/guides/storage/security/access-control)
+## Knowledge Base
 
-## Data Flow
+Searchable FAQ and documentation. Simple content management with categorization.
 
-### Authentication Flow (Custom PIN)
+### New Components
 
-```
-┌─────────────┐     ┌─────────────┐     ┌─────────────┐
-│   Browser   │────>│  API Route  │────>│  Database   │
-│  (PIN Form) │     │ /api/login  │     │  (sessions) │
-└─────────────┘     └─────────────┘     └─────────────┘
-       │                   │                   │
-       │  1. Submit PIN    │                   │
-       │──────────────────>│                   │
-       │                   │  2. Verify hash   │
-       │                   │──────────────────>│
-       │                   │<──────────────────│
-       │                   │  3. Create session│
-       │                   │──────────────────>│
-       │  4. Set cookie    │<──────────────────│
-       │<──────────────────│                   │
-       │                   │                   │
-```
+| Component | Location | Purpose |
+|-----------|----------|---------|
+| `kb_articles` table | `supabase/migrations/` | Article content with metadata |
+| `kb_categories` table | `supabase/migrations/` | Article categorization |
+| `ArticleList.tsx` | `src/components/knowledge-base/` | Article listing with search |
+| `ArticleDetail.tsx` | `src/components/knowledge-base/` | Article view with markdown rendering |
+| `ArticleEditor.tsx` | `src/components/knowledge-base/` | Admin article editor |
+| `KBSearch.tsx` | `src/components/knowledge-base/` | Full-text search component |
+| `/dashboard/wissensbasis/` | `src/app/dashboard/` | Knowledge base pages |
+| `/contractor/[token]/help/` | `src/app/contractor/` | Contractor-visible articles |
+| `/api/knowledge-base/` | `src/app/api/` | API routes |
 
-**Implementation:**
-```typescript
-// app/api/auth/login/route.ts
-import { cookies } from 'next/headers';
-import bcrypt from 'bcryptjs';
-import { createServerClient } from '@/lib/supabase/server';
+### Modified Components
 
-export async function POST(request: Request) {
-  const { pin, role } = await request.json();
-  const supabase = createServerClient();
+| Component | Modification |
+|-----------|-------------|
+| Contractor portal | Add "Hilfe" link to knowledge base articles |
+| Header | Add knowledge base link (optional) |
+| Dashboard | Quick search widget for KB articles |
 
-  // Find user by role
-  const { data: user } = await supabase
-    .from('users')
-    .select('id, pin_hash, role')
-    .eq('role', role)
-    .single();
+### Data Model
 
-  if (!user || !await bcrypt.compare(pin, user.pin_hash)) {
-    return Response.json({ error: 'Invalid PIN' }, { status: 401 });
-  }
+```sql
+-- Article categories
+CREATE TABLE kb_categories (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name TEXT NOT NULL,
+  slug TEXT NOT NULL UNIQUE,
+  description TEXT,
+  parent_id UUID REFERENCES kb_categories(id),  -- For nested categories
+  sort_order INTEGER DEFAULT 0,
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
 
-  // Create session
-  const token = crypto.randomUUID();
-  const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
+-- Knowledge base articles
+CREATE TABLE kb_articles (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 
-  await supabase.from('sessions').insert({
-    user_id: user.id,
-    token,
-    expires_at: expiresAt.toISOString(),
-  });
+  -- Content
+  title TEXT NOT NULL,
+  slug TEXT NOT NULL UNIQUE,
+  summary TEXT,  -- Short preview text
+  content TEXT NOT NULL,  -- Markdown content
 
-  // Set HTTP-only cookie
-  const cookieStore = await cookies();
-  cookieStore.set('session', token, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
-    expires: expiresAt,
-  });
+  -- Classification
+  category_id UUID REFERENCES kb_categories(id),
+  tags TEXT[],  -- For additional filtering
 
-  return Response.json({ role: user.role });
-}
-```
+  -- Visibility
+  visibility TEXT DEFAULT 'internal' CHECK (visibility IN (
+    'internal',     -- KEWA only
+    'contractors',  -- Visible to contractors
+    'public'        -- Future: tenant portal
+  )),
 
-### Task Creation Flow (KEWA)
+  -- Status
+  status TEXT DEFAULT 'draft' CHECK (status IN ('draft', 'published', 'archived')),
+  published_at TIMESTAMPTZ,
 
-```
-┌─────────────┐     ┌─────────────┐     ┌─────────────┐
-│   KEWA UI   │────>│Server Action│────>│  Supabase   │
-│ (Task Form) │     │ createTask  │     │  (tasks)    │
-└─────────────┘     └─────────────┘     └─────────────┘
-       │                   │                   │
-       │  1. Form submit   │                   │
-       │──────────────────>│                   │
-       │                   │  2. Validate      │
-       │                   │  3. Auth check    │
-       │                   │  4. Insert task   │
-       │                   │──────────────────>│
-       │                   │<──────────────────│
-       │                   │  5. revalidatePath│
-       │  6. UI updates    │                   │
-       │<──────────────────│                   │
-```
+  -- Search optimization
+  search_vector TSVECTOR,  -- PostgreSQL full-text search
 
-**Implementation:**
-```typescript
-// lib/tasks/mutations.ts
-'use server';
+  -- Engagement
+  view_count INTEGER DEFAULT 0,
+  helpful_count INTEGER DEFAULT 0,  -- Thumbs up
 
-import { revalidatePath } from 'next/cache';
-import { createServerClient } from '@/lib/supabase/server';
-import { getSession } from '@/lib/auth/session';
-import { z } from 'zod';
+  -- Metadata
+  author_id UUID REFERENCES users(id),
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
 
-const CreateTaskSchema = z.object({
-  project_id: z.string().uuid(),
-  title: z.string().min(1).max(200),
-  description: z.string().optional(),
-  priority: z.number().int().min(0).max(10).default(0),
-  due_date: z.string().optional(),
-  visible_to_imeri: z.boolean().default(true),
-});
+-- Full-text search index
+CREATE INDEX idx_kb_articles_search ON kb_articles USING GIN(search_vector);
 
-export async function createTask(formData: FormData) {
-  const session = await getSession();
-  if (!session || session.role !== 'kewa') {
-    throw new Error('Unauthorized');
-  }
+-- Auto-update search vector
+CREATE OR REPLACE FUNCTION kb_articles_search_trigger()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.search_vector :=
+    setweight(to_tsvector('german', coalesce(NEW.title, '')), 'A') ||
+    setweight(to_tsvector('german', coalesce(NEW.summary, '')), 'B') ||
+    setweight(to_tsvector('german', coalesce(NEW.content, '')), 'C');
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
 
-  const validated = CreateTaskSchema.parse({
-    project_id: formData.get('project_id'),
-    title: formData.get('title'),
-    description: formData.get('description'),
-    priority: Number(formData.get('priority') || 0),
-    due_date: formData.get('due_date'),
-    visible_to_imeri: formData.get('visible_to_imeri') === 'true',
-  });
+CREATE TRIGGER kb_articles_search_update
+  BEFORE INSERT OR UPDATE OF title, summary, content ON kb_articles
+  FOR EACH ROW EXECUTE FUNCTION kb_articles_search_trigger();
 
-  const supabase = createServerClient();
+-- Article feedback (optional)
+CREATE TABLE kb_article_feedback (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  article_id UUID NOT NULL REFERENCES kb_articles(id) ON DELETE CASCADE,
+  user_id UUID REFERENCES users(id),
+  is_helpful BOOLEAN NOT NULL,
+  feedback_text TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
 
-  const { data, error } = await supabase
-    .from('tasks')
-    .insert(validated)
-    .select()
-    .single();
-
-  if (error) throw error;
-
-  revalidatePath('/kewa/tasks');
-  return data;
-}
+  UNIQUE(article_id, user_id)  -- One feedback per user per article
+);
 ```
 
-### Task Completion Flow (Imeri)
+### Integration Points
 
-```
-┌─────────────┐     ┌─────────────┐     ┌─────────────┐     ┌─────────────┐
-│  Imeri UI   │────>│Server Action│────>│  Supabase   │────>│  Realtime   │
-│ (Complete)  │     │completeTask │     │  (tasks)    │     │ (broadcast) │
-└─────────────┘     └─────────────┘     └─────────────┘     └─────────────┘
-       │                   │                   │                   │
-       │  1. Click done    │                   │                   │
-       │──────────────────>│                   │                   │
-       │                   │  2. Update status │                   │
-       │                   │──────────────────>│                   │
-       │                   │                   │  3. Trigger       │
-       │                   │                   │─────────────────->│
-       │                   │                   │                   │
-       │                   │                   │     4. KEWA gets  │
-       │                   │                   │     notification  │
-       │                   │<──────────────────│                   │
-       │  5. UI updates    │                   │                   │
-       │<──────────────────│                   │                   │
-```
+1. **Contractor Portal**: Filtered articles with `visibility = 'contractors'`
+2. **Full-Text Search**: PostgreSQL tsvector for German language search
+3. **Markdown Rendering**: Use existing patterns or add `react-markdown`
+4. **Analytics**: Track view counts for popular articles
+5. **Comments**: Could use polymorphic comments pattern for discussions
 
-### Realtime Subscription Setup
+### Visibility Matrix
 
-```typescript
-// hooks/useTaskSubscription.ts
-'use client';
-
-import { useEffect } from 'react';
-import { createBrowserClient } from '@/lib/supabase/client';
-
-export function useTaskSubscription(
-  onUpdate: (task: Task) => void
-) {
-  useEffect(() => {
-    const supabase = createBrowserClient();
-
-    const channel = supabase
-      .channel('task-changes')
-      .on(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'tasks',
-        },
-        (payload) => {
-          onUpdate(payload.new as Task);
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [onUpdate]);
-}
-```
-
-**Source:** [Supabase Realtime Postgres Changes](https://supabase.com/docs/guides/realtime/subscribing-to-database-changes)
-
-## Component Dependencies
-
-### Dependency Graph
-
-```
-                    ┌─────────────┐
-                    │   Supabase  │
-                    │   Project   │
-                    └──────┬──────┘
-                           │
-         ┌─────────────────┼─────────────────┐
-         │                 │                 │
-         v                 v                 v
-   ┌───────────┐    ┌───────────┐    ┌───────────┐
-   │  Database │    │  Storage  │    │ Realtime  │
-   │  Schema   │    │  Buckets  │    │ Publication│
-   └─────┬─────┘    └─────┬─────┘    └─────┬─────┘
-         │                │                │
-         └────────┬───────┴────────────────┘
-                  │
-                  v
-         ┌─────────────────┐
-         │  Supabase       │
-         │  Client Setup   │
-         │  (lib/supabase) │
-         └────────┬────────┘
-                  │
-    ┌─────────────┼─────────────┐
-    │             │             │
-    v             v             v
-┌───────┐   ┌─────────┐   ┌─────────┐
-│ Auth  │   │ Queries │   │ Storage │
-│Session│   │Mutations│   │ Upload  │
-└───┬───┘   └────┬────┘   └────┬────┘
-    │            │             │
-    └────────────┼─────────────┘
-                 │
-                 v
-         ┌─────────────────┐
-         │   UI Components │
-         │   (pages, etc)  │
-         └─────────────────┘
-```
-
-### Critical Path Dependencies
-
-| Component | Depends On | Blocks |
-|-----------|------------|--------|
-| Database Schema | Supabase Project | Everything |
-| Supabase Client | Database Schema | Auth, Queries, Storage |
-| Auth/Session | Supabase Client | All protected routes |
-| Base UI Components | Nothing | Page components |
-| Task Queries | Auth, Schema | Task UI |
-| Storage Upload | Auth, Buckets | File UI |
-| Realtime | Publication config | Live updates |
-| Reports | Task Queries | Report UI |
+| Article Visibility | KEWA Staff | Contractors | Future Tenants |
+|-------------------|------------|-------------|----------------|
+| internal | Yes | No | No |
+| contractors | Yes | Yes | No |
+| public | Yes | Yes | Yes |
 
 ## Suggested Build Order
 
-Based on dependencies and incremental value delivery:
+Based on dependencies and integration complexity:
 
-### Phase 1: Foundation
-**Goal:** Working Supabase backend + authentication
+### Phase 1: Knowledge Base (Foundation)
+**Rationale:** Simplest new feature, no dependencies on other v2.2 features, establishes content patterns.
 
-1. **Supabase Project Setup**
-   - Create project
-   - Configure environment variables
-   - Set up local development (optional: Supabase CLI)
+1. Database migrations (kb_categories, kb_articles)
+2. API routes with full-text search
+3. Admin article editor
+4. Article list and detail views
+5. Contractor portal integration
 
-2. **Database Schema**
-   - Create all tables with foreign keys
-   - Add indexes
-   - Seed initial data (building, units, 2 users)
+**Estimated effort:** 1-2 phases
 
-3. **Supabase Client Configuration**
-   - `lib/supabase/client.ts` (browser)
-   - `lib/supabase/server.ts` (server with service role)
+### Phase 2: Supplier Module
+**Rationale:** Extends existing partners pattern, provides foundation for material tracking in other features.
 
-4. **Custom Auth System**
-   - Session management (`lib/auth/session.ts`)
-   - Login API route
-   - Logout API route
-   - Middleware for route protection
+1. Database migrations (supplier_products, supplier_orders, inventory_movements)
+2. Supplier filtering in partner list
+3. Product catalog with stock levels
+4. Order creation and tracking
+5. Inventory dashboard with alerts
 
-**Deliverable:** Users can log in with PIN and see role-appropriate dashboard
+**Estimated effort:** 2-3 phases
 
-### Phase 2: Core Data Operations
-**Goal:** KEWA can manage tasks, Imeri can view them
+### Phase 3: Change Orders
+**Rationale:** Core renovation workflow enhancement, integrates with cost tracking.
 
-5. **Base UI Components**
-   - Layout components (Header, Navigation)
-   - UI primitives (Button, Input, Card, etc.)
-   - Loading and error states
+1. Database migrations with status workflow trigger
+2. Change order form with line items
+3. Approval workflow (submit -> review -> approve/reject)
+4. PDF generation
+5. Integration with project cost dashboard
+6. Link to work orders
 
-6. **Unit/Project/Task Queries**
-   - Hierarchical data fetching
-   - Role-based filtering (visible_to_imeri)
+**Estimated effort:** 2-3 phases
 
-7. **KEWA Task Management**
-   - Task list view
-   - Task creation form
-   - Task editing
-   - Visibility toggle
+### Phase 4: Inspection Workflow
+**Rationale:** Depends on project status workflow, extends quality gates.
 
-8. **Imeri Task View**
-   - Filtered task list
-   - Task detail page
-   - Status update action
+1. Database migrations (inspections, inspection_items)
+2. Inspection checklist from quality gates
+3. Digital sign-off capability
+4. Deficiency tracking with remediation
+5. Abnahmeprotokoll PDF
+6. Project status integration (finished -> approved)
 
-**Deliverable:** Full task CRUD with role separation
+**Estimated effort:** 2-3 phases
 
-### Phase 3: Files and Media
-**Goal:** Photo and audio support
+### Phase 5: Push Notifications
+**Rationale:** Enhances all other features, should be built last so all event sources exist.
 
-9. **Storage Buckets**
-   - Create buckets in Supabase
-   - Configure access (service role bypass)
+1. Database migrations (subscriptions, notifications, preferences)
+2. Service worker and Web Push setup
+3. Subscription management
+4. Notification bell UI component
+5. Trigger functions for each event type
+6. Supabase Realtime integration
+7. Contractor portal notifications
 
-10. **Photo Upload**
-    - Upload component with preview
-    - Before/after photo support
-    - Photo gallery component
+**Estimated effort:** 2-3 phases
 
-11. **Audio Playback**
-    - Audio player component
-    - KEWA audio upload (future or separate)
+### Total Estimated Phases: 9-14 phases
 
-**Deliverable:** Tasks can have photos and audio instructions
+## Risk Areas
 
-### Phase 4: Real-time and Reports
-**Goal:** Live updates + weekly summaries
+### Push Notifications - Highest Complexity
+- **Web Push requires HTTPS and service worker** - Ensure Vercel deployment has proper SSL
+- **Subscription management across sessions** - Users need to re-subscribe on new devices
+- **iOS Safari limitations** - Web Push has limited support pre-iOS 16.4
+- **Background sync** - Service worker lifecycle management
 
-12. **Realtime Setup**
-    - Enable publication on tasks table
-    - Subscription hook
-    - UI integration for live status updates
+### Change Orders - Cost Integration
+- **Variance calculations** - Need to maintain accuracy with original estimates
+- **Applied state** - Once applied, change orders modify project scope
+- **Cascading updates** - Approved COs may need to update project dates and costs
 
-13. **Report Generation**
-    - Weekly summary query
-    - Report formatting
-    - Export/print capability
+### Inspection Workflow - Status Coupling
+- **Blocking transitions** - Failed inspections should block project approval
+- **Deficiency lifecycle** - Need clear remediation workflow
+- **Multiple inspection types** - Intermediate vs final vs followup logic
 
-**Deliverable:** Full application with all features
+### Supplier Module - Inventory Accuracy
+- **Real-time stock levels** - Need atomic operations for concurrent updates
+- **Multi-location inventory** - If inventory is per-building, adds complexity
+- **Pellets seasonality** - May need forecasting or alerts for peak usage
 
-## Open Questions
+### Knowledge Base - Content Management
+- **German full-text search** - Need proper PostgreSQL configuration for German dictionary
+- **Markdown security** - Sanitize user-generated content
+- **Media attachments** - Images in articles need storage integration
 
-### LOW Confidence Items (Need Validation)
+## Cross-Feature Dependencies
 
-1. **Audio Recording in Browser**
-   - How should KEWA record audio instructions?
-   - WebM vs other formats for browser recording
-   - Need to research MediaRecorder API patterns
+```
+Knowledge Base
+    (standalone)
 
-2. **Report Scheduling**
-   - Should reports auto-generate weekly or on-demand?
-   - If scheduled: Supabase Edge Functions or external cron?
+Supplier Module
+    depends on: partners table (exists)
+    integrates with: work orders (optional)
 
-3. **Offline Support**
-   - Is offline access needed for Imeri?
-   - If yes: PWA + local storage strategy needed
+Change Orders
+    depends on: renovation_projects (exists)
+    integrates with: work orders, cost dashboard
 
-### Design Decisions to Confirm
+Inspection Workflow
+    depends on: renovation_projects (exists)
+    depends on: project_quality_gates (exists)
+    integrates with: work orders, condition tracking
 
-1. **PIN Length:** 4-digit vs 6-digit?
-2. **Session Duration:** 7 days appropriate?
-3. **Photo Limit Enforcement:** Database constraint or application level?
+Push Notifications
+    depends on: all other features (triggers from each)
+    integrates with: contractor portal
+```
 
-## Sources
+## Architecture Patterns Summary
 
-### Primary (HIGH Confidence)
-- [Supabase Joins and Nesting Documentation](https://supabase.com/docs/guides/database/joins-and-nesting) - Hierarchical query patterns
-- [Supabase Storage Access Control](https://supabase.com/docs/guides/storage/security/access-control) - File security patterns
-- [Supabase Realtime Postgres Changes](https://supabase.com/docs/guides/realtime/subscribing-to-database-changes) - Subscription setup
-- [Supabase Row Level Security](https://supabase.com/docs/guides/database/postgres/row-level-security) - RLS patterns
-
-### Secondary (MEDIUM Confidence)
-- [Next.js 15 Folder Structure Best Practices](https://dev.to/bajrayejoon/best-practices-for-organizing-your-nextjs-15-2025-53ji) - Project organization
-- [MakerKit Next.js Supabase Architecture](https://makerkit.dev/docs/next-supabase/architecture/architecture) - Layered architecture patterns
-- [Supabase Storage Upload Patterns](https://kodaschool.com/blog/next-js-and-supabase-how-to-store-and-serve-images) - File upload implementation
-
-### Architecture Patterns Verified
-- [Supabase Best Practices](https://www.leanware.co/insights/supabase-best-practices) - Security and scaling
-- [Server Actions with Supabase](https://makerkit.dev/docs/next-supabase/data-fetching/server-actions) - Mutation patterns
-- [OWASP Session Management](https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html) - Cookie security
-
-## Confidence Assessment
-
-| Area | Level | Reason |
-|------|-------|--------|
-| Database Schema | HIGH | Standard relational design, verified with Supabase docs |
-| Supabase Client Setup | HIGH | Well-documented in official quickstart |
-| Server Actions Pattern | HIGH | Recommended by Supabase + Next.js docs |
-| Custom PIN Auth | MEDIUM | Standard cookie pattern, but custom implementation |
-| Storage Organization | HIGH | Standard bucket patterns from Supabase docs |
-| Realtime Setup | HIGH | Official documentation clear |
-| Build Order | MEDIUM | Based on dependency analysis, may need adjustment |
-
----
-
-**Research Date:** 2026-01-16
-**Valid Until:** 2026-02-16 (30 days - stable technologies)
+| Pattern | Existing Example | Apply To |
+|---------|-----------------|----------|
+| Status state machine | `work_order_status`, `renovation_status` | `change_order_status`, `inspection status` |
+| Polymorphic entities | `comments.entity_type` | Inspections, notifications |
+| Event logging | `work_order_events` | Change order events, notification history |
+| JSONB line items | `invoices.line_items` | Change order line items, order line items |
+| Full-text search | (new) | Knowledge base articles |
+| Server Components | Dashboard pages | All list pages |
+| PDF generation | `@react-pdf/renderer` | Change order PDF, Abnahmeprotokoll |
+| Trigger-based updates | `update_room_condition_from_project` | Notification triggers, stock level updates |
