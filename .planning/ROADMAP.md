@@ -111,15 +111,15 @@ Plans:
   5. Demo data script creates realistic test data for development/testing
   6. First-time login triggers setup wizard that creates initial property, building, and partner
   7. README includes deployment instructions for Supabase, Vercel, and environment setup
-**Plans**: TBD
+**Plans**: 6 plans
 
 Plans:
-- [ ] 17-01: Commit and document migrations 045, 046
-- [ ] 17-02: Admin overview dashboard with counters
-- [ ] 17-03: Search/filter on partner and template lists
-- [ ] 17-04: Demo data seed script
-- [ ] 17-05: Setup wizard for first-time onboarding
-- [ ] 17-06: Deployment README documentation
+- [ ] 17-01-PLAN.md — Commit and document migrations 045, 046
+- [ ] 17-02-PLAN.md — Admin overview dashboard with counters, alerts, quick actions
+- [ ] 17-03-PLAN.md — Search/filter on partner and template lists with debounce
+- [ ] 17-04-PLAN.md — Demo data seed script with Swiss-realistic data
+- [ ] 17-05-PLAN.md — Setup wizard for first-time onboarding
+- [ ] 17-06-PLAN.md — Deployment README documentation
 
 ## Progress
 
@@ -132,7 +132,7 @@ Phases execute in numeric order: 13 -> 14 -> 15 -> 16 -> 17
 | 14. Multi-Liegenschaft | v2.1 | 5/5 | Complete | 2026-01-24 |
 | 15. Einheiten-Verwaltung | v2.1 | 4/4 | Complete | 2026-01-24 |
 | 16. Template-Management | v2.1 | 5/5 | Complete | 2026-01-25 |
-| 17. Admin & Onboarding | v2.1 | 0/6 | Not started | - |
+| 17. Admin & Onboarding | v2.1 | 0/6 | Planned | - |
 
 **Total:** 18/24 plans complete (75%)
 
@@ -142,4 +142,5 @@ Phases execute in numeric order: 13 -> 14 -> 15 -> 16 -> 17
 *Phase 14 complete: 2026-01-24*
 *Phase 15 complete: 2026-01-24*
 *Phase 16 complete: 2026-01-25*
+*Phase 17 planned: 2026-01-25*
 *Milestone: v2.1 Master Data Management*
