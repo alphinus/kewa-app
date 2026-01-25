@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-01-25)
 
 **Core value:** KEWA AG hat volle Transparenz und Kontrolle uber alle Renovationen — mit standardisierten Workflows, externer Handwerker-Integration, Kostenuebersicht und automatischer Zustandshistorie.
-**Current focus:** Milestone v2.2 Extensions — Phase 18 Knowledge Base
+**Current focus:** Milestone v2.2 Extensions — Phase 18 Knowledge Base Complete
 
 ## Current Position
 
 Phase: 18 of 24 (Knowledge Base)
-Plan: 4 of 5 in current phase
-Status: In progress
-Last activity: 2026-01-25 — Completed 18-04-PLAN.md
+Plan: 5 of 5 in current phase
+Status: Phase complete
+Last activity: 2026-01-25 — Completed 18-05-PLAN.md
 
-Progress: [████░░░░░░] 11% (4/35 v2.2 plans)
+Progress: [█████░░░░░] 14% (5/35 v2.2 plans)
 
 ## Milestones Completed
 
@@ -26,7 +26,7 @@ Progress: [████░░░░░░] 11% (4/35 v2.2 plans)
 
 | Phase | Name | Requirements | Status |
 |-------|------|--------------|--------|
-| 18 | Knowledge Base | 10 | In progress (4/5 plans) |
+| 18 | Knowledge Base | 10 | Complete (5/5 plans) |
 | 19 | Supplier Core | 7 | Not started |
 | 20 | Supplier Advanced | 5 | Not started |
 | 21 | Change Orders | 10 | Not started |
@@ -37,15 +37,15 @@ Progress: [████░░░░░░] 11% (4/35 v2.2 plans)
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 4 (v2.2)
+- Total plans completed: 5 (v2.2)
 - Average duration: 10 min
-- Total execution time: 41 min
+- Total execution time: 49 min
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 18 | 4 | 41 min | 10 min |
+| 18 | 5 | 49 min | 10 min |
 
 *Updated after each plan completion*
 
@@ -72,20 +72,23 @@ Recent decisions affecting current work:
 - [18-04]: Signed URLs with 1-hour expiry for secure downloads
 - [18-04]: Workflow transitions validated in API and database trigger
 - [18-04]: Rejection requires comment for audit trail
+- [18-05]: Category-based similarity for related articles (simpler than FTS overlap)
+- [18-05]: Contractor portal hides internal metadata (author, dates, version history)
+- [18-05]: Visibility filter IN ('contractors', 'both') for contractor access
 
 ### Pending Todos
 
-None yet.
+None.
 
 ### Blockers/Concerns
 
-None yet.
+None.
 
 ## Session Continuity
 
 Last session: 2026-01-25
-Stopped at: Completed 18-04-PLAN.md
+Stopped at: Completed 18-05-PLAN.md (Phase 18 complete)
 Resume file: None
 
 ---
-*v2.2 Extensions milestone in progress. Phase 18 Plan 04 complete.*
+*v2.2 Extensions milestone in progress. Phase 18 Knowledge Base complete. Ready for Phase 19 Supplier Core.*
