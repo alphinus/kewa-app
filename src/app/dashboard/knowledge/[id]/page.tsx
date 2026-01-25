@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { ArticleViewer } from '@/components/knowledge/ArticleViewer'
+import { VersionHistory } from '@/components/knowledge/VersionHistory'
 import type { KBArticleWithMeta, KBArticleResponse } from '@/types/knowledge-base'
 
 /**
@@ -94,6 +95,13 @@ export default function ArticleViewPage() {
       <Card>
         <CardContent className="p-4 sm:p-6">
           <ArticleViewer article={article} />
+        </CardContent>
+      </Card>
+
+      {/* Version history sidebar */}
+      <Card>
+        <CardContent className="p-4">
+          <VersionHistory articleId={articleId} />
         </CardContent>
       </Card>
 
