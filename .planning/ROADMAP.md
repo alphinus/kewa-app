@@ -21,7 +21,7 @@ v2.1 delivers complete master data management: Partner/Handwerker CRUD with Work
 - [x] **Phase 14: Multi-Liegenschaft** - Property/Building management with context switching
 - [x] **Phase 15: Einheiten-Verwaltung** - Unit and room management within buildings
 - [x] **Phase 16: Template-Management** - Template CRUD UI for project templates
-- [ ] **Phase 17: Admin & Onboarding** - Dashboard, search, migrations, and setup wizard
+- [x] **Phase 17: Admin & Onboarding** - Dashboard, search, migrations, and setup wizard
 
 ## Phase Details
 
@@ -114,12 +114,12 @@ Plans:
 **Plans**: 6 plans
 
 Plans:
-- [ ] 17-01-PLAN.md — Commit and document migrations 045, 046
-- [ ] 17-02-PLAN.md — Admin overview dashboard with counters, alerts, quick actions
-- [ ] 17-03-PLAN.md — Search/filter on partner and template lists with debounce
-- [ ] 17-04-PLAN.md — Demo data seed script with Swiss-realistic data
-- [ ] 17-05-PLAN.md — Setup wizard for first-time onboarding
-- [ ] 17-06-PLAN.md — Deployment README documentation
+- [x] 17-01-PLAN.md — Commit and document migrations 045, 046
+- [x] 17-02-PLAN.md — Admin overview dashboard with counters, alerts, quick actions
+- [x] 17-03-PLAN.md — Search/filter on partner and template lists with debounce
+- [x] 17-04-PLAN.md — Demo data seed script with Swiss-realistic data
+- [x] 17-05-PLAN.md — Setup wizard for first-time onboarding
+- [x] 17-06-PLAN.md — Deployment README documentation
 
 ## Progress
 
@@ -132,9 +132,9 @@ Phases execute in numeric order: 13 -> 14 -> 15 -> 16 -> 17
 | 14. Multi-Liegenschaft | v2.1 | 5/5 | Complete | 2026-01-24 |
 | 15. Einheiten-Verwaltung | v2.1 | 4/4 | Complete | 2026-01-24 |
 | 16. Template-Management | v2.1 | 5/5 | Complete | 2026-01-25 |
-| 17. Admin & Onboarding | v2.1 | 0/6 | Planned | - |
+| 17. Admin & Onboarding | v2.1 | 6/6 | Complete | 2026-01-25 |
 
-**Total:** 18/24 plans complete (75%)
+**Total:** 24/24 plans complete (100%)
 
 ---
 *Roadmap created: 2026-01-22*
@@ -142,5 +142,5 @@ Phases execute in numeric order: 13 -> 14 -> 15 -> 16 -> 17
 *Phase 14 complete: 2026-01-24*
 *Phase 15 complete: 2026-01-24*
 *Phase 16 complete: 2026-01-25*
-*Phase 17 planned: 2026-01-25*
-*Milestone: v2.1 Master Data Management*
+*Phase 17 complete: 2026-01-25*
+*Milestone v2.1 complete: 2026-01-25*
