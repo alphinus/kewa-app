@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-01-25)
 
 **Core value:** KEWA AG hat volle Transparenz und Kontrolle uber alle Renovationen — mit standardisierten Workflows, externer Handwerker-Integration, Kostenuebersicht und automatischer Zustandshistorie.
-**Current focus:** Milestone v2.2 Extensions — Phase 18 Knowledge Base Complete
+**Current focus:** Milestone v2.2 Extensions — Phase 19 Supplier Core
 
 ## Current Position
 
-Phase: 18 of 24 (Knowledge Base)
-Plan: 5 of 5 in current phase
-Status: Phase complete
-Last activity: 2026-01-25 — Completed 18-05-PLAN.md
+Phase: 19 of 24 (Supplier Core)
+Plan: 1 of 7 in current phase
+Status: In progress
+Last activity: 2026-01-25 — Completed 19-01-PLAN.md
 
-Progress: [█████░░░░░] 14% (5/35 v2.2 plans)
+Progress: [██████░░░░] 17% (6/35 v2.2 plans)
 
 ## Milestones Completed
 
@@ -27,7 +27,7 @@ Progress: [█████░░░░░] 14% (5/35 v2.2 plans)
 | Phase | Name | Requirements | Status |
 |-------|------|--------------|--------|
 | 18 | Knowledge Base | 10 | Complete (5/5 plans) |
-| 19 | Supplier Core | 7 | Not started |
+| 19 | Supplier Core | 7 | In progress (1/7 plans) |
 | 20 | Supplier Advanced | 5 | Not started |
 | 21 | Change Orders | 10 | Not started |
 | 22 | Inspection Core | 8 | Not started |
@@ -37,15 +37,16 @@ Progress: [█████░░░░░] 14% (5/35 v2.2 plans)
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 5 (v2.2)
-- Average duration: 10 min
-- Total execution time: 49 min
+- Total plans completed: 6 (v2.2)
+- Average duration: 9 min
+- Total execution time: 54 min
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 18 | 5 | 49 min | 10 min |
+| 19 | 1 | 5 min | 5 min |
 
 *Updated after each plan completion*
 
@@ -75,6 +76,8 @@ Recent decisions affecting current work:
 - [18-05]: Category-based similarity for related articles (simpler than FTS overlap)
 - [18-05]: Contractor portal hides internal metadata (author, dates, version history)
 - [18-05]: Visibility filter IN ('contractors', 'both') for contractor access
+- [19-01]: Purchase order sequence for order numbers (PO-YYYY-NNNNN)
+- [19-01]: Deliveries has_variance computed column for mismatch detection
 
 ### Pending Todos
 
@@ -87,8 +90,8 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-25
-Stopped at: Completed 18-05-PLAN.md (Phase 18 complete)
+Stopped at: Completed 19-01-PLAN.md
 Resume file: None
 
 ---
-*v2.2 Extensions milestone in progress. Phase 18 Knowledge Base complete. Ready for Phase 19 Supplier Core.*
+*v2.2 Extensions milestone in progress. Phase 19 Supplier Core started.*
