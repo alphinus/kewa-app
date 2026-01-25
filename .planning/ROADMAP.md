@@ -41,21 +41,23 @@ See milestones/v2.1-ROADMAP.md
 ---
 
 ### Phase 18: Knowledge Base
-**Goal**: Users can create, organize, and search internal documentation and contractor-visible FAQs.
+**Goal**: Users can create, organize, and search internal documentation and contractor-visible FAQs with WYSIWYG editing, version history, and approval workflow.
 **Depends on**: Nothing (v2.2 starts here)
 **Requirements**: KNOW-01, KNOW-02, KNOW-03, KNOW-04, KNOW-05, KNOW-06, KNOW-07, KNOW-08, KNOW-09, KNOW-10
 **Success Criteria** (what must be TRUE):
-  1. User can create a new article with markdown content and see it rendered
+  1. User can create a new article with rich text content and see it rendered
   2. User can organize articles into categories and navigate by category
   3. User can search articles and find results by keyword
   4. User can mark articles as contractor-visible and contractors see them in portal
   5. User can view article version history and see who last updated it
-**Plans**: TBD
+**Plans**: 5 plans
 
 Plans:
-- [ ] 18-01: Knowledge base schema and article CRUD
-- [ ] 18-02: Categories, search, and attachments
-- [ ] 18-03: Version history, contractor visibility, and dashboard shortcuts
+- [ ] 18-01-PLAN.md — Database schema, types, API scaffolding
+- [ ] 18-02-PLAN.md — Tiptap editor, article CRUD UI
+- [ ] 18-03-PLAN.md — Category tree, full-text search
+- [ ] 18-04-PLAN.md — Attachments, approval workflow
+- [ ] 18-05-PLAN.md — Version history, contractor portal, dashboard shortcuts
 
 ---
 
@@ -178,7 +180,7 @@ Plans:
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 18. Knowledge Base | v2.2 | 0/3 | Not started | - |
+| 18. Knowledge Base | v2.2 | 0/5 | Planned | - |
 | 19. Supplier Core | v2.2 | 0/3 | Not started | - |
 | 20. Supplier Advanced | v2.2 | 0/3 | Not started | - |
 | 21. Change Orders | v2.2 | 0/4 | Not started | - |
