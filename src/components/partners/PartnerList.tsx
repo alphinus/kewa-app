@@ -1,8 +1,10 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
+import { Search } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { PartnerCard } from './PartnerCard'
+import { useDebounce } from '@/hooks/useDebounce'
 import type { Partner } from '@/types/database'
 import type { PartnerType } from '@/types'
 
@@ -22,6 +24,40 @@ export function PartnerList({ onEdit, refreshKey }: PartnerListProps) {
   const [error, setError] = useState<string | null>(null)
   const [filterActive, setFilterActive] = useState<'all' | 'true' | 'false'>('all')
   const [filterType, setFilterType] = useState<'all' | 'contractor' | 'supplier'>('all')
+  const [searchQuery, setSearchQuery] = useState('')
+  const [debouncedQuery, setDebouncedQuery] = useState('')
+  const [isSearching, setIsSearching] = useState(false)
+
+  // Debounced search update
+  const updateDebouncedQuery = useCallback((query: string) => {
+    setDebouncedQuery(query)
+    setIsSearching(false)
+  }, [])
+  const debouncedSearch = useDebounce(updateDebouncedQuery, 300)
+
+  // Handle search input change
+  const handleSearchChange = useCallback((value: string) => {
+    setSearchQuery(value)
+    setIsSearching(true)
+    debouncedSearch(value)
+  }, [debouncedSearch])
+
+  // Filter partners based on search query
+  const filteredPartners = useMemo(() => {
+    if (!debouncedQuery.trim()) return partners
+
+    const query = debouncedQuery.toLowerCase()
+    return partners.filter(partner => {
+      const companyMatch = partner.company_name?.toLowerCase().includes(query) ?? false
+      const contactMatch = partner.contact_name?.toLowerCase().includes(query) ?? false
+      const emailMatch = partner.email?.toLowerCase().includes(query) ?? false
+      const tradeMatch = partner.trade_categories?.some(
+        trade => trade.toLowerCase().includes(query)
+      ) ?? false
+
+      return companyMatch || contactMatch || emailMatch || tradeMatch
+    })
+  }, [partners, debouncedQuery])
 
   // Fetch partners
   useEffect(() => {
@@ -101,9 +137,27 @@ export function PartnerList({ onEdit, refreshKey }: PartnerListProps) {
 
   return (
     <div className="space-y-4">
-      {/* Filters */}
+      {/* Search and Filters */}
       <Card>
-        <CardContent className="p-4">
+        <CardContent className="p-4 space-y-4">
+          {/* Search input */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Suche
+            </label>
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Partner suchen..."
+                value={searchQuery}
+                onChange={(e) => handleSearchChange(e.target.value)}
+                className="w-full h-10 pl-10 pr-3 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+          </div>
+
+          {/* Dropdown filters */}
           <div className="flex flex-col sm:flex-row gap-4">
             {/* Active status filter */}
             <div className="flex-1">
@@ -137,21 +191,30 @@ export function PartnerList({ onEdit, refreshKey }: PartnerListProps) {
               </select>
             </div>
           </div>
+
+          {/* Results count */}
+          <div className="text-sm text-gray-500 dark:text-gray-400">
+            {isSearching ? (
+              'Suche...'
+            ) : (
+              `Zeige ${filteredPartners.length} von ${partners.length} Partnern`
+            )}
+          </div>
         </CardContent>
       </Card>
 
       {/* Partner list or empty state */}
-      {partners.length === 0 ? (
+      {filteredPartners.length === 0 ? (
         <Card>
           <CardContent className="p-8 text-center">
             <p className="text-gray-500 dark:text-gray-400">
-              Keine Partner vorhanden
+              {partners.length === 0 ? 'Keine Partner vorhanden' : 'Keine Partner gefunden'}
             </p>
           </CardContent>
         </Card>
       ) : (
         <div className="space-y-3">
-          {partners.map((partner) => (
+          {filteredPartners.map((partner) => (
             <PartnerCard
               key={partner.id}
               partner={partner}

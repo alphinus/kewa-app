@@ -1,10 +1,12 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { Search } from 'lucide-react'
 import { TemplateCard } from '@/components/templates/TemplateCard'
 import { fetchTemplates, deleteTemplate, duplicateTemplate } from '@/lib/api/templates'
+import { useDebounce } from '@/hooks/useDebounce'
 import type { Template, TemplateCategory } from '@/types/templates'
 
 /**
@@ -21,6 +23,35 @@ export default function TemplatesPage() {
   const [categoryFilter, setCategoryFilter] = useState<TemplateCategory | ''>('')
   const [showInactive, setShowInactive] = useState(false)
   const [isAdmin, setIsAdmin] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [debouncedQuery, setDebouncedQuery] = useState('')
+  const [isSearching, setIsSearching] = useState(false)
+
+  // Debounced search update
+  const updateDebouncedQuery = useCallback((query: string) => {
+    setDebouncedQuery(query)
+    setIsSearching(false)
+  }, [])
+  const debouncedSearch = useDebounce(updateDebouncedQuery, 300)
+
+  // Handle search input change
+  const handleSearchChange = useCallback((value: string) => {
+    setSearchQuery(value)
+    setIsSearching(true)
+    debouncedSearch(value)
+  }, [debouncedSearch])
+
+  // Filter templates based on search query
+  const filteredTemplates = useMemo(() => {
+    if (!debouncedQuery.trim()) return templates
+
+    const query = debouncedQuery.toLowerCase()
+    return templates.filter(template => {
+      const nameMatch = template.name?.toLowerCase().includes(query) ?? false
+      const descMatch = template.description?.toLowerCase().includes(query) ?? false
+      return nameMatch || descMatch
+    })
+  }, [templates, debouncedQuery])
 
   // Load templates and check admin status
   useEffect(() => {
@@ -76,8 +107,8 @@ export default function TemplatesPage() {
     }
   }
 
-  // Group templates by category
-  const grouped = templates.reduce((acc, template) => {
+  // Group filtered templates by category
+  const grouped = filteredTemplates.reduce((acc, template) => {
     const key = template.category
     if (!acc[key]) acc[key] = []
     acc[key].push(template)
@@ -122,20 +153,34 @@ export default function TemplatesPage() {
         )}
 
         {/* Filters */}
-        <div className="mb-6 flex flex-wrap items-center gap-4">
-          {/* Inactive toggle */}
-          <label className="flex items-center gap-2 cursor-pointer">
+        <div className="mb-6 space-y-4">
+          {/* Search input */}
+          <div className="relative max-w-md">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
             <input
-              type="checkbox"
-              checked={showInactive}
-              onChange={(e) => setShowInactive(e.target.checked)}
-              className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              type="text"
+              placeholder="Template suchen..."
+              value={searchQuery}
+              onChange={(e) => handleSearchChange(e.target.value)}
+              className="w-full h-10 pl-10 pr-3 rounded-lg border border-gray-300 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
-            <span className="text-sm text-gray-700">Inaktive anzeigen</span>
-          </label>
+          </div>
 
-          {/* Category filter */}
-          <div className="flex flex-wrap gap-2">
+          {/* Filter row */}
+          <div className="flex flex-wrap items-center gap-4">
+            {/* Inactive toggle */}
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={showInactive}
+                onChange={(e) => setShowInactive(e.target.checked)}
+                className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              />
+              <span className="text-sm text-gray-700">Inaktive anzeigen</span>
+            </label>
+
+            {/* Category filter */}
+            <div className="flex flex-wrap gap-2">
           <button
             onClick={() => setCategoryFilter('')}
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors min-h-[44px] ${
@@ -176,6 +221,16 @@ export default function TemplatesPage() {
           >
             Gewerk-spezifisch
           </button>
+            </div>
+          </div>
+
+          {/* Results count */}
+          <div className="text-sm text-gray-500">
+            {isSearching ? (
+              'Suche...'
+            ) : (
+              `Zeige ${filteredTemplates.length} von ${templates.length} Templates`
+            )}
           </div>
         </div>
 
@@ -185,12 +240,14 @@ export default function TemplatesPage() {
             <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
             <p className="mt-2 text-gray-600">Lade Templates...</p>
           </div>
-        ) : templates.length === 0 ? (
+        ) : filteredTemplates.length === 0 ? (
           <div className="text-center py-12 bg-white rounded-lg border border-gray-200">
             <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
-            <p className="mt-4 text-gray-600">Keine Templates gefunden</p>
+            <p className="mt-4 text-gray-600">
+              {templates.length === 0 ? 'Keine Templates vorhanden' : 'Keine Templates gefunden'}
+            </p>
             {isAdmin && (
               <Link
                 href="/templates/new"
