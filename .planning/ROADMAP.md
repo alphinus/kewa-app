@@ -71,12 +71,12 @@ Plans:
   3. User can record delivery confirmation with actual quantities and delivery note
   4. User can link deliveries to invoices for payment tracking
   5. User can view order history per supplier and per property
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 19-01: Supplier entity and CRUD (extends Partner)
-- [ ] 19-02: Purchase orders with status workflow
-- [ ] 19-03: Deliveries, property association, and invoice linking
+- [ ] 19-01-PLAN.md — Database schema (purchase_orders, deliveries), types, supplier API
+- [ ] 19-02-PLAN.md — Purchase order CRUD, status workflow, form/list components
+- [ ] 19-03-PLAN.md — Deliveries, invoice linking, dashboard pages
 
 ---
 
@@ -181,7 +181,7 @@ Plans:
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 18. Knowledge Base | v2.2 | 0/5 | Planned | - |
-| 19. Supplier Core | v2.2 | 0/3 | Not started | - |
+| 19. Supplier Core | v2.2 | 0/3 | Planned | - |
 | 20. Supplier Advanced | v2.2 | 0/3 | Not started | - |
 | 21. Change Orders | v2.2 | 0/4 | Not started | - |
 | 22. Inspection Core | v2.2 | 0/3 | Not started | - |
