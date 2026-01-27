@@ -90,12 +90,12 @@ Plans:
   3. User can view price history chart (CHF/tonne over time)
   4. User can view seasonal consumption patterns
   5. User can create multi-property orders with allocation breakdown
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 20-01: Consumption tracking and inventory movements
-- [ ] 20-02: Reorder alerts and stock projections
-- [ ] 20-03: Price history, seasonal patterns, and multi-property orders
+- [ ] 20-01-PLAN.md — Database schema (inventory_movements, allocations), views, functions, types, recharts
+- [ ] 20-02-PLAN.md — Inventory API, reorder alerts, consumption tracking UI and dashboard
+- [ ] 20-03-PLAN.md — Price analytics, seasonal consumption charts, multi-property order allocations
 
 ---
 
