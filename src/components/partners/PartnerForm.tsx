@@ -16,6 +16,8 @@ interface PartnerFormProps {
   mode: 'create' | 'edit'
   /** Existing partner for edit mode */
   partner?: Partner
+  /** Default partner type for create mode */
+  defaultPartnerType?: PartnerType
   /** Callback on successful save */
   onSave: (partner: Partner) => void
   /** Callback on cancel */
@@ -58,11 +60,12 @@ const TRADE_CATEGORIES: { value: TradeCategory; label: string }[] = [
 export function PartnerForm({
   mode,
   partner,
+  defaultPartnerType,
   onSave,
   onCancel
 }: PartnerFormProps) {
   // Form state
-  const [partnerType, setPartnerType] = useState<PartnerType>(partner?.partner_type || 'contractor')
+  const [partnerType, setPartnerType] = useState<PartnerType>(partner?.partner_type || defaultPartnerType || 'contractor')
   const [companyName, setCompanyName] = useState(partner?.company_name || '')
   const [contactName, setContactName] = useState(partner?.contact_name || '')
   const [email, setEmail] = useState(partner?.email || '')

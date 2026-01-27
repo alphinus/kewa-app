@@ -1,7 +1,7 @@
 /**
  * Building Heatmap API
  *
- * GET /api/buildings/[buildingId]/heatmap
+ * GET /api/buildings/[id]/heatmap
  *
  * Returns unit condition data for building heatmap visualization.
  * KEWA/Imeri access only.
@@ -36,7 +36,7 @@ interface HeatmapUnit {
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ buildingId: string }> }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const userId = request.headers.get('x-user-id')
@@ -53,7 +53,7 @@ export async function GET(
       )
     }
 
-    const { buildingId } = await params
+    const { id: buildingId } = await params
 
     if (!buildingId) {
       return NextResponse.json(
@@ -133,7 +133,7 @@ export async function GET(
       units: heatmapUnits
     })
   } catch (error) {
-    console.error('Unexpected error in GET /api/buildings/[buildingId]/heatmap:', error)
+    console.error('Unexpected error in GET /api/buildings/[id]/heatmap:', error)
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

@@ -1,10 +1,12 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { PartnerList } from '@/components/partners/PartnerList'
 import { PartnerForm } from '@/components/partners/PartnerForm'
 import type { Partner } from '@/types/database'
+import type { PartnerType } from '@/types'
 
 /**
  * Partner Management Page
@@ -19,16 +21,29 @@ import type { Partner } from '@/types/database'
  * Phase 13: Partner-Modul
  */
 export default function PartnerPage() {
+  const searchParams = useSearchParams()
+
   // Form state
   const [showForm, setShowForm] = useState(false)
   const [editingPartner, setEditingPartner] = useState<Partner | null>(null)
+  const [defaultPartnerType, setDefaultPartnerType] = useState<PartnerType | undefined>(undefined)
   const [refreshKey, setRefreshKey] = useState(0)
+
+  // Check for create=supplier query param on mount
+  useEffect(() => {
+    const createType = searchParams.get('create')
+    if (createType === 'supplier' || createType === 'contractor') {
+      setDefaultPartnerType(createType as PartnerType)
+      setShowForm(true)
+    }
+  }, [searchParams])
 
   /**
    * Handle create new partner
    */
   function handleCreate() {
     setEditingPartner(null)
+    setDefaultPartnerType(undefined)
     setShowForm(true)
   }
 
@@ -46,6 +61,7 @@ export default function PartnerPage() {
   function handleSave() {
     setShowForm(false)
     setEditingPartner(null)
+    setDefaultPartnerType(undefined)
     // Trigger list refresh by incrementing key
     setRefreshKey(prev => prev + 1)
   }
@@ -56,6 +72,7 @@ export default function PartnerPage() {
   function handleCancel() {
     setShowForm(false)
     setEditingPartner(null)
+    setDefaultPartnerType(undefined)
   }
 
   return (
@@ -86,6 +103,7 @@ export default function PartnerPage() {
         <PartnerForm
           mode={editingPartner ? 'edit' : 'create'}
           partner={editingPartner || undefined}
+          defaultPartnerType={defaultPartnerType}
           onSave={handleSave}
           onCancel={handleCancel}
         />

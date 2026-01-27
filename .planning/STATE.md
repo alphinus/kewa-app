@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-01-25)
 
 **Core value:** KEWA AG hat volle Transparenz und Kontrolle uber alle Renovationen — mit standardisierten Workflows, externer Handwerker-Integration, Kostenuebersicht und automatischer Zustandshistorie.
-**Current focus:** Milestone v2.2 Extensions — Phase 19 Supplier Core
+**Current focus:** Milestone v2.2 Extensions — Phase 19 Complete, ready for Phase 20
 
 ## Current Position
 
-Phase: 19 of 24 (Supplier Core)
-Plan: 3 of 7 in current phase
-Status: In progress
-Last activity: 2026-01-25 — Completed 19-03-PLAN.md
+Phase: 19 of 24 (Supplier Core) — VERIFIED
+Plan: 3 of 3 executed + UAT passed
+Status: Complete
+Last activity: 2026-01-27 — Phase 19 UAT passed (4 PASS, 2 PARTIAL)
 
-Progress: [██████░░░░] 23% (8/35 v2.2 plans)
+Progress: [███████░░░] 31% (11/35 v2.2 plans)
 
 ## Milestones Completed
 
@@ -27,7 +27,7 @@ Progress: [██████░░░░] 23% (8/35 v2.2 plans)
 | Phase | Name | Requirements | Status |
 |-------|------|--------------|--------|
 | 18 | Knowledge Base | 10 | Complete (5/5 plans) |
-| 19 | Supplier Core | 7 | In progress (3/7 plans) |
+| 19 | Supplier Core | 7 | Complete (3/3 plans + UAT) |
 | 20 | Supplier Advanced | 5 | Not started |
 | 21 | Change Orders | 10 | Not started |
 | 22 | Inspection Core | 8 | Not started |
@@ -37,7 +37,7 @@ Progress: [██████░░░░] 23% (8/35 v2.2 plans)
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 8 (v2.2)
+- Total plans completed: 11 (v2.2)
 - Average duration: 10 min
 - Total execution time: 76 min
 
@@ -82,6 +82,11 @@ Recent decisions affecting current work:
 - [19-03]: Delivery recording requires 'confirmed' PO status
 - [19-03]: Invoice linking validates supplier match between delivery and invoice
 
+### UAT Issues for Future Phases
+
+- Invoice linking needs proper modal UI (currently uses prompt()) — requires invoice module
+- Property-level delivery history page not yet built — data model ready
+
 ### Pending Todos
 
 None.
@@ -92,9 +97,9 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-01-25
-Stopped at: Completed 19-03-PLAN.md
+Last session: 2026-01-27
+Stopped at: Phase 19 UAT complete — ready for Phase 20 (Supplier Advanced)
 Resume file: None
 
 ---
-*v2.2 Extensions milestone in progress. Phase 19 Supplier Core at 3/7 plans.*
+*v2.2 Extensions milestone in progress. Phase 19 Supplier Core verified. Next: Phase 20 Supplier Advanced.*

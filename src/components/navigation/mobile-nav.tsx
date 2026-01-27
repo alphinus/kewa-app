@@ -10,7 +10,8 @@ import {
   Archive,
   Mic,
   Settings,
-  Landmark
+  Landmark,
+  Truck
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { Role } from '@/types'
@@ -28,6 +29,7 @@ const kewaNavItems: NavItem[] = [
   { href: '/dashboard/gebaude', label: 'Gebaeude', icon: Building2 },
   { href: '/dashboard/aufgaben', label: 'Aufgaben', icon: CheckSquare },
   { href: '/dashboard/projekte', label: 'Projekte', icon: Archive },
+  { href: '/dashboard/lieferanten', label: 'Lieferanten', icon: Truck },
   { href: '/dashboard/berichte', label: 'Berichte', icon: FileText },
   { href: '/dashboard/settings', label: 'Einstellungen', icon: Settings }
 ]

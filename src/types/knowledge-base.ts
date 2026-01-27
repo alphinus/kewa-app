@@ -236,6 +236,16 @@ export interface KBSearchFilters {
 // =============================================
 
 /**
+ * Minimal article info for shortcuts display
+ */
+export interface KBShortcutArticle {
+  id: string
+  title: string
+  category_id: string | null
+  category_name: string | null
+}
+
+/**
  * User's pinned article shortcut
  */
 export interface KBDashboardShortcut {
@@ -243,7 +253,7 @@ export interface KBDashboardShortcut {
   user_id: string
   article_id: string
   created_at: string
-  article?: KBArticleWithMeta
+  article?: KBShortcutArticle
 }
 
 // =============================================
