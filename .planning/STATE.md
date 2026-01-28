@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-01-25)
 ## Current Position
 
 Phase: 22 of 24 (Inspection Core) — IN PROGRESS
-Plan: 1 of 4 executed
+Plan: 2 of 4 executed
 Status: In progress
-Last activity: 2026-01-28 — Completed 22-01-PLAN.md
+Last activity: 2026-01-28 — Completed 22-02-PLAN.md
 
-Progress: [█████████░] 54% (19/35 v2.2 plans)
+Progress: [█████████░] 57% (20/35 v2.2 plans)
 
 ## Milestones Completed
 
@@ -30,16 +30,16 @@ Progress: [█████████░] 54% (19/35 v2.2 plans)
 | 19 | Supplier Core | 7 | Complete (3/3 plans + UAT) |
 | 20 | Supplier Advanced | 5 | Complete (3/3 plans) |
 | 21 | Change Orders | 10 | Complete (4/4 plans) |
-| 22 | Inspection Core | 8 | In progress (1/4 plans) |
+| 22 | Inspection Core | 8 | In progress (2/4 plans) |
 | 23 | Inspection Advanced | 4 | Not started |
 | 24 | Push Notifications | 12 | Not started |
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 19 (v2.2)
-- Average duration: 11 min
-- Total execution time: 209 min
+- Total plans completed: 20 (v2.2)
+- Average duration: 12 min
+- Total execution time: 240 min
 
 **By Phase:**
 
@@ -49,7 +49,7 @@ Progress: [█████████░] 54% (19/35 v2.2 plans)
 | 19 | 3 | 27 min | 9 min |
 | 20 | 3 | 47 min | 16 min |
 | 21 | 4 | 49 min | 12 min |
-| 22 | 1 | 16 min | 16 min |
+| 22 | 2 | 47 min | 24 min |
 
 *Updated after each plan completion*
 
@@ -121,15 +121,21 @@ Recent decisions affecting current work:
 - [22-01]: Template checklist_sections copied to inspection checklist_items at creation
 - [22-01]: Overall result auto-computed from defect severity (schwer+open=failed)
 - [22-01]: Dedicated inspections storage bucket (not media bucket)
+- [22-02]: Photo upload stores in inspections bucket with signed URLs (1-hour expiry)
+- [22-02]: Auto-save with 3-second debounce for checklist partial progress
+- [22-02]: Photo nudge prompts but doesn't require photos (dismissable)
+- [22-02]: Touch-friendly UI with 48px min height on interactive elements
+- [22-02]: Template filtering by trade category when work order selected
 
 ### UAT Issues for Future Phases
 
 - Invoice linking needs proper modal UI (currently uses prompt()) — requires invoice module
 - Property-level delivery history page not yet built — data model ready
+- Checklist item titles need proper lookup from template (currently shows "Item 1", "Item 2")
 
 ### Pending Todos
 
-None.
+- Enhance template population to copy title/description into ChecklistItemResult structure (22-02 minor issue)
 
 ### Blockers/Concerns
 
@@ -138,8 +144,8 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-28
-Stopped at: Completed 22-01-PLAN.md (Inspection Core Foundation)
+Stopped at: Completed 22-02-PLAN.md (Inspection UI)
 Resume file: None
 
 ---
-*v2.2 Extensions milestone in progress. Phase 22 Inspection Core (1/4 plans complete). Next: Phase 22-02 Inspection UI.*
+*v2.2 Extensions milestone in progress. Phase 22 Inspection Core (2/4 plans complete). Next: Phase 22-03 Signature Capture.*
