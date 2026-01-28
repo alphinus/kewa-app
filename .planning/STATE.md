@@ -9,12 +9,12 @@ See: .planning/PROJECT.md (updated 2026-01-25)
 
 ## Current Position
 
-Phase: 21 of 24 (Change Orders) — VERIFIED
-Plan: 4 of 4 executed + verified
-Status: Complete
-Last activity: 2026-01-28 — Phase 21 verified (5/5 must-haves passed)
+Phase: 22 of 24 (Inspection Core) — IN PROGRESS
+Plan: 1 of 4 executed
+Status: In progress
+Last activity: 2026-01-28 — Completed 22-01-PLAN.md
 
-Progress: [█████████░] 51% (18/35 v2.2 plans)
+Progress: [█████████░] 54% (19/35 v2.2 plans)
 
 ## Milestones Completed
 
@@ -30,16 +30,16 @@ Progress: [█████████░] 51% (18/35 v2.2 plans)
 | 19 | Supplier Core | 7 | Complete (3/3 plans + UAT) |
 | 20 | Supplier Advanced | 5 | Complete (3/3 plans) |
 | 21 | Change Orders | 10 | Complete (4/4 plans) |
-| 22 | Inspection Core | 8 | Not started |
+| 22 | Inspection Core | 8 | In progress (1/4 plans) |
 | 23 | Inspection Advanced | 4 | Not started |
 | 24 | Push Notifications | 12 | Not started |
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 18 (v2.2)
+- Total plans completed: 19 (v2.2)
 - Average duration: 11 min
-- Total execution time: 193 min
+- Total execution time: 209 min
 
 **By Phase:**
 
@@ -49,6 +49,7 @@ Progress: [█████████░] 51% (18/35 v2.2 plans)
 | 19 | 3 | 27 min | 9 min |
 | 20 | 3 | 47 min | 16 min |
 | 21 | 4 | 49 min | 12 min |
+| 22 | 1 | 16 min | 16 min |
 
 *Updated after each plan completion*
 
@@ -114,6 +115,12 @@ Recent decisions affecting current work:
 - [21-04]: show_line_items_to_client controls financial detail visibility in portal
 - [21-04]: Rejection requires comment for audit trail, approval comment optional
 - [21-04]: 7-day token expiry for client approval workflow
+- [22-01]: Status transition trigger validates inspection workflow (in_progress->completed->signed)
+- [22-01]: Signature refusal escape hatch (signature_refused=true with mandatory reason)
+- [22-01]: Defects have independent lifecycle not derived from linked task status
+- [22-01]: Template checklist_sections copied to inspection checklist_items at creation
+- [22-01]: Overall result auto-computed from defect severity (schwer+open=failed)
+- [22-01]: Dedicated inspections storage bucket (not media bucket)
 
 ### UAT Issues for Future Phases
 
@@ -131,8 +138,8 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-28
-Stopped at: Phase 21 Change Orders verified — ready for Phase 22 (Inspection Core)
+Stopped at: Completed 22-01-PLAN.md (Inspection Core Foundation)
 Resume file: None
 
 ---
-*v2.2 Extensions milestone in progress. Phase 21 Change Orders verified. Next: Phase 22 Inspection Core.*
+*v2.2 Extensions milestone in progress. Phase 22 Inspection Core (1/4 plans complete). Next: Phase 22-02 Inspection UI.*
