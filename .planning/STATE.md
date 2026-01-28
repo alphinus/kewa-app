@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-01-25)
 ## Current Position
 
 Phase: 22 of 24 (Inspection Core) — IN PROGRESS
-Plan: 2 of 4 executed
+Plan: 3 of 4 executed
 Status: In progress
-Last activity: 2026-01-28 — Completed 22-02-PLAN.md
+Last activity: 2026-01-28 — Completed 22-03-PLAN.md
 
-Progress: [█████████░] 57% (20/35 v2.2 plans)
+Progress: [█████████░] 60% (21/35 v2.2 plans)
 
 ## Milestones Completed
 
@@ -30,16 +30,16 @@ Progress: [█████████░] 57% (20/35 v2.2 plans)
 | 19 | Supplier Core | 7 | Complete (3/3 plans + UAT) |
 | 20 | Supplier Advanced | 5 | Complete (3/3 plans) |
 | 21 | Change Orders | 10 | Complete (4/4 plans) |
-| 22 | Inspection Core | 8 | In progress (2/4 plans) |
+| 22 | Inspection Core | 8 | In progress (3/4 plans) |
 | 23 | Inspection Advanced | 4 | Not started |
 | 24 | Push Notifications | 12 | Not started |
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 20 (v2.2)
+- Total plans completed: 21 (v2.2)
 - Average duration: 12 min
-- Total execution time: 240 min
+- Total execution time: 262 min
 
 **By Phase:**
 
@@ -49,7 +49,7 @@ Progress: [█████████░] 57% (20/35 v2.2 plans)
 | 19 | 3 | 27 min | 9 min |
 | 20 | 3 | 47 min | 16 min |
 | 21 | 4 | 49 min | 12 min |
-| 22 | 2 | 47 min | 24 min |
+| 22 | 3 | 69 min | 23 min |
 
 *Updated after each plan completion*
 
@@ -126,6 +126,13 @@ Recent decisions affecting current work:
 - [22-02]: Photo nudge prompts but doesn't require photos (dismissable)
 - [22-02]: Touch-friendly UI with 48px min height on interactive elements
 - [22-02]: Template filtering by trade category when work order selected
+- [22-03]: Signature canvas uses react-signature-canvas with typed name (500x200px responsive)
+- [22-03]: Signature refusal requires mandatory reason, keeps status at 'completed' (not 'signed')
+- [22-03]: Completion warns about open defects with modal, requires acknowledge to proceed
+- [22-03]: Defect actions prevent duplicate task creation via null check on action field
+- [22-03]: Follow-up tasks created as subtasks on work order's task_id with severity-based priority
+- [22-03]: Template editor uses button-based reorder (up/down arrows) not drag-and-drop
+- [22-03]: PDF embeds signature PNG via signed URL, filename format: Abnahme-{title}-{date}.pdf
 
 ### UAT Issues for Future Phases
 
@@ -144,8 +151,8 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-28
-Stopped at: Completed 22-02-PLAN.md (Inspection UI)
+Stopped at: Completed 22-03-PLAN.md (Signature Capture and Completion Flow)
 Resume file: None
 
 ---
-*v2.2 Extensions milestone in progress. Phase 22 Inspection Core (2/4 plans complete). Next: Phase 22-03 Signature Capture.*
+*v2.2 Extensions milestone in progress. Phase 22 Inspection Core (3/4 plans complete). Next: Phase 22-04 Inspection Advanced Features.*
