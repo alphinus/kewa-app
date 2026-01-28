@@ -26,11 +26,11 @@
 - [ ] **SUPP-05**: Deliveries are associated with properties/buildings
 - [ ] **SUPP-06**: Deliveries can be linked to invoices for payment tracking
 - [ ] **SUPP-07**: User can view order history per supplier and property
-- [ ] **SUPP-08**: User can track consumption (tank levels, usage rate)
-- [ ] **SUPP-09**: System alerts when projected stock runs low (reorder alerts)
-- [ ] **SUPP-10**: User can view price history (CHF/tonne over time)
-- [ ] **SUPP-11**: User can view seasonal consumption patterns
-- [ ] **SUPP-12**: User can create multi-property orders with allocation
+- [x] **SUPP-08**: User can track consumption (tank levels, usage rate)
+- [x] **SUPP-09**: System alerts when projected stock runs low (reorder alerts)
+- [x] **SUPP-10**: User can view price history (CHF/tonne over time)
+- [x] **SUPP-11**: User can view seasonal consumption patterns
+- [x] **SUPP-12**: User can create multi-property orders with allocation
 
 ## Inspection/Abnahme Workflow (INSP)
 
@@ -125,11 +125,11 @@
 | SUPP-05 | 19 | Pending |
 | SUPP-06 | 19 | Pending |
 | SUPP-07 | 19 | Pending |
-| SUPP-08 | 20 | Pending |
-| SUPP-09 | 20 | Pending |
-| SUPP-10 | 20 | Pending |
-| SUPP-11 | 20 | Pending |
-| SUPP-12 | 20 | Pending |
+| SUPP-08 | 20 | Complete |
+| SUPP-09 | 20 | Complete |
+| SUPP-10 | 20 | Complete |
+| SUPP-11 | 20 | Complete |
+| SUPP-12 | 20 | Complete |
 | CHNG-01 | 21 | Pending |
 | CHNG-02 | 21 | Pending |
 | CHNG-03 | 21 | Pending |

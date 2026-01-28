@@ -93,9 +93,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 20-01-PLAN.md — Database schema (inventory_movements, allocations), views, functions, types, recharts
-- [ ] 20-02-PLAN.md — Inventory API, reorder alerts, consumption tracking UI and dashboard
-- [ ] 20-03-PLAN.md — Price analytics, seasonal consumption charts, multi-property order allocations
+- [x] 20-01-PLAN.md — Database schema (inventory_movements, allocations), views, functions, types, recharts
+- [x] 20-02-PLAN.md — Inventory API, reorder alerts, consumption tracking UI and dashboard
+- [x] 20-03-PLAN.md — Price analytics, seasonal consumption charts, multi-property order allocations
 
 ---
 
@@ -180,9 +180,9 @@ Plans:
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 18. Knowledge Base | v2.2 | 0/5 | Planned | - |
-| 19. Supplier Core | v2.2 | 0/3 | Planned | - |
-| 20. Supplier Advanced | v2.2 | 0/3 | Not started | - |
+| 18. Knowledge Base | v2.2 | 5/5 | Complete | 2026-01-26 |
+| 19. Supplier Core | v2.2 | 3/3 | Complete | 2026-01-27 |
+| 20. Supplier Advanced | v2.2 | 3/3 | Complete | 2026-01-28 |
 | 21. Change Orders | v2.2 | 0/4 | Not started | - |
 | 22. Inspection Core | v2.2 | 0/3 | Not started | - |
 | 23. Inspection Advanced | v2.2 | 0/3 | Not started | - |
