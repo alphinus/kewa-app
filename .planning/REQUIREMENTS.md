@@ -34,18 +34,18 @@
 
 ## Inspection/Abnahme Workflow (INSP)
 
-- [ ] **INSP-01**: User can create inspection linked to project or work order
-- [ ] **INSP-02**: Inspection checklist is populated from quality gate template
-- [ ] **INSP-03**: User can mark each checklist item as pass/fail/na
-- [ ] **INSP-04**: User can attach photos per checklist item
-- [ ] **INSP-05**: User can log defects/snags with description and photos
-- [ ] **INSP-06**: Inspection records inspector, date/time, and overall result (passed/passed_with_conditions/failed)
-- [ ] **INSP-07**: User can capture digital signature from contractor
-- [ ] **INSP-08**: User can create follow-up tasks from failed checklist items
-- [ ] **INSP-09**: User can schedule and track re-inspections (parent-child relationship)
-- [ ] **INSP-10**: User can generate PDF inspection protocol (Abnahme-Protokoll)
-- [ ] **INSP-11**: Contractor can view and acknowledge inspection results via portal
-- [ ] **INSP-12**: Completed inspections auto-update room conditions based on results
+- [x] **INSP-01**: User can create inspection linked to project or work order
+- [x] **INSP-02**: Inspection checklist is populated from quality gate template
+- [x] **INSP-03**: User can mark each checklist item as pass/fail/na
+- [x] **INSP-04**: User can attach photos per checklist item
+- [x] **INSP-05**: User can log defects/snags with description and photos
+- [x] **INSP-06**: Inspection records inspector, date/time, and overall result (passed/passed_with_conditions/failed)
+- [x] **INSP-07**: User can capture digital signature from contractor
+- [x] **INSP-08**: User can create follow-up tasks from failed checklist items
+- [x] **INSP-09**: User can schedule and track re-inspections (parent-child relationship)
+- [x] **INSP-10**: User can generate PDF inspection protocol (Abnahme-Protokoll)
+- [x] **INSP-11**: Contractor can view and acknowledge inspection results via portal
+- [x] **INSP-12**: Completed inspections auto-update room conditions based on results
 
 ## Push Notifications (PUSH)
 
@@ -140,18 +140,18 @@
 | CHNG-08 | 21 | Complete |
 | CHNG-09 | 21 | Complete |
 | CHNG-10 | 21 | Complete |
-| INSP-01 | 22 | Pending |
-| INSP-02 | 22 | Pending |
-| INSP-03 | 22 | Pending |
-| INSP-04 | 22 | Pending |
-| INSP-05 | 22 | Pending |
-| INSP-06 | 22 | Pending |
-| INSP-07 | 22 | Pending |
-| INSP-08 | 22 | Pending |
-| INSP-09 | 23 | Pending |
-| INSP-10 | 23 | Pending |
-| INSP-11 | 23 | Pending |
-| INSP-12 | 23 | Pending |
+| INSP-01 | 22 | Complete |
+| INSP-02 | 22 | Complete |
+| INSP-03 | 22 | Complete |
+| INSP-04 | 22 | Complete |
+| INSP-05 | 22 | Complete |
+| INSP-06 | 22 | Complete |
+| INSP-07 | 22 | Complete |
+| INSP-08 | 22 | Complete |
+| INSP-09 | 23 | Complete |
+| INSP-10 | 23 | Complete |
+| INSP-11 | 23 | Complete |
+| INSP-12 | 23 | Complete |
 | PUSH-01 | 24 | Pending |
 | PUSH-02 | 24 | Pending |
 | PUSH-03 | 24 | Pending |

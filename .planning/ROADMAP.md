@@ -132,9 +132,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 22-01-PLAN.md — Database schema, types, CRUD API, storage bucket setup
-- [ ] 22-02-PLAN.md — Checklist execution UI, defect logging, photo upload
-- [ ] 22-03-PLAN.md — Signature capture, defect review/actions, templates, PDF generation
+- [x] 22-01-PLAN.md — Database schema, types, CRUD API, storage bucket setup
+- [x] 22-02-PLAN.md — Checklist execution UI, defect logging, photo upload
+- [x] 22-03-PLAN.md — Signature capture, defect review/actions, templates, PDF generation
 
 ---
 
@@ -150,9 +150,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 23-01-PLAN.md — Re-inspection scheduling with defect propagation, database migration, history timeline
-- [ ] 23-02-PLAN.md — Contractor portal with magic links, acknowledgment flow, enhanced PDF Abnahme-Protokoll
-- [ ] 23-03-PLAN.md — Integration of Phase 23 components, room condition automation verification
+- [x] 23-01-PLAN.md — Re-inspection scheduling with defect propagation, database migration, history timeline
+- [x] 23-02-PLAN.md — Contractor portal with magic links, acknowledgment flow, enhanced PDF Abnahme-Protokoll
+- [x] 23-03-PLAN.md — Integration of Phase 23 components, room condition automation verification
 
 ---
 
@@ -184,8 +184,8 @@ Plans:
 | 19. Supplier Core | v2.2 | 3/3 | Complete | 2026-01-27 |
 | 20. Supplier Advanced | v2.2 | 3/3 | Complete | 2026-01-28 |
 | 21. Change Orders | v2.2 | 4/4 | Complete | 2026-01-28 |
-| 22. Inspection Core | v2.2 | 0/3 | Not started | - |
-| 23. Inspection Advanced | v2.2 | 0/3 | Not started | - |
+| 22. Inspection Core | v2.2 | 3/3 | Complete | 2026-01-28 |
+| 23. Inspection Advanced | v2.2 | 3/3 | Complete | 2026-01-28 |
 | 24. Push Notifications | v2.2 | 0/4 | Not started | - |
 
 ---
