@@ -1,11 +1,12 @@
 /**
  * Rooms API - Single Resource Routes
  *
- * GET /api/rooms/[id] - Get room by ID
+ * GET /api/rooms/[id] - Get room by ID with joins
  * PATCH /api/rooms/[id] - Update room fields
  * DELETE /api/rooms/[id] - Delete room (kewa only)
  *
  * Phase 15-02: Room API CRUD Operations
+ * Updated Phase 23-03: Added condition_source_project join
  */
 
 import { NextRequest, NextResponse } from 'next/server'
@@ -90,7 +91,16 @@ export async function GET(
 
     const { data: room, error } = await supabase
       .from('rooms')
-      .select('*')
+      .select(`
+        *,
+        condition_source_project:renovation_projects!condition_source_project_id(id, name),
+        unit:units!unit_id(
+          id,
+          name,
+          building_id,
+          building:buildings!building_id(id, name)
+        )
+      `)
       .eq('id', id)
       .single()
 
