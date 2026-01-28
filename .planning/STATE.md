@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-01-25)
 ## Current Position
 
 Phase: 20 of 24 (Supplier Advanced)
-Plan: 2 of 3 executed
-Status: In progress
-Last activity: 2026-01-28 — Completed 20-02-PLAN.md (inventory tracking API and dashboard)
+Plan: 3 of 3 executed
+Status: Phase complete
+Last activity: 2026-01-28 — Completed 20-03-PLAN.md (price analytics and multi-property allocations)
 
-Progress: [███████░░░] 37% (13/35 v2.2 plans)
+Progress: [████████░░] 40% (14/35 v2.2 plans)
 
 ## Milestones Completed
 
@@ -28,7 +28,7 @@ Progress: [███████░░░] 37% (13/35 v2.2 plans)
 |-------|------|--------------|--------|
 | 18 | Knowledge Base | 10 | Complete (5/5 plans) |
 | 19 | Supplier Core | 7 | Complete (3/3 plans + UAT) |
-| 20 | Supplier Advanced | 5 | In progress (2/3 plans) |
+| 20 | Supplier Advanced | 5 | Complete (3/3 plans) |
 | 21 | Change Orders | 10 | Not started |
 | 22 | Inspection Core | 8 | Not started |
 | 23 | Inspection Advanced | 4 | Not started |
@@ -37,9 +37,9 @@ Progress: [███████░░░] 37% (13/35 v2.2 plans)
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 13 (v2.2)
-- Average duration: 10 min
-- Total execution time: 98 min
+- Total plans completed: 14 (v2.2)
+- Average duration: 11 min
+- Total execution time: 123 min
 
 **By Phase:**
 
@@ -47,7 +47,7 @@ Progress: [███████░░░] 37% (13/35 v2.2 plans)
 |-------|-------|-------|----------|
 | 18 | 5 | 49 min | 10 min |
 | 19 | 3 | 27 min | 9 min |
-| 20 | 2 | 22 min | 11 min |
+| 20 | 3 | 47 min | 16 min |
 
 *Updated after each plan completion*
 
@@ -91,6 +91,10 @@ Recent decisions affecting current work:
 - [20-02]: Delivery movements set consumption to null (deliveries add to tank)
 - [20-02]: Color-coded level percentage (green >50%, amber 20-50%, red <20%)
 - [20-02]: "Keine Verbrauchsdaten" for insufficient readings (less than 2)
+- [20-03]: Enrich API responses with joined names in API layer (views return IDs only)
+- [20-03]: Auto-calculate allocated_amount from quantity * unit_price in form
+- [20-03]: Client-side validation + server-side DB trigger for allocation totals
+- [20-03]: German month names via getMonthName() utility function
 
 ### UAT Issues for Future Phases
 
@@ -108,8 +112,8 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-28
-Stopped at: Completed 20-02-PLAN.md (inventory tracking API and dashboard)
+Stopped at: Completed 20-03-PLAN.md (price analytics and multi-property allocations)
 Resume file: None
 
 ---
-*v2.2 Extensions milestone in progress. Phase 19 Supplier Core verified. Next: Phase 20 Supplier Advanced.*
+*v2.2 Extensions milestone in progress. Phase 20 Supplier Advanced complete. Next: Phase 21 Change Orders.*
