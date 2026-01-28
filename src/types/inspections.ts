@@ -306,3 +306,15 @@ export interface InspectionResponse {
 export interface DefectsResponse {
   defects: InspectionDefect[]
 }
+
+// =============================================
+// RE-INSPECTION TYPES (Phase 23)
+// =============================================
+
+/**
+ * Inspection with history metadata for timeline display
+ */
+export interface InspectionHistoryItem extends Inspection {
+  defect_count?: number
+  is_current?: boolean
+}
