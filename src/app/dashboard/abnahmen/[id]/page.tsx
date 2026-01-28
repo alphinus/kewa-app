@@ -9,14 +9,13 @@
  * Phase 22-02: Inspection UI
  * Updated Phase 22-03: Added completion flow with defect warnings
  * Updated Phase 23-01: Added re-inspection scheduling and history
+ * Updated Phase 23-03: Integrated all Phase 23 components into InspectionDetail
  */
 
 import { useState, useEffect, use } from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { InspectionDetail } from '@/components/inspections/InspectionDetail'
-import { ReInspectionButton } from '@/components/inspections/ReInspectionButton'
-import { InspectionHistory } from '@/components/inspections/InspectionHistory'
 import type { Inspection, InspectionDefect } from '@/types/inspections'
 
 export default function InspectionDetailPage({
@@ -126,38 +125,13 @@ export default function InspectionDetailPage({
         <span className="text-gray-900 dark:text-gray-100">{inspection.title}</span>
       </nav>
 
-      {/* Re-inspection badge */}
-      {isReInspection && (
-        <div className="mb-4">
-          <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-200">
-            Nachkontrolle
-          </span>
-        </div>
-      )}
-
-      {/* InspectionDetail component */}
+      {/* InspectionDetail component with all Phase 23 integrations */}
       <InspectionDetail
         inspection={inspection}
         defects={defects}
         onComplete={() => handleComplete(false)}
+        showHistory={isReInspection || inspection.status === 'signed'}
       />
-
-      {/* Re-inspection button for completed/signed inspections */}
-      {['completed', 'signed'].includes(inspection.status) && (
-        <div className="mt-6 flex gap-3">
-          <ReInspectionButton inspection={inspection} />
-        </div>
-      )}
-
-      {/* Inspection history (if this inspection has parent or children) */}
-      {(isReInspection || inspection.status === 'signed') && (
-        <div className="mt-6">
-          <InspectionHistory
-            inspectionId={id}
-            currentInspectionId={id}
-          />
-        </div>
-      )}
 
       {/* Warning modal for open defects */}
       {showWarningModal && warningData && (

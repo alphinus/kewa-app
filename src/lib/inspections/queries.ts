@@ -157,8 +157,14 @@ export async function deleteInspectionTemplate(id: string) {
 // INSPECTIONS
 // =============================================
 
+/**
+ * Inspection select query with joins
+ * Includes Phase 23 acknowledgment fields for portal tracking
+ */
 const INSPECTION_SELECT = `
   *,
+  acknowledged_at,
+  acknowledged_by_email,
   work_order:work_orders(id, title, wo_number),
   project:renovation_projects(id, name),
   template:inspection_templates(id, name)

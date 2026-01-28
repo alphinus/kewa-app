@@ -4,22 +4,31 @@
  * Inspection Detail Component
  *
  * Comprehensive inspection detail view with stats, defects, and action buttons.
+ * Includes Phase 23 features: portal link, acknowledgment status, re-inspection.
+ *
  * Phase: 22-inspection-core Plan 03
+ * Updated: Phase 23-03 Integration
  */
 
+import { useState } from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { InspectionStatusBadge } from './InspectionStatusBadge'
 import { SeverityBadge } from './SeverityBadge'
+import { ReInspectionButton } from './ReInspectionButton'
+import { InspectionHistory } from './InspectionHistory'
+import { SendPortalDialog } from './SendPortalDialog'
 import type { Inspection, InspectionDefect, ChecklistSectionResult } from '@/types/inspections'
 
 interface InspectionDetailProps {
   inspection: Inspection
   defects: InspectionDefect[]
   onComplete?: () => void
+  showHistory?: boolean
 }
 
-export function InspectionDetail({ inspection, defects, onComplete }: InspectionDetailProps) {
+export function InspectionDetail({ inspection, defects, onComplete, showHistory = false }: InspectionDetailProps) {
+  const [showPortalDialog, setShowPortalDialog] = useState(false)
   // Calculate checklist stats
   const checklistItems = (inspection.checklist_items as ChecklistSectionResult[]) || []
   let totalItems = 0
@@ -58,9 +67,16 @@ export function InspectionDetail({ inspection, defects, onComplete }: Inspection
       {/* Header */}
       <div>
         <div className="flex items-center justify-between mb-2">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-            {inspection.title}
-          </h1>
+          <div className="flex items-center gap-2">
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+              {inspection.title}
+            </h1>
+            {inspection.parent_inspection_id && (
+              <span className="px-2 py-0.5 text-xs bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 rounded">
+                Nachkontrolle
+              </span>
+            )}
+          </div>
           <div className="flex items-center gap-2">
             <InspectionStatusBadge status={inspection.status} />
             {inspection.overall_result && (
@@ -216,6 +232,25 @@ export function InspectionDetail({ inspection, defects, onComplete }: Inspection
         </div>
       )}
 
+      {/* Acknowledgment Status */}
+      {inspection.acknowledged_at && (
+        <div className="p-4 border border-green-200 dark:border-green-800 rounded-lg bg-green-50 dark:bg-green-900/20">
+          <h4 className="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-2">
+            Handwerker-Bestaetigung
+          </h4>
+          <div className="flex items-center gap-2 text-green-800 dark:text-green-200">
+            <span className="text-lg">&#10003;</span>
+            <div>
+              <p className="font-medium">Kenntnisnahme bestaetigt</p>
+              <p className="text-sm text-green-600 dark:text-green-400">
+                {new Date(inspection.acknowledged_at).toLocaleString('de-CH')}
+                {inspection.acknowledged_by_email && ` von ${inspection.acknowledged_by_email}`}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Action buttons */}
       <div className="flex gap-3">
         {inspection.status === 'in_progress' && (
@@ -246,11 +281,44 @@ export function InspectionDetail({ inspection, defects, onComplete }: Inspection
         )}
 
         {inspection.status === 'signed' && (
-          <Link href={`/api/inspections/${inspection.id}/pdf`} target="_blank">
-            <Button className="min-h-[48px]">PDF herunterladen</Button>
-          </Link>
+          <>
+            {/* PDF Download */}
+            <a
+              href={`/api/inspections/${inspection.id}/pdf`}
+              download
+              className="px-4 py-2 text-sm bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 flex items-center gap-2 min-h-[48px]"
+            >
+              <span>&#128196;</span> PDF herunterladen
+            </a>
+
+            {/* Send Portal Link */}
+            <button
+              onClick={() => setShowPortalDialog(true)}
+              className="px-4 py-2 text-sm bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-900/50 flex items-center gap-2 min-h-[48px]"
+            >
+              <span>&#9993;</span> Portal-Link senden
+            </button>
+
+            {/* Re-inspection */}
+            <ReInspectionButton inspection={inspection} />
+          </>
         )}
       </div>
+
+      {/* Inspection History */}
+      {showHistory && (
+        <InspectionHistory
+          inspectionId={inspection.id}
+          currentInspectionId={inspection.id}
+        />
+      )}
+
+      {/* Portal Dialog */}
+      <SendPortalDialog
+        inspection={inspection}
+        isOpen={showPortalDialog}
+        onClose={() => setShowPortalDialog(false)}
+      />
     </div>
   )
 }

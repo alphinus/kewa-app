@@ -148,6 +148,9 @@ export interface Inspection {
   completed_at: string | null
   created_at: string
   updated_at: string
+  // Phase 23 additions - Portal acknowledgment
+  acknowledged_at?: string | null
+  acknowledged_by_email?: string | null
   // Joined fields
   work_order?: {
     id: string
