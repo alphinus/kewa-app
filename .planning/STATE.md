@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-01-25)
 
 **Core value:** KEWA AG hat volle Transparenz und Kontrolle uber alle Renovationen — mit standardisierten Workflows, externer Handwerker-Integration, Kostenuebersicht und automatischer Zustandshistorie.
-**Current focus:** Milestone v2.2 Extensions — Phase 21 Complete, ready for Phase 22
+**Current focus:** Milestone v2.2 Extensions — Phase 23 Inspection Advanced in progress
 
 ## Current Position
 
-Phase: 22 of 24 (Inspection Core) — IN PROGRESS
-Plan: 3 of 4 executed
+Phase: 23 of 24 (Inspection Advanced) — IN PROGRESS
+Plan: 2 of 3 executed
 Status: In progress
-Last activity: 2026-01-28 — Completed 22-03-PLAN.md
+Last activity: 2026-01-28 — Completed 23-02-PLAN.md
 
-Progress: [█████████░] 60% (21/35 v2.2 plans)
+Progress: [██████████░] 66% (24/35 v2.2 plans)
 
 ## Milestones Completed
 
@@ -30,16 +30,16 @@ Progress: [█████████░] 60% (21/35 v2.2 plans)
 | 19 | Supplier Core | 7 | Complete (3/3 plans + UAT) |
 | 20 | Supplier Advanced | 5 | Complete (3/3 plans) |
 | 21 | Change Orders | 10 | Complete (4/4 plans) |
-| 22 | Inspection Core | 8 | In progress (3/4 plans) |
-| 23 | Inspection Advanced | 4 | Not started |
+| 22 | Inspection Core | 8 | Complete (4/4 plans) |
+| 23 | Inspection Advanced | 4 | In progress (2/3 plans) |
 | 24 | Push Notifications | 12 | Not started |
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 21 (v2.2)
+- Total plans completed: 24 (v2.2)
 - Average duration: 12 min
-- Total execution time: 262 min
+- Total execution time: 292 min
 
 **By Phase:**
 
@@ -49,7 +49,8 @@ Progress: [█████████░] 60% (21/35 v2.2 plans)
 | 19 | 3 | 27 min | 9 min |
 | 20 | 3 | 47 min | 16 min |
 | 21 | 4 | 49 min | 12 min |
-| 22 | 3 | 69 min | 23 min |
+| 22 | 4 | 91 min | 23 min |
+| 23 | 2 | 30 min | 15 min |
 
 *Updated after each plan completion*
 
@@ -133,6 +134,10 @@ Recent decisions affecting current work:
 - [22-03]: Follow-up tasks created as subtasks on work order's task_id with severity-based priority
 - [22-03]: Template editor uses button-based reorder (up/down arrows) not drag-and-drop
 - [22-03]: PDF embeds signature PNG via signed URL, filename format: Abnahme-{title}-{date}.pdf
+- [23-02]: inspection_portal_tokens join table links magic_link_tokens to inspections
+- [23-02]: Portal validates token without consuming (read-only), acknowledge consumes token
+- [23-02]: PDF signature embedded as base64 data URL (prevents URL expiry in saved PDFs)
+- [23-02]: acknowledged_at and acknowledged_by_email track contractor portal acknowledgments
 
 ### UAT Issues for Future Phases
 
@@ -151,8 +156,8 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-28
-Stopped at: Completed 22-03-PLAN.md (Signature Capture and Completion Flow)
+Stopped at: Completed 23-02-PLAN.md (Contractor Portal for Inspection Acknowledgment)
 Resume file: None
 
 ---
-*v2.2 Extensions milestone in progress. Phase 22 Inspection Core (3/4 plans complete). Next: Phase 22-04 Inspection Advanced Features.*
+*v2.2 Extensions milestone in progress. Phase 23 Inspection Advanced (2/3 plans complete). Next: Phase 23-03 or Phase 24 Push Notifications.*
