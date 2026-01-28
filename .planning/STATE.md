@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-01-25)
 ## Current Position
 
 Phase: 21 of 24 (Change Orders)
-Plan: 2 of 4 executed
-Status: In progress
-Last activity: 2026-01-28 — Completed 21-02-PLAN.md
+Plan: 4 of 4 executed
+Status: Phase complete
+Last activity: 2026-01-28 — Completed 21-04-PLAN.md (Client Approval Portal)
 
-Progress: [████████░░] 46% (16/35 v2.2 plans)
+Progress: [████████░░] 51% (18/35 v2.2 plans)
 
 ## Milestones Completed
 
@@ -29,7 +29,7 @@ Progress: [████████░░] 46% (16/35 v2.2 plans)
 | 18 | Knowledge Base | 10 | Complete (5/5 plans) |
 | 19 | Supplier Core | 7 | Complete (3/3 plans + UAT) |
 | 20 | Supplier Advanced | 5 | Complete (3/3 plans) |
-| 21 | Change Orders | 10 | In progress (2/4 plans) |
+| 21 | Change Orders | 10 | Complete (4/4 plans) |
 | 22 | Inspection Core | 8 | Not started |
 | 23 | Inspection Advanced | 4 | Not started |
 | 24 | Push Notifications | 12 | Not started |
@@ -37,9 +37,9 @@ Progress: [████████░░] 46% (16/35 v2.2 plans)
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 16 (v2.2)
+- Total plans completed: 18 (v2.2)
 - Average duration: 11 min
-- Total execution time: 169 min
+- Total execution time: 193 min
 
 **By Phase:**
 
@@ -48,7 +48,7 @@ Progress: [████████░░] 46% (16/35 v2.2 plans)
 | 18 | 5 | 49 min | 10 min |
 | 19 | 3 | 27 min | 9 min |
 | 20 | 3 | 47 min | 16 min |
-| 21 | 2 | 25 min | 13 min |
+| 21 | 4 | 49 min | 12 min |
 
 *Updated after each plan completion*
 
@@ -108,6 +108,12 @@ Recent decisions affecting current work:
 - [21-02]: Cancel status requires cancelled_reason (400 error if missing)
 - [21-02]: LineItemEditor supports negative amounts for credits (distinct from PurchaseOrder)
 - [21-02]: Version history timeline shows amount changes between versions
+- [21-04]: Magic link tokens linked to change orders via change_order_approval_tokens join table
+- [21-04]: Portal data endpoint validates token without consuming (read-only check)
+- [21-04]: Approve/reject endpoints consume token to prevent reuse (mark as used)
+- [21-04]: show_line_items_to_client controls financial detail visibility in portal
+- [21-04]: Rejection requires comment for audit trail, approval comment optional
+- [21-04]: 7-day token expiry for client approval workflow
 
 ### UAT Issues for Future Phases
 
@@ -125,8 +131,8 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-28
-Stopped at: Completed 21-02-PLAN.md (Approval Workflow)
+Stopped at: Completed 21-04-PLAN.md (Client Approval Portal)
 Resume file: None
 
 ---
-*v2.2 Extensions milestone in progress. Phase 21 Change Orders halfway done (2/4 plans complete).*
+*v2.2 Extensions milestone in progress. Phase 21 Change Orders complete (4/4 plans). Ready for Phase 22.*
