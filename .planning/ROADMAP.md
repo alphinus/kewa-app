@@ -109,13 +109,13 @@ Plans:
   3. User can attach photo evidence and generate PDF from change order
   4. Dashboard shows cumulative change orders per project with net budget impact
   5. Client can approve change orders via magic-link portal
-**Plans**: TBD
+**Plans**: 4 plans
 
 Plans:
-- [ ] 21-01: Change order schema, CRUD, and work order linking
-- [ ] 21-02: Approval workflow, audit trail, and counter-offers
-- [ ] 21-03: Photo evidence, PDF generation, and dashboard analytics
-- [ ] 21-04: Client portal approval via magic-link
+- [ ] 21-01-PLAN.md — Database schema, types, CRUD API, and work order linking
+- [ ] 21-02-PLAN.md — Approval workflow, audit trail, counter-offers, and dashboard UI
+- [ ] 21-03-PLAN.md — Photo evidence, PDF generation, and budget analytics dashboard
+- [ ] 21-04-PLAN.md — Client portal approval via magic-link
 
 ---
 
