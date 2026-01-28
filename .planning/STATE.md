@@ -9,12 +9,12 @@ See: .planning/PROJECT.md (updated 2026-01-25)
 
 ## Current Position
 
-Phase: 20 of 24 (Supplier Advanced) — VERIFIED
-Plan: 3 of 3 executed + verified
-Status: Complete
-Last activity: 2026-01-28 — Phase 20 verified (5/5 must-haves passed)
+Phase: 21 of 24 (Change Orders)
+Plan: 1 of 4 executed
+Status: In progress
+Last activity: 2026-01-28 — Completed 21-01-PLAN.md
 
-Progress: [████████░░] 40% (14/35 v2.2 plans)
+Progress: [████████░░] 43% (15/35 v2.2 plans)
 
 ## Milestones Completed
 
@@ -29,7 +29,7 @@ Progress: [████████░░] 40% (14/35 v2.2 plans)
 | 18 | Knowledge Base | 10 | Complete (5/5 plans) |
 | 19 | Supplier Core | 7 | Complete (3/3 plans + UAT) |
 | 20 | Supplier Advanced | 5 | Complete (3/3 plans) |
-| 21 | Change Orders | 10 | Not started |
+| 21 | Change Orders | 10 | In progress (1/4 plans) |
 | 22 | Inspection Core | 8 | Not started |
 | 23 | Inspection Advanced | 4 | Not started |
 | 24 | Push Notifications | 12 | Not started |
@@ -37,9 +37,9 @@ Progress: [████████░░] 40% (14/35 v2.2 plans)
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 14 (v2.2)
-- Average duration: 11 min
-- Total execution time: 123 min
+- Total plans completed: 15 (v2.2)
+- Average duration: 10 min
+- Total execution time: 130 min
 
 **By Phase:**
 
@@ -48,6 +48,7 @@ Progress: [████████░░] 40% (14/35 v2.2 plans)
 | 18 | 5 | 49 min | 10 min |
 | 19 | 3 | 27 min | 9 min |
 | 20 | 3 | 47 min | 16 min |
+| 21 | 1 | 7 min | 7 min |
 
 *Updated after each plan completion*
 
@@ -95,6 +96,12 @@ Recent decisions affecting current work:
 - [20-03]: Auto-calculate allocated_amount from quantity * unit_price in form
 - [20-03]: Client-side validation + server-side DB trigger for allocation totals
 - [20-03]: German month names via getMonthName() utility function
+- [21-01]: Temporal versioning table for counter-offers (change_order_versions stores OLD values)
+- [21-01]: Status workflow enforced at database level via trigger (JSONB transition map)
+- [21-01]: Approval thresholds configurable per-project with priority-based routing
+- [21-01]: Line items can be negative (scope reductions/credits) - total preserves sign
+- [21-01]: Work order deletion blocked if active change orders exist
+- [21-01]: Soft-delete only (status=cancelled with mandatory reason)
 
 ### UAT Issues for Future Phases
 
@@ -112,8 +119,8 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-28
-Stopped at: Phase 20 Supplier Advanced verified — ready for Phase 21 (Change Orders)
+Stopped at: Completed 21-01-PLAN.md (Change Order CRUD)
 Resume file: None
 
 ---
-*v2.2 Extensions milestone in progress. Phase 20 Supplier Advanced complete. Next: Phase 21 Change Orders.*
+*v2.2 Extensions milestone in progress. Phase 21 Change Orders started (1/4 plans complete).*
