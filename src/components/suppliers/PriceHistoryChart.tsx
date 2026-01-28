@@ -39,7 +39,7 @@ function formatCHF(value: number): string {
 /**
  * Custom tooltip showing formatted date and price
  */
-function CustomTooltip({ active, payload }: any) {
+function CustomTooltip({ active, payload }: { active?: boolean; payload?: any[] }) {
   if (active && payload && payload.length) {
     const data = payload[0].payload
     const date = new Date(data.delivery_date).toLocaleDateString('de-CH', {

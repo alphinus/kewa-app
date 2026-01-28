@@ -291,7 +291,7 @@ export function MultiPropertyOrderForm({
       ))}
 
       {/* Add allocation button */}
-      <Button type="button" variant="outline" onClick={addAllocation}>
+      <Button type="button" variant="secondary" onClick={addAllocation}>
         <Plus className="h-4 w-4 mr-2" />
         Liegenschaft hinzufuegen
       </Button>

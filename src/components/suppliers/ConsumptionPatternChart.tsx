@@ -26,7 +26,7 @@ interface ConsumptionPatternChartProps {
 /**
  * Custom tooltip showing quantity with Tonnen suffix
  */
-function CustomTooltip({ active, payload }: any) {
+function CustomTooltip({ active, payload }: { active?: boolean; payload?: any[] }) {
   if (active && payload && payload.length) {
     const data = payload[0].payload
     const quantity = data.avg_quantity_per_delivery?.toFixed(2) ?? '0.00'
