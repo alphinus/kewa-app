@@ -145,3 +145,15 @@ COMMENT ON COLUMN inspection_portal_tokens.inspection_id IS 'The inspection acce
 
 COMMENT ON FUNCTION update_room_condition_from_inspection IS 'Updates room condition when inspection is signed. Maps passed->new, passed_with_conditions->partial, failed->no change';
 COMMENT ON TRIGGER inspection_update_room_condition ON inspections IS 'Fires when inspection status changes to signed, updates linked room condition';
+
+-- =============================================
+-- ACKNOWLEDGMENT FIELDS (Plan 02)
+-- =============================================
+
+-- Add acknowledgment fields to inspections table for portal tracking
+ALTER TABLE inspections
+ADD COLUMN IF NOT EXISTS acknowledged_at TIMESTAMPTZ,
+ADD COLUMN IF NOT EXISTS acknowledged_by_email VARCHAR(255);
+
+COMMENT ON COLUMN inspections.acknowledged_at IS 'Timestamp when contractor acknowledged receipt via portal';
+COMMENT ON COLUMN inspections.acknowledged_by_email IS 'Email of contractor who acknowledged via portal';
