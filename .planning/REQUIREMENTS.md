@@ -6,16 +6,16 @@
 
 ## Change Orders (CHNG)
 
-- [ ] **CHNG-01**: User can create a change order linked to work order or project
-- [ ] **CHNG-02**: User can specify scope description, cost impact (original vs. revised), and schedule impact
-- [ ] **CHNG-03**: User can classify change reason (owner_request, unforeseen_conditions, design_error, site_conditions)
-- [ ] **CHNG-04**: Change order follows approval workflow (draft → submitted → approved/rejected)
-- [ ] **CHNG-05**: All change order events are logged in audit trail
-- [ ] **CHNG-06**: User can attach photo evidence to change orders
-- [ ] **CHNG-07**: Contractor can propose counter-offer on change order cost/scope
-- [ ] **CHNG-08**: User can generate PDF document from change order
-- [ ] **CHNG-09**: Dashboard shows cumulative change orders per project with net budget impact
-- [ ] **CHNG-10**: Client can approve change orders via magic-link portal
+- [x] **CHNG-01**: User can create a change order linked to work order or project
+- [x] **CHNG-02**: User can specify scope description, cost impact (original vs. revised), and schedule impact
+- [x] **CHNG-03**: User can classify change reason (owner_request, unforeseen_conditions, design_error, site_conditions)
+- [x] **CHNG-04**: Change order follows approval workflow (draft → submitted → approved/rejected)
+- [x] **CHNG-05**: All change order events are logged in audit trail
+- [x] **CHNG-06**: User can attach photo evidence to change orders
+- [x] **CHNG-07**: Contractor can propose counter-offer on change order cost/scope
+- [x] **CHNG-08**: User can generate PDF document from change order
+- [x] **CHNG-09**: Dashboard shows cumulative change orders per project with net budget impact
+- [x] **CHNG-10**: Client can approve change orders via magic-link portal
 
 ## Supplier Module (SUPP)
 
@@ -130,16 +130,16 @@
 | SUPP-10 | 20 | Complete |
 | SUPP-11 | 20 | Complete |
 | SUPP-12 | 20 | Complete |
-| CHNG-01 | 21 | Pending |
-| CHNG-02 | 21 | Pending |
-| CHNG-03 | 21 | Pending |
-| CHNG-04 | 21 | Pending |
-| CHNG-05 | 21 | Pending |
-| CHNG-06 | 21 | Pending |
-| CHNG-07 | 21 | Pending |
-| CHNG-08 | 21 | Pending |
-| CHNG-09 | 21 | Pending |
-| CHNG-10 | 21 | Pending |
+| CHNG-01 | 21 | Complete |
+| CHNG-02 | 21 | Complete |
+| CHNG-03 | 21 | Complete |
+| CHNG-04 | 21 | Complete |
+| CHNG-05 | 21 | Complete |
+| CHNG-06 | 21 | Complete |
+| CHNG-07 | 21 | Complete |
+| CHNG-08 | 21 | Complete |
+| CHNG-09 | 21 | Complete |
+| CHNG-10 | 21 | Complete |
 | INSP-01 | 22 | Pending |
 | INSP-02 | 22 | Pending |
 | INSP-03 | 22 | Pending |

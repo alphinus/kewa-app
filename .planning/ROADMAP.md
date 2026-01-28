@@ -112,10 +112,10 @@ Plans:
 **Plans**: 4 plans
 
 Plans:
-- [ ] 21-01-PLAN.md — Database schema, types, CRUD API, and work order linking
-- [ ] 21-02-PLAN.md — Approval workflow, audit trail, counter-offers, and dashboard UI
-- [ ] 21-03-PLAN.md — Photo evidence, PDF generation, and budget analytics dashboard
-- [ ] 21-04-PLAN.md — Client portal approval via magic-link
+- [x] 21-01-PLAN.md — Database schema, types, CRUD API, and work order linking
+- [x] 21-02-PLAN.md — Approval workflow, audit trail, counter-offers, and dashboard UI
+- [x] 21-03-PLAN.md — Photo evidence, PDF generation, and budget analytics dashboard
+- [x] 21-04-PLAN.md — Client portal approval via magic-link
 
 ---
 
@@ -183,7 +183,7 @@ Plans:
 | 18. Knowledge Base | v2.2 | 5/5 | Complete | 2026-01-26 |
 | 19. Supplier Core | v2.2 | 3/3 | Complete | 2026-01-27 |
 | 20. Supplier Advanced | v2.2 | 3/3 | Complete | 2026-01-28 |
-| 21. Change Orders | v2.2 | 0/4 | Not started | - |
+| 21. Change Orders | v2.2 | 4/4 | Complete | 2026-01-28 |
 | 22. Inspection Core | v2.2 | 0/3 | Not started | - |
 | 23. Inspection Advanced | v2.2 | 0/3 | Not started | - |
 | 24. Push Notifications | v2.2 | 0/4 | Not started | - |

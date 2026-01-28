@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-01-25)
 
 **Core value:** KEWA AG hat volle Transparenz und Kontrolle uber alle Renovationen — mit standardisierten Workflows, externer Handwerker-Integration, Kostenuebersicht und automatischer Zustandshistorie.
-**Current focus:** Milestone v2.2 Extensions — Phase 20 Complete, ready for Phase 21
+**Current focus:** Milestone v2.2 Extensions — Phase 21 Complete, ready for Phase 22
 
 ## Current Position
 
-Phase: 21 of 24 (Change Orders)
-Plan: 4 of 4 executed
-Status: Phase complete
-Last activity: 2026-01-28 — Completed 21-04-PLAN.md (Client Approval Portal)
+Phase: 21 of 24 (Change Orders) — VERIFIED
+Plan: 4 of 4 executed + verified
+Status: Complete
+Last activity: 2026-01-28 — Phase 21 verified (5/5 must-haves passed)
 
-Progress: [████████░░] 51% (18/35 v2.2 plans)
+Progress: [█████████░] 51% (18/35 v2.2 plans)
 
 ## Milestones Completed
 
@@ -131,8 +131,8 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-28
-Stopped at: Completed 21-04-PLAN.md (Client Approval Portal)
+Stopped at: Phase 21 Change Orders verified — ready for Phase 22 (Inspection Core)
 Resume file: None
 
 ---
-*v2.2 Extensions milestone in progress. Phase 21 Change Orders complete (4/4 plans). Ready for Phase 22.*
+*v2.2 Extensions milestone in progress. Phase 21 Change Orders verified. Next: Phase 22 Inspection Core.*
