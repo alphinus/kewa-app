@@ -9,12 +9,12 @@ See: .planning/PROJECT.md (updated 2026-01-25)
 
 ## Current Position
 
-Phase: 19 of 24 (Supplier Core) — VERIFIED
-Plan: 3 of 3 executed + UAT passed
-Status: Complete
-Last activity: 2026-01-27 — Phase 19 UAT passed (4 PASS, 2 PARTIAL)
+Phase: 20 of 24 (Supplier Advanced)
+Plan: 1 of 3 executed
+Status: In progress
+Last activity: 2026-01-28 — Completed 20-01-PLAN.md (inventory schema and analytics foundation)
 
-Progress: [███████░░░] 31% (11/35 v2.2 plans)
+Progress: [███████░░░] 34% (12/35 v2.2 plans)
 
 ## Milestones Completed
 
@@ -28,7 +28,7 @@ Progress: [███████░░░] 31% (11/35 v2.2 plans)
 |-------|------|--------------|--------|
 | 18 | Knowledge Base | 10 | Complete (5/5 plans) |
 | 19 | Supplier Core | 7 | Complete (3/3 plans + UAT) |
-| 20 | Supplier Advanced | 5 | Not started |
+| 20 | Supplier Advanced | 5 | In progress (1/3 plans) |
 | 21 | Change Orders | 10 | Not started |
 | 22 | Inspection Core | 8 | Not started |
 | 23 | Inspection Advanced | 4 | Not started |
@@ -37,9 +37,9 @@ Progress: [███████░░░] 31% (11/35 v2.2 plans)
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 11 (v2.2)
-- Average duration: 10 min
-- Total execution time: 76 min
+- Total plans completed: 12 (v2.2)
+- Average duration: 9 min
+- Total execution time: 81 min
 
 **By Phase:**
 
@@ -47,6 +47,7 @@ Progress: [███████░░░] 31% (11/35 v2.2 plans)
 |-------|-------|-------|----------|
 | 18 | 5 | 49 min | 10 min |
 | 19 | 3 | 27 min | 9 min |
+| 20 | 1 | 5 min | 5 min |
 
 *Updated after each plan completion*
 
@@ -81,6 +82,11 @@ Recent decisions affecting current work:
 - [19-02]: Status transition validation in API before database trigger
 - [19-03]: Delivery recording requires 'confirmed' PO status
 - [19-03]: Invoice linking validates supplier match between delivery and invoice
+- [20-01]: inventory_movements as append-only log for historical tracking
+- [20-01]: Validation trigger on purchase_order_allocations prevents over-allocation
+- [20-01]: Computed level_percentage column in database for consistency
+- [20-01]: get_reorder_alerts returns urgency classification
+- [20-01]: recharts over Chart.js for React-first API
 
 ### UAT Issues for Future Phases
 
@@ -97,8 +103,8 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-01-27
-Stopped at: Phase 19 UAT complete — ready for Phase 20 (Supplier Advanced)
+Last session: 2026-01-28
+Stopped at: Completed 20-01-PLAN.md (inventory schema and analytics foundation)
 Resume file: None
 
 ---
