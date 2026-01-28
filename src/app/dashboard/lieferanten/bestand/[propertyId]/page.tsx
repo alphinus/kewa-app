@@ -137,7 +137,7 @@ export default function PropertyInventoryDetailPage({
           {error}
         </div>
         <Link href="/dashboard/lieferanten/bestand" className="mt-4 inline-block">
-          <Button variant="outline">Zurueck</Button>
+          <Button variant="secondary">Zurueck</Button>
         </Link>
       </div>
     )
@@ -149,7 +149,7 @@ export default function PropertyInventoryDetailPage({
         <h1 className="text-2xl font-bold mb-6">Bestandsverlauf</h1>
         <p className="text-gray-600 dark:text-gray-400">Liegenschaft nicht gefunden</p>
         <Link href="/dashboard/lieferanten/bestand" className="mt-4 inline-block">
-          <Button variant="outline">Zurueck</Button>
+          <Button variant="secondary">Zurueck</Button>
         </Link>
       </div>
     )
@@ -167,7 +167,7 @@ export default function PropertyInventoryDetailPage({
         </div>
         <div className="flex gap-2">
           <Link href="/dashboard/lieferanten/bestand">
-            <Button variant="outline">Zurueck</Button>
+            <Button variant="secondary">Zurueck</Button>
           </Link>
           <Button
             onClick={() => setShowForm(!showForm)}

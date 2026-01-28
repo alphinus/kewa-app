@@ -77,9 +77,9 @@ export default function InventoryOverviewPage() {
         propertiesData.properties.map((p: Property) => [p.id, p.name])
       )
 
-      const levelsWithNames = Array.from(propertyLevels.values()).map(level => ({
+      const levelsWithNames: InventoryLevelWithProperty[] = Array.from(propertyLevels.values()).map(level => ({
         ...level,
-        property_name: propertyMap.get(level.property_id) || 'Unbekannt',
+        property_name: (propertyMap.get(level.property_id) || 'Unbekannt') as string,
       }))
 
       setAlerts(alertsData.alerts || [])
@@ -133,7 +133,7 @@ export default function InventoryOverviewPage() {
         </div>
         <div className="flex gap-2">
           <Link href="/dashboard/lieferanten">
-            <Button variant="outline">Zurueck</Button>
+            <Button variant="secondary">Zurueck</Button>
           </Link>
           <Button
             onClick={() => setShowForm(!showForm)}
