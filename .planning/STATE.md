@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-01-25)
 ## Current Position
 
 Phase: 21 of 24 (Change Orders)
-Plan: 1 of 4 executed
+Plan: 3 of 4 executed
 Status: In progress
-Last activity: 2026-01-28 — Completed 21-01-PLAN.md
+Last activity: 2026-01-28 — Completed 21-03-PLAN.md
 
-Progress: [████████░░] 43% (15/35 v2.2 plans)
+Progress: [█████████░] 49% (17/35 v2.2 plans)
 
 ## Milestones Completed
 
@@ -29,7 +29,7 @@ Progress: [████████░░] 43% (15/35 v2.2 plans)
 | 18 | Knowledge Base | 10 | Complete (5/5 plans) |
 | 19 | Supplier Core | 7 | Complete (3/3 plans + UAT) |
 | 20 | Supplier Advanced | 5 | Complete (3/3 plans) |
-| 21 | Change Orders | 10 | In progress (1/4 plans) |
+| 21 | Change Orders | 10 | In progress (3/4 plans) |
 | 22 | Inspection Core | 8 | Not started |
 | 23 | Inspection Advanced | 4 | Not started |
 | 24 | Push Notifications | 12 | Not started |
@@ -37,9 +37,9 @@ Progress: [████████░░] 43% (15/35 v2.2 plans)
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 15 (v2.2)
+- Total plans completed: 17 (v2.2)
 - Average duration: 10 min
-- Total execution time: 130 min
+- Total execution time: 151 min
 
 **By Phase:**
 
@@ -48,7 +48,7 @@ Progress: [████████░░] 43% (15/35 v2.2 plans)
 | 18 | 5 | 49 min | 10 min |
 | 19 | 3 | 27 min | 9 min |
 | 20 | 3 | 47 min | 16 min |
-| 21 | 1 | 7 min | 7 min |
+| 21 | 3 | 28 min | 9 min |
 
 *Updated after each plan completion*
 
@@ -102,6 +102,11 @@ Recent decisions affecting current work:
 - [21-01]: Line items can be negative (scope reductions/credits) - total preserves sign
 - [21-01]: Work order deletion blocked if active change orders exist
 - [21-01]: Soft-delete only (status=cancelled with mandatory reason)
+- [21-03]: Photo storage in media bucket at change_orders/{id}/photos/ with signed URLs
+- [21-03]: PDF filename matches CO number exactly (CO-YYYY-NNNNN.pdf)
+- [21-03]: Waterfall chart uses stacked bar pattern (recharts has no native waterfall)
+- [21-03]: Approved COs used for waterfall, pending COs shown separately in summary
+- [21-03]: Negative amounts shown in red across all views (PDF, chart, table)
 
 ### UAT Issues for Future Phases
 
@@ -119,8 +124,8 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-28
-Stopped at: Completed 21-01-PLAN.md (Change Order CRUD)
+Stopped at: Completed 21-03-PLAN.md (Photo Evidence, PDF, Budget Analytics)
 Resume file: None
 
 ---
-*v2.2 Extensions milestone in progress. Phase 21 Change Orders started (1/4 plans complete).*
+*v2.2 Extensions milestone in progress. Phase 21 Change Orders nearly complete (3/4 plans done).*
