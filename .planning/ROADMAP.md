@@ -129,12 +129,12 @@ Plans:
   3. User can log defects with description and photos
   4. User can capture digital signature from contractor
   5. User can create follow-up tasks from failed checklist items
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 22-01: Inspection schema and template-based checklists
-- [ ] 22-02: Checklist execution with pass/fail and photos
-- [ ] 22-03: Defect logging, signatures, and task generation
+- [ ] 22-01-PLAN.md — Database schema, types, CRUD API, storage bucket setup
+- [ ] 22-02-PLAN.md — Checklist execution UI, defect logging, photo upload
+- [ ] 22-03-PLAN.md — Signature capture, defect review/actions, templates, PDF generation
 
 ---
 
