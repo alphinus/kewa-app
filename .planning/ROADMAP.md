@@ -147,12 +147,12 @@ Plans:
   2. User can generate PDF inspection protocol (Abnahme-Protokoll)
   3. Contractor can view and acknowledge inspection results via portal
   4. Completed inspections auto-update room conditions based on results
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 23-01: Re-inspection scheduling and parent-child tracking
-- [ ] 23-02: PDF Abnahme-Protokoll generation
-- [ ] 23-03: Contractor portal integration and room condition automation
+- [ ] 23-01-PLAN.md — Re-inspection scheduling with defect propagation, database migration, history timeline
+- [ ] 23-02-PLAN.md — Contractor portal with magic links, acknowledgment flow, enhanced PDF Abnahme-Protokoll
+- [ ] 23-03-PLAN.md — Integration of Phase 23 components, room condition automation verification
 
 ---
 
