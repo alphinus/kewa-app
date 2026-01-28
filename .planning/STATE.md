@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-01-25)
 ## Current Position
 
 Phase: 23 of 24 (Inspection Advanced) — IN PROGRESS
-Plan: 2 of 3 executed
-Status: In progress
-Last activity: 2026-01-28 — Completed 23-02-PLAN.md
+Plan: 3 of 3 executed (23-01 completed out of order)
+Status: Complete
+Last activity: 2026-01-28 — Completed 23-01-PLAN.md (Re-inspection Scheduling)
 
-Progress: [██████████░] 66% (24/35 v2.2 plans)
+Progress: [██████████░] 71% (25/35 v2.2 plans)
 
 ## Milestones Completed
 
@@ -31,15 +31,15 @@ Progress: [██████████░] 66% (24/35 v2.2 plans)
 | 20 | Supplier Advanced | 5 | Complete (3/3 plans) |
 | 21 | Change Orders | 10 | Complete (4/4 plans) |
 | 22 | Inspection Core | 8 | Complete (4/4 plans) |
-| 23 | Inspection Advanced | 4 | In progress (2/3 plans) |
+| 23 | Inspection Advanced | 4 | Complete (3/3 plans) |
 | 24 | Push Notifications | 12 | Not started |
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 24 (v2.2)
-- Average duration: 12 min
-- Total execution time: 292 min
+- Total plans completed: 25 (v2.2)
+- Average duration: 13 min
+- Total execution time: 337 min
 
 **By Phase:**
 
@@ -50,7 +50,7 @@ Progress: [██████████░] 66% (24/35 v2.2 plans)
 | 20 | 3 | 47 min | 16 min |
 | 21 | 4 | 49 min | 12 min |
 | 22 | 4 | 91 min | 23 min |
-| 23 | 2 | 30 min | 15 min |
+| 23 | 3 | 75 min | 25 min |
 
 *Updated after each plan completion*
 
@@ -134,6 +134,9 @@ Recent decisions affecting current work:
 - [22-03]: Follow-up tasks created as subtasks on work order's task_id with severity-based priority
 - [22-03]: Template editor uses button-based reorder (up/down arrows) not drag-and-drop
 - [22-03]: PDF embeds signature PNG via signed URL, filename format: Abnahme-{title}-{date}.pdf
+- [23-01]: Deferred defects copied to re-inspection as open (not all defects)
+- [23-01]: Re-inspection inherits parent checklist structure with items reset
+- [23-01]: History shows full chain from root to all children
 - [23-02]: inspection_portal_tokens join table links magic_link_tokens to inspections
 - [23-02]: Portal validates token without consuming (read-only), acknowledge consumes token
 - [23-02]: PDF signature embedded as base64 data URL (prevents URL expiry in saved PDFs)
@@ -156,8 +159,8 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-28
-Stopped at: Completed 23-02-PLAN.md (Contractor Portal for Inspection Acknowledgment)
+Stopped at: Completed 23-01-PLAN.md (Re-inspection Scheduling)
 Resume file: None
 
 ---
-*v2.2 Extensions milestone in progress. Phase 23 Inspection Advanced (2/3 plans complete). Next: Phase 23-03 or Phase 24 Push Notifications.*
+*v2.2 Extensions milestone in progress. Phase 23 Inspection Advanced complete (3/3 plans). Next: Phase 24 Push Notifications.*
