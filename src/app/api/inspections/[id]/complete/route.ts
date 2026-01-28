@@ -6,13 +6,13 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { getCurrentUser } from '@/lib/auth/session'
+import { getCurrentUser } from '@/lib/session'
 import { getInspection, updateInspection } from '@/lib/inspections/queries'
 import { computeOverallResult } from '@/lib/inspections/workflow'
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Auth check
@@ -24,7 +24,7 @@ export async function POST(
       )
     }
 
-    const inspectionId = params.id
+    const { id: inspectionId } = await params
     const body = await req.json()
     const acknowledgeDefects = body.acknowledge_defects === true
 

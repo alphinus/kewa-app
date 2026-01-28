@@ -89,9 +89,10 @@ export function InspectionForm({ onSubmit }: InspectionFormProps) {
     if (linkType === 'work_order' && workOrderId) {
       const selectedWorkOrder = workOrders.find((wo) => wo.id === workOrderId)
       if (selectedWorkOrder?.partner?.trade_category) {
+        const partnerTradeCategory = selectedWorkOrder.partner.trade_category
         setFilteredTemplates(
           templates.filter(
-            (t) => t.trade_category === selectedWorkOrder.partner.trade_category
+            (t) => t.trade_category === partnerTradeCategory
           )
         )
       } else {

@@ -7,6 +7,7 @@ export {
   validateSession,
   getSessionFromRequest,
   getSessionFromCookie,
+  getCurrentUser,
   SESSION_COOKIE_NAME,
   SESSION_COOKIE_OPTIONS,
   SESSION_EXPIRATION_SECONDS,

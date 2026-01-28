@@ -201,3 +201,30 @@ export async function getSessionFromCookie(cookieValue: string | undefined): Pro
 
   return validateSession(cookieValue)
 }
+
+/**
+ * Get the current authenticated user from server context
+ * Convenience wrapper for use in API routes and server components
+ *
+ * @returns User object with id and role, or null if not authenticated
+ */
+export async function getCurrentUser(): Promise<{ id: string; role: 'kewa' | 'imeri' } | null> {
+  // Dynamic import to avoid bundling issues
+  const { cookies } = await import('next/headers')
+  const cookieStore = await cookies()
+  const sessionCookie = cookieStore.get(SESSION_COOKIE_NAME)
+
+  if (!sessionCookie?.value) {
+    return null
+  }
+
+  const session = await validateSession(sessionCookie.value)
+  if (!session) {
+    return null
+  }
+
+  return {
+    id: session.userId,
+    role: session.role,
+  }
+}

@@ -6,7 +6,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { getCurrentUser } from '@/lib/auth/session'
+import { getCurrentUser } from '@/lib/session'
 import { createClient } from '@/lib/supabase/server'
 import { getInspection } from '@/lib/inspections/queries'
 import { createFollowUpTask, deferDefect, dismissDefect } from '@/lib/inspections/defect-actions'
@@ -14,7 +14,7 @@ import type { InspectionDefect, DefectAction } from '@/types/inspections'
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: { id: string; defectId: string } }
+  { params }: { params: Promise<{ id: string; defectId: string }> }
 ) {
   try {
     // Auth check
@@ -26,8 +26,7 @@ export async function POST(
       )
     }
 
-    const inspectionId = params.id
-    const defectId = params.defectId
+    const { id: inspectionId, defectId } = await params
     const body = await req.json()
 
     const { action, reason, assignee_id } = body as {

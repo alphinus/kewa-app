@@ -327,8 +327,10 @@ export function InspectionPDFDocument({ data }: InspectionPDFProps) {
     }
   }
 
+  // Use template's formality level if available, default to 'informal_check'
+  const formality = (inspection as unknown as Record<string, unknown>).formality_level || 'informal_check'
   const documentTitle =
-    inspection.formality_level === 'formal_abnahme'
+    formality === 'formal_abnahme'
       ? 'Abnahmeprotokoll'
       : 'Inspektionsbericht'
 

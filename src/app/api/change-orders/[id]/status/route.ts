@@ -188,8 +188,10 @@ export async function PATCH(
 
     // Special handling for 'submitted' - determine approver via threshold routing
     if (targetStatus === 'submitted') {
-      const workOrder = existing.work_order as { id: string; project_id: string } | null
-      const projectId = workOrder?.project_id ?? null
+      // work_order may be returned as array or single object depending on Supabase version
+      const workOrderData = existing.work_order
+      const workOrder = Array.isArray(workOrderData) ? workOrderData[0] : workOrderData
+      const projectId = (workOrder as { id: string; project_id: string } | null)?.project_id ?? null
 
       const approvalRoute = await determineApprover(
         id,
