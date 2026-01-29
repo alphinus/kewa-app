@@ -14,6 +14,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { formatFileSize, CONTEXT_LABELS, type UploadContext } from '@/lib/storage/contractor-upload'
+import { toast } from 'sonner'
 
 interface MediaItem {
   id: string
@@ -91,10 +92,10 @@ export default function MediaGallery({
           setMedia((prev) => prev.filter((m) => m.id !== mediaId))
         } else {
           const error = await response.json()
-          alert(error.error || 'Loeschen fehlgeschlagen')
+          toast.error(error.error || 'Loeschen fehlgeschlagen')
         }
       } catch {
-        alert('Loeschen fehlgeschlagen')
+        toast.error('Loeschen fehlgeschlagen')
       }
     },
     [token, workOrderId]

@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import { WBSTree } from '@/components/templates/WBSTree'
 import { SimpleTimeline } from '@/components/templates/SimpleTimeline'
 import { fetchTemplate, deleteTemplate } from '@/lib/api/templates'
+import { toast } from 'sonner'
 import type { TemplateWithHierarchy, TemplateTask } from '@/types/templates'
 
 // Lazy load GanttPreview for better performance
@@ -389,7 +390,7 @@ export default function TemplateDetailPage({ params }: PageProps) {
               </p>
               <button
                 className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 min-h-[44px]"
-                onClick={() => alert('Template-Anwendung wird in Plan 08-03 implementiert')}
+                onClick={() => toast.info('Template-Anwendung wird in einer zukuenftigen Version implementiert')}
               >
                 Template anwenden
               </button>

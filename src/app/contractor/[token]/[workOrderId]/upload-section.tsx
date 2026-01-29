@@ -13,6 +13,7 @@
 
 import { useState, useCallback, useEffect } from 'react'
 import FileUploader from '@/components/upload/FileUploader'
+import { toast } from 'sonner'
 import {
   type UploadMediaType,
   type UploadContext,
@@ -118,7 +119,7 @@ export default function UploadSection({
         return { id: newMedia.id, url: newMedia.url }
       } catch (error) {
         console.error('Upload failed:', error)
-        alert(error instanceof Error ? error.message : 'Upload fehlgeschlagen')
+        toast.error(error instanceof Error ? error.message : 'Upload fehlgeschlagen')
         return null
       }
     },
@@ -153,7 +154,7 @@ export default function UploadSection({
         return true
       } catch (error) {
         console.error('Delete failed:', error)
-        alert(error instanceof Error ? error.message : 'Loeschen fehlgeschlagen')
+        toast.error(error instanceof Error ? error.message : 'Loeschen fehlgeschlagen')
         return false
       }
     },

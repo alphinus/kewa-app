@@ -16,6 +16,7 @@ import Link from 'next/link'
 import ResponseForm from './[workOrderId]/response-form'
 import DeadlineBanner, { CompactDeadlineBanner } from './[workOrderId]/deadline-banner'
 import { getDeadlineStatus, isDeadlinePassed } from '@/lib/work-orders/deadline'
+import { toast } from 'sonner'
 
 interface WorkOrderData {
   id: string
@@ -122,7 +123,7 @@ export default function WorkOrderCard({
       window.location.reload()
     } catch (error) {
       console.error('Status update failed:', error)
-      alert('Aktualisierung fehlgeschlagen. Bitte versuchen Sie es erneut.')
+      toast.error('Aktualisierung fehlgeschlagen. Bitte versuchen Sie es erneut.')
     } finally {
       setIsLoading(false)
     }
