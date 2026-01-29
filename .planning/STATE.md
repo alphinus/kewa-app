@@ -2,180 +2,46 @@
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-01-25)
+See: .planning/PROJECT.md (updated 2026-01-29)
 
 **Core value:** KEWA AG hat volle Transparenz und Kontrolle uber alle Renovationen — mit standardisierten Workflows, externer Handwerker-Integration, Kostenuebersicht und automatischer Zustandshistorie.
-**Current focus:** Milestone v2.2 Extensions — Phase 24 Push Notifications COMPLETE
+**Current focus:** Milestone v3.0 Tenant & Offline — Defining requirements
 
 ## Current Position
 
-Phase: 24 of 24 (Push Notifications) — COMPLETE
-Plan: 4 of 4 executed
-Status: Phase complete — verified 5/5 must-haves
-Last activity: 2026-01-29 — Completed Phase 24 Push Notifications
-
-Progress: [██████████████] 100% (35/35 v2.2 plans)
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-01-29 — Milestone v3.0 started
 
 ## Milestones Completed
 
 - v1.0 MVP (2025-03-XX) — Phases 1-6
 - v2.0 Advanced Features (2026-01-19) — Phases 7-12.3
 - v2.1 Master Data Management (2026-01-25) — Phases 13-17
-
-## v2.2 Phase Overview
-
-| Phase | Name | Requirements | Status |
-|-------|------|--------------|--------|
-| 18 | Knowledge Base | 10 | Complete (5/5 plans) |
-| 19 | Supplier Core | 7 | Complete (3/3 plans + UAT) |
-| 20 | Supplier Advanced | 5 | Complete (3/3 plans) |
-| 21 | Change Orders | 10 | Complete (4/4 plans) |
-| 22 | Inspection Core | 8 | Complete (4/4 plans) |
-| 23 | Inspection Advanced | 4 | Complete (3/3 plans) |
-| 24 | Push Notifications | 12 | Complete (4/4 plans) |
-
-## Performance Metrics
-
-**Velocity:**
-- Total plans completed: 35 (v2.2)
-- Average duration: 15 min
-- Total execution time: 542 min
-
-**By Phase:**
-
-| Phase | Plans | Total | Avg/Plan |
-|-------|-------|-------|----------|
-| 18 | 5 | 49 min | 10 min |
-| 19 | 3 | 27 min | 9 min |
-| 20 | 3 | 47 min | 16 min |
-| 21 | 4 | 49 min | 12 min |
-| 22 | 4 | 91 min | 23 min |
-| 23 | 3 | 106 min | 35 min |
-| 24 | 4 | 87 min | 22 min |
-
-**All v2.2 phases complete.**
-
-*Updated after each plan completion*
+- v2.2 Extensions (2026-01-29) — Phases 18-24
 
 ## Accumulated Context
 
 ### Decisions
 
 Decisions are logged in PROJECT.md Key Decisions table.
-Recent decisions affecting current work:
+Carried forward from v2.2:
 
-- [v2.2]: Research recommends MDX for knowledge base content (no CMS)
-- [v2.2]: Supplier Module extends existing Partner entity
-- [v2.2]: Push Notifications built last so all event sources exist
-- [18-01]: Generated tsvector column with weighted search (title A, content B, tags C)
-- [18-01]: Temporal tables pattern for version history
-- [18-01]: Workflow FSM with trigger enforcement
-- [18-02]: Tiptap with immediatelyRender: false for SSR safety
-- [18-02]: Template scaffolds as Tiptap JSON with section headings
-- [18-02]: Manual toolbar (no shadcn minimal-tiptap, no components.json)
-- [18-03]: websearch_to_tsquery for safe FTS user input handling
-- [18-03]: pg_trgm similarity for fuzzy autocomplete suggestions
-- [18-03]: 300ms debounce for search suggestions
-- [18-04]: Reuse media bucket for attachments at kb_articles/{id}/attachments/
-- [18-04]: Signed URLs with 1-hour expiry for secure downloads
-- [18-04]: Workflow transitions validated in API and database trigger
-- [18-04]: Rejection requires comment for audit trail
-- [18-05]: Category-based similarity for related articles (simpler than FTS overlap)
-- [18-05]: Contractor portal hides internal metadata (author, dates, version history)
-- [18-05]: Visibility filter IN ('contractors', 'both') for contractor access
-- [19-01]: Purchase order sequence for order numbers (PO-YYYY-NNNNN)
-- [19-01]: Deliveries has_variance computed column for mismatch detection
-- [19-02]: Status transition validation in API before database trigger
-- [19-03]: Delivery recording requires 'confirmed' PO status
-- [19-03]: Invoice linking validates supplier match between delivery and invoice
-- [20-01]: inventory_movements as append-only log for historical tracking
-- [20-01]: Validation trigger on purchase_order_allocations prevents over-allocation
-- [20-01]: Computed level_percentage column in database for consistency
-- [20-01]: get_reorder_alerts returns urgency classification
-- [20-01]: recharts over Chart.js for React-first API
-- [20-02]: Auto-calculate consumption on movement creation for consistency
-- [20-02]: Delivery movements set consumption to null (deliveries add to tank)
-- [20-02]: Color-coded level percentage (green >50%, amber 20-50%, red <20%)
-- [20-02]: "Keine Verbrauchsdaten" for insufficient readings (less than 2)
-- [20-03]: Enrich API responses with joined names in API layer (views return IDs only)
-- [20-03]: Auto-calculate allocated_amount from quantity * unit_price in form
-- [20-03]: Client-side validation + server-side DB trigger for allocation totals
-- [20-03]: German month names via getMonthName() utility function
-- [21-01]: Temporal versioning table for counter-offers (change_order_versions stores OLD values)
-- [21-01]: Status workflow enforced at database level via trigger (JSONB transition map)
-- [21-01]: Approval thresholds configurable per-project with priority-based routing
-- [21-01]: Line items can be negative (scope reductions/credits) - total preserves sign
-- [21-01]: Work order deletion blocked if active change orders exist
-- [21-01]: Soft-delete only (status=cancelled with mandatory reason)
-- [21-02]: Optimistic locking via version check prevents concurrent revision conflicts (409 Conflict)
-- [21-02]: Threshold routing queries project-specific thresholds first, falls back to global defaults
-- [21-02]: Reject status requires comment for audit trail (400 error if missing)
-- [21-02]: Cancel status requires cancelled_reason (400 error if missing)
-- [21-02]: LineItemEditor supports negative amounts for credits (distinct from PurchaseOrder)
-- [21-02]: Version history timeline shows amount changes between versions
-- [21-04]: Magic link tokens linked to change orders via change_order_approval_tokens join table
-- [21-04]: Portal data endpoint validates token without consuming (read-only check)
-- [21-04]: Approve/reject endpoints consume token to prevent reuse (mark as used)
-- [21-04]: show_line_items_to_client controls financial detail visibility in portal
-- [21-04]: Rejection requires comment for audit trail, approval comment optional
-- [21-04]: 7-day token expiry for client approval workflow
-- [22-01]: Status transition trigger validates inspection workflow (in_progress->completed->signed)
-- [22-01]: Signature refusal escape hatch (signature_refused=true with mandatory reason)
-- [22-01]: Defects have independent lifecycle not derived from linked task status
-- [22-01]: Template checklist_sections copied to inspection checklist_items at creation
-- [22-01]: Overall result auto-computed from defect severity (schwer+open=failed)
-- [22-01]: Dedicated inspections storage bucket (not media bucket)
-- [22-02]: Photo upload stores in inspections bucket with signed URLs (1-hour expiry)
-- [22-02]: Auto-save with 3-second debounce for checklist partial progress
-- [22-02]: Photo nudge prompts but doesn't require photos (dismissable)
-- [22-02]: Touch-friendly UI with 48px min height on interactive elements
-- [22-02]: Template filtering by trade category when work order selected
-- [22-03]: Signature canvas uses react-signature-canvas with typed name (500x200px responsive)
-- [22-03]: Signature refusal requires mandatory reason, keeps status at 'completed' (not 'signed')
-- [22-03]: Completion warns about open defects with modal, requires acknowledge to proceed
-- [22-03]: Defect actions prevent duplicate task creation via null check on action field
-- [22-03]: Follow-up tasks created as subtasks on work order's task_id with severity-based priority
-- [22-03]: Template editor uses button-based reorder (up/down arrows) not drag-and-drop
-- [22-03]: PDF embeds signature PNG via signed URL, filename format: Abnahme-{title}-{date}.pdf
-- [23-01]: Deferred defects copied to re-inspection as open (not all defects)
-- [23-01]: Re-inspection inherits parent checklist structure with items reset
-- [23-01]: History shows full chain from root to all children
-- [23-02]: inspection_portal_tokens join table links magic_link_tokens to inspections
-- [23-02]: Portal validates token without consuming (read-only), acknowledge consumes token
-- [23-02]: PDF signature embedded as base64 data URL (prevents URL expiry in saved PDFs)
-- [23-02]: acknowledged_at and acknowledged_by_email track contractor portal acknowledgments
-- [23-03]: Integrated Phase 23 components into InspectionDetail (showHistory prop pattern)
-- [23-03]: Room detail page created at deep nested route for breadcrumb navigation
-- [23-03]: Condition source joins added to rooms API for single-request data fetch
-- [24-01]: VAPID public key exposed to client (NEXT_PUBLIC_), private key server-only
-- [24-01]: Device ID cookie (1-year) identifies browser/device for multi-subscription support
-- [24-01]: pg_cron jobs with DO/EXCEPTION fallback for environments without extension
-- [24-01]: PushProvider in Wave 1 (24-01) not Wave 2 (24-04) - required by 24-02 settings page
-- [24-01]: Service worker notification without PWA icons (no icons exist yet)
-- [24-02]: getPreferences() returns defaults without auto-insert (only upsert creates row)
-- [24-02]: Quiet hours with timezone support and overnight wrap handling
-- [24-02]: Urgent notifications bypass both quiet hours and digest mode
-- [24-02]: 410 Gone cleanup in sendPushToUser() removes expired subscriptions
-- [24-02]: Digest API simplified UTC hour matching (TODO: proper timezone conversion)
-- [24-03]: Fire-and-forget notification dispatch with .catch() prevents blocking API responses
-- [24-03]: Contractor notifications only when work order status is 'sent' (assignment only)
-- [24-03]: Approval notifications fire when status changes to under_review/submitted (not after approval)
-- [24-03]: CRON_SECRET for internal trigger API (pg_cron or external cron authentication)
-- [24-03]: Batch deadline processing via getUpcomingDeadlines() for cron efficiency
-- [24-04]: Entity grouping by type:id for cleaner notification display (e.g., "Work Order #42 - 3 Updates")
-- [24-04]: Badge count capped at 9+ for standard notification pattern
-- [24-04]: Supabase Realtime channel per user for instant notification delivery
-- [24-04]: Auto-mark-read on notification click reduces user friction
+- Tiptap with immediatelyRender: false for SSR safety
+- Service worker for push notifications (no PWA icons yet)
+- VAPID keys in environment secrets
+- Supabase Realtime for live updates
+- react-signature-canvas for digital signatures
+- recharts for data visualization
+- Fire-and-forget notification dispatch pattern
 
-### UAT Issues for Future Phases
+### UAT Issues (carried from v2.2)
 
-- Invoice linking needs proper modal UI (currently uses prompt()) — requires invoice module
+- Invoice linking needs proper modal UI (currently uses prompt())
 - Property-level delivery history page not yet built — data model ready
 - Checklist item titles need proper lookup from template (currently shows "Item 1", "Item 2")
-
-### Pending Todos
-
-- Enhance template population to copy title/description into ChecklistItemResult structure (22-02 minor issue)
+- Enhance template population to copy title/description into ChecklistItemResult structure
 
 ### Blockers/Concerns
 
@@ -184,8 +50,8 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-29
-Stopped at: Phase 24 complete. All v2.2 phases done. Milestone audit pending.
-Resume file: .planning/.continue-here.md
+Stopped at: Starting v3.0 milestone — research phase
+Resume file: —
 
 ---
-*v2.2 Extensions milestone complete. All 7 phases (18-24) delivered. 35 plans, 56 requirements. Next: Milestone audit.*
+*v3.0 Tenant & Offline milestone started. Defining requirements.*

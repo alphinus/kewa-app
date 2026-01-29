@@ -8,33 +8,30 @@ Ein umfassendes Renovations-Management-System für KEWA AG. Standardisierte Proj
 
 KEWA AG hat volle Transparenz und Kontrolle über alle Renovationen — mit standardisierten Workflows, externer Handwerker-Integration, Kostenübersicht und automatischer Zustandshistorie.
 
-## Current Milestone: v2.2 Extensions
+## Current Milestone: v3.0 Tenant & Offline
 
-**Goal:** Extend renovation workflow with change orders, supplier management, inspection workflows, push notifications, and knowledge base.
+**Goal:** Add tenant self-service portal, offline PWA support, and polish existing UX issues across the app.
 
 **Target features:**
-- Change Orders for in-flight project modifications
-- Supplier Module (Pellets tracking and ordering)
-- Inspection/Abnahme Workflow for project handoffs
-- Push Notifications for real-time updates
-- Knowledge Base for FAQ and documentation
+- Tenant Portal for self-service ticket creation and communication
+- Offline Support with PWA sync queue and conflict resolution
+- UX Polish fixing pending issues (invoice modal, checklist titles, delivery history) and improvements
 
-## Current State (v2.1 Shipped)
+## Current State (v2.2 Shipped)
 
 **Tech Stack:** Next.js 16 + React 19 + Supabase + Tailwind CSS 4
-**Codebase:** ~75,000 LOC TypeScript, ~530 files
-**Status:** v2.1 Master Data Management shipped
+**Codebase:** ~100,000+ LOC TypeScript, ~700+ files
+**Status:** v2.2 Extensions shipped
 
-**Shipped Features (v2.1):**
-- Partner/Contractor Master Data with trade categories and WorkOrder integration
-- Multi-Property Management with BuildingContext for cross-app filtering
-- Unit & Room CRUD with tenant data and condition tracking
-- Template UI with create/edit, drag-drop reordering, and project creation flow
-- Admin Dashboard with counters, quick actions, and search/filter
-- Setup Wizard for first-time onboarding
-- Demo data seed script and deployment README
+**Shipped Features (v2.2):**
+- Knowledge Base with Tiptap WYSIWYG editor, categories, full-text search, version history, contractor visibility
+- Supplier Core + Advanced with purchase orders, deliveries, consumption tracking, reorder alerts, price analytics
+- Change Orders with approval workflow, counter-offers, PDF generation, magic-link client portal
+- Inspection Core + Advanced with checklists, defect logging, signatures, re-inspections, room condition automation
+- Push Notifications with service worker, preference controls, quiet hours, notification center, real-time updates
 
 **Previous Milestones:**
+- v2.1 Master Data Management (shipped 2026-01-25) — See milestones/v2.1-ROADMAP.md
 - v2.0 Advanced Features (shipped 2026-01-19) — See milestones/v2.0-ROADMAP.md
 - v1.0 MVP (shipped 2025-03-XX) — See milestones/v1.0-ROADMAP.md
 
@@ -75,20 +72,22 @@ KEWA AG hat volle Transparenz und Kontrolle über alle Renovationen — mit stan
 - ✓ ADMN-01 to ADMN-03: Admin Dashboard, Quick Actions, Search — v2.1
 - ✓ SEED-01 to SEED-04: Migrations, Seed Script, Setup Wizard, README — v2.1
 
-### Active (v2.2+)
+**v2.2:**
+- ✓ KNOW-01 to KNOW-10: Knowledge Base (articles, categories, search, attachments, versions, contractor visibility) — v2.2
+- ✓ SUPP-01 to SUPP-12: Supplier Module (purchase orders, deliveries, consumption, reorder alerts, price analytics) — v2.2
+- ✓ CHNG-01 to CHNG-10: Change Orders (workflow, counter-offers, PDF, portal approval) — v2.2
+- ✓ INSP-01 to INSP-12: Inspection Workflow (checklists, defects, signatures, re-inspections, room conditions) — v2.2
+- ✓ PUSH-01 to PUSH-12: Push Notifications (service worker, preferences, triggers, notification center) — v2.2
 
-**Phase 2 Extensions (19 req):**
-- [ ] CHNG-01 to CHNG-03: Change Orders
-- [ ] SUPP-01 to SUPP-04: Lieferanten-Modul (Pellets)
-- [ ] INSP-01 to INSP-03: Inspection/Abnahme Workflow
-- [ ] PUSH-01 to PUSH-05: Push-Notifications
-- [ ] KNOW-01 to KNOW-04: Knowledge Base
+### Active (v3.0)
 
-**Phase 3 Advanced (16 req):**
-- [ ] TPRT-01 to TPRT-04: Tenant Portal
-- [ ] OFFL-01 to OFFL-05: Offline Support
+- [ ] TPRT: Tenant Portal (self-service, ticket creation, communication)
+- [ ] OFFL: Offline Support (PWA, sync queue, conflict resolution)
+- [ ] UXPOL: UX Polish (invoice modal, checklist titles, delivery history, general improvements)
+
+### Future
+
 - [ ] INTG-01 to INTG-03: Integrationen (Kalender, Buchhaltung)
-- [ ] UXIM-01 to UXIM-04: UX-Verbesserungen
 
 ### Deferred
 
@@ -152,5 +151,5 @@ KEWA AG hat volle Transparenz und Kontrolle über alle Renovationen — mit stan
 | Mieter-Portal in Phase 3 | MVP-Fokus auf Renovation, Mieter später | — Planned |
 
 ---
-*Last updated: 2026-01-25 — v2.2 Extensions milestone started*
+*Last updated: 2026-01-29 — v3.0 Tenant & Offline milestone started*
 *Source: KEWA-RENOVATION-OPS-SPEC_v1 + Original v2.0 Scope*
