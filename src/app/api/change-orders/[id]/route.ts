@@ -14,6 +14,7 @@ import type { Role } from '@/types'
 import type { UpdateChangeOrderInput } from '@/types/change-orders'
 import { calculateLineItemsTotal, CHANGE_ORDER_SELECT } from '@/lib/change-orders/queries'
 import { canTransition } from '@/lib/change-orders/workflow'
+import { notifyApprovalNeeded } from '@/lib/notifications/triggers'
 
 // Internal roles that can manage change orders
 const ALLOWED_ROLES: Role[] = ['kewa', 'imeri']
@@ -219,6 +220,16 @@ export async function PATCH(
     if (updateError) {
       console.error('Error updating change order:', updateError)
       return NextResponse.json({ error: updateError.message }, { status: 500 })
+    }
+
+    // Fire notification when change order is submitted (approval needed)
+    if (body.status === 'submitted') {
+      notifyApprovalNeeded(
+        'change_order',
+        changeOrder.id,
+        changeOrder.co_number,
+        userId
+      ).catch(err => console.error('Notification error:', err))
     }
 
     return NextResponse.json({ change_order: changeOrder })

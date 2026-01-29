@@ -9,6 +9,7 @@ import { createClient } from '@/lib/supabase/server'
 import type { Role } from '@/types'
 import { createMagicLink } from '@/lib/magic-link'
 import { logSentEvent } from '@/lib/work-orders/events'
+import { notifyWorkOrderStatusChange } from '@/lib/notifications/triggers'
 
 interface RouteContext {
   params: Promise<{ id: string }>
@@ -85,6 +86,7 @@ export async function POST(
       .select(`
         id,
         title,
+        wo_number,
         status,
         partner:partners (
           id,
@@ -145,6 +147,14 @@ export async function POST(
 
     // Log 'sent' event
     await logSentEvent(id, userId, partner.email)
+
+    // Fire notification for sent status (non-blocking)
+    notifyWorkOrderStatusChange(
+      id,
+      workOrder.wo_number,
+      'sent',
+      userId
+    ).catch(err => console.error('Notification error:', err))
 
     // Build mailto link
     const mailtoLink = buildMailtoLink(

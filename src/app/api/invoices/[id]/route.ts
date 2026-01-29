@@ -10,6 +10,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { INVOICE_SELECT } from '@/lib/costs/invoice-queries'
 import type { Role } from '@/types'
+import { notifyApprovalNeeded } from '@/lib/notifications/triggers'
 
 interface RouteContext {
   params: Promise<{ id: string }>
@@ -187,6 +188,16 @@ export async function PATCH(
     if (updateError) {
       console.error('Error updating invoice:', updateError)
       return NextResponse.json({ error: updateError.message }, { status: 500 })
+    }
+
+    // Fire notification when invoice moves to under_review (approval needed)
+    if (body.status === 'under_review') {
+      notifyApprovalNeeded(
+        'invoice',
+        invoice.id,
+        invoice.invoice_number || invoice.id,
+        userId
+      ).catch(err => console.error('Notification error:', err))
     }
 
     return NextResponse.json({ invoice })

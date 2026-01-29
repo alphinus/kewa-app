@@ -10,6 +10,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import type { Role } from '@/types'
 import type { UpdateWorkOrderInput } from '@/types/work-order'
+import { notifyWorkOrderStatusChange } from '@/lib/notifications/triggers'
 
 // Select query for work orders with relations
 const WORK_ORDER_SELECT = `
@@ -211,6 +212,17 @@ export async function PATCH(
       }
       console.error('Error updating work order:', updateError)
       return NextResponse.json({ error: updateError.message }, { status: 500 })
+    }
+
+    // Fire notification for status changes (non-blocking)
+    const notifiableStatuses = ['sent', 'accepted', 'rejected']
+    if (body.status && notifiableStatuses.includes(body.status)) {
+      notifyWorkOrderStatusChange(
+        workOrder.id,
+        workOrder.wo_number,
+        body.status,
+        userId
+      ).catch(err => console.error('Notification error:', err))
     }
 
     return NextResponse.json({ workOrder })
