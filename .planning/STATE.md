@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-01-29)
 ## Current Position
 
 Phase: 26 of 29 (Tenant Portal Core)
-Plan: 0 of 4 in current phase (planned, not yet executed)
-Status: Planning complete
-Last activity: 2026-01-29 -- Phase 26 plans written (4 plans, 3 waves)
+Plan: 1 of 4 in current phase
+Status: In progress
+Last activity: 2026-01-29 -- Completed 26-01-PLAN.md
 
-Progress: [██░░░░░░░░] 20%
+Progress: [██░░░░░░░░] 21%
 
 ## Milestones Completed
 
@@ -26,15 +26,16 @@ Progress: [██░░░░░░░░] 20%
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 2 (v3.0)
-- Average duration: 31min
-- Total execution time: 62min
+- Total plans completed: 3 (v3.0)
+- Average duration: 26min
+- Total execution time: 76min
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 25 | 2 | 62min | 31min |
+| 26 | 1 | 14min | 14min |
 
 *Updated after each plan completion*
 
@@ -71,6 +72,11 @@ Phase 25-02 decisions:
 - Top-right positioning (standard for desktop apps)
 - German text with "ue/oe/ae" encoding to avoid umlaut issues
 
+Phase 26-01 decisions:
+- Ticket status workflow: 4 statuses (offen → in_bearbeitung → geschlossen, optional storniert)
+- Ticket number format: T-YYYYMMDD-XXXX with daily sequence
+- Tenant isolation at application layer (no RLS, consistent with Phase 1 decision)
+
 ### UAT Issues (carried from v2.2 -- all resolved in Phase 25)
 
 - ✓ Invoice linking with modal UI (resolved in 25-01)
@@ -80,13 +86,13 @@ Phase 25-02 decisions:
 
 ### Blockers/Concerns
 
-None.
+**Phase 26-01:** Docker unavailable during execution - migration 062 created but not verified. Recommendation: Run `npx supabase db reset` in next session to confirm migration applies cleanly.
 
 ## Session Continuity
 
-Last session: 2026-01-29
-Stopped at: Phase 26 planned (4 plans across 3 waves). Ready to execute.
-Resume file: .planning/phases/26-tenant-portal-core/26-01-PLAN.md
+Last session: 2026-01-29 17:27 UTC
+Stopped at: Completed 26-01-PLAN.md (Portal Foundation)
+Resume file: .planning/phases/26-tenant-portal-core/26-02-PLAN.md
 
 ---
-*Phase 26 Tenant Portal Core planned. 4 plans: schema/types (W1), auth + API (W2 parallel), UI/seed (W3). Execute with /gsd:execute-phase 26.*
+*Phase 26 Plan 01 complete. Database schema, types, and query helpers ready. Next: 26-02 (Tenant Auth) and 26-03 (Ticket API) can run in parallel (Wave 2).*
