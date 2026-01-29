@@ -184,8 +184,8 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-29
-Stopped at: Phase 24 complete. All v2.2 phases done.
-Resume file: None
+Stopped at: Phase 24 complete. All v2.2 phases done. Milestone audit pending.
+Resume file: .planning/.continue-here.md
 
 ---
 *v2.2 Extensions milestone complete. All 7 phases (18-24) delivered. 35 plans, 56 requirements. Next: Milestone audit.*
