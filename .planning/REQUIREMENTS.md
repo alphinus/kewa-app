@@ -1,106 +1,86 @@
-# Requirements: v2.2 Extensions
+# Requirements: v3.0 Tenant & Offline
 
-**Milestone:** v2.2 Extensions
-**Created:** 2026-01-25
+**Milestone:** v3.0 Tenant & Offline
+**Created:** 2026-01-29
 **Status:** Active
 
-## Change Orders (CHNG)
+## Tenant Portal (TPRT)
 
-- [x] **CHNG-01**: User can create a change order linked to work order or project
-- [x] **CHNG-02**: User can specify scope description, cost impact (original vs. revised), and schedule impact
-- [x] **CHNG-03**: User can classify change reason (owner_request, unforeseen_conditions, design_error, site_conditions)
-- [x] **CHNG-04**: Change order follows approval workflow (draft → submitted → approved/rejected)
-- [x] **CHNG-05**: All change order events are logged in audit trail
-- [x] **CHNG-06**: User can attach photo evidence to change orders
-- [x] **CHNG-07**: Contractor can propose counter-offer on change order cost/scope
-- [x] **CHNG-08**: User can generate PDF document from change order
-- [x] **CHNG-09**: Dashboard shows cumulative change orders per project with net budget impact
-- [x] **CHNG-10**: Client can approve change orders via magic-link portal
+- [ ] **TPRT-01**: Tenant can register with email/password, scoped to their unit
+- [ ] **TPRT-02**: Tenant can log in via email/password and access tenant-only routes
+- [ ] **TPRT-03**: Tenant can create maintenance ticket with category, description, and optional photos
+- [ ] **TPRT-04**: Ticket follows status workflow (eingereicht → bestätigt → in Bearbeitung → erledigt)
+- [ ] **TPRT-05**: Tenant can view list of own tickets with status and last update
+- [ ] **TPRT-06**: Tenant can communicate with KEWA via message thread per ticket
+- [ ] **TPRT-07**: Tenant sees dashboard with open tickets, recent messages, and unit info
+- [ ] **TPRT-08**: Tenant receives email notification when ticket status changes or KEWA replies
+- [ ] **TPRT-09**: Tenant can select ticket category (Heizung, Wasser/Sanitär, Elektrik, Allgemein)
+- [ ] **TPRT-10**: Tenant can select ticket urgency (Notfall, Dringend, Normal)
+- [ ] **TPRT-11**: Tenant receives push notification for ticket updates (uses existing push infrastructure)
+- [ ] **TPRT-12**: KEWA can convert tenant ticket to internal work order (manual, one-click)
+- [ ] **TPRT-13**: Tenant can update own profile (phone, email, emergency contact)
+- [ ] **TPRT-14**: Tenant portal UI is German, mobile-responsive, portrait-first
+- [ ] **TPRT-15**: Tenant data isolation is enforced at application layer (all queries scoped via tenant_users)
 
-## Supplier Module (SUPP)
+## Offline PWA (OFFL)
 
-- [ ] **SUPP-01**: User can create/edit suppliers (extends Partners with type='supplier')
-- [ ] **SUPP-02**: User can create purchase orders with quantity, unit price, delivery date
-- [ ] **SUPP-03**: Purchase order follows status workflow (ordered → confirmed → delivered → invoiced)
-- [ ] **SUPP-04**: User can record delivery (actual date, quantity received, delivery note number)
-- [ ] **SUPP-05**: Deliveries are associated with properties/buildings
-- [ ] **SUPP-06**: Deliveries can be linked to invoices for payment tracking
-- [ ] **SUPP-07**: User can view order history per supplier and property
-- [x] **SUPP-08**: User can track consumption (tank levels, usage rate)
-- [x] **SUPP-09**: System alerts when projected stock runs low (reorder alerts)
-- [x] **SUPP-10**: User can view price history (CHF/tonne over time)
-- [x] **SUPP-11**: User can view seasonal consumption patterns
-- [x] **SUPP-12**: User can create multi-property orders with allocation
+- [ ] **OFFL-01**: App has PWA manifest with icons and display: standalone for home screen install
+- [ ] **OFFL-02**: App shows install prompt / Add to Home Screen guidance
+- [ ] **OFFL-03**: Service worker caches app shell (HTML, CSS, JS, fonts) for offline navigation
+- [ ] **OFFL-04**: App shows online/offline visual indicator in header
+- [ ] **OFFL-05**: Recently viewed entities are cached in IndexedDB for offline reading
+- [ ] **OFFL-06**: Offline form submissions are queued in IndexedDB sync queue
+- [ ] **OFFL-07**: Queued operations sync automatically when connectivity returns
+- [ ] **OFFL-08**: App shows sync status indicator (pending count, last sync time)
+- [ ] **OFFL-09**: Conflict detection compares updated_at timestamps with last-write-wins resolution
+- [ ] **OFFL-10**: Offline photo capture queues photos for upload on reconnect
+- [ ] **OFFL-11**: Failed syncs retry with exponential backoff
+- [ ] **OFFL-12**: Existing push notification handlers in service worker are preserved during SW expansion
 
-## Inspection/Abnahme Workflow (INSP)
+## UX Polish (UXPL)
 
-- [x] **INSP-01**: User can create inspection linked to project or work order
-- [x] **INSP-02**: Inspection checklist is populated from quality gate template
-- [x] **INSP-03**: User can mark each checklist item as pass/fail/na
-- [x] **INSP-04**: User can attach photos per checklist item
-- [x] **INSP-05**: User can log defects/snags with description and photos
-- [x] **INSP-06**: Inspection records inspector, date/time, and overall result (passed/passed_with_conditions/failed)
-- [x] **INSP-07**: User can capture digital signature from contractor
-- [x] **INSP-08**: User can create follow-up tasks from failed checklist items
-- [x] **INSP-09**: User can schedule and track re-inspections (parent-child relationship)
-- [x] **INSP-10**: User can generate PDF inspection protocol (Abnahme-Protokoll)
-- [x] **INSP-11**: Contractor can view and acknowledge inspection results via portal
-- [x] **INSP-12**: Completed inspections auto-update room conditions based on results
-
-## Push Notifications (PUSH)
-
-- [x] **PUSH-01**: App supports web push via service worker and Push API
-- [x] **PUSH-02**: User can enable/disable notification types in preferences
-- [x] **PUSH-03**: User receives push when work order status changes (sent, accepted, rejected)
-- [x] **PUSH-04**: User receives push when approval is needed (invoice, change order)
-- [x] **PUSH-05**: App shows in-app notification center with recent notifications
-- [x] **PUSH-06**: User can mark notifications as read/unread
-- [x] **PUSH-07**: Clicking notification navigates to relevant entity
-- [x] **PUSH-08**: Contractors can receive push notifications if permitted
-- [x] **PUSH-09**: User receives reminder before acceptance deadline expires
-- [x] **PUSH-10**: User can opt for daily digest instead of individual notifications
-- [x] **PUSH-11**: Notifications show urgency levels (urgent/normal/info)
-- [x] **PUSH-12**: User can set quiet hours (no notifications during specified times)
-
-## Knowledge Base (KNOW)
-
-- [ ] **KNOW-01**: User can create/edit/delete knowledge base articles
-- [ ] **KNOW-02**: Articles are organized by categories
-- [ ] **KNOW-03**: Articles support markdown formatting
-- [ ] **KNOW-04**: User can search articles with full-text search
-- [ ] **KNOW-05**: Articles show view count, last updated timestamp, and author
-- [ ] **KNOW-06**: Some articles can be marked visible to contractors (FAQ section in portal)
-- [ ] **KNOW-07**: Articles can link to related articles
-- [ ] **KNOW-08**: Articles can have file attachments (PDFs, images)
-- [ ] **KNOW-09**: Articles maintain version history
-- [ ] **KNOW-10**: User can pin important articles as dashboard shortcuts
+- [ ] **UXPL-01**: Invoice linking uses proper modal UI (replaces prompt())
+- [ ] **UXPL-02**: Checklist item titles display from template (replaces "Item 1", "Item 2")
+- [ ] **UXPL-03**: Property-level delivery history page is built (data model exists)
+- [ ] **UXPL-04**: Toast notifications via Sonner for action feedback (Gespeichert, Gelöscht, Fehler)
+- [ ] **UXPL-05**: Loading states (skeleton loaders or spinners) across data-fetching views
+- [ ] **UXPL-06**: Empty states with meaningful messages and CTAs when lists are empty
+- [ ] **UXPL-07**: Error handling UI with user-friendly messages and retry option
+- [ ] **UXPL-08**: Confirmation dialogs before destructive actions (delete, archive)
+- [ ] **UXPL-09**: Form validation shows inline errors on fields
+- [ ] **UXPL-10**: Breadcrumb navigation in deep hierarchies (Property → Unit → Project → Task)
 
 ---
 
-## Future Requirements (Deferred)
+## Deferred (Post-v3.0)
 
-*From user discussion — noted for v2.3+:*
+*From research -- noted for v3.1+:*
 
-- Warranty tracking for completed work
-- Contractor ratings/reviews
-- Time tracking per task
-- Budget forecasting
-- Bulk operations
-- Central document repository
-- Enhanced Gantt charts
-- Email for critical events
-- iCal export
+- Full offline-first architecture (CRDTs, full DB mirror)
+- Dark mode
+- Swipe gestures on mobile
+- Global cross-entity search
+- Tenant document access (KB extension for tenants)
+- Announcement board (Hausmitteilungen)
+- Bulk operations (multi-select status change)
+- Selective pre-caching ("Download for offline" button)
+- Offline inspection completion
+- Delta sync (dirty-field tracking)
 
 ## Out of Scope
 
-- Multi-tier approval chains (only 2 internal users)
-- Automated change order generation from RFIs
+- Online rent payment (CSV export for accounting suffices)
+- Lease signing / document upload by tenants
+- Community forum between tenants
+- Tenant screening / application process
+- Maintenance scheduling by tenants (KEWA decides)
+- Multi-language i18n (German-only)
+- AI chatbot / ticket triage
+- Tenant satisfaction surveys
+- Automatic ticket-to-work-order conversion (KEWA entscheidet manuell)
+- Full offline PDF generation
 - SMS notifications
-- Native mobile push (web push sufficient)
-- IoT tank sensor integration
-- Automated reordering
-- AI chatbot for knowledge base
-- Tenant-facing FAQ (deferred to v3.0 Tenant Portal)
+- Native mobile app
 
 ---
 
@@ -108,64 +88,45 @@
 
 | REQ-ID | Phase | Status |
 |--------|-------|--------|
-| KNOW-01 | 18 | Pending |
-| KNOW-02 | 18 | Pending |
-| KNOW-03 | 18 | Pending |
-| KNOW-04 | 18 | Pending |
-| KNOW-05 | 18 | Pending |
-| KNOW-06 | 18 | Pending |
-| KNOW-07 | 18 | Pending |
-| KNOW-08 | 18 | Pending |
-| KNOW-09 | 18 | Pending |
-| KNOW-10 | 18 | Pending |
-| SUPP-01 | 19 | Pending |
-| SUPP-02 | 19 | Pending |
-| SUPP-03 | 19 | Pending |
-| SUPP-04 | 19 | Pending |
-| SUPP-05 | 19 | Pending |
-| SUPP-06 | 19 | Pending |
-| SUPP-07 | 19 | Pending |
-| SUPP-08 | 20 | Complete |
-| SUPP-09 | 20 | Complete |
-| SUPP-10 | 20 | Complete |
-| SUPP-11 | 20 | Complete |
-| SUPP-12 | 20 | Complete |
-| CHNG-01 | 21 | Complete |
-| CHNG-02 | 21 | Complete |
-| CHNG-03 | 21 | Complete |
-| CHNG-04 | 21 | Complete |
-| CHNG-05 | 21 | Complete |
-| CHNG-06 | 21 | Complete |
-| CHNG-07 | 21 | Complete |
-| CHNG-08 | 21 | Complete |
-| CHNG-09 | 21 | Complete |
-| CHNG-10 | 21 | Complete |
-| INSP-01 | 22 | Complete |
-| INSP-02 | 22 | Complete |
-| INSP-03 | 22 | Complete |
-| INSP-04 | 22 | Complete |
-| INSP-05 | 22 | Complete |
-| INSP-06 | 22 | Complete |
-| INSP-07 | 22 | Complete |
-| INSP-08 | 22 | Complete |
-| INSP-09 | 23 | Complete |
-| INSP-10 | 23 | Complete |
-| INSP-11 | 23 | Complete |
-| INSP-12 | 23 | Complete |
-| PUSH-01 | 24 | Complete |
-| PUSH-02 | 24 | Complete |
-| PUSH-03 | 24 | Complete |
-| PUSH-04 | 24 | Complete |
-| PUSH-05 | 24 | Complete |
-| PUSH-06 | 24 | Complete |
-| PUSH-07 | 24 | Complete |
-| PUSH-08 | 24 | Complete |
-| PUSH-09 | 24 | Complete |
-| PUSH-10 | 24 | Complete |
-| PUSH-11 | 24 | Complete |
-| PUSH-12 | 24 | Complete |
+| TPRT-01 | Phase 26 | Pending |
+| TPRT-02 | Phase 26 | Pending |
+| TPRT-03 | Phase 26 | Pending |
+| TPRT-04 | Phase 26 | Pending |
+| TPRT-05 | Phase 26 | Pending |
+| TPRT-06 | Phase 26 | Pending |
+| TPRT-07 | Phase 26 | Pending |
+| TPRT-08 | Phase 29 | Pending |
+| TPRT-09 | Phase 26 | Pending |
+| TPRT-10 | Phase 26 | Pending |
+| TPRT-11 | Phase 29 | Pending |
+| TPRT-12 | Phase 29 | Pending |
+| TPRT-13 | Phase 29 | Pending |
+| TPRT-14 | Phase 26 | Pending |
+| TPRT-15 | Phase 26 | Pending |
+| OFFL-01 | Phase 27 | Pending |
+| OFFL-02 | Phase 27 | Pending |
+| OFFL-03 | Phase 27 | Pending |
+| OFFL-04 | Phase 27 | Pending |
+| OFFL-05 | Phase 28 | Pending |
+| OFFL-06 | Phase 28 | Pending |
+| OFFL-07 | Phase 28 | Pending |
+| OFFL-08 | Phase 28 | Pending |
+| OFFL-09 | Phase 28 | Pending |
+| OFFL-10 | Phase 28 | Pending |
+| OFFL-11 | Phase 28 | Pending |
+| OFFL-12 | Phase 27 | Pending |
+| UXPL-01 | Phase 25 | Pending |
+| UXPL-02 | Phase 25 | Pending |
+| UXPL-03 | Phase 25 | Pending |
+| UXPL-04 | Phase 25 | Pending |
+| UXPL-05 | Phase 29 | Pending |
+| UXPL-06 | Phase 29 | Pending |
+| UXPL-07 | Phase 29 | Pending |
+| UXPL-08 | Phase 29 | Pending |
+| UXPL-09 | Phase 29 | Pending |
+| UXPL-10 | Phase 29 | Pending |
 
 ---
 
-*Created: 2026-01-25*
-*56 requirements across 5 categories*
+*Created: 2026-01-29*
+*37 requirements across 3 categories*

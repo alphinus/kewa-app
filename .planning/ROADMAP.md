@@ -1,15 +1,16 @@
-# Roadmap: KEWA v2.2 Extensions
+# Roadmap: KEWA v3.0 Tenant & Offline
 
 ## Milestones
 
 - **v1.0 MVP** - Phases 1-6 (shipped 2025-03-XX)
 - **v2.0 Advanced Features** - Phases 7-12.3 (shipped 2026-01-19)
 - **v2.1 Master Data Management** - Phases 13-17 (shipped 2026-01-25)
-- **v2.2 Extensions** - Phases 18-24 (in progress)
+- **v2.2 Extensions** - Phases 18-24 (shipped 2026-01-29)
+- **v3.0 Tenant & Offline** - Phases 25-29 (in progress)
 
 ## Overview
 
-v2.2 extends the renovation workflow with change order management, supplier/procurement tracking, formal inspection workflows, push notifications, and a knowledge base. The milestone follows a dependency-driven order: Knowledge Base first (no dependencies), then Supplier Module (extends Partners), Change Orders (integrates with costs), Inspection Workflow (leverages quality gates), and Push Notifications last (needs all event sources).
+v3.0 adds a tenant-facing portal for maintenance ticket management, converts the app into a PWA with offline data access and background sync, and resolves UX debt carried from v2.2 UAT. The milestone starts with quick UX fixes (unblocking clean UAT baseline), builds tenant portal core (largest feature), layers PWA infrastructure, adds offline data sync (highest complexity), and finishes with tenant notifications and remaining UX polish.
 
 ## Phases
 
@@ -34,145 +35,137 @@ See milestones/v2.1-ROADMAP.md
 
 </details>
 
-### v2.2 Extensions (In Progress)
-
-**Milestone Goal:** Extend renovation workflow with change orders, supplier management, inspection workflows, push notifications, and knowledge base.
-
----
+<details>
+<summary>v2.2 Extensions (Phases 18-24) - SHIPPED 2026-01-29</summary>
 
 ### Phase 18: Knowledge Base
 **Goal**: Users can create, organize, and search internal documentation and contractor-visible FAQs with WYSIWYG editing, version history, and approval workflow.
-**Depends on**: Nothing (v2.2 starts here)
-**Requirements**: KNOW-01, KNOW-02, KNOW-03, KNOW-04, KNOW-05, KNOW-06, KNOW-07, KNOW-08, KNOW-09, KNOW-10
-**Success Criteria** (what must be TRUE):
-  1. User can create a new article with rich text content and see it rendered
-  2. User can organize articles into categories and navigate by category
-  3. User can search articles and find results by keyword
-  4. User can mark articles as contractor-visible and contractors see them in portal
-  5. User can view article version history and see who last updated it
-**Plans**: 5 plans
-
-Plans:
-- [ ] 18-01-PLAN.md — Database schema, types, API scaffolding
-- [ ] 18-02-PLAN.md — Tiptap editor, article CRUD UI
-- [ ] 18-03-PLAN.md — Category tree, full-text search
-- [ ] 18-04-PLAN.md — Attachments, approval workflow
-- [ ] 18-05-PLAN.md — Version history, contractor portal, dashboard shortcuts
-
----
+**Plans**: 5/5 complete
 
 ### Phase 19: Supplier Core
 **Goal**: Users can manage suppliers, create purchase orders, and track deliveries to invoice.
-**Depends on**: Phase 18
-**Requirements**: SUPP-01, SUPP-02, SUPP-03, SUPP-04, SUPP-05, SUPP-06, SUPP-07
-**Success Criteria** (what must be TRUE):
-  1. User can create a supplier (as Partner with type='supplier') with contact info
-  2. User can create a purchase order with line items, quantities, and delivery date
-  3. User can record delivery confirmation with actual quantities and delivery note
-  4. User can link deliveries to invoices for payment tracking
-  5. User can view order history per supplier and per property
-**Plans**: 3 plans
-
-Plans:
-- [ ] 19-01-PLAN.md — Database schema (purchase_orders, deliveries), types, supplier API
-- [ ] 19-02-PLAN.md — Purchase order CRUD, status workflow, form/list components
-- [ ] 19-03-PLAN.md — Deliveries, invoice linking, dashboard pages
-
----
+**Plans**: 3/3 complete
 
 ### Phase 20: Supplier Advanced
 **Goal**: Users can track consumption, receive reorder alerts, and analyze pricing trends.
-**Depends on**: Phase 19
-**Requirements**: SUPP-08, SUPP-09, SUPP-10, SUPP-11, SUPP-12
-**Success Criteria** (what must be TRUE):
-  1. User can record consumption (tank levels, usage rate) per property
-  2. System alerts user when projected stock is low (reorder threshold)
-  3. User can view price history chart (CHF/tonne over time)
-  4. User can view seasonal consumption patterns
-  5. User can create multi-property orders with allocation breakdown
-**Plans**: 3 plans
-
-Plans:
-- [x] 20-01-PLAN.md — Database schema (inventory_movements, allocations), views, functions, types, recharts
-- [x] 20-02-PLAN.md — Inventory API, reorder alerts, consumption tracking UI and dashboard
-- [x] 20-03-PLAN.md — Price analytics, seasonal consumption charts, multi-property order allocations
-
----
+**Plans**: 3/3 complete
 
 ### Phase 21: Change Orders
 **Goal**: Users can create, approve, and track change orders with full cost impact visibility.
-**Depends on**: Phase 20
-**Requirements**: CHNG-01, CHNG-02, CHNG-03, CHNG-04, CHNG-05, CHNG-06, CHNG-07, CHNG-08, CHNG-09, CHNG-10
-**Success Criteria** (what must be TRUE):
-  1. User can create a change order linked to work order with cost/schedule impact
-  2. Change order follows approval workflow (draft -> submitted -> approved/rejected)
-  3. User can attach photo evidence and generate PDF from change order
-  4. Dashboard shows cumulative change orders per project with net budget impact
-  5. Client can approve change orders via magic-link portal
-**Plans**: 4 plans
-
-Plans:
-- [x] 21-01-PLAN.md — Database schema, types, CRUD API, and work order linking
-- [x] 21-02-PLAN.md — Approval workflow, audit trail, counter-offers, and dashboard UI
-- [x] 21-03-PLAN.md — Photo evidence, PDF generation, and budget analytics dashboard
-- [x] 21-04-PLAN.md — Client portal approval via magic-link
-
----
+**Plans**: 4/4 complete
 
 ### Phase 22: Inspection Core
 **Goal**: Users can conduct inspections with checklists, capture defects, and collect signatures.
-**Depends on**: Phase 21
-**Requirements**: INSP-01, INSP-02, INSP-03, INSP-04, INSP-05, INSP-06, INSP-07, INSP-08
-**Success Criteria** (what must be TRUE):
-  1. User can create an inspection linked to project/work order with populated checklist
-  2. User can mark checklist items as pass/fail/na with photos per item
-  3. User can log defects with description and photos
-  4. User can capture digital signature from contractor
-  5. User can create follow-up tasks from failed checklist items
-**Plans**: 3 plans
-
-Plans:
-- [x] 22-01-PLAN.md — Database schema, types, CRUD API, storage bucket setup
-- [x] 22-02-PLAN.md — Checklist execution UI, defect logging, photo upload
-- [x] 22-03-PLAN.md — Signature capture, defect review/actions, templates, PDF generation
-
----
+**Plans**: 3/3 complete
 
 ### Phase 23: Inspection Advanced
 **Goal**: Users can track re-inspections, generate protocols, and automate room conditions.
-**Depends on**: Phase 22
-**Requirements**: INSP-09, INSP-10, INSP-11, INSP-12
-**Success Criteria** (what must be TRUE):
-  1. User can schedule and track re-inspections with parent-child relationship
-  2. User can generate PDF inspection protocol (Abnahme-Protokoll)
-  3. Contractor can view and acknowledge inspection results via portal
-  4. Completed inspections auto-update room conditions based on results
-**Plans**: 3 plans
-
-Plans:
-- [x] 23-01-PLAN.md — Re-inspection scheduling with defect propagation, database migration, history timeline
-- [x] 23-02-PLAN.md — Contractor portal with magic links, acknowledgment flow, enhanced PDF Abnahme-Protokoll
-- [x] 23-03-PLAN.md — Integration of Phase 23 components, room condition automation verification
-
----
+**Plans**: 3/3 complete
 
 ### Phase 24: Push Notifications
 **Goal**: Users receive timely push notifications for workflow events with preference controls.
-**Depends on**: Phase 23
-**Requirements**: PUSH-01, PUSH-02, PUSH-03, PUSH-04, PUSH-05, PUSH-06, PUSH-07, PUSH-08, PUSH-09, PUSH-10, PUSH-11, PUSH-12
+**Plans**: 4/4 complete
+
+</details>
+
+### v3.0 Tenant & Offline (In Progress)
+
+**Milestone Goal:** Tenants can submit and track maintenance tickets through a dedicated portal. KEWA operators use the app offline with automatic data sync. UX debt from v2.2 is resolved.
+
+---
+
+### Phase 25: UX Polish (Known Issues)
+**Goal**: v2.2 UAT issues are resolved and toast notification feedback is available across the app.
+**Depends on**: Nothing (v3.0 starts here)
+**Requirements**: UXPL-01, UXPL-02, UXPL-03, UXPL-04
 **Success Criteria** (what must be TRUE):
-  1. User can enable push notifications and receive them in browser
-  2. User can configure notification preferences (types, quiet hours, digest mode)
-  3. User receives push when work order status changes or approval is needed
-  4. User can view in-app notification center and mark notifications read/unread
-  5. Clicking notification navigates to relevant entity
+  1. Invoice linking opens a search/select modal instead of browser prompt()
+  2. Checklist items display their template-defined title and description
+  3. Property detail page shows delivery history with dates, quantities, and linked orders
+  4. Action feedback (save, delete, error) displays as toast notification via Sonner
+  5. Toast notifications are German-language and appear consistently across all CRUD operations
+**Plans**: 2 plans
+
+Plans:
+- [ ] 25-01-PLAN.md -- Invoice modal, checklist titles, delivery history page
+- [ ] 25-02-PLAN.md -- Sonner integration, toast notifications across CRUD operations
+
+---
+
+### Phase 26: Tenant Portal Core
+**Goal**: Tenants can register, log in, create maintenance tickets with category/urgency, communicate via message threads, and view a dashboard -- all within an isolated, German-language, mobile-first portal.
+**Depends on**: Phase 25
+**Requirements**: TPRT-01, TPRT-02, TPRT-03, TPRT-04, TPRT-05, TPRT-06, TPRT-07, TPRT-09, TPRT-10, TPRT-14, TPRT-15
+**Success Criteria** (what must be TRUE):
+  1. Tenant can register with email/password and is scoped to their unit; cannot see other tenants' data
+  2. Tenant can create a ticket selecting category (Heizung, Wasser/Sanitaer, Elektrik, Allgemein) and urgency (Notfall, Dringend, Normal) with optional photo attachments
+  3. Tenant can view their ticket list with current status and send/receive messages on each ticket
+  4. Tenant sees a dashboard showing open ticket count, recent messages, and unit information
+  5. Tenant portal renders in German, is mobile-responsive, and works portrait-first on phone screens
 **Plans**: 4 plans
 
 Plans:
-- [x] 24-01-PLAN.md — Database schema, types, service worker, VAPID setup, push subscription management
-- [x] 24-02-PLAN.md — Notification preferences, quiet hours, send function with urgency bypass
-- [x] 24-03-PLAN.md — Event triggers integrated into work order, invoice, and change order APIs
-- [x] 24-04-PLAN.md — In-app notification center with bell icon, dropdown, full page, real-time updates
+- [ ] 26-01-PLAN.md -- Database schema (tickets, ticket_messages, ticket_attachments, tenant_users), types, tenant API namespace
+- [ ] 26-02-PLAN.md -- Tenant auth (registration, login, session validation, route protection, data isolation)
+- [ ] 26-03-PLAN.md -- Ticket CRUD with category/urgency, status workflow, photo attachments, message threads
+- [ ] 26-04-PLAN.md -- Tenant dashboard, ticket list view, mobile-responsive layout, German UI
+
+---
+
+### Phase 27: PWA Foundation
+**Goal**: The app is installable as a standalone PWA with offline shell navigation and online/offline status awareness, without breaking existing push notification functionality.
+**Depends on**: Phase 26
+**Requirements**: OFFL-01, OFFL-02, OFFL-03, OFFL-04, OFFL-12
+**Success Criteria** (what must be TRUE):
+  1. App can be installed to home screen via manifest and launches in standalone display mode
+  2. App shows install prompt or Add to Home Screen guidance on first eligible visit
+  3. App shell (HTML, CSS, JS, fonts) loads from cache when device is offline
+  4. Header displays a visual indicator showing current online/offline connectivity state
+  5. Existing push notification subscription, delivery, and click handling continue to work after service worker expansion
+**Plans**: 3 plans
+
+Plans:
+- [ ] 27-01-PLAN.md -- PWA manifest with icons, display: standalone, install prompt / A2HS guidance
+- [ ] 27-02-PLAN.md -- Service worker expansion (cache-first static, network-first API), preserve push handlers
+- [ ] 27-03-PLAN.md -- Online/offline detection provider, header connectivity indicator
+
+---
+
+### Phase 28: Offline Data Sync
+**Goal**: Users can read recently viewed data and submit forms while offline, with automatic background sync, conflict resolution, and retry on reconnect.
+**Depends on**: Phase 27
+**Requirements**: OFFL-05, OFFL-06, OFFL-07, OFFL-08, OFFL-09, OFFL-10, OFFL-11
+**Success Criteria** (what must be TRUE):
+  1. Recently viewed entities (properties, units, work orders) are readable from IndexedDB when offline
+  2. Form submissions made offline are queued and sync automatically when connectivity returns
+  3. Sync status indicator shows pending operation count and last successful sync time
+  4. Conflicts are detected via updated_at timestamp comparison and resolved with last-write-wins; user is notified of overwritten changes
+  5. Photos captured offline are queued and uploaded on reconnect; failed syncs retry with exponential backoff
+**Plans**: 3 plans
+
+Plans:
+- [ ] 28-01-PLAN.md -- Dexie IndexedDB setup, entity caching layer for offline reads
+- [ ] 28-02-PLAN.md -- Sync queue, background sync on reconnect, sync status indicator
+- [ ] 28-03-PLAN.md -- Conflict detection (LWW), offline photo queue, exponential backoff retry
+
+---
+
+### Phase 29: Tenant Extras & UX Improvements
+**Goal**: Tenants receive email and push notifications for ticket updates, KEWA can convert tickets to work orders, tenants can manage their profile, and the app has consistent loading/empty/error states with form validation and breadcrumb navigation.
+**Depends on**: Phase 28
+**Requirements**: TPRT-08, TPRT-11, TPRT-12, TPRT-13, UXPL-05, UXPL-06, UXPL-07, UXPL-08, UXPL-09, UXPL-10
+**Success Criteria** (what must be TRUE):
+  1. Tenant receives email notification when ticket status changes or KEWA replies to a message
+  2. Tenant receives push notification for ticket updates using existing push infrastructure
+  3. KEWA operator can convert a tenant ticket to an internal work order with one click
+  4. Tenant can update their profile (phone, email, emergency contact) from the portal
+  5. App displays skeleton loaders during data fetching, meaningful empty states with CTAs, user-friendly error messages with retry, confirmation dialogs before destructive actions, inline form validation errors, and breadcrumb navigation in deep hierarchies
+**Plans**: 3 plans
+
+Plans:
+- [ ] 29-01-PLAN.md -- Tenant email notifications (status change, reply), push notification integration
+- [ ] 29-02-PLAN.md -- Ticket-to-work-order conversion, tenant profile management
+- [ ] 29-03-PLAN.md -- Loading states, empty states, error handling, confirmation dialogs, form validation, breadcrumbs
 
 ---
 
@@ -187,8 +180,13 @@ Plans:
 | 22. Inspection Core | v2.2 | 3/3 | Complete | 2026-01-28 |
 | 23. Inspection Advanced | v2.2 | 3/3 | Complete | 2026-01-28 |
 | 24. Push Notifications | v2.2 | 4/4 | Complete | 2026-01-29 |
+| 25. UX Polish | v3.0 | 0/2 | Not started | - |
+| 26. Tenant Portal Core | v3.0 | 0/4 | Not started | - |
+| 27. PWA Foundation | v3.0 | 0/3 | Not started | - |
+| 28. Offline Data Sync | v3.0 | 0/3 | Not started | - |
+| 29. Tenant Extras & UX | v3.0 | 0/3 | Not started | - |
 
 ---
 
-*Created: 2026-01-25*
-*56 requirements mapped across 7 phases (18-24)*
+*Created: 2026-01-29*
+*37 requirements mapped across 5 phases (25-29)*
