@@ -39,10 +39,10 @@
 
 ## UX Polish (UXPL)
 
-- [ ] **UXPL-01**: Invoice linking uses proper modal UI (replaces prompt())
-- [ ] **UXPL-02**: Checklist item titles display from template (replaces "Item 1", "Item 2")
-- [ ] **UXPL-03**: Property-level delivery history page is built (data model exists)
-- [ ] **UXPL-04**: Toast notifications via Sonner for action feedback (Gespeichert, Gelöscht, Fehler)
+- [x] **UXPL-01**: Invoice linking uses proper modal UI (replaces prompt())
+- [x] **UXPL-02**: Checklist item titles display from template (replaces "Item 1", "Item 2")
+- [x] **UXPL-03**: Property-level delivery history page is built (data model exists)
+- [x] **UXPL-04**: Toast notifications via Sonner for action feedback (Gespeichert, Gelöscht, Fehler)
 - [ ] **UXPL-05**: Loading states (skeleton loaders or spinners) across data-fetching views
 - [ ] **UXPL-06**: Empty states with meaningful messages and CTAs when lists are empty
 - [ ] **UXPL-07**: Error handling UI with user-friendly messages and retry option
@@ -115,10 +115,10 @@
 | OFFL-10 | Phase 28 | Pending |
 | OFFL-11 | Phase 28 | Pending |
 | OFFL-12 | Phase 27 | Pending |
-| UXPL-01 | Phase 25 | Pending |
-| UXPL-02 | Phase 25 | Pending |
-| UXPL-03 | Phase 25 | Pending |
-| UXPL-04 | Phase 25 | Pending |
+| UXPL-01 | Phase 25 | Complete |
+| UXPL-02 | Phase 25 | Complete |
+| UXPL-03 | Phase 25 | Complete |
+| UXPL-04 | Phase 25 | Complete |
 | UXPL-05 | Phase 29 | Pending |
 | UXPL-06 | Phase 29 | Pending |
 | UXPL-07 | Phase 29 | Pending |

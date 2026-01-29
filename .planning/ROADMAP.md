@@ -87,8 +87,8 @@ See milestones/v2.1-ROADMAP.md
 **Plans**: 2 plans
 
 Plans:
-- [ ] 25-01-PLAN.md -- Invoice modal, checklist titles, delivery history page
-- [ ] 25-02-PLAN.md -- Sonner integration, toast notifications across CRUD operations
+- [x] 25-01-PLAN.md -- Invoice modal, checklist titles, delivery history page
+- [x] 25-02-PLAN.md -- Sonner integration, toast notifications across CRUD operations
 
 ---
 
@@ -180,7 +180,7 @@ Plans:
 | 22. Inspection Core | v2.2 | 3/3 | Complete | 2026-01-28 |
 | 23. Inspection Advanced | v2.2 | 3/3 | Complete | 2026-01-28 |
 | 24. Push Notifications | v2.2 | 4/4 | Complete | 2026-01-29 |
-| 25. UX Polish | v3.0 | 0/2 | Not started | - |
+| 25. UX Polish | v3.0 | 2/2 | Complete | 2026-01-29 |
 | 26. Tenant Portal Core | v3.0 | 0/4 | Not started | - |
 | 27. PWA Foundation | v3.0 | 0/3 | Not started | - |
 | 28. Offline Data Sync | v3.0 | 0/3 | Not started | - |
