@@ -9,10 +9,10 @@ See: .planning/PROJECT.md (updated 2026-01-29)
 
 ## Current Position
 
-Phase: 25 of 29 (UX Polish - Known Issues)
-Plan: 2 of 2 in current phase
-Status: Phase complete
-Last activity: 2026-01-29 -- Phase 25 verified (5/5 must-haves)
+Phase: 26 of 29 (Tenant Portal Core)
+Plan: 0 of 4 in current phase (planned, not yet executed)
+Status: Planning complete
+Last activity: 2026-01-29 -- Phase 26 plans written (4 plans, 3 waves)
 
 Progress: [██░░░░░░░░] 20%
 
@@ -85,8 +85,8 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-29
-Stopped at: Phase 25 complete and verified (5/5 must-haves). Phase 26 ready to plan.
-Resume file: --
+Stopped at: Phase 26 planned (4 plans across 3 waves). Ready to execute.
+Resume file: .planning/phases/26-tenant-portal-core/26-01-PLAN.md
 
 ---
-*Phase 25 UX Polish complete. v2.2 UAT debt resolved. Phase 26 Tenant Portal Core next.*
+*Phase 26 Tenant Portal Core planned. 4 plans: schema/types (W1), auth + API (W2 parallel), UI/seed (W3). Execute with /gsd:execute-phase 26.*
