@@ -166,13 +166,13 @@ Plans:
   3. User receives push when work order status changes or approval is needed
   4. User can view in-app notification center and mark notifications read/unread
   5. Clicking notification navigates to relevant entity
-**Plans**: TBD
+**Plans**: 4 plans
 
 Plans:
-- [ ] 24-01: Service worker, VAPID setup, and subscription management
-- [ ] 24-02: Notification preferences and quiet hours
-- [ ] 24-03: Event triggers (work orders, approvals, deadlines)
-- [ ] 24-04: In-app notification center with navigation
+- [ ] 24-01-PLAN.md — Database schema, types, service worker, VAPID setup, push subscription management
+- [ ] 24-02-PLAN.md — Notification preferences, quiet hours, send function with urgency bypass
+- [ ] 24-03-PLAN.md — Event triggers integrated into work order, invoice, and change order APIs
+- [ ] 24-04-PLAN.md — In-app notification center with bell icon, dropdown, full page, real-time updates
 
 ---
 
