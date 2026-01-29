@@ -202,6 +202,15 @@ export default function SettingsPage() {
         </div>
       </div>
 
+      {/* Portal Settings Card */}
+      <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-4">
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
+          <PortalIcon className="w-5 h-5" />
+          Portal-Einstellungen
+        </h2>
+        <PortalSettings userId={userInfo?.id || ''} />
+      </div>
+
       {/* System Settings Card */}
       <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-4">
         <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
@@ -405,6 +414,151 @@ function BellIcon({ className }: { className?: string }) {
     <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
     </svg>
+  )
+}
+
+function PortalIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
+    </svg>
+  )
+}
+
+// =============================================
+// PORTAL SETTINGS COMPONENT
+// =============================================
+
+interface PortalSettingsProps {
+  userId: string
+}
+
+function PortalSettings({ userId }: PortalSettingsProps) {
+  const [portalSettings, setPortalSettings] = useState<Record<string, string>>({})
+  const [categories, setCategories] = useState<Array<{ id: string; name: string; display_name: string; is_active: boolean }>>([])
+  const [isEditing, setIsEditing] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
+  const [editValues, setEditValues] = useState<Record<string, string>>({})
+
+  useEffect(() => {
+    // Fetch portal settings
+    fetch('/api/settings')
+      .then(res => res.json())
+      .then(data => {
+        const settings = data.settings || []
+        const portalOnly = settings
+          .filter((s: any) => ['company_name', 'support_email', 'notfall_phone'].includes(s.key))
+          .reduce((acc: any, s: any) => ({ ...acc, [s.key]: s.value }), {})
+        setPortalSettings(portalOnly)
+        setEditValues(portalOnly)
+      })
+
+    // Fetch categories
+    fetch('/api/settings/categories')
+      .then(res => res.json())
+      .then(data => setCategories(data.categories || []))
+  }, [])
+
+  const handleSave = async () => {
+    setIsSaving(true)
+
+    try {
+      for (const [key, value] of Object.entries(editValues)) {
+        await fetch(`/api/settings/${key}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ value, updatedBy: userId }),
+        })
+      }
+
+      setPortalSettings(editValues)
+      setIsEditing(false)
+      // Success toast would go here
+    } catch (error) {
+      console.error('Error saving settings:', error)
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  return (
+    <div className="space-y-4">
+      {/* Editable settings */}
+      <div className="space-y-3">
+        {[
+          { key: 'company_name', label: 'Firmenname' },
+          { key: 'support_email', label: 'Support E-Mail' },
+          { key: 'notfall_phone', label: 'Notfall-Telefon' },
+        ].map(({ key, label }) => (
+          <div key={key} className="flex justify-between items-center">
+            <span className="text-sm text-gray-600 dark:text-gray-400">{label}</span>
+            {isEditing ? (
+              <input
+                type="text"
+                value={editValues[key] || ''}
+                onChange={(e) => setEditValues({ ...editValues, [key]: e.target.value })}
+                className="px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-800"
+              />
+            ) : (
+              <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                {portalSettings[key] || '-'}
+              </span>
+            )}
+          </div>
+        ))}
+      </div>
+
+      {/* Action buttons */}
+      <div className="flex gap-2 pt-2">
+        {isEditing ? (
+          <>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => {
+                setEditValues(portalSettings)
+                setIsEditing(false)
+              }}
+              disabled={isSaving}
+            >
+              Abbrechen
+            </Button>
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={handleSave}
+              loading={isSaving}
+            >
+              Speichern
+            </Button>
+          </>
+        ) : (
+          <Button variant="secondary" size="sm" onClick={() => setIsEditing(true)}>
+            Bearbeiten
+          </Button>
+        )}
+      </div>
+
+      {/* Categories section */}
+      <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
+        <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">
+          Ticket-Kategorien
+        </h3>
+        <div className="space-y-2">
+          {categories.map((cat) => (
+            <div key={cat.id} className="flex justify-between items-center text-sm">
+              <span className={cat.is_active ? 'text-gray-900 dark:text-gray-100' : 'text-gray-500 line-through'}>
+                {cat.display_name}
+              </span>
+              <span className="text-xs text-gray-500">{cat.is_active ? 'Aktiv' : 'Inaktiv'}</span>
+            </div>
+          ))}
+        </div>
+        <p className="text-xs text-gray-500 dark:text-gray-400 mt-3">
+          Kategorie-Verwaltung wird in Phase 29 hinzugefügt
+        </p>
+      </div>
+    </div>
   )
 }
 
