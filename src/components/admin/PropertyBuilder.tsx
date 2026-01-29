@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { UnitEditor } from './UnitEditor'
+import { toast } from 'sonner'
 import type { Building, Unit } from '@/types/database'
 import type { UnitType } from '@/types'
 
@@ -208,7 +209,7 @@ export function PropertyBuilder({ building, onSave }: PropertyBuilderProps) {
       onSave()
     } catch (error) {
       console.error('Error creating unit:', error)
-      alert('Fehler beim Erstellen der Einheit')
+      toast.error('Fehler beim Erstellen der Einheit')
     }
   }
 
@@ -232,7 +233,7 @@ export function PropertyBuilder({ building, onSave }: PropertyBuilderProps) {
       onSave()
     } catch (error) {
       console.error('Error moving unit:', error)
-      alert('Fehler beim Verschieben der Einheit')
+      toast.error('Fehler beim Verschieben der Einheit')
     }
   }
 

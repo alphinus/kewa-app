@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { SeverityBadge } from './SeverityBadge'
+import { toast } from 'sonner'
 import type { InspectionDefect, DefectAction } from '@/types/inspections'
 
 interface DefectReviewCardProps {
@@ -31,12 +32,12 @@ export function DefectReviewCard({ defect, onActionTaken, users }: DefectReviewC
 
     // Validate required fields
     if (selectedAction === 'dismissed' && !reason.trim()) {
-      alert('Grund ist erforderlich beim Verwerfen')
+      toast.warning('Grund ist erforderlich beim Verwerfen')
       return
     }
 
     if (selectedAction === 'task_created' && !assigneeId) {
-      alert('Bitte wählen Sie einen Verantwortlichen aus')
+      toast.warning('Bitte waehlen Sie einen Verantwortlichen aus')
       return
     }
 
@@ -60,7 +61,7 @@ export function DefectReviewCard({ defect, onActionTaken, users }: DefectReviewC
       onActionTaken()
     } catch (error) {
       console.error('Error taking action:', error)
-      alert(error instanceof Error ? error.message : 'Fehler beim Ausführen der Aktion')
+      toast.error(error instanceof Error ? error.message : 'Fehler beim Ausfuehren der Aktion')
     } finally {
       setIsSubmitting(false)
     }

@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Plus, Trash2 } from 'lucide-react'
+import { toast } from 'sonner'
 import type { Room } from '@/types/database'
 import type { RoomType, RoomCondition } from '@/types'
 
@@ -65,7 +66,7 @@ export function RoomManager({ unitId, rooms, onRoomsUpdated }: RoomManagerProps)
       onRoomsUpdated()
     } catch (error) {
       console.error('Error adding room:', error)
-      alert('Fehler beim Hinzufuegen des Raums')
+      toast.error('Fehler beim Hinzufuegen des Raums')
     } finally {
       setSaving(false)
     }
@@ -84,7 +85,7 @@ export function RoomManager({ unitId, rooms, onRoomsUpdated }: RoomManagerProps)
       onRoomsUpdated()
     } catch (error) {
       console.error('Error deleting room:', error)
-      alert('Fehler beim Loeschen des Raums')
+      toast.error('Fehler beim Loeschen des Raums')
     }
   }
 
@@ -101,7 +102,7 @@ export function RoomManager({ unitId, rooms, onRoomsUpdated }: RoomManagerProps)
       onRoomsUpdated()
     } catch (error) {
       console.error('Error updating room:', error)
-      alert('Fehler beim Aktualisieren des Raums')
+      toast.error('Fehler beim Aktualisieren des Raums')
     }
   }
 

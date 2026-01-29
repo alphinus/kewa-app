@@ -14,6 +14,7 @@
  */
 
 import { useState, useRef, useCallback } from 'react'
+import { toast } from 'sonner'
 import {
   validateContractorUpload,
   formatFileSize,
@@ -77,7 +78,7 @@ export default function FileUploader({
     // Check max files limit
     const remainingSlots = maxFiles - files.length
     if (remainingSlots <= 0) {
-      alert(`Maximal ${maxFiles} Dateien erlaubt`)
+      toast.warning(`Maximal ${maxFiles} Dateien erlaubt`)
       return
     }
 
@@ -88,7 +89,7 @@ export default function FileUploader({
       // Validate
       const validation = validateContractorUpload(file, mediaType)
       if (!validation.valid) {
-        alert(validation.error)
+        toast.warning(validation.error)
         continue
       }
 

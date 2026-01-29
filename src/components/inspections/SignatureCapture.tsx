@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
+import { toast } from 'sonner'
 
 interface SignatureCaptureProps {
   onSave: (imageDataUrl: string, signerName: string, signerRole: string) => Promise<void>
@@ -33,12 +34,12 @@ export function SignatureCapture({ onSave, onRefused }: SignatureCaptureProps) {
 
   const handleSave = async () => {
     if (!sigCanvas.current || sigCanvas.current.isEmpty()) {
-      alert('Bitte zeichnen Sie eine Unterschrift')
+      toast.warning('Bitte zeichnen Sie eine Unterschrift')
       return
     }
 
     if (!signerName.trim()) {
-      alert('Bitte geben Sie Ihren Namen ein')
+      toast.warning('Bitte geben Sie Ihren Namen ein')
       return
     }
 
@@ -48,7 +49,7 @@ export function SignatureCapture({ onSave, onRefused }: SignatureCaptureProps) {
       await onSave(dataUrl, signerName.trim(), signerRole.trim())
     } catch (error) {
       console.error('Error saving signature:', error)
-      alert('Fehler beim Speichern der Unterschrift')
+      toast.error('Fehler beim Speichern der Unterschrift')
     } finally {
       setIsLoading(false)
     }
@@ -56,7 +57,7 @@ export function SignatureCapture({ onSave, onRefused }: SignatureCaptureProps) {
 
   const handleRefuse = async () => {
     if (!refusalReason.trim()) {
-      alert('Bitte geben Sie einen Grund für die Verweigerung an')
+      toast.warning('Bitte geben Sie einen Grund fuer die Verweigerung an')
       return
     }
 
@@ -65,7 +66,7 @@ export function SignatureCapture({ onSave, onRefused }: SignatureCaptureProps) {
       await onRefused(refusalReason.trim())
     } catch (error) {
       console.error('Error refusing signature:', error)
-      alert('Fehler beim Speichern der Verweigerung')
+      toast.error('Fehler beim Speichern der Verweigerung')
     } finally {
       setIsLoading(false)
     }

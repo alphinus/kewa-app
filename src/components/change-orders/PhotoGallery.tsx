@@ -10,6 +10,7 @@
 import { useState } from 'react'
 import { X, Trash2, ZoomIn } from 'lucide-react'
 import Image from 'next/image'
+import { toast } from 'sonner'
 
 interface Photo {
   id: string
@@ -51,7 +52,7 @@ export function PhotoGallery({ photos, changeOrderId, onDelete }: PhotoGalleryPr
 
       onDelete?.(photoId)
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Löschen fehlgeschlagen')
+      toast.error(err instanceof Error ? err.message : 'Loeschen fehlgeschlagen')
     } finally {
       setDeleting(null)
     }

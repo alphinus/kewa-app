@@ -13,6 +13,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import { toast } from 'sonner'
 import type { ChangeOrder } from '@/types/change-orders'
 import { getStatusLabel, getNextActions } from '@/lib/change-orders/workflow'
 
@@ -60,7 +61,7 @@ export function ApprovalWorkflowCard({
 
       if (!res.ok) {
         const error = await res.json()
-        alert(error.error || 'Fehler beim Statuswechsel')
+        toast.error(error.error || 'Fehler beim Statuswechsel')
         return
       }
 
@@ -68,7 +69,7 @@ export function ApprovalWorkflowCard({
       router.refresh()
     } catch (error) {
       console.error('Error changing status:', error)
-      alert('Fehler beim Statuswechsel')
+      toast.error('Fehler beim Statuswechsel')
     } finally {
       setLoading(false)
       setShowRejectInput(false)
@@ -84,7 +85,7 @@ export function ApprovalWorkflowCard({
 
   const handleReject = () => {
     if (!comment.trim()) {
-      alert('Bitte geben Sie einen Kommentar ein')
+      toast.warning('Bitte geben Sie einen Kommentar ein')
       return
     }
     handleStatusChange('rejected', { comment })
@@ -92,7 +93,7 @@ export function ApprovalWorkflowCard({
 
   const handleCancel = () => {
     if (!cancelReason.trim()) {
-      alert('Bitte geben Sie einen Grund ein')
+      toast.warning('Bitte geben Sie einen Grund ein')
       return
     }
     handleStatusChange('cancelled', { cancelled_reason: cancelReason })

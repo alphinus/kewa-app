@@ -10,6 +10,7 @@
 
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
+import { toast } from 'sonner'
 import type { DefectSeverity } from '@/types/inspections'
 
 interface DefectFormProps {
@@ -94,7 +95,7 @@ export function DefectForm({
       onCreated()
     } catch (err) {
       console.error('Error creating defect:', err)
-      alert('Fehler beim Erstellen des Mangels')
+      toast.error('Fehler beim Erstellen des Mangels')
     } finally {
       setIsSubmitting(false)
     }

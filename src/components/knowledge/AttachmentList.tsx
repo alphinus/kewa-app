@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { Button } from '@/components/ui/button'
+import { toast } from 'sonner'
 import type { KBAttachmentWithUrl, KBAttachmentsResponse } from '@/types/knowledge-base'
 
 interface AttachmentListProps {
@@ -68,7 +69,7 @@ export function AttachmentList({
       // Remove from local state
       setAttachments(prev => prev.filter(a => a.id !== attachmentId))
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Loeschen fehlgeschlagen')
+      toast.error(err instanceof Error ? err.message : 'Loeschen fehlgeschlagen')
     } finally {
       setDeletingId(null)
     }
