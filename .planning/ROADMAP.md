@@ -105,10 +105,10 @@ Plans:
 **Plans**: 4 plans
 
 Plans:
-- [ ] 26-01-PLAN.md -- Database schema (tickets, ticket_messages, ticket_attachments, tenant_users), types, tenant API namespace
-- [ ] 26-02-PLAN.md -- Tenant auth (registration, login, session validation, route protection, data isolation)
-- [ ] 26-03-PLAN.md -- Ticket CRUD with category/urgency, status workflow, photo attachments, message threads
-- [ ] 26-04-PLAN.md -- Tenant dashboard, ticket list view, mobile-responsive layout, German UI
+- [x] 26-01-PLAN.md -- Database schema (tickets, ticket_messages, ticket_attachments, tenant_users), types, tenant API namespace
+- [x] 26-02-PLAN.md -- Tenant auth (registration, login, session validation, route protection, data isolation)
+- [x] 26-03-PLAN.md -- Ticket CRUD with category/urgency, status workflow, photo attachments, message threads
+- [x] 26-04-PLAN.md -- Tenant dashboard, ticket list view, mobile-responsive layout, German UI
 
 ---
 
@@ -181,7 +181,7 @@ Plans:
 | 23. Inspection Advanced | v2.2 | 3/3 | Complete | 2026-01-28 |
 | 24. Push Notifications | v2.2 | 4/4 | Complete | 2026-01-29 |
 | 25. UX Polish | v3.0 | 2/2 | Complete | 2026-01-29 |
-| 26. Tenant Portal Core | v3.0 | 0/4 | Not started | - |
+| 26. Tenant Portal Core | v3.0 | 4/4 | Complete | 2026-01-29 |
 | 27. PWA Foundation | v3.0 | 0/3 | Not started | - |
 | 28. Offline Data Sync | v3.0 | 0/3 | Not started | - |
 | 29. Tenant Extras & UX | v3.0 | 0/3 | Not started | - |

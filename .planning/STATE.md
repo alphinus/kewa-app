@@ -5,7 +5,7 @@
 See: .planning/PROJECT.md (updated 2026-01-29)
 
 **Core value:** KEWA AG hat volle Transparenz und Kontrolle uber alle Renovationen -- mit standardisierten Workflows, externer Handwerker-Integration, Kostenuebersicht und automatischer Zustandshistorie.
-**Current focus:** Milestone v3.0 Tenant & Offline -- Phase 25 complete, Phase 26 next
+**Current focus:** Milestone v3.0 Tenant & Offline -- Phase 26 complete, Phase 27 next
 
 ## Current Position
 
@@ -14,7 +14,7 @@ Plan: 4 of 4 in current phase
 Status: Phase complete
 Last activity: 2026-01-29 -- Completed 26-04-PLAN.md
 
-Progress: [███░░░░░░░] 27%
+Progress: [████░░░░░░] 40%
 
 ## Milestones Completed
 
@@ -110,9 +110,9 @@ Phase 26-04 decisions:
 
 ## Session Continuity
 
-Last session: 2026-01-29 19:08 UTC
-Stopped at: Completed 26-04-PLAN.md (Portal UI)
-Resume file: None (Phase 26 complete)
+Last session: 2026-01-29
+Stopped at: Phase 26 complete and verified (5/5 must-haves passed)
+Resume file: .planning/phases/26-tenant-portal-core/26-VERIFICATION.md
 
 ---
-*Phase 26 complete. Tenant portal fully functional with dashboard, ticket list, WhatsApp-style message thread, QR multi-device login, and admin settings. Next: Phase 27 (PWA Foundation) - make app installable with offline shell.*
+*Phase 26 Tenant Portal Core complete and verified. 4 plans, 16 commits, 3 waves. Next: Phase 27 (PWA Foundation).*

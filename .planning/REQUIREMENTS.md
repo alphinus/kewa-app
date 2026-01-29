@@ -6,21 +6,21 @@
 
 ## Tenant Portal (TPRT)
 
-- [ ] **TPRT-01**: Tenant can register with email/password, scoped to their unit
-- [ ] **TPRT-02**: Tenant can log in via email/password and access tenant-only routes
-- [ ] **TPRT-03**: Tenant can create maintenance ticket with category, description, and optional photos
-- [ ] **TPRT-04**: Ticket follows status workflow (eingereicht → bestätigt → in Bearbeitung → erledigt)
-- [ ] **TPRT-05**: Tenant can view list of own tickets with status and last update
-- [ ] **TPRT-06**: Tenant can communicate with KEWA via message thread per ticket
-- [ ] **TPRT-07**: Tenant sees dashboard with open tickets, recent messages, and unit info
+- [x] **TPRT-01**: Tenant can register with email/password, scoped to their unit
+- [x] **TPRT-02**: Tenant can log in via email/password and access tenant-only routes
+- [x] **TPRT-03**: Tenant can create maintenance ticket with category, description, and optional photos
+- [x] **TPRT-04**: Ticket follows status workflow (eingereicht → bestätigt → in Bearbeitung → erledigt)
+- [x] **TPRT-05**: Tenant can view list of own tickets with status and last update
+- [x] **TPRT-06**: Tenant can communicate with KEWA via message thread per ticket
+- [x] **TPRT-07**: Tenant sees dashboard with open tickets, recent messages, and unit info
 - [ ] **TPRT-08**: Tenant receives email notification when ticket status changes or KEWA replies
-- [ ] **TPRT-09**: Tenant can select ticket category (Heizung, Wasser/Sanitär, Elektrik, Allgemein)
-- [ ] **TPRT-10**: Tenant can select ticket urgency (Notfall, Dringend, Normal)
+- [x] **TPRT-09**: Tenant can select ticket category (Heizung, Wasser/Sanitär, Elektrik, Allgemein)
+- [x] **TPRT-10**: Tenant can select ticket urgency (Notfall, Dringend, Normal)
 - [ ] **TPRT-11**: Tenant receives push notification for ticket updates (uses existing push infrastructure)
 - [ ] **TPRT-12**: KEWA can convert tenant ticket to internal work order (manual, one-click)
 - [ ] **TPRT-13**: Tenant can update own profile (phone, email, emergency contact)
-- [ ] **TPRT-14**: Tenant portal UI is German, mobile-responsive, portrait-first
-- [ ] **TPRT-15**: Tenant data isolation is enforced at application layer (all queries scoped via tenant_users)
+- [x] **TPRT-14**: Tenant portal UI is German, mobile-responsive, portrait-first
+- [x] **TPRT-15**: Tenant data isolation is enforced at application layer (all queries scoped via tenant_users)
 
 ## Offline PWA (OFFL)
 
@@ -88,21 +88,21 @@
 
 | REQ-ID | Phase | Status |
 |--------|-------|--------|
-| TPRT-01 | Phase 26 | Pending |
-| TPRT-02 | Phase 26 | Pending |
-| TPRT-03 | Phase 26 | Pending |
-| TPRT-04 | Phase 26 | Pending |
-| TPRT-05 | Phase 26 | Pending |
-| TPRT-06 | Phase 26 | Pending |
-| TPRT-07 | Phase 26 | Pending |
+| TPRT-01 | Phase 26 | Complete |
+| TPRT-02 | Phase 26 | Complete |
+| TPRT-03 | Phase 26 | Complete |
+| TPRT-04 | Phase 26 | Complete |
+| TPRT-05 | Phase 26 | Complete |
+| TPRT-06 | Phase 26 | Complete |
+| TPRT-07 | Phase 26 | Complete |
 | TPRT-08 | Phase 29 | Pending |
-| TPRT-09 | Phase 26 | Pending |
-| TPRT-10 | Phase 26 | Pending |
+| TPRT-09 | Phase 26 | Complete |
+| TPRT-10 | Phase 26 | Complete |
 | TPRT-11 | Phase 29 | Pending |
 | TPRT-12 | Phase 29 | Pending |
 | TPRT-13 | Phase 29 | Pending |
-| TPRT-14 | Phase 26 | Pending |
-| TPRT-15 | Phase 26 | Pending |
+| TPRT-14 | Phase 26 | Complete |
+| TPRT-15 | Phase 26 | Complete |
 | OFFL-01 | Phase 27 | Pending |
 | OFFL-02 | Phase 27 | Pending |
 | OFFL-03 | Phase 27 | Pending |
