@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-01-29)
 ## Current Position
 
 Phase: 26 of 29 (Tenant Portal Core)
-Plan: 3 of 4 in current phase
-Status: In progress
-Last activity: 2026-01-29 -- Completed 26-03-PLAN.md
+Plan: 4 of 4 in current phase
+Status: Phase complete
+Last activity: 2026-01-29 -- Completed 26-04-PLAN.md
 
-Progress: [███░░░░░░░] 25%
+Progress: [███░░░░░░░] 27%
 
 ## Milestones Completed
 
@@ -26,16 +26,16 @@ Progress: [███░░░░░░░] 25%
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 5 (v3.0)
-- Average duration: 40min
-- Total execution time: 202min
+- Total plans completed: 6 (v3.0)
+- Average duration: 37min
+- Total execution time: 218min
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 25 | 2 | 62min | 31min |
-| 26 | 3 | 140min | 47min |
+| 26 | 4 | 156min | 39min |
 
 *Updated after each plan completion*
 
@@ -89,6 +89,12 @@ Phase 26-03 decisions:
 - Auto-mark-as-read on GET messages (tenant viewing thread marks operator messages read)
 - Attachment upload enforces MAX_TICKET_PHOTOS=5 for ticket-level, unlimited for message-level
 
+Phase 26-04 decisions:
+- QR login tokens expire after 5 minutes to prevent replay attacks
+- Message date grouping uses German labels (Heute, Gestern, DD.MM.YYYY) via date-fns locale
+- Admin portal settings embedded in existing dashboard settings page (no new route needed)
+- Seed data uses bcrypt-hashed password 'test1234' for all test tenants
+
 ### UAT Issues (carried from v2.2 -- all resolved in Phase 25)
 
 - ✓ Invoice linking with modal UI (resolved in 25-01)
@@ -100,11 +106,13 @@ Phase 26-03 decisions:
 
 **Phase 26-01:** Docker unavailable during execution - migration 062 created but not verified. Recommendation: Run `npx supabase db reset` in next session to confirm migration applies cleanly.
 
+**Phase 26-04:** Seed migration 063 created but not applied. API endpoints from 26-03 not verified to exist. Run database reset to apply all pending migrations before Phase 27.
+
 ## Session Continuity
 
-Last session: 2026-01-29 20:27 UTC
-Stopped at: Completed 26-03-PLAN.md (Ticket API)
-Resume file: .planning/phases/26-tenant-portal-core/26-04-PLAN.md
+Last session: 2026-01-29 19:08 UTC
+Stopped at: Completed 26-04-PLAN.md (Portal UI)
+Resume file: None (Phase 26 complete)
 
 ---
-*Phase 26 Plan 03 complete. Full portal REST API for ticket management (CRUD, messages, attachments, dashboard) and admin settings/category routes ready. Next: 26-04 (Portal UI) - final plan in phase.*
+*Phase 26 complete. Tenant portal fully functional with dashboard, ticket list, WhatsApp-style message thread, QR multi-device login, and admin settings. Next: Phase 27 (PWA Foundation) - make app installable with offline shell.*
