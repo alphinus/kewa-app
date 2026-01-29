@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-01-29)
 ## Current Position
 
 Phase: 25 of 29 (UX Polish - Known Issues)
-Plan: 1 of 2 in current phase
-Status: In progress
-Last activity: 2026-01-29 -- Completed 25-01-PLAN.md
+Plan: 2 of 2 in current phase
+Status: Phase complete
+Last activity: 2026-01-29 -- Completed 25-02-PLAN.md
 
-Progress: [█░░░░░░░░░] 10%
+Progress: [██░░░░░░░░] 20%
 
 ## Milestones Completed
 
@@ -26,15 +26,15 @@ Progress: [█░░░░░░░░░] 10%
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 1 (v3.0)
-- Average duration: 17min
-- Total execution time: 17min
+- Total plans completed: 2 (v3.0)
+- Average duration: 31min
+- Total execution time: 62min
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 25 | 1 | 17min | 17min |
+| 25 | 2 | 62min | 31min |
 
 *Updated after each plan completion*
 
@@ -65,11 +65,18 @@ Phase 25-01 decisions:
 - Component reuse pattern (DeliveryList reused on property page)
 - German fallback language ("Punkt N" instead of "Item N")
 
-### UAT Issues (carried from v2.2 -- resolving in Phase 25)
+Phase 25-02 decisions:
+- Sonner toast library for non-blocking action feedback
+- 4-second toast duration (longer than default 3s for German text readability)
+- Top-right positioning (standard for desktop apps)
+- German text with "ue/oe/ae" encoding to avoid umlaut issues
+
+### UAT Issues (carried from v2.2 -- all resolved in Phase 25)
 
 - ✓ Invoice linking with modal UI (resolved in 25-01)
 - ✓ Checklist item titles from template (resolved in 25-01)
 - ✓ Property-level delivery history page (resolved in 25-01)
+- ✓ Blocking alert() dialogs replaced with toast notifications (resolved in 25-02)
 
 ### Blockers/Concerns
 
@@ -77,9 +84,9 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-01-29T11:07:16Z
-Stopped at: Completed 25-01-PLAN.md (Invoice modal, checklist titles, delivery history)
+Last session: 2026-01-29
+Stopped at: Completed 25-02-PLAN.md (Sonner toast notifications)
 Resume file: None
 
 ---
-*v3.0 Tenant & Offline milestone in progress. Phase 25 Plan 01 complete.*
+*v3.0 Tenant & Offline milestone in progress. Phase 25 complete (UX Polish).*
