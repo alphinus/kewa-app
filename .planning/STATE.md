@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-01-29)
 ## Current Position
 
 Phase: 26 of 29 (Tenant Portal Core)
-Plan: 2 of 4 in current phase
+Plan: 3 of 4 in current phase
 Status: In progress
-Last activity: 2026-01-29 -- Completed 26-02-PLAN.md
+Last activity: 2026-01-29 -- Completed 26-03-PLAN.md
 
-Progress: [██░░░░░░░░] 22%
+Progress: [███░░░░░░░] 25%
 
 ## Milestones Completed
 
@@ -26,16 +26,16 @@ Progress: [██░░░░░░░░] 22%
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 4 (v3.0)
-- Average duration: 33min
-- Total execution time: 134min
+- Total plans completed: 5 (v3.0)
+- Average duration: 40min
+- Total execution time: 202min
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 25 | 2 | 62min | 31min |
-| 26 | 2 | 72min | 36min |
+| 26 | 3 | 140min | 47min |
 
 *Updated after each plan completion*
 
@@ -83,6 +83,12 @@ Phase 26-02 decisions:
 - QR login tokens are short-lived (5 minutes) for multi-device access
 - Portal routes completely isolated from operator routes via middleware
 
+Phase 26-03 decisions:
+- Portal API auth via x-portal-user-id header (middleware-injected from portal session)
+- Admin API uses existing operator session with role-based access (admin only for write ops)
+- Auto-mark-as-read on GET messages (tenant viewing thread marks operator messages read)
+- Attachment upload enforces MAX_TICKET_PHOTOS=5 for ticket-level, unlimited for message-level
+
 ### UAT Issues (carried from v2.2 -- all resolved in Phase 25)
 
 - ✓ Invoice linking with modal UI (resolved in 25-01)
@@ -96,9 +102,9 @@ Phase 26-02 decisions:
 
 ## Session Continuity
 
-Last session: 2026-01-29 18:39 UTC
-Stopped at: Completed 26-02-PLAN.md (Tenant Auth)
-Resume file: .planning/phases/26-tenant-portal-core/26-03-PLAN.md
+Last session: 2026-01-29 20:27 UTC
+Stopped at: Completed 26-03-PLAN.md (Ticket API)
+Resume file: .planning/phases/26-tenant-portal-core/26-04-PLAN.md
 
 ---
-*Phase 26 Plan 02 complete. Tenant authentication with invite-based registration, email+password login, and portal session management ready. Next: 26-03 (Ticket API) and 26-04 (Portal UI) can proceed (Wave 2-3).*
+*Phase 26 Plan 03 complete. Full portal REST API for ticket management (CRUD, messages, attachments, dashboard) and admin settings/category routes ready. Next: 26-04 (Portal UI) - final plan in phase.*
