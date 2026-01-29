@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-01-29)
 ## Current Position
 
 Phase: 25 of 29 (UX Polish - Known Issues)
-Plan: 0 of 2 in current phase
-Status: Ready to plan
-Last activity: 2026-01-29 -- Roadmap created for v3.0
+Plan: 1 of 2 in current phase
+Status: In progress
+Last activity: 2026-01-29 -- Completed 25-01-PLAN.md
 
-Progress: [░░░░░░░░░░] 0%
+Progress: [█░░░░░░░░░] 10%
 
 ## Milestones Completed
 
@@ -26,15 +26,15 @@ Progress: [░░░░░░░░░░] 0%
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 0 (v3.0)
-- Average duration: -
-- Total execution time: -
+- Total plans completed: 1 (v3.0)
+- Average duration: 17min
+- Total execution time: 17min
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| - | - | - | - |
+| 25 | 1 | 17min | 17min |
 
 *Updated after each plan completion*
 
@@ -60,11 +60,16 @@ v3.0 architecture decisions:
 - Last-Write-Wins conflict resolution with server timestamp authority
 - Network-first for API, cache-first for static assets
 
+Phase 25-01 decisions:
+- Client-side invoice search (50-item limit sufficient for supplier volumes)
+- Component reuse pattern (DeliveryList reused on property page)
+- German fallback language ("Punkt N" instead of "Item N")
+
 ### UAT Issues (carried from v2.2 -- resolving in Phase 25)
 
-- Invoice linking needs proper modal UI (currently uses prompt())
-- Checklist item titles need proper lookup from template
-- Property-level delivery history page not yet built
+- ✓ Invoice linking with modal UI (resolved in 25-01)
+- ✓ Checklist item titles from template (resolved in 25-01)
+- ✓ Property-level delivery history page (resolved in 25-01)
 
 ### Blockers/Concerns
 
@@ -72,9 +77,9 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-01-29
-Stopped at: Roadmap created for v3.0 milestone
-Resume file: --
+Last session: 2026-01-29T11:07:16Z
+Stopped at: Completed 25-01-PLAN.md (Invoice modal, checklist titles, delivery history)
+Resume file: None
 
 ---
-*v3.0 Tenant & Offline milestone roadmapped. Phase 25 ready to plan.*
+*v3.0 Tenant & Offline milestone in progress. Phase 25 Plan 01 complete.*
