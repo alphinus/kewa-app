@@ -5,6 +5,7 @@ import { useState } from 'react'
 import { LogOut } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { PropertySelector } from './PropertySelector'
+import { NotificationBell } from '@/components/notifications/NotificationBell'
 import type { User } from '@/types'
 import type { BuildingSelectionId } from '@/contexts/BuildingContext'
 
@@ -69,13 +70,14 @@ export function Header({ user, selectedBuildingId, onBuildingSelect }: HeaderPro
         {/* Spacer */}
         <div className="flex-1" />
 
-        {/* User role and logout */}
+        {/* User role, notifications, and logout */}
         <div className="flex items-center gap-3 flex-shrink-0">
           {user && (
             <span className="text-sm font-medium text-gray-600 dark:text-gray-400 hidden sm:inline">
               {user.displayName}
             </span>
           )}
+          {user && <NotificationBell userId={user.id} />}
           <Button
             variant="ghost"
             size="sm"
