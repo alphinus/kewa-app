@@ -16,6 +16,7 @@ import { useState, useEffect, use } from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { InspectionDetail } from '@/components/inspections/InspectionDetail'
+import { toast } from 'sonner'
 import type { Inspection, InspectionDefect } from '@/types/inspections'
 
 export default function InspectionDetailPage({
@@ -85,7 +86,7 @@ export default function InspectionDetailPage({
       setShowWarningModal(false)
     } catch (err) {
       console.error('Error completing inspection:', err)
-      alert('Fehler beim Abschliessen')
+      toast.error('Fehler beim Abschliessen')
     }
   }
 

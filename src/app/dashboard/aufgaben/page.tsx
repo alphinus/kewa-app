@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { TaskList } from '@/components/tasks/TaskList'
 import { TaskForm } from '@/components/tasks/TaskForm'
 import { useBuilding } from '@/contexts/BuildingContext'
+import { toast } from 'sonner'
 import type { TaskWithProject, TasksResponse, UnitWithStats, UnitsResponse, Building } from '@/types/database'
 import type { TaskStatus } from '@/types'
 
@@ -149,7 +150,7 @@ function AufgabenPageContent() {
       // Refresh list
       await fetchTasks()
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Fehler beim Loeschen')
+      toast.error(err instanceof Error ? err.message : 'Fehler beim Loeschen')
     } finally {
       setDeleteConfirm(null)
     }

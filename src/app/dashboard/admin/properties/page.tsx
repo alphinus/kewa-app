@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Building2, Plus, X, ArrowLeft } from 'lucide-react'
 import { PropertyBuilder } from '@/components/admin/PropertyBuilder'
+import { toast } from 'sonner'
 import type { Property, Building } from '@/types/database'
 
 interface PropertyWithBuildings extends Property {
@@ -220,7 +221,7 @@ function CreatePropertyForm({ onClose, onCreated }: CreatePropertyFormProps) {
       onCreated()
     } catch (error) {
       console.error('Error creating property:', error)
-      alert('Fehler beim Erstellen. Bitte versuchen Sie es erneut.')
+      toast.error('Fehler beim Erstellen. Bitte versuchen Sie es erneut.')
     } finally {
       setSaving(false)
     }
@@ -352,7 +353,7 @@ function PropertyCard({ property, onBuildingClick, onRefresh }: PropertyCardProp
       onRefresh()
     } catch (error) {
       console.error('Error creating building:', error)
-      alert('Fehler beim Erstellen des Gebaeudes')
+      toast.error('Fehler beim Erstellen des Gebaeudes')
     } finally {
       setAddingBuilding(false)
     }

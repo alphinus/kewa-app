@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { Card, CardContent } from '@/components/ui/card'
 import { ProjectCard } from '@/components/projects/ProjectCard'
 import { useBuilding } from '@/contexts/BuildingContext'
+import { toast } from 'sonner'
 import type { ProjectWithUnit, ProjectsResponse, TasksResponse, Building } from '@/types/database'
 
 interface ProjectWithStats extends ProjectWithUnit {
@@ -170,7 +171,7 @@ export default function ProjektePage() {
       // Refresh projects list
       await fetchProjects()
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Fehler beim Archivieren')
+      toast.error(err instanceof Error ? err.message : 'Fehler beim Archivieren')
       throw err
     }
   }

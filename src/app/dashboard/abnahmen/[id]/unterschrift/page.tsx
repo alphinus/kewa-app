@@ -13,6 +13,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { SignatureCapture } from '@/components/inspections/SignatureCapture'
 import { SeverityBadge } from '@/components/inspections/SeverityBadge'
+import { toast } from 'sonner'
 import type { Inspection, InspectionDefect } from '@/types/inspections'
 
 export default function SignaturePage({
@@ -40,7 +41,7 @@ export default function SignaturePage({
 
         // Redirect if not completed
         if (insp.status !== 'completed') {
-          alert('Abnahme muss zuerst abgeschlossen werden')
+          toast.warning('Abnahme muss zuerst abgeschlossen werden')
           router.push(`/dashboard/abnahmen/${id}`)
           return
         }

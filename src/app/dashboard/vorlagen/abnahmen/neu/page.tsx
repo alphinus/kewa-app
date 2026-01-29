@@ -16,6 +16,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { ChecklistEditor } from '@/components/inspections/ChecklistEditor'
+import { toast } from 'sonner'
 import type { ChecklistSection, InspectionFormality } from '@/types/inspections'
 
 export default function NewInspectionTemplatePage() {
@@ -49,28 +50,28 @@ export default function NewInspectionTemplatePage() {
     e.preventDefault()
 
     if (!name.trim()) {
-      alert('Bitte geben Sie einen Namen ein')
+      toast.warning('Bitte geben Sie einen Namen ein')
       return
     }
 
     if (checklistSections.length === 0) {
-      alert('Bitte fügen Sie mindestens einen Abschnitt hinzu')
+      toast.warning('Bitte fuegen Sie mindestens einen Abschnitt hinzu')
       return
     }
 
     // Validate that all sections have names and at least one item
     for (const section of checklistSections) {
       if (!section.name.trim()) {
-        alert('Alle Abschnitte müssen einen Namen haben')
+        toast.warning('Alle Abschnitte muessen einen Namen haben')
         return
       }
       if (section.items.length === 0) {
-        alert(`Abschnitt "${section.name}" muss mindestens ein Element haben`)
+        toast.warning(`Abschnitt "${section.name}" muss mindestens ein Element haben`)
         return
       }
       for (const item of section.items) {
         if (!item.title.trim()) {
-          alert(`Alle Elemente in "${section.name}" müssen einen Titel haben`)
+          toast.warning(`Alle Elemente in "${section.name}" muessen einen Titel haben`)
           return
         }
       }
@@ -98,7 +99,7 @@ export default function NewInspectionTemplatePage() {
       router.push('/dashboard/vorlagen/abnahmen')
     } catch (error) {
       console.error('Error creating template:', error)
-      alert(error instanceof Error ? error.message : 'Fehler beim Erstellen der Vorlage')
+      toast.error(error instanceof Error ? error.message : 'Fehler beim Erstellen der Vorlage')
     } finally {
       setIsSubmitting(false)
     }
