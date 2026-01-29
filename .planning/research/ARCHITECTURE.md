@@ -1,869 +1,657 @@
-# Architecture Research: v2.2 Extensions
+# Architecture Patterns
 
-**Domain:** Renovation Management System Extensions
-**Researched:** 2026-01-25
-**Confidence:** HIGH (based on existing codebase patterns)
+**Domain:** Tenant Portal + Offline PWA + UX Polish for Renovation Operations System
+**Researched:** 2026-01-29
+**Confidence:** HIGH (based on codebase analysis + verified external sources)
 
-## Integration Overview
+## Executive Summary
 
-The v2.2 extensions integrate with a mature Next.js 16 + Supabase architecture with established patterns:
+The existing KEWA architecture is well-structured for these additions. The auth system already defines the `tenant` role, `email_password` auth method, `tenant_users` junction table, and ticket permissions in the RBAC schema. The service worker (`sw.js`) handles only push notifications today and must be expanded for offline caching. The key architectural challenge is integrating three new capabilities (tenant portal, offline sync, UX fixes) without disrupting the existing internal dashboard, contractor portal, and notification infrastructure.
 
-- **Server Components** for dashboards with direct Supabase queries
-- **JSONB-based state machines** with PostgreSQL trigger enforcement
-- **Polymorphic entity patterns** (comments, media attach to any entity type)
-- **Event logging** for audit trails (work_order_events pattern)
-- **Multi-role auth** with PIN (internal) and magic-link (external)
-- **BuildingContext** for cross-app property filtering
+---
 
-All five new features can integrate using these existing patterns without architectural changes.
+## Integration Points
 
-## Change Orders
+### Existing Architecture Map
 
-Change Orders represent modifications to active projects. They fit naturally into the existing cost workflow (Offer -> Invoice -> Payment) and project hierarchy.
-
-### New Components
-
-| Component | Location | Purpose |
-|-----------|----------|---------|
-| `change_orders` table | `supabase/migrations/` | Core data model with status workflow |
-| `change_order_status` enum | `supabase/migrations/` | `draft` -> `submitted` -> `under_review` -> `approved`/`rejected` -> `applied` |
-| `ChangeOrderForm.tsx` | `src/components/change-orders/` | Create/edit form with line items |
-| `ChangeOrderList.tsx` | `src/components/change-orders/` | List with status badges, filtering |
-| `ChangeOrderDetail.tsx` | `src/components/change-orders/` | Full detail view with approval actions |
-| `ChangeOrderPDF.tsx` | `src/components/change-orders/` | PDF generation (follows WorkOrderPDF pattern) |
-| `change-order-queries.ts` | `src/lib/change-orders/` | Server-side query functions |
-| `/dashboard/aenderungen/` | `src/app/dashboard/` | Change order pages (list, detail, new) |
-| `/api/change-orders/` | `src/app/api/` | API routes for CRUD + approval workflow |
-
-### Modified Components
-
-| Component | Modification |
-|-----------|-------------|
-| `renovation_projects` table | Add `has_change_orders` boolean flag (optional, for quick filtering) |
-| Project detail page | Add "Change Orders" tab/section with count badge |
-| ProjectCostDashboard | Include approved change order amounts in totals |
-| CSV export | Include change order line items in cost export |
-
-### Data Model
-
-```sql
--- change_order_status enum
-CREATE TYPE change_order_status AS ENUM (
-  'draft',
-  'submitted',
-  'under_review',
-  'approved',
-  'rejected',
-  'applied',
-  'cancelled'
-);
-
--- change_orders table
-CREATE TABLE change_orders (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-
-  -- Relationships
-  project_id UUID NOT NULL REFERENCES renovation_projects(id),
-  work_order_id UUID REFERENCES work_orders(id),  -- Optional link to originating work order
-
-  -- Identification
-  change_order_number TEXT NOT NULL,  -- CO-2026-001 format
-  title TEXT NOT NULL,
-  description TEXT,
-  reason TEXT NOT NULL,  -- Why change is needed
-
-  -- Status workflow (JSONB trigger enforced)
-  status change_order_status DEFAULT 'draft',
-
-  -- Cost impact (follows invoice pattern)
-  line_items JSONB DEFAULT '[]',  -- [{description, quantity, unit_price, total}]
-  subtotal DECIMAL(12,2),
-  tax_rate DECIMAL(5,2) DEFAULT 8.0,
-  tax_amount DECIMAL(12,2),
-  total_amount DECIMAL(12,2),
-
-  -- Original vs new cost (for variance tracking)
-  original_estimated_cost DECIMAL(12,2),
-  revised_estimated_cost DECIMAL(12,2),
-  cost_variance DECIMAL(12,2),  -- Computed: revised - original
-
-  -- Schedule impact
-  schedule_impact_days INTEGER,  -- Positive = delay, negative = acceleration
-  revised_end_date DATE,
-
-  -- Approval workflow
-  requested_by UUID REFERENCES users(id),
-  requested_at TIMESTAMPTZ DEFAULT NOW(),
-  reviewed_by UUID REFERENCES users(id),
-  reviewed_at TIMESTAMPTZ,
-  approved_by UUID REFERENCES users(id),
-  approved_at TIMESTAMPTZ,
-  rejection_reason TEXT,
-
-  -- Application tracking
-  applied_at TIMESTAMPTZ,
-  applied_by UUID REFERENCES users(id),
-
-  -- Documents
-  attachments UUID[],  -- References to media table
-
-  -- Timestamps
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW()
-);
+```
+src/
+  app/
+    layout.tsx              <-- Root: PushProvider wraps everything
+    login/                  <-- PIN + email login page
+    dashboard/              <-- Internal app (admin, property_manager, accounting)
+      layout.tsx            <-- BuildingProvider + Header + MobileNav
+      [feature]/page.tsx    <-- ~60 pages
+    contractor/[token]/     <-- Magic-link contractor portal
+      layout.tsx            <-- Minimal header, mobile-first
+      [workOrderId]/        <-- Work order detail pages
+    portal/                 <-- Change order + inspection approval portals
+      change-orders/[token]/
+      inspections/[token]/
+    api/
+      auth/                 <-- login, logout, register, session, magic-link
+      [feature]/            <-- ~90 API routes
+  middleware.ts             <-- Session + RBAC for /dashboard, /api, /contractor
+  lib/
+    auth.ts                 <-- PIN/password hash, session creation
+    session.ts              <-- JWT validation, cookie management
+    permissions.ts          <-- RBAC permission checks
+    magic-link.ts           <-- Token validation for contractors
+  contexts/
+    BuildingContext.tsx      <-- Property filtering (dashboard only)
+    PushContext.tsx          <-- Service worker registration + push subscription
+  hooks/
+    useSession.ts           <-- Client-side session fetch
+public/
+  sw.js                     <-- Push notification handlers only (47 lines)
 ```
 
-### Integration Points
+### Integration Point 1: Authentication (Tenant Portal)
 
-1. **Project Detail Page**: Add "Aenderungen" tab showing change orders for project
-2. **Cost Dashboard**: Include `SUM(approved change orders)` in project cost calculations
-3. **Work Order Detail**: "Request Change Order" button to create CO from work order
-4. **PDF Generation**: Use existing `@react-pdf/renderer` pattern from WorkOrderPDF
-5. **Audit Logging**: Extend existing audit_log table (entity_type = 'change_order')
-6. **Comments**: Use polymorphic comments pattern (entity_type = 'change_order')
+**Current state:**
+- `middleware.ts` handles three route groups: `/dashboard/*` (session + internal role), `/api/*` (session + permissions), `/contractor/*` (magic-link token)
+- Session JWT contains: `userId`, `role` (legacy: kewa/imeri), `roleId`, `roleName` (admin/property_manager/accounting/tenant/external_contractor), `permissions[]`
+- `validateSession()` in `session.ts` rejects non-kewa/imeri legacy roles (line 92: `if (sessionPayload.role !== 'kewa' && sessionPayload.role !== 'imeri')`)
+- Email+password login already works in `/api/auth/login` via `handleEmailAuth()`
+- User registration already creates tenant users with `tenant_users` junction table
 
-### Status Transitions (JSONB trigger)
+**Required changes:**
+- Extend `validateSession()` / `validateSessionWithRBAC()` to accept tenant sessions (the legacy role field mapping needs a tenant-compatible value)
+- Add `/tenant/*` route group to middleware matcher
+- Add tenant-specific middleware handler (session-based, not magic-link)
+- The `isInternalRole()` check correctly returns false for tenants (no change needed)
 
-```json
-{
-  "draft": ["submitted", "cancelled"],
-  "submitted": ["under_review", "draft"],
-  "under_review": ["approved", "rejected", "submitted"],
-  "approved": ["applied"],
-  "rejected": ["draft"],
-  "applied": [],
-  "cancelled": []
+**Risk:** LOW. The auth infrastructure is 90% ready. The gap is the legacy role field -- tenants are mapped to `'imeri'` in `register.ts` (line 121), which is a hack that must be fixed cleanly.
+
+### Integration Point 2: Service Worker (Offline PWA)
+
+**Current state:**
+- `public/sw.js` is 47 lines of plain JavaScript handling only push events (`push`, `notificationclick`, `pushsubscriptionchange`)
+- Registered in `PushContext.tsx` via `navigator.serviceWorker.register('/sw.js')`
+- `next.config.ts` sets `Cache-Control: no-cache` and `Service-Worker-Allowed: /` headers
+- No `manifest.json` exists
+- No PWA metadata in root layout
+- No caching, no IndexedDB, no offline fallback
+
+**Required changes:**
+- Migrate from hand-written `sw.js` to Serwist-managed service worker
+- Preserve existing push notification handlers in the new SW
+- Add precaching for app shell (HTML, CSS, JS)
+- Add runtime caching strategies (stale-while-revalidate for assets, network-first for API)
+- Add IndexedDB stores for offline data and sync queue
+- Add web app manifest
+- Update `next.config.ts` to use `withSerwistInit` wrapper
+- Build must use `--webpack` flag (Serwist requires webpack; Next.js 16 defaults to Turbopack)
+
+**Risk:** MEDIUM. The service worker transition from manual to Serwist is the riskiest integration. Push notification handlers must be preserved. The `--webpack` flag for build is a constraint that affects CI/CD.
+
+### Integration Point 3: Data Layer (Tenant Isolation)
+
+**Current state:**
+- `tenant_users` table links users to units (with `is_primary`, `move_in_date`, `move_out_date`)
+- Units belong to buildings, buildings belong to properties
+- RLS is disabled (`004_disable_rls.sql` migration exists)
+- All API routes query Supabase without tenant scoping -- they rely on middleware auth headers
+- Permissions for tenant role: `units:read`, `tickets:create`, `tickets:read`
+
+**Required changes:**
+- New `tickets` table (does not exist yet)
+- All tenant API endpoints must filter by `tenant_users.unit_id` JOIN
+- Tenant must never see data from other units/buildings (application-level enforcement)
+
+**Risk:** MEDIUM. Application-level filtering is pragmatic since RLS is globally disabled. But every tenant API endpoint must consistently apply the unit filter. Missing a filter equals a data leak.
+
+### Integration Point 4: Middleware Router
+
+**Current state:**
+```typescript
+export const config = {
+  matcher: [
+    '/dashboard/:path*',
+    '/api/((?!auth).*)',
+    '/contractor/:path*'
+  ]
 }
 ```
 
-## Supplier Module
+**Required changes:**
+```typescript
+export const config = {
+  matcher: [
+    '/dashboard/:path*',
+    '/tenant/:path*',        // NEW
+    '/api/((?!auth).*)',
+    '/contractor/:path*'
+  ]
+}
+```
 
-Supplier management for tracking Pellets inventory and ordering. Extends existing `partners` table (already has `partner_type = 'supplier'`).
+New handler function `handleTenantRoute()`: validates session cookie (not magic-link), checks `roleName === 'tenant'`, injects `x-tenant-user-id` and `x-tenant-unit-ids` headers.
 
-### New Components
+### Integration Point 5: Root Layout (PWA)
 
-| Component | Location | Purpose |
-|-----------|----------|---------|
-| `supplier_products` table | `supabase/migrations/` | Products/materials from suppliers |
-| `supplier_orders` table | `supabase/migrations/` | Purchase orders with line items |
-| `supplier_inventory` table | `supabase/migrations/` | Inventory tracking with levels |
-| `SupplierList.tsx` | `src/components/suppliers/` | List of suppliers (filtered from partners) |
-| `SupplierDetail.tsx` | `src/components/suppliers/` | Supplier with products, orders |
-| `ProductCatalog.tsx` | `src/components/suppliers/` | Products grid with stock levels |
-| `OrderForm.tsx` | `src/components/suppliers/` | Create purchase order |
-| `InventoryDashboard.tsx` | `src/components/suppliers/` | Stock levels, low-stock alerts |
-| `/dashboard/lieferanten/` | `src/app/dashboard/` | Supplier pages |
-| `/api/suppliers/` | `src/app/api/` | API routes |
+**Current state:**
+- Root layout wraps everything in `PushProvider`
+- No manifest link
+- No theme-color meta tag (only in contractor layout)
 
-### Modified Components
+**Required changes:**
+- Add manifest link: `<link rel="manifest" href="/manifest.json" />`
+- Add PWA meta tags (theme-color, apple-mobile-web-app-capable)
+- PushProvider stays (service worker registration moves to Serwist, but push subscription logic remains in PushContext)
 
-| Component | Modification |
-|-----------|-------------|
-| `partners` table | Already has `partner_type = 'supplier'` - no changes needed |
-| PartnerList | Add filter toggle for Contractors vs Suppliers |
-| Template tasks | Link `materials_list` JSONB to actual products (optional enhancement) |
-| Expense tracking | Link material expenses to supplier orders |
+---
 
-### Data Model
+## New Components
+
+### Route Structure: Tenant Portal
+
+```
+src/app/tenant/
+  layout.tsx                    <-- Tenant layout (simplified nav, no BuildingContext)
+  page.tsx                      <-- Tenant dashboard (unit info, open tickets)
+  login/page.tsx                <-- Tenant login (email + password only)
+  tickets/
+    page.tsx                    <-- Own ticket list
+    new/page.tsx                <-- Create ticket (form + photo upload)
+    [id]/page.tsx               <-- Ticket detail + message thread
+  profile/
+    page.tsx                    <-- Tenant profile, notification settings
+```
+
+**Rationale:** Separate `/tenant` route group (not under `/dashboard`) because:
+1. Different layout (no BuildingContext, no admin nav, simplified mobile-first UI)
+2. Different auth flow (email+password, not PIN)
+3. Different data scope (own unit only, not all properties)
+4. Follows existing pattern: `/dashboard` = internal, `/contractor` = external token-based, `/tenant` = external session-based
+
+### API Routes: Tenant Portal
+
+```
+src/app/api/tenant/
+  tickets/
+    route.ts                    <-- GET (own), POST (create)
+    [id]/route.ts               <-- GET detail, PUT update
+    [id]/messages/route.ts      <-- GET/POST thread messages
+  unit/
+    route.ts                    <-- GET own unit info
+  profile/
+    route.ts                    <-- GET/PUT own profile
+```
+
+**Rationale:** Separate `/api/tenant/*` namespace enforces data isolation at the route level. These routes always filter by the authenticated tenant's `unit_id(s)`. Internal ticket management by KEWA staff uses separate `/api/tickets/*` routes with full access.
+
+### Database: New Tables
 
 ```sql
--- Products from suppliers
-CREATE TABLE supplier_products (
+-- Tenant support tickets
+CREATE TABLE tickets (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  partner_id UUID NOT NULL REFERENCES partners(id),
-
-  -- Identification
-  sku TEXT,
-  name TEXT NOT NULL,
-  description TEXT,
-  category TEXT,  -- e.g., 'pellets', 'insulation', 'paint'
-  unit TEXT NOT NULL,  -- e.g., 'kg', 'sack', 'liter', 'stueck'
-
-  -- Pricing
-  unit_price DECIMAL(10,2),
-  currency TEXT DEFAULT 'CHF',
-  min_order_quantity INTEGER DEFAULT 1,
-
-  -- Inventory
-  current_stock DECIMAL(12,2) DEFAULT 0,
-  reorder_level DECIMAL(12,2),  -- Alert when below
-  reorder_quantity DECIMAL(12,2),  -- Standard order amount
-
-  -- Status
-  is_active BOOLEAN DEFAULT true,
-
-  -- Metadata
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW()
-);
-
--- Purchase orders
-CREATE TABLE supplier_orders (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  partner_id UUID NOT NULL REFERENCES partners(id),
-
-  -- Identification
-  order_number TEXT NOT NULL,  -- PO-2026-001
-
-  -- Status workflow
-  status TEXT DEFAULT 'draft' CHECK (status IN (
-    'draft', 'submitted', 'confirmed', 'shipped', 'received', 'cancelled'
-  )),
-
-  -- Line items
-  line_items JSONB NOT NULL DEFAULT '[]',
-  -- [{product_id, product_name, quantity, unit, unit_price, total}]
-
-  -- Totals
-  subtotal DECIMAL(12,2),
-  tax_rate DECIMAL(5,2) DEFAULT 8.0,
-  tax_amount DECIMAL(12,2),
-  total_amount DECIMAL(12,2),
-
-  -- Dates
-  order_date DATE DEFAULT CURRENT_DATE,
-  expected_delivery DATE,
-  actual_delivery DATE,
-
-  -- Receiving
-  received_by UUID REFERENCES users(id),
-  received_at TIMESTAMPTZ,
-  receiving_notes TEXT,
-
-  -- Links
-  renovation_project_id UUID REFERENCES renovation_projects(id),  -- Optional project link
-  invoice_id UUID REFERENCES invoices(id),  -- Link to supplier invoice
-
-  -- Metadata
-  created_by UUID REFERENCES users(id),
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW()
-);
-
--- Inventory movements (for audit trail)
-CREATE TABLE inventory_movements (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  product_id UUID NOT NULL REFERENCES supplier_products(id),
-
-  movement_type TEXT NOT NULL CHECK (movement_type IN (
-    'received', 'used', 'adjustment', 'return', 'transfer'
-  )),
-  quantity DECIMAL(12,2) NOT NULL,  -- Positive for in, negative for out
-  balance_after DECIMAL(12,2) NOT NULL,
-
-  -- References
-  supplier_order_id UUID REFERENCES supplier_orders(id),
-  work_order_id UUID REFERENCES work_orders(id),
-  project_id UUID REFERENCES renovation_projects(id),
-
-  notes TEXT,
-  created_by UUID REFERENCES users(id),
-  created_at TIMESTAMPTZ DEFAULT NOW()
-);
-```
-
-### Integration Points
-
-1. **Partners List**: Filter toggle between contractors and suppliers (already have `partner_type`)
-2. **Work Orders**: "Order Materials" action to create supplier order
-3. **Template Tasks**: `materials_list` JSONB could reference `supplier_products.id`
-4. **Invoice Linking**: When supplier invoice arrives, link to `supplier_orders`
-5. **Low Stock Alerts**: Dashboard widget showing products below reorder level
-6. **Cost Tracking**: Material costs flow through supplier orders to project costs
-
-### Pellets-Specific Features
-
-Pellets tracking is a primary use case:
-
-```sql
--- Pellets-specific view
-CREATE VIEW pellets_inventory AS
-SELECT
-  sp.*,
-  p.company_name as supplier_name,
-  (sp.current_stock < sp.reorder_level) as needs_reorder
-FROM supplier_products sp
-JOIN partners p ON sp.partner_id = p.id
-WHERE sp.category = 'pellets';
-```
-
-## Inspection Workflow
-
-Formal handoff process for project completion. Extends existing `project_quality_gates` and work order `inspected` status.
-
-### New Components
-
-| Component | Location | Purpose |
-|-----------|----------|---------|
-| `inspections` table | `supabase/migrations/` | Formal inspection records |
-| `inspection_items` table | `supabase/migrations/` | Checklist items with sign-off |
-| `InspectionChecklist.tsx` | `src/components/inspections/` | Interactive checklist with photos |
-| `InspectionSignOff.tsx` | `src/components/inspections/` | Digital signature capture |
-| `InspectionReport.tsx` | `src/components/inspections/` | Summary report with deficiencies |
-| `InspectionPDF.tsx` | `src/components/inspections/` | Abnahmeprotokoll PDF |
-| `/dashboard/abnahme/` | `src/app/dashboard/` | Inspection pages |
-| `/api/inspections/` | `src/app/api/` | API routes |
-
-### Modified Components
-
-| Component | Modification |
-|-----------|-------------|
-| `renovation_projects.status` | 'finished' triggers inspection availability; 'approved' requires passed inspection |
-| `project_quality_gates` | Existing structure supports inspection checklists |
-| Work order status flow | 'done' -> 'inspected' -> 'closed' already exists |
-| Project detail page | "Start Abnahme" button when status = 'finished' |
-
-### Data Model
-
-```sql
--- Formal inspection records
-CREATE TABLE inspections (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-
-  -- What's being inspected
-  entity_type TEXT NOT NULL CHECK (entity_type IN ('project', 'work_order', 'unit', 'room')),
-  entity_id UUID NOT NULL,
-  project_id UUID REFERENCES renovation_projects(id),  -- Always link to project for context
-
-  -- Inspection type
-  inspection_type TEXT NOT NULL CHECK (inspection_type IN (
-    'intermediate',  -- Zwischenabnahme
-    'final',         -- Endabnahme
-    'followup'       -- Nachkontrolle
-  )),
-
-  -- Status
-  status TEXT DEFAULT 'scheduled' CHECK (status IN (
-    'scheduled', 'in_progress', 'completed', 'passed', 'failed', 'cancelled'
-  )),
-
-  -- Scheduling
-  scheduled_date DATE,
-  scheduled_time TIME,
-  actual_date DATE,
-
-  -- Participants
-  inspector_id UUID REFERENCES users(id),  -- KEWA staff
-  contractor_rep TEXT,  -- Contractor representative name
-  tenant_rep TEXT,      -- Tenant representative (for handover)
-
-  -- Results
-  overall_result TEXT CHECK (overall_result IN ('passed', 'passed_with_deficiencies', 'failed')),
-  notes TEXT,
-
-  -- Sign-off
-  signed_at TIMESTAMPTZ,
-  signature_data TEXT,  -- Base64 signature image or signature pad data
-
-  -- Links
-  deficiency_count INTEGER DEFAULT 0,
-
-  -- Metadata
-  created_by UUID REFERENCES users(id),
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW()
-);
-
--- Inspection checklist items
-CREATE TABLE inspection_items (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  inspection_id UUID NOT NULL REFERENCES inspections(id) ON DELETE CASCADE,
-
-  -- Item definition
-  category TEXT NOT NULL,  -- e.g., 'Elektro', 'Sanitaer', 'Malerarbeiten'
-  description TEXT NOT NULL,
-  sort_order INTEGER DEFAULT 0,
-
-  -- Result
-  status TEXT DEFAULT 'pending' CHECK (status IN (
-    'pending', 'passed', 'failed', 'na'  -- na = not applicable
-  )),
-
-  -- Deficiency details (if failed)
-  deficiency_description TEXT,
-  deficiency_severity TEXT CHECK (deficiency_severity IN ('minor', 'major', 'critical')),
-  remediation_deadline DATE,
-  remediated_at TIMESTAMPTZ,
-
-  -- Evidence
-  media_ids UUID[],  -- Before/after photos
-
-  -- Sign-off
-  inspected_by UUID REFERENCES users(id),
-  inspected_at TIMESTAMPTZ,
-
-  created_at TIMESTAMPTZ DEFAULT NOW()
-);
-
--- Predefined checklist templates (could be derived from quality gates)
-CREATE TABLE inspection_templates (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  name TEXT NOT NULL,
-  description TEXT,
-  inspection_type TEXT NOT NULL,
-  items JSONB NOT NULL DEFAULT '[]',
-  -- [{category, description, sort_order}]
-  is_active BOOLEAN DEFAULT true,
-  created_at TIMESTAMPTZ DEFAULT NOW()
-);
-```
-
-### Integration Points
-
-1. **Project Status Flow**: `finished` -> inspection -> `approved`
-2. **Quality Gates**: Existing `project_quality_gates` provide checklist structure
-3. **Work Order Flow**: `done` -> `inspected` -> `closed` status already exists
-4. **Media System**: Photos attach via existing polymorphic media pattern
-5. **PDF Generation**: Abnahmeprotokoll using `@react-pdf/renderer`
-6. **Condition Update**: Passing final inspection triggers room condition updates (existing trigger)
-
-### Workflow Integration
-
-```
-Project Status Flow:
-planned -> active -> [blocked] -> finished -> [inspection] -> approved
-
-When project.status = 'finished':
-  - "Endabnahme starten" button appears
-  - Creates inspection record with checklist from quality gates
-
-Inspection completion:
-  - passed -> project.status = 'approved' (triggers condition updates)
-  - failed -> remediation items created, followup inspection scheduled
-```
-
-## Push Notifications
-
-Real-time alerts for key events. Uses Supabase Realtime + Web Push API.
-
-### New Components
-
-| Component | Location | Purpose |
-|-----------|----------|---------|
-| `notification_subscriptions` table | `supabase/migrations/` | Push subscription storage |
-| `notifications` table | `supabase/migrations/` | Notification history/queue |
-| `notification_preferences` table | `supabase/migrations/` | Per-user notification settings |
-| `NotificationBell.tsx` | `src/components/notifications/` | Header bell icon with badge |
-| `NotificationDropdown.tsx` | `src/components/notifications/` | Dropdown list of notifications |
-| `NotificationSettings.tsx` | `src/components/notifications/` | Preference toggles |
-| `usePushNotifications.ts` | `src/hooks/` | Push subscription hook |
-| `useRealtimeNotifications.ts` | `src/hooks/` | Supabase Realtime hook |
-| `/api/notifications/` | `src/app/api/` | API routes |
-| `service-worker.js` | `public/` | Service worker for push |
-
-### Modified Components
-
-| Component | Modification |
-|-----------|-------------|
-| Header | Add NotificationBell component |
-| DashboardLayout | Initialize push subscription on mount |
-| Contractor portal | Subscribe to work order updates |
-| Settings page | Add notification preferences section |
-
-### Data Model
-
-```sql
--- Push subscription storage (Web Push)
-CREATE TABLE notification_subscriptions (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-
-  -- User link (nullable for contractor subscriptions)
-  user_id UUID REFERENCES users(id),
-  contractor_token TEXT,  -- For magic-link users
-
-  -- Web Push subscription
-  endpoint TEXT NOT NULL,
-  p256dh_key TEXT NOT NULL,
-  auth_key TEXT NOT NULL,
-
-  -- Device info
-  user_agent TEXT,
-  device_type TEXT,  -- 'mobile', 'desktop', 'tablet'
-
-  -- Status
-  is_active BOOLEAN DEFAULT true,
-  last_used_at TIMESTAMPTZ,
-
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW(),
-
-  UNIQUE(endpoint)
-);
-
--- Notification history
-CREATE TABLE notifications (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-
-  -- Recipient
-  user_id UUID REFERENCES users(id),
-  contractor_email TEXT,  -- For external recipients
-
-  -- Content
+  tenant_user_id UUID NOT NULL REFERENCES users(id),
+  unit_id UUID NOT NULL REFERENCES units(id),
+  building_id UUID NOT NULL REFERENCES buildings(id),
   title TEXT NOT NULL,
-  body TEXT NOT NULL,
-  icon TEXT,
-  action_url TEXT,  -- Deep link
+  description TEXT NOT NULL,
+  category TEXT NOT NULL,           -- 'maintenance', 'defect', 'request', 'complaint'
+  priority TEXT DEFAULT 'normal',   -- 'low', 'normal', 'high', 'urgent'
+  status TEXT DEFAULT 'open',       -- 'open', 'in_progress', 'resolved', 'closed'
+  assigned_to UUID REFERENCES users(id),
+  resolved_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
 
-  -- Source
-  notification_type TEXT NOT NULL,
-  -- 'work_order_sent', 'work_order_accepted', 'invoice_approved',
-  -- 'change_order_submitted', 'inspection_scheduled', etc.
-
-  entity_type TEXT,
-  entity_id UUID,
-
-  -- Status
-  status TEXT DEFAULT 'pending' CHECK (status IN (
-    'pending', 'sent', 'delivered', 'read', 'failed'
-  )),
-  read_at TIMESTAMPTZ,
-  sent_at TIMESTAMPTZ,
-  error_message TEXT,
-
+-- Ticket messages (thread between tenant and KEWA)
+CREATE TABLE ticket_messages (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  ticket_id UUID NOT NULL REFERENCES tickets(id) ON DELETE CASCADE,
+  sender_id UUID NOT NULL REFERENCES users(id),
+  content TEXT NOT NULL,
+  is_internal BOOLEAN DEFAULT false,  -- Internal notes hidden from tenant
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- User notification preferences
-CREATE TABLE notification_preferences (
+-- Ticket attachments (photos of issues)
+CREATE TABLE ticket_attachments (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID NOT NULL REFERENCES users(id),
-
-  -- Channel preferences
-  push_enabled BOOLEAN DEFAULT true,
-  email_enabled BOOLEAN DEFAULT false,  -- Future
-
-  -- Event type preferences (JSONB for flexibility)
-  event_preferences JSONB DEFAULT '{
-    "work_order_received": true,
-    "work_order_status_change": true,
-    "invoice_pending": true,
-    "change_order_submitted": true,
-    "inspection_scheduled": true,
-    "low_stock_alert": true
-  }'::JSONB,
-
-  -- Quiet hours
-  quiet_hours_start TIME,
-  quiet_hours_end TIME,
-
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW(),
-
-  UNIQUE(user_id)
+  ticket_id UUID NOT NULL REFERENCES tickets(id) ON DELETE CASCADE,
+  message_id UUID REFERENCES ticket_messages(id),
+  file_path TEXT NOT NULL,
+  file_name TEXT NOT NULL,
+  file_size INTEGER,
+  mime_type TEXT,
+  uploaded_by UUID NOT NULL REFERENCES users(id),
+  created_at TIMESTAMPTZ DEFAULT NOW()
 );
 ```
 
-### Integration Points
+### Offline Infrastructure: New Modules
 
-1. **Work Order Events**: Existing `work_order_events` can trigger notifications
-2. **Supabase Realtime**: Subscribe to table changes for real-time UI updates
-3. **Service Worker**: Standard Web Push API for background notifications
-4. **Contractor Portal**: Subscribe to work order updates via magic-link token
-5. **Header Integration**: Bell icon in existing Header component
+```
+src/lib/offline/
+  db.ts                         <-- IndexedDB schema (idb library wrapper)
+  sync-queue.ts                 <-- Queued mutations store
+  sync-engine.ts                <-- Background sync orchestrator
+  conflict-resolver.ts          <-- Last-write-wins via updated_at
+  online-detector.ts            <-- Navigator.onLine + fetch probe
 
-### Notification Triggers
+src/hooks/
+  useOfflineStatus.ts           <-- Online/offline state hook
+  useOfflineData.ts             <-- Read from IndexedDB with network fallback
 
-| Event | Recipients | Trigger |
-|-------|------------|---------|
-| Work order sent | Contractor | `work_orders` INSERT with status='sent' |
-| Work order accepted/rejected | KEWA admin | `work_order_events` INSERT |
-| Counter-offer submitted | KEWA admin | `work_order_events` INSERT |
-| Invoice received | Accounting | `invoices` INSERT |
-| Invoice approved | Contractor | `invoices` UPDATE status='approved' |
-| Change order submitted | Project manager | `change_orders` INSERT |
-| Inspection scheduled | All parties | `inspections` INSERT |
-| Low stock alert | Property manager | `supplier_products` UPDATE (check threshold) |
+src/contexts/
+  OfflineContext.tsx             <-- Sync status, queue depth, last sync time
 
-### Implementation Pattern
+src/app/~offline/
+  page.tsx                      <-- Serwist offline fallback page
+```
+
+### Service Worker: Expanded
+
+```
+src/app/sw.ts                   <-- Serwist source (replaces public/sw.js)
+  - Serwist precaching + runtime caching (defaultCache)
+  - Push notification handlers (migrated from existing sw.js)
+  - Background sync event handler
+  - Offline fallback routing to /~offline
+
+public/manifest.json            <-- PWA web app manifest (NEW)
+```
+
+---
+
+## Data Flow
+
+### Tenant Portal Data Flow
+
+```
+Tenant Browser
+  |
+  |--> /tenant/login (email + password)
+  |      |--> POST /api/auth/login { email, password }
+  |      |      |--> Supabase: users WHERE email AND auth_method='email_password'
+  |      |      |--> JWT: { userId, role, roleName:'tenant', permissions }
+  |      |      |--> Set session cookie
+  |      |--> Redirect to /tenant
+  |
+  |--> /tenant/tickets (list)
+  |      |--> middleware: validate session, check roleName='tenant'
+  |      |--> Set headers: x-tenant-unit-ids
+  |      |--> GET /api/tenant/tickets
+  |             |--> Filter: tickets WHERE unit_id IN (tenant's unit_ids)
+  |
+  |--> /tenant/tickets/new (create)
+         |--> POST /api/tenant/tickets { title, description, category, photos }
+                |--> Validate unit_id belongs to tenant
+                |--> Create ticket + upload attachments
+                |--> Trigger push notification to KEWA admin
+```
+
+### Offline Data Flow
+
+```
+User Action (create ticket, update status, etc.)
+  |
+  |--> Write to IndexedDB (optimistic, immediate)
+  |      |--> UI updates instantly from local store
+  |
+  |--> Check navigator.onLine
+  |      |
+  |      |--> ONLINE:
+  |      |      |--> POST to API
+  |      |      |--> Success: Mark synced in IndexedDB
+  |      |      |--> Failure (network): Add to sync queue
+  |      |
+  |      |--> OFFLINE:
+  |             |--> Add to sync queue in IndexedDB
+  |             |--> Queue entry: { id, operation, endpoint, payload, timestamp, retries }
+  |
+  |--> Connection restored (online event)
+         |--> Sync engine processes queue (FIFO)
+         |--> For each entry:
+         |      |--> Send to API
+         |      |--> 200: Remove from queue, update synced flag
+         |      |--> 409: Apply LWW conflict resolution
+         |      |--> 5xx: Retry with exponential backoff (max 3)
+         |--> Pull latest data from server
+         |--> Reconcile local IndexedDB with server state
+```
+
+### Conflict Resolution: Last-Write-Wins
+
+LWW with `updated_at` is sufficient for KEWA because:
+1. Tenants only edit their own tickets (no concurrent multi-user edits)
+2. Internal users manage tickets on the admin side (different fields typically)
+3. Low data complexity (text tickets, not collaborative documents)
+
+```
+Conflict detected (server returns 409):
+  |--> Compare local.updated_at vs server.updated_at
+  |      |--> Server newer: Discard local, accept server version
+  |      |--> Local newer: Re-send local version (force)
+  |      |--> Equal: Accept server (deterministic tiebreak)
+  |--> Update IndexedDB with winner
+  |--> Toast: "Daten aktualisiert" (non-blocking)
+```
+
+---
+
+## Service Worker Migration Plan
+
+### Current sw.js (47 lines, push only)
+
+```javascript
+// Three event listeners:
+self.addEventListener('push', ...)           // Show notification
+self.addEventListener('notificationclick', ...) // Navigate to URL
+self.addEventListener('pushsubscriptionchange', ...) // Re-subscribe
+```
+
+### Target sw.ts (Serwist-managed)
 
 ```typescript
-// Supabase Realtime for UI updates
-const channel = supabase
-  .channel('work-order-updates')
-  .on('postgres_changes', {
-    event: 'UPDATE',
-    schema: 'public',
-    table: 'work_orders',
-    filter: `partner_id=eq.${partnerId}`
-  }, (payload) => {
-    // Update UI, show toast, increment badge
-  })
-  .subscribe()
+import { defaultCache } from "@serwist/next/worker";
+import type { PrecacheEntry, SerwistGlobalConfig } from "serwist";
+import { Serwist } from "serwist";
 
-// Push notification trigger (database function)
-CREATE OR REPLACE FUNCTION notify_on_work_order_sent()
-RETURNS TRIGGER AS $$
-BEGIN
-  IF NEW.status = 'sent' AND (OLD.status IS NULL OR OLD.status = 'draft') THEN
-    INSERT INTO notifications (user_id, title, body, notification_type, entity_type, entity_id)
-    VALUES (
-      -- contractor's user_id or contractor_email
-      NEW.partner_id,  -- resolve to user
-      'Neuer Auftrag',
-      'Sie haben einen neuen Auftrag erhalten: ' || NEW.title,
-      'work_order_sent',
-      'work_order',
-      NEW.id
-    );
-  END IF;
-  RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
+declare global {
+  interface WorkerGlobalScope extends SerwistGlobalConfig {
+    __SW_MANIFEST: (PrecacheEntry | string)[] | undefined;
+  }
+}
+declare const self: ServiceWorkerGlobalScope;
+
+const serwist = new Serwist({
+  precacheEntries: self.__SW_MANIFEST,
+  skipWaiting: true,
+  clientsClaim: true,
+  navigationPreload: true,
+  runtimeCaching: defaultCache,
+  fallbacks: {
+    entries: [{
+      url: "/~offline",
+      matcher({ request }) { return request.destination === "document"; },
+    }],
+  },
+});
+
+serwist.addEventListeners();
+
+// === PRESERVED: Push notification handlers (from existing sw.js) ===
+self.addEventListener('push', (event) => {
+  const data = event.data.json();
+  const options = {
+    body: data.body,
+    tag: data.tag || `notification-${Date.now()}`,
+    data: { url: data.url, notificationId: data.notificationId },
+    requireInteraction: data.urgency === 'urgent',
+    renotify: true,
+  };
+  event.waitUntil(self.registration.showNotification(data.title, options));
+});
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const url = event.notification.data.url || '/';
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+      for (const client of clientList) {
+        if (client.url.includes(url) && 'focus' in client) return client.focus();
+      }
+      if (clients.openWindow) return clients.openWindow(url);
+    })
+  );
+});
+
+self.addEventListener('pushsubscriptionchange', (event) => {
+  event.waitUntil(
+    fetch('/api/push/subscribe', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        subscription: event.newSubscription,
+        oldEndpoint: event.oldSubscription?.endpoint,
+      }),
+    })
+  );
+});
 ```
 
-## Knowledge Base
+### next.config.ts Changes
 
-Searchable FAQ and documentation. Simple content management with categorization.
+```typescript
+import type { NextConfig } from "next";
+import withSerwistInit from "@serwist/next";
 
-### New Components
+const withSerwist = withSerwistInit({
+  swSrc: "src/app/sw.ts",
+  swDest: "public/sw.js",
+  cacheOnNavigation: true,
+  reloadOnOnline: false,    // IMPORTANT: false to prevent form data loss
+  disable: process.env.NODE_ENV === "development",
+});
 
-| Component | Location | Purpose |
-|-----------|----------|---------|
-| `kb_articles` table | `supabase/migrations/` | Article content with metadata |
-| `kb_categories` table | `supabase/migrations/` | Article categorization |
-| `ArticleList.tsx` | `src/components/knowledge-base/` | Article listing with search |
-| `ArticleDetail.tsx` | `src/components/knowledge-base/` | Article view with markdown rendering |
-| `ArticleEditor.tsx` | `src/components/knowledge-base/` | Admin article editor |
-| `KBSearch.tsx` | `src/components/knowledge-base/` | Full-text search component |
-| `/dashboard/wissensbasis/` | `src/app/dashboard/` | Knowledge base pages |
-| `/contractor/[token]/help/` | `src/app/contractor/` | Contractor-visible articles |
-| `/api/knowledge-base/` | `src/app/api/` | API routes |
+const nextConfig: NextConfig = {
+  output: 'standalone',
+  reactCompiler: true,
+  turbopack: { root: __dirname },
+  experimental: {
+    parallelServerCompiles: false,
+    parallelServerBuildTraces: false,
+  },
+  // Note: sw.js headers now managed by Serwist
+};
 
-### Modified Components
-
-| Component | Modification |
-|-----------|-------------|
-| Contractor portal | Add "Hilfe" link to knowledge base articles |
-| Header | Add knowledge base link (optional) |
-| Dashboard | Quick search widget for KB articles |
-
-### Data Model
-
-```sql
--- Article categories
-CREATE TABLE kb_categories (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  name TEXT NOT NULL,
-  slug TEXT NOT NULL UNIQUE,
-  description TEXT,
-  parent_id UUID REFERENCES kb_categories(id),  -- For nested categories
-  sort_order INTEGER DEFAULT 0,
-  is_active BOOLEAN DEFAULT true,
-  created_at TIMESTAMPTZ DEFAULT NOW()
-);
-
--- Knowledge base articles
-CREATE TABLE kb_articles (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-
-  -- Content
-  title TEXT NOT NULL,
-  slug TEXT NOT NULL UNIQUE,
-  summary TEXT,  -- Short preview text
-  content TEXT NOT NULL,  -- Markdown content
-
-  -- Classification
-  category_id UUID REFERENCES kb_categories(id),
-  tags TEXT[],  -- For additional filtering
-
-  -- Visibility
-  visibility TEXT DEFAULT 'internal' CHECK (visibility IN (
-    'internal',     -- KEWA only
-    'contractors',  -- Visible to contractors
-    'public'        -- Future: tenant portal
-  )),
-
-  -- Status
-  status TEXT DEFAULT 'draft' CHECK (status IN ('draft', 'published', 'archived')),
-  published_at TIMESTAMPTZ,
-
-  -- Search optimization
-  search_vector TSVECTOR,  -- PostgreSQL full-text search
-
-  -- Engagement
-  view_count INTEGER DEFAULT 0,
-  helpful_count INTEGER DEFAULT 0,  -- Thumbs up
-
-  -- Metadata
-  author_id UUID REFERENCES users(id),
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW()
-);
-
--- Full-text search index
-CREATE INDEX idx_kb_articles_search ON kb_articles USING GIN(search_vector);
-
--- Auto-update search vector
-CREATE OR REPLACE FUNCTION kb_articles_search_trigger()
-RETURNS TRIGGER AS $$
-BEGIN
-  NEW.search_vector :=
-    setweight(to_tsvector('german', coalesce(NEW.title, '')), 'A') ||
-    setweight(to_tsvector('german', coalesce(NEW.summary, '')), 'B') ||
-    setweight(to_tsvector('german', coalesce(NEW.content, '')), 'C');
-  RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE TRIGGER kb_articles_search_update
-  BEFORE INSERT OR UPDATE OF title, summary, content ON kb_articles
-  FOR EACH ROW EXECUTE FUNCTION kb_articles_search_trigger();
-
--- Article feedback (optional)
-CREATE TABLE kb_article_feedback (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  article_id UUID NOT NULL REFERENCES kb_articles(id) ON DELETE CASCADE,
-  user_id UUID REFERENCES users(id),
-  is_helpful BOOLEAN NOT NULL,
-  feedback_text TEXT,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-
-  UNIQUE(article_id, user_id)  -- One feedback per user per article
-);
+export default withSerwist(nextConfig);
 ```
 
-### Integration Points
+### Build Script Change
 
-1. **Contractor Portal**: Filtered articles with `visibility = 'contractors'`
-2. **Full-Text Search**: PostgreSQL tsvector for German language search
-3. **Markdown Rendering**: Use existing patterns or add `react-markdown`
-4. **Analytics**: Track view counts for popular articles
-5. **Comments**: Could use polymorphic comments pattern for discussions
-
-### Visibility Matrix
-
-| Article Visibility | KEWA Staff | Contractors | Future Tenants |
-|-------------------|------------|-------------|----------------|
-| internal | Yes | No | No |
-| contractors | Yes | Yes | No |
-| public | Yes | Yes | Yes |
-
-## Suggested Build Order
-
-Based on dependencies and integration complexity:
-
-### Phase 1: Knowledge Base (Foundation)
-**Rationale:** Simplest new feature, no dependencies on other v2.2 features, establishes content patterns.
-
-1. Database migrations (kb_categories, kb_articles)
-2. API routes with full-text search
-3. Admin article editor
-4. Article list and detail views
-5. Contractor portal integration
-
-**Estimated effort:** 1-2 phases
-
-### Phase 2: Supplier Module
-**Rationale:** Extends existing partners pattern, provides foundation for material tracking in other features.
-
-1. Database migrations (supplier_products, supplier_orders, inventory_movements)
-2. Supplier filtering in partner list
-3. Product catalog with stock levels
-4. Order creation and tracking
-5. Inventory dashboard with alerts
-
-**Estimated effort:** 2-3 phases
-
-### Phase 3: Change Orders
-**Rationale:** Core renovation workflow enhancement, integrates with cost tracking.
-
-1. Database migrations with status workflow trigger
-2. Change order form with line items
-3. Approval workflow (submit -> review -> approve/reject)
-4. PDF generation
-5. Integration with project cost dashboard
-6. Link to work orders
-
-**Estimated effort:** 2-3 phases
-
-### Phase 4: Inspection Workflow
-**Rationale:** Depends on project status workflow, extends quality gates.
-
-1. Database migrations (inspections, inspection_items)
-2. Inspection checklist from quality gates
-3. Digital sign-off capability
-4. Deficiency tracking with remediation
-5. Abnahmeprotokoll PDF
-6. Project status integration (finished -> approved)
-
-**Estimated effort:** 2-3 phases
-
-### Phase 5: Push Notifications
-**Rationale:** Enhances all other features, should be built last so all event sources exist.
-
-1. Database migrations (subscriptions, notifications, preferences)
-2. Service worker and Web Push setup
-3. Subscription management
-4. Notification bell UI component
-5. Trigger functions for each event type
-6. Supabase Realtime integration
-7. Contractor portal notifications
-
-**Estimated effort:** 2-3 phases
-
-### Total Estimated Phases: 9-14 phases
-
-## Risk Areas
-
-### Push Notifications - Highest Complexity
-- **Web Push requires HTTPS and service worker** - Ensure Vercel deployment has proper SSL
-- **Subscription management across sessions** - Users need to re-subscribe on new devices
-- **iOS Safari limitations** - Web Push has limited support pre-iOS 16.4
-- **Background sync** - Service worker lifecycle management
-
-### Change Orders - Cost Integration
-- **Variance calculations** - Need to maintain accuracy with original estimates
-- **Applied state** - Once applied, change orders modify project scope
-- **Cascading updates** - Approved COs may need to update project dates and costs
-
-### Inspection Workflow - Status Coupling
-- **Blocking transitions** - Failed inspections should block project approval
-- **Deficiency lifecycle** - Need clear remediation workflow
-- **Multiple inspection types** - Intermediate vs final vs followup logic
-
-### Supplier Module - Inventory Accuracy
-- **Real-time stock levels** - Need atomic operations for concurrent updates
-- **Multi-location inventory** - If inventory is per-building, adds complexity
-- **Pellets seasonality** - May need forecasting or alerts for peak usage
-
-### Knowledge Base - Content Management
-- **German full-text search** - Need proper PostgreSQL configuration for German dictionary
-- **Markdown security** - Sanitize user-generated content
-- **Media attachments** - Images in articles need storage integration
-
-## Cross-Feature Dependencies
-
-```
-Knowledge Base
-    (standalone)
-
-Supplier Module
-    depends on: partners table (exists)
-    integrates with: work orders (optional)
-
-Change Orders
-    depends on: renovation_projects (exists)
-    integrates with: work orders, cost dashboard
-
-Inspection Workflow
-    depends on: renovation_projects (exists)
-    depends on: project_quality_gates (exists)
-    integrates with: work orders, condition tracking
-
-Push Notifications
-    depends on: all other features (triggers from each)
-    integrates with: contractor portal
+```json
+{
+  "scripts": {
+    "build": "next build --webpack"
+  }
+}
 ```
 
-## Architecture Patterns Summary
+**Critical:** Serwist requires webpack for the build step. Dev mode continues with Turbopack since Serwist is disabled in dev.
 
-| Pattern | Existing Example | Apply To |
-|---------|-----------------|----------|
-| Status state machine | `work_order_status`, `renovation_status` | `change_order_status`, `inspection status` |
-| Polymorphic entities | `comments.entity_type` | Inspections, notifications |
-| Event logging | `work_order_events` | Change order events, notification history |
-| JSONB line items | `invoices.line_items` | Change order line items, order line items |
-| Full-text search | (new) | Knowledge base articles |
-| Server Components | Dashboard pages | All list pages |
-| PDF generation | `@react-pdf/renderer` | Change order PDF, Abnahmeprotokoll |
-| Trigger-based updates | `update_room_condition_from_project` | Notification triggers, stock level updates |
+---
+
+## Data Isolation Strategy
+
+### Application-Level Enforcement (Primary)
+
+Every tenant-facing API route uses a shared context extractor:
+
+```typescript
+// src/lib/tenant-context.ts
+async function getTenantContext(request: NextRequest) {
+  const userId = request.headers.get('x-user-id');
+  const roleName = request.headers.get('x-user-role-name');
+
+  if (roleName !== 'tenant') {
+    return { error: 'Not a tenant', status: 403 };
+  }
+
+  const { data: tenantUnits } = await supabase
+    .from('tenant_users')
+    .select('unit_id, units(building_id)')
+    .eq('user_id', userId)
+    .is('move_out_date', null);  // Active tenancies only
+
+  return {
+    userId,
+    unitIds: tenantUnits.map(t => t.unit_id),
+    buildingIds: tenantUnits.map(t => t.units.building_id),
+  };
+}
+```
+
+Every `/api/tenant/*` route calls this and filters all queries by `unitIds`.
+
+### Defense-in-Depth Layers
+
+1. **Middleware header injection:** Tenant unit_ids passed via `x-tenant-unit-ids` header
+2. **Route namespace isolation:** `/api/tenant/*` physically separate from internal routes
+3. **Ownership verification:** Updates/deletes verify `ticket.tenant_user_id === session.userId`
+4. **Internal-only fields:** `ticket_messages.is_internal` flag hides staff notes from tenant view
+5. **Audit logging:** All tenant data access logged (Swiss Datenschutz compliance)
+
+### Swiss Data Privacy (Datenschutz)
+
+- Tenant personal data (email, name) stored with `is_active` flag for soft-delete
+- Tenants see only their own unit/building data
+- Internal notes (`is_internal: true`) never exposed to tenants
+- 7-day session expiry (existing behavior, appropriate for tenants)
+- Full audit trail for data access/modifications
+
+---
+
+## Build Order
+
+### Phase 1: Tenant Portal Auth + Core (Build first)
+
+**Why first:** Auth changes touch `middleware.ts` which is foundational. Establish the tenant route group, login flow, and data isolation pattern before building on top of it.
+
+**Scope:**
+- Fix legacy role mapping for tenant sessions in `session.ts`
+- Extend middleware for `/tenant/*` routes with `handleTenantRoute()`
+- Tenant login page (email+password, reuse existing flow)
+- Tenant layout with simplified mobile-first navigation
+- Tickets database migration (tickets, ticket_messages, ticket_attachments)
+- Tenant context utility (`getTenantContext`)
+- Tenant dashboard (unit info + ticket summary)
+- Ticket CRUD (create, list, detail)
+- Ticket messaging thread
+- Photo attachments for tickets
+- Push notification triggers for new tickets
+
+**Dependencies:** Existing auth system (ready), RBAC schema (ready), tenant_users table (ready)
+
+### Phase 2: Offline PWA Support (Build second)
+
+**Why second:** Service worker changes affect the entire app. Better to have tenant portal stable first, then add offline capabilities across both internal dashboard and tenant portal.
+
+**Scope:**
+- Install @serwist/next + serwist + idb
+- Migrate sw.js to Serwist-managed sw.ts
+- Preserve push notification handlers
+- Web app manifest (manifest.json)
+- PWA meta tags in root layout
+- Precaching for app shell
+- Runtime caching strategies (stale-while-revalidate for assets, network-first for API)
+- IndexedDB database setup (idb wrapper)
+- Sync queue implementation
+- Background sync engine
+- Online/offline detection hook + context
+- Offline fallback page (/~offline)
+- Conflict resolution (LWW with updated_at)
+- Build script update (--webpack flag)
+
+**Dependencies:** Phase 1 complete (stable routes for caching)
+
+### Phase 3: UX Polish (Build last)
+
+**Why last:** Polish touches many existing components. Doing this after architectural changes (auth, SW) avoids merge conflicts and lets us polish the new tenant portal UI simultaneously.
+
+**Scope:**
+- Invoice linking modal (replace `prompt()`)
+- Checklist item title lookup from templates (fix "Item 1", "Item 2" display)
+- Property-level delivery history page
+- General UX improvements across dashboard and tenant portal
+
+**Dependencies:** All architectural changes complete
+
+---
+
+## Anti-Patterns to Avoid
+
+### Anti-Pattern 1: Shared Routes with Role Checks
+**What:** Putting tenant pages under `/dashboard` with `if (role === 'tenant')` conditionals.
+**Why bad:** Tenant sees admin navigation, BuildingContext is unnecessary, data leak risk from shared components.
+**Instead:** Separate `/tenant` route group with its own layout.
+
+### Anti-Pattern 2: Cache All API Responses in Service Worker
+**What:** Caching all API responses in the service worker runtime cache.
+**Why bad:** Stale data served to users, cache invalidation nightmare, storage limits hit.
+**Instead:** Cache only app shell and static assets in SW. Use IndexedDB for specific offline-needed data with explicit sync queue.
+
+### Anti-Pattern 3: Dual Service Workers
+**What:** Keeping `sw.js` for push and creating a second SW for caching.
+**Why bad:** Only one service worker per scope. Second registration silently replaces the first.
+**Instead:** Single Serwist-managed SW that handles both push events and caching.
+
+### Anti-Pattern 4: RLS as Only Isolation
+**What:** Relying solely on Supabase RLS for tenant data isolation.
+**Why bad:** RLS is currently disabled globally (migration 004). Enabling now risks breaking all existing queries.
+**Instead:** Application-level filtering in API routes. RLS can be considered as future hardening.
+
+### Anti-Pattern 5: Same Login Page for PIN and Email
+**What:** Adding email/password fields to the existing `/login` page used by KEWA staff.
+**Why bad:** Confuses internal users (PIN entry) with tenants (email+password). Different UX expectations.
+**Instead:** Separate `/tenant/login` page. Main `/login` stays PIN-only for internal users.
+
+### Anti-Pattern 6: reloadOnOnline: true
+**What:** Setting Serwist to auto-reload when coming back online.
+**Why bad:** If tenant is filling out a ticket form offline and connection restores, forced reload destroys unsaved form data.
+**Instead:** Set `reloadOnOnline: false`. Show non-intrusive toast "Verbindung wiederhergestellt" and sync in background.
+
+---
+
+## Technology Additions
+
+| Technology | Version | Purpose | Confidence |
+|------------|---------|---------|------------|
+| @serwist/next | latest | Service worker management for Next.js | HIGH |
+| serwist | latest | Core service worker library (Workbox successor for Next.js) | HIGH |
+| idb | ^8.x | IndexedDB wrapper with promise-based API | HIGH |
+
+**Rejected alternatives:**
+
+| Technology | Reason for Rejection |
+|------------|---------------------|
+| next-pwa | Unmaintained, requires webpack, Serwist is its maintained successor |
+| workbox (direct) | Serwist wraps Workbox with Next.js-specific configuration |
+| PouchDB | Overkill for sync queue pattern; idb is lighter |
+| RxDB | Too heavy for ticket sync use case |
+
+---
+
+## Caching Strategy Detail
+
+### Precache (Install time)
+
+- App shell HTML
+- Static CSS/JS bundles
+- Font files
+- Offline fallback page (`/~offline`)
+
+### Runtime Cache
+
+| Resource | Strategy | Rationale |
+|----------|----------|-----------|
+| Static assets (JS, CSS, images) | StaleWhileRevalidate | Fast load, background update |
+| API data requests | NetworkFirst | Fresh data preferred, cached fallback |
+| Navigation (pages) | NetworkFirst with offline fallback | Serve page if online, fallback if not |
+| Font files | CacheFirst | Rarely change |
+| Supabase Storage (photos) | CacheFirst | Immutable once uploaded |
+
+### IndexedDB Stores
+
+| Store | Purpose | Key |
+|-------|---------|-----|
+| `tickets` | Cached ticket data for offline viewing | `id` |
+| `ticket-drafts` | Unsaved ticket drafts | `id` |
+| `sync-queue` | Pending mutations to sync | `id` (auto-increment) |
+| `metadata` | Last sync timestamp, app version | `key` |
+
+---
+
+## Sources
+
+- Serwist official docs: https://serwist.pages.dev/docs/next/getting-started (HIGH confidence)
+- LogRocket Next.js 16 PWA guide (Jan 2026): https://blog.logrocket.com/nextjs-16-pwa-offline-support (MEDIUM confidence)
+- Next.js multi-tenant guide: https://nextjs.org/docs/app/guides/multi-tenant (HIGH confidence)
+- Codebase analysis: middleware.ts, auth.ts, session.ts, permissions.ts, sw.js, RBAC migrations 022-024, notifications migration 061 (HIGH confidence - direct source code review)

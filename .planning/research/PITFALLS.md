@@ -1,477 +1,509 @@
-# Pitfalls Research: KeWa Property Task Management App
+# Domain Pitfalls: v3.0 Tenant Portal + Offline PWA + UX Polish
 
-**Researched:** 2026-01-16
-**Domain:** Mobile-first task management with media upload and speech-to-text
-**Primary User:** Non-technical handyman (Imeri) on construction sites
-**Confidence:** HIGH (verified with multiple authoritative sources)
+**Domain:** Property management app with new user class, offline retrofit, UI refactoring
+**Researched:** 2026-01-29
+**Milestone:** v3.0 Tenant & Offline
+**Confidence:** HIGH (verified against codebase, official docs, and multiple sources)
 
-## Executive Summary
+## Priority Summary
 
-Building a mobile-first task management app for a non-technical user on construction sites carries significant risks across four areas: (1) **Network reliability** - photo uploads on spotty mobile networks fail silently and frustrate users; (2) **Speech recognition limitations** - Swiss German dialects and construction site noise severely impact transcription accuracy; (3) **UX complexity creep** - features designed for technical users create friction for field workers; (4) **Data model rigidity** - hierarchical task structures become maintenance nightmares when requirements change. The most critical risk is losing Imeri's trust through upload failures or confusing interfaces - a non-technical user will abandon a tool that feels unreliable within days.
+| # | Pitfall | Severity | Phase Impact | Detection Difficulty |
+|---|---------|----------|-------------|---------------------|
+| 1 | RLS policies are dead code — anon key bypasses all isolation | CRITICAL | Tenant Portal | Low (code inspection) |
+| 2 | Service worker replacement destroys push notifications | CRITICAL | Offline PWA | High (only manifests in production) |
+| 3 | Session JWT incompatible with Supabase RLS auth.uid() | CRITICAL | Tenant Portal | Medium (silent data leak) |
+| 4 | Server Components cannot render offline | CRITICAL | Offline PWA | Low (architectural) |
+| 5 | Tenant sees admin data through shared API routes | CRITICAL | Tenant Portal | Medium (requires security audit) |
+| 6 | IndexedDB sync queue loses writes on conflict | MODERATE | Offline PWA | High (race condition) |
+| 7 | Middleware routing gap between /dashboard and /tenant | MODERATE | Tenant Portal | Medium |
+| 8 | iOS service worker cache eviction breaks offline | MODERATE | Offline PWA | High (device-specific) |
+| 9 | UX refactoring breaks existing workflows | MODERATE | UX Polish | Medium |
+| 10 | Swiss DSG tenant data handling requirements | MODERATE | Tenant Portal | Low (compliance) |
+| 11 | Offline queue grows unbounded with media | MODERATE | Offline PWA | Medium |
+| 12 | Three auth methods sharing one session system | LOW | Tenant Portal | Low |
+| 13 | Workbox precache bloats initial install | LOW | Offline PWA | Low |
+| 14 | prompt() and alert() still in codebase | LOW | UX Polish | Low |
 
 ---
 
 ## Critical Pitfalls
 
-### 1. Silent Upload Failures on Mobile Networks
+### 1. RLS Policies Are Dead Code -- Anon Key Bypasses All Isolation
 
-**Risk Level:** HIGH
-**Description:** Photo uploads initiated on construction sites with poor mobile connectivity fail without clear feedback. Users believe photos were uploaded when they were not, leading to missing documentation and lost trust in the app.
+**Severity:** CRITICAL
+**Applies to:** Tenant Portal
 
-**Warning Signs:**
-- Users report "photos disappeared"
-- Task entries appear without attached photos
-- Imeri stops adding photos because "it never works"
-- Upload progress indicators hang indefinitely
+**What goes wrong:** Migration `029_rls_policies.sql` defines tenant data isolation policies using `auth.uid()`. However, the app uses custom auth (PIN/email/magic-link) with the Supabase **anon key** (`NEXT_PUBLIC_SUPABASE_ANON_KEY`). Migration `004_disable_rls.sql` granted `GRANT ALL ON ... TO anon, authenticated`. The RLS policies call `is_internal_user(auth.uid())` and `is_tenant_of_unit(auth.uid(), id)`, but `auth.uid()` returns NULL for anon-key connections because no Supabase Auth session exists. This means:
 
-**Prevention:**
-1. **Compress images client-side before upload** - Target 320-720px width for mobile, use WebP format when supported. Reduces upload time from minutes to seconds on slow networks.
-2. **Implement offline queue with IndexedDB** - Store photos locally first, mark as "pending upload," sync automatically when connectivity returns.
-3. **Show clear upload status** - Use persistent indicators: "Saved locally - syncing" vs "Uploaded" vs "Upload failed - tap to retry"
-4. **Auto-retry with exponential backoff** - First retry immediately, second after 5 minutes, third after 15 minutes.
-5. **Never lose user data** - Photos must persist locally until confirmed uploaded. Delete only after server acknowledgment.
+- All RLS policies that check `auth.uid()` silently fail
+- The `anon` role has GRANT ALL on core tables from migration 004
+- Tenant data isolation does NOT exist at the database level
+- A tenant user hitting any API endpoint can potentially read all data
 
-**Phase to Address:** Phase 1 (Foundation) - Core upload architecture must be built offline-first from the start. Retrofitting is extremely difficult.
+**Evidence from codebase:**
+- `src/lib/supabase/server.ts` line 9: uses `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `src/lib/supabase/client.ts` line 6: same anon key
+- No `accessToken` hook or `setAuth` calls anywhere in the codebase
+- No custom JWT signing with Supabase's secret anywhere
+- RLS policies in `029_rls_policies.sql` all reference `auth.uid()`
 
-**Sources:**
-- [Smashing Magazine: Building Offline-Friendly Image Upload](https://www.smashingmagazine.com/2025/04/building-offline-friendly-image-upload-system/)
-- [LogRocket: Offline-first frontend apps 2025](https://blog.logrocket.com/offline-first-frontend-apps-2025-indexeddb-sqlite/)
+**Why it happens:** The original system was admin-only (2 internal users). RLS was added as future-proofing but never activated because no external users accessed the database directly. Now that tenants need data isolation, the gap becomes a security breach.
 
----
-
-### 2. Swiss German Dialect Recognition Failure
-
-**Risk Level:** HIGH
-**Description:** Speech-to-text services struggle with Swiss German dialects, producing Standard German output that may misinterpret meaning, or complete gibberish. Construction site background noise compounds the problem. Word error rates of 15-30% are common even with optimized models.
-
-**Warning Signs:**
-- Imeri stops using voice input because "it doesn't understand me"
-- Transcriptions contain hallucinated words not in the audio
-- Task descriptions are incomprehensible or wrong
-- User spends more time correcting transcription than typing
+**Warning signs:**
+- A tenant API endpoint returns data from other tenants' units
+- Supabase logs show all queries executing as `anon` role
+- `auth.uid()` returns NULL in RLS policy evaluations
 
 **Prevention:**
-1. **Always provide text input fallback** - Voice input must be optional, never required. Some tasks will be faster to type.
-2. **Use Whisper API with Standard German output** - Whisper translates Swiss German to Standard German reasonably well (not transcribes), which may be acceptable for task notes.
-3. **Show transcription for user confirmation** - Never auto-submit. Always let user review and edit before saving.
-4. **Design for partial accuracy** - Expect 80% accuracy at best. UI should make editing easy with large tap targets.
-5. **Test with Imeri's actual dialect** - Swiss German varies significantly by region (Zurich vs Basel vs Bern). Test with his specific dialect.
-6. **Capture and store original audio** - Allow playback for clarification if transcription is unclear later.
+1. **Do NOT rely on RLS for tenant isolation.** The custom auth system doesn't integrate with Supabase Auth, so `auth.uid()` will always be NULL.
+2. **Implement application-layer isolation.** Every tenant API route must filter by the tenant's `user_id` from the session JWT (which IS validated by the middleware). Add `WHERE` clauses scoping to the tenant's linked units via `tenant_users` table.
+3. **Create dedicated tenant query functions** in `src/lib/tenant/` that always join through `tenant_users` to the session user. Never expose raw table queries to tenant routes.
+4. **Alternatively, bridge the auth systems:** Mint Supabase-compatible JWTs signed with the Supabase JWT secret (from Dashboard > Settings > API), including `sub` = user_id and `role` = 'authenticated'. Pass via the `accessToken` hook on the Supabase client. This activates RLS but requires significant refactoring.
+5. **Recommendation:** Application-layer isolation is simpler and safer for this 2-admin + tenants system. RLS bridge is over-engineering for the user count.
 
-**Phase to Address:** Phase 2 or 3 (Audio Features) - Can be added after core functionality works. Not essential for MVP.
-
-**Sources:**
-- [Research: Does Whisper Understand Swiss German?](https://arxiv.org/abs/2404.19310)
-- [FHNW: Speech Recognition for Swiss German](https://www.fhnw.ch/en/about-fhnw/schools/school-of-engineering/institutes/research-projects/speech-recognition-for-swiss-german)
-- [Hugging Face: Whisper Swiss German Model](https://huggingface.co/Flurin17/whisper-large-v3-turbo-swiss-german)
+**Phase to address:** Tenant Portal -- must be solved before any tenant-facing feature ships.
 
 ---
 
-### 3. Touch Targets Too Small for Construction Site Use
+### 2. Service Worker Replacement Destroys Push Notifications
 
-**Risk Level:** HIGH
-**Description:** Standard mobile UI elements (44px touch targets) are difficult to use with work gloves, dirty fingers, or while moving. Imeri working on a construction site will rage-tap small buttons, trigger wrong actions, and abandon the app.
+**Severity:** CRITICAL
+**Applies to:** Offline PWA
 
-**Warning Signs:**
-- Imeri complains about hitting wrong buttons
-- Multiple accidental actions (wrong task selected, wrong button pressed)
-- User holds phone very close to face trying to tap correctly
-- Imeri takes off gloves to use the app (friction = abandonment)
+**What goes wrong:** The current `public/sw.js` handles only push notifications (push event, notificationclick, pushsubscriptionchange). Adding offline caching requires Workbox or Serwist, which typically **generates** a new service worker. If the new service worker replaces `sw.js` without preserving the push event handlers, all push notification subscriptions break. Users stop receiving notifications with no error. The push subscription endpoint in the database becomes stale.
+
+Browsers only allow ONE service worker per scope. You cannot run two workers side by side.
+
+**Evidence from codebase:**
+- `public/sw.js`: 47 lines, handles push/notificationclick/pushsubscriptionchange only
+- Service worker registered somewhere in the app (push notifications phase 24)
+- No Workbox or caching logic exists yet
+
+**Why it happens:** Workbox's `GenerateSW` mode creates an entirely new service worker file, overwriting existing handlers. Developers add offline caching, test it works, and don't notice push broke because push requires a real server to test.
+
+**Warning signs:**
+- Push notifications stop arriving after deploying offline support
+- `navigator.serviceWorker.controller` changes scope or file
+- Push subscription endpoint becomes invalid
+- No errors in console (push simply stops working)
 
 **Prevention:**
-1. **Minimum 76dp touch targets** - Use Google's driving guidelines as baseline (construction = similar constraints to driving). Standard 44px is insufficient.
-2. **Extra spacing between targets** - Minimum 16px between clickable elements to prevent accidental taps.
-3. **Position critical actions at thumb-reach** - Primary actions in bottom half of screen, not top.
-4. **Support gesture-based navigation** - Swipe to complete task, swipe to go back. Fewer precise taps needed.
-5. **Test with work gloves** - Actually test the app wearing the same gloves Imeri uses.
-6. **High contrast colors** - Outdoor visibility in bright sunlight requires strong contrast.
+1. **Use Workbox InjectManifest mode, NOT GenerateSW.** InjectManifest lets you write your own service worker that includes BOTH Workbox caching AND existing push handlers.
+2. **Keep the same scope** (`/`) and same filename (`sw.js`) or ensure proper migration.
+3. **Merge into a single file:** Start with the existing push handlers in `sw.js`, then add Workbox imports:
+   ```js
+   // Existing push handlers (keep as-is)
+   self.addEventListener('push', ...);
+   self.addEventListener('notificationclick', ...);
+   self.addEventListener('pushsubscriptionchange', ...);
 
-**Phase to Address:** Phase 1 (Foundation) - UI component library must be designed for field use from the start.
+   // NEW: Workbox caching
+   import { precacheAndRoute } from 'workbox-precaching';
+   precacheAndRoute(self.__WB_MANIFEST);
+   // ... routing strategies
+   ```
+4. **Test push AFTER adding caching.** Verify push still works in production-like environment.
+5. **Include `skipWaiting()` and `clientsClaim()` carefully** -- these can cause the new worker to take over immediately, which is desired for caching updates but must not disrupt push subscriptions.
 
-**Sources:**
-- [W3C WCAG 2.5.5: Target Size](https://www.w3.org/WAI/WCAG21/Understanding/target-size.html)
-- [Google Design for Driving Guidelines](https://support.google.com/accessibility/android/answer/7101858)
-- [NN/G: Touch Target Size](https://www.nngroup.com/articles/touch-target-size/)
+**Phase to address:** Offline PWA -- the very first step must be merging the service worker, not replacing it.
 
 ---
 
-### 4. PIN Authentication Security Theater
+### 3. Session JWT Incompatible with Supabase RLS auth.uid()
 
-**Risk Level:** MEDIUM
-**Description:** Simple 4-digit PINs provide minimal security but can still be forgotten, locked out, or cause friction. Over-engineering (rate limiting, lockouts, hashing) creates frustration; under-engineering creates actual security issues.
+**Severity:** CRITICAL
+**Applies to:** Tenant Portal
 
-**Warning Signs:**
-- Imeri forgets PIN and can't access app
-- Lockout mechanism triggers from pocket-dialing
-- PIN entry is slow enough to be frustrating
-- No recovery mechanism exists
+**What goes wrong:** The app's session system (`src/lib/session.ts`) creates JWTs with `jose` library signed with `SESSION_SECRET`. These are stored in an httpOnly cookie named `session`. Supabase RLS expects JWTs signed with Supabase's JWT secret (different key), containing `sub` claim = user UUID and `role` = 'authenticated'. The two JWT systems are completely independent -- the app JWT authenticates users at the middleware level, but Supabase has no awareness of user identity. All database queries run as anonymous.
+
+**Evidence from codebase:**
+- `src/lib/session.ts`: JWT created with `jose` using `SESSION_SECRET` env var
+- `src/lib/supabase/server.ts`: Client uses anon key, no auth integration
+- Session payload: `{ userId, role, roleId, roleName, permissions }` -- not Supabase-compatible format
+- Middleware passes identity via headers (`x-user-id`, `x-user-role-name`) not via Supabase auth
+
+**Why it happens:** The original design deliberately chose custom auth over Supabase Auth for simplicity (PIN auth, 2 users). This was the right call for v1. But it means the database layer has no user context.
 
 **Prevention:**
-1. **Use device-stored credentials** - PIN unlocks locally stored cryptographic key, not sent to server. Eliminates brute-force attack surface.
-2. **Implement "remember device" for 30 days** - PIN required only on new devices or after timeout. Reduces friction on daily use.
-3. **No lockouts for 2-user system** - Rate limiting adds friction without security benefit for 2 trusted users. If concerned, add 5-second delay after 3 wrong attempts.
-4. **Simple recovery flow** - Admin can reset PIN via separate channel (phone call). No complex "forgot PIN" flows.
-5. **Avoid 1234/0000** - Prevent obviously weak PINs but don't over-restrict.
-6. **Consider removing PIN entirely** - For 2 trusted users on personal devices, device passcode may be sufficient security.
+- Same as Pitfall #1 -- tenant isolation must happen at the application layer (query scoping), not database layer (RLS).
+- Every tenant query function must accept and enforce user_id from the validated session.
+- The `getCurrentUser()` function in session.ts returns `{ id, role }` which is sufficient for application-layer filtering.
 
-**Phase to Address:** Phase 1 (Foundation) - Keep authentication minimal. Expand only if security requirements increase.
-
-**Sources:**
-- [Wultra: Secure PIN Code](https://www.wultra.com/secure-pin-code-for-financial-apps)
-- [LoginRadius: PIN Authentication Security](https://www.loginradius.com/blog/identity/what-is-pin-authentication)
+**Phase to address:** Tenant Portal -- architectural decision needed before implementation.
 
 ---
 
-### 5. Web Speech API Browser Incompatibility
+### 4. Server Components Cannot Render Offline
 
-**Risk Level:** MEDIUM
-**Description:** The Web Speech API has only ~50% browser compatibility, doesn't work offline, and fails completely when installed as PWA on iOS Safari. Relying on it as primary input method will break for significant user scenarios.
+**Severity:** CRITICAL
+**Applies to:** Offline PWA
 
-**Warning Signs:**
-- Voice input works on desktop Chrome but fails on Imeri's phone
-- Speech recognition requires internet but construction site has poor connectivity
-- PWA installation disables voice features on iOS
-- Error messages about "speech recognition not supported"
+**What goes wrong:** The existing app uses `'use client'` components extensively (dashboard pages, task lists, etc.) that fetch data via `/api/` routes. However, these client components still require the Next.js server to serve the initial HTML/JS bundles. When offline, if the page shell is not cached, the user sees nothing -- not even a loading state. Server Components (RSC) are worse: they execute on the server and stream HTML, which is impossible offline.
+
+The fundamental architecture clash: Next.js is server-first. Offline is client-first. These two models need explicit bridging.
+
+**Evidence from codebase:**
+- `src/app/dashboard/page.tsx`: `'use client'` -- fetches via `/api/tasks`
+- `src/app/dashboard/aufgaben/page.tsx`: `'use client'` -- fetches via `/api/tasks`
+- All data comes from server-side Supabase queries
+- No IndexedDB, no local data storage, no cache layer
+
+**Why it happens:** The app was built server-first (correct for admin app with reliable internet). Offline support requires a fundamentally different data flow: read from local cache first, sync to server when possible.
+
+**Warning signs:**
+- Offline user sees blank page or browser error
+- Cached page loads but data sections are empty
+- Navigation between pages fails offline (needs server for RSC payloads)
 
 **Prevention:**
-1. **Check API availability before showing voice UI** - Feature-detect `webkitSpeechRecognition` and hide voice button if unavailable.
-2. **Use server-side Whisper API instead** - Record audio locally with MediaRecorder API (wide support), send to Whisper API for transcription. Works offline (record, transcribe later).
-3. **Test on Imeri's actual device/browser** - Don't assume Chrome desktop = Chrome Android = Safari iOS.
-4. **Design voice as enhancement, not requirement** - App must be fully usable without voice input.
+1. **Cache the app shell.** Use Workbox to precache all static assets (JS, CSS, fonts) and the HTML skeleton. This ensures the app renders offline.
+2. **Cache API responses.** Use Workbox's `StaleWhileRevalidate` strategy for `/api/` routes. Serve cached response immediately, update cache in background when online.
+3. **Do NOT try to cache RSC payloads.** RSC responses are serialized React components -- they are not user data. Cache the raw API data instead.
+4. **Add an offline data layer.** Use IndexedDB (via Dexie or idb) to store the last-fetched state of lists (tasks, tickets). Client components read from IndexedDB first, then fetch from server.
+5. **Network-first for mutations.** Writes (POST/PUT/DELETE) queue in IndexedDB when offline, sync when online.
+6. **Tenant portal can be simpler.** Tenants see limited data (their unit's tickets). Cache this small dataset aggressively.
+7. **Scope offline support narrowly.** Not every page needs to work offline. Prioritize: ticket creation, ticket list, communication. Admin pages can require network.
 
-**Phase to Address:** Phase 2 or 3 - Voice features are enhancement, not core. Build text-first.
-
-**Sources:**
-- [Can I Use: Speech Recognition API](https://caniuse.com/speech-recognition)
-- [MDN: Web Speech API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Speech_API)
+**Phase to address:** Offline PWA -- must be the architectural foundation before any page-level work.
 
 ---
 
-### 6. Hierarchical Data Deletion Cascades
+### 5. Tenant Sees Admin Data Through Shared API Routes
 
-**Risk Level:** MEDIUM
-**Description:** Building > Floor > Apartment > Task hierarchy creates cascade deletion problems. Deleting a floor accidentally deletes all apartments and tasks. Reorganizing hierarchy (moving task to different apartment) becomes complex.
+**Severity:** CRITICAL
+**Applies to:** Tenant Portal
 
-**Warning Signs:**
-- Accidental deletion wipes significant data
-- "Move task" functionality doesn't exist or is broken
-- Database queries for "all tasks" are slow due to deep joins
-- Adding new hierarchy level requires schema migration
+**What goes wrong:** All existing API routes (`/api/tasks`, `/api/units`, `/api/projects`, etc.) return ALL data because they were built for admin users. If tenant routes call these same endpoints, the tenant sees everything. The middleware checks permissions but the ROUTE_PERMISSIONS map (`src/lib/permissions.ts`) grants read access to anyone with `tasks:read` -- it doesn't scope by user identity.
+
+**Evidence from codebase:**
+- `src/app/api/tasks/route.ts` (inferred): Queries all tasks, filters by building/unit/status but NOT by user
+- `src/lib/permissions.ts`: `ROUTE_PERMISSIONS` maps `'GET /api/tasks'` to `[PERMISSIONS.TASKS_READ]` -- any user with this permission sees all tasks
+- Middleware sets `x-user-id` header but API routes don't use it for scoping
+- `PERMISSIONS.TENANTS_READ` and `TICKETS_CREATE` exist but no tenant-specific API routes exist yet
+
+**Why it happens:** Existing routes assume all users are internal. Adding a new user class requires either scoping existing routes (risky -- breaks admin functionality) or creating separate tenant routes.
 
 **Prevention:**
-1. **Soft delete everything** - Mark deleted, don't remove. Allow recovery.
-2. **Flat task storage with references** - Tasks reference apartment_id, not nested in hierarchy. Queries are simpler.
-3. **Avoid deep nesting in UI** - Building > Apartment is enough. Skip "floor" unless explicitly needed.
-4. **Implement task history** - Track which apartment task belonged to, allowing audit trail if moved.
-5. **Confirm destructive actions** - "Delete apartment" shows "This will affect X tasks. Continue?"
+1. **Create separate `/api/tenant/` route namespace.** Don't modify existing admin routes. New routes that always scope by tenant identity.
+2. **Tenant routes always filter by tenant_users join.** Every query: `SELECT ... FROM tickets t JOIN tenant_users tu ON tu.unit_id = t.unit_id WHERE tu.user_id = $session.userId`.
+3. **Add middleware matcher for `/tenant/` path.** Add to `config.matcher` in middleware.ts, verify tenant role.
+4. **Tenant dashboard at `/tenant/` not `/dashboard/`.** Separate route trees prevent accidental data exposure through shared layouts.
+5. **Never reuse admin query functions for tenant data.** Create `src/lib/tenant/` with dedicated query functions that enforce scoping.
 
-**Phase to Address:** Phase 1 (Foundation) - Data model is hardest to change later. Design it flat and flexible.
-
-**Sources:**
-- [MongoDB Forums: Tasks and Subtasks](https://www.mongodb.com/community/forums/t/tasks-and-subtasks/147521)
-- [Data Integration Info: Hierarchical vs Relational](https://dataintegrationinfo.com/hierarchical-vs-relational-database/)
+**Phase to address:** Tenant Portal -- must be the data access pattern before building any UI.
 
 ---
 
-## Mobile-Specific Pitfalls
+## Moderate Pitfalls
 
-### 7. Background Sync Unreliable Across Browsers
+### 6. IndexedDB Sync Queue Loses Writes on Conflict
 
-**Risk Level:** MEDIUM
-**Description:** The Background Sync API (for automatic retry of failed uploads) is only supported in Chrome-based browsers. Safari and Firefox don't support it. App behavior differs dramatically across browsers.
+**Severity:** MODERATE
+**Applies to:** Offline PWA
 
-**Warning Signs:**
-- Uploads retry on Chrome but not Safari
-- Users on iOS report different behavior than Android users
-- "Sync when online" feature only works sometimes
+**What goes wrong:** Tenant creates a ticket offline. Goes online. Another admin has modified the related data. Sync queue tries to POST the ticket but the referenced data has changed. Without conflict resolution, the write either fails silently (data loss) or creates inconsistent state.
+
+For this app specifically: ticket creation is the primary offline use case. Tickets reference a unit_id (stable) and contain text/photos (no conflicts). The risk is lower than general-purpose offline sync but still present.
 
 **Prevention:**
-1. **Don't rely on Background Sync API alone** - Implement foreground retry with visual indicator as primary mechanism.
-2. **Use polling fallback** - When app is open, periodically check for pending uploads and retry.
-3. **Persist upload queue in IndexedDB** - Survive app restarts, browser doesn't matter.
-4. **Test on both Android Chrome and iOS Safari** - These are the realistic device scenarios.
+1. **Use client-generated UUIDs** for new records. Prevents duplicate creation on retry.
+2. **Last-write-wins is acceptable** for this domain. Tenants create tickets, admins respond. No concurrent edits on the same entity.
+3. **Validate on sync, not on create.** Store locally without validation, validate when syncing. If validation fails, show "could not sync" with option to edit and retry.
+4. **Queue operations as idempotent.** POST with client-generated ID = PUT-or-create. Safe to retry.
+5. **Store pending items visually distinct.** Tenant sees "Ticket (pending sync)" until confirmed.
 
-**Phase to Address:** Phase 1 (Foundation) - Upload architecture must work without Background Sync.
-
-**Sources:**
-- [Can I Use: Background Sync](https://caniuse.com/background-sync)
-- [MDN: Background Synchronization API](https://developer.mozilla.org/en-US/docs/Web/API/Background_Synchronization_API)
+**Phase to address:** Offline PWA -- sync queue implementation.
 
 ---
 
-### 8. Large Images Consume Data Plans and Battery
+### 7. Middleware Routing Gap Between /dashboard and /tenant
 
-**Risk Level:** MEDIUM
-**Description:** Modern phone cameras produce 3-12MB images. Uploading uncompressed over mobile data drains battery, consumes expensive data plans, and fails on slow connections.
+**Severity:** MODERATE
+**Applies to:** Tenant Portal
 
-**Warning Signs:**
-- Uploads take minutes on mobile network
-- Imeri complains about data usage
-- Battery drains quickly when using app
-- Upload timeout errors
+**What goes wrong:** Current middleware (`src/middleware.ts`) protects `/dashboard/*` (internal only) and `/contractor/*` (magic link). Adding `/tenant/*` requires careful middleware updates. If misconfigured:
+- Tenant accesses `/dashboard/` (admin area) -- data leak
+- Tenant gets redirected to wrong login page
+- Tenant session not validated on `/tenant/*` routes
+
+**Evidence from codebase:**
+- `middleware.ts` line 68-72: `/dashboard` routes check `isInternalRole()` -- tenants would be rejected
+- `middleware.ts` config.matcher: `['/dashboard/:path*', '/api/((?!auth).*)', '/contractor/:path*']` -- no `/tenant/` matcher
+- Session validation returns `roleName` which could be 'tenant' -- properly identified but not routed
 
 **Prevention:**
-1. **Compress to 720px width max** - Sufficient quality for documentation, ~100KB vs 5MB original.
-2. **Use lossy compression (80% quality)** - Imperceptible quality loss, significant size reduction.
-3. **Convert to WebP where supported** - 30% smaller than JPEG at same quality.
-4. **Show compression happening** - "Optimizing photo..." so user knows something is happening.
-5. **Allow original upload as option** - For cases where full resolution needed.
+1. **Add `/tenant/:path*` to middleware config.matcher.**
+2. **Add `handleTenantRoute()` handler** similar to `handleContractorRoute()`.
+3. **Verify tenant role explicitly:** `if (session.roleName !== 'tenant') redirect to /login`.
+4. **Test cross-path access:** Tenant hitting `/dashboard/*` must get redirected, not 403.
+5. **Separate login flow for tenants.** Tenants use email+password (already in login route). Add `/login?mode=tenant` or separate `/tenant/login` page.
 
-**Phase to Address:** Phase 1 (Foundation) - Build into upload pipeline from start.
-
-**Sources:**
-- [Cloudinary: Image Compression Before Upload](https://cloudinary.com/guides/image-effects/best-ways-to-compress-images-before-upload-in-javascript)
-- [Imagify: Optimize Images for Mobile](https://imagify.io/blog/how-to-optimize-images-for-mobile/)
+**Phase to address:** Tenant Portal -- first implementation step.
 
 ---
 
-### 9. No Offline Indicator
+### 8. iOS Service Worker Cache Eviction Breaks Offline
 
-**Risk Level:** LOW
-**Description:** Users don't know if they're offline or if the app is broken. They keep trying actions that won't work, get frustrated, and blame the app.
+**Severity:** MODERATE
+**Applies to:** Offline PWA
 
-**Warning Signs:**
-- User taps save repeatedly thinking it's not working
-- Confusion between "saving locally" and "saved to server"
-- Support questions about "why isn't it uploading"
+**What goes wrong:** iOS Safari aggressively evicts service worker caches. Known WebKit bugs (Bug 190269, 199110) cause cache contents to disappear unexpectedly. PWA installed to home screen may lose all cached data after a few days of inactivity. Users who rely on offline access find the app broken after a weekend.
+
+This is particularly relevant because tenants are "mobile-first, from home" users who may use iOS devices.
 
 **Prevention:**
-1. **Always show connection status** - Small indicator: "Online" / "Offline - changes saved locally"
-2. **Queue count visible** - "3 items waiting to sync"
-3. **Last sync time** - "Last synced: 5 minutes ago"
-4. **Different UI states** - Pending items visually distinct from synced items.
+1. **Never assume cache persistence.** Always have a network fallback.
+2. **Store critical data in IndexedDB, not Cache API.** IndexedDB is more persistent on iOS.
+3. **Show clear state when cache is empty.** "Loading data..." not blank screen.
+4. **Re-cache on every app open.** Don't rely on stale cache; refresh data proactively.
+5. **Test on actual iOS devices.** Simulator doesn't reproduce eviction behavior.
+6. **Set realistic expectations.** Offline support means "survives brief connectivity loss," not "works for days offline."
 
-**Phase to Address:** Phase 1 (Foundation) - Part of core offline-first architecture.
-
-**Sources:**
-- [API Ninjas: Designing for Poor Connectivity](https://www.api-ninjas.com/blog/designing-apps-with-poor-connectivity-in-mind)
+**Phase to address:** Offline PWA -- testing and validation phase.
 
 ---
 
-## UX Pitfalls for Non-Technical Users
+### 9. UX Refactoring Breaks Existing Workflows
 
-### 10. Technical Error Messages
+**Severity:** MODERATE
+**Applies to:** UX Polish
 
-**Risk Level:** HIGH
-**Description:** Error messages like "Error 500: Internal Server Error" or "Network request failed" mean nothing to Imeri. He won't know if he did something wrong, if the app is broken, or what to do next.
+**What goes wrong:** The UX polish phase fixes known issues (invoice modal uses `prompt()`, checklist titles show "Item 1", delivery history missing). Refactoring these touches components used by admins daily. Changing the invoice linking flow, for example, could break the accounting workflow that the 2 internal users rely on.
 
-**Warning Signs:**
-- User screenshots error and asks "what does this mean?"
-- User gives up when error appears instead of retrying
-- User blames himself for "breaking" the app
-- Support questions about every error type
+**Evidence from codebase (known UAT issues):**
+- Invoice linking needs proper modal UI (currently uses `prompt()`)
+- Checklist item titles need template lookup (shows "Item 1", "Item 2")
+- Property-level delivery history page not built
+- These touch: `InvoiceForm`, `ChecklistExecution`, `DeliveryList` components
 
 **Prevention:**
-1. **Human-readable messages only** - "Could not save. Check your internet connection and try again."
-2. **Always include action** - Every error message has a button: "Try Again" / "Save Offline" / "Contact Support"
-3. **Never blame user** - "Something went wrong" not "You entered invalid data"
-4. **No error codes visible** - Log codes for debugging, show friendly message to user.
-5. **Test messages with Imeri** - Show him error mockups, ask what he'd do. Iterate.
+1. **Test existing behavior first.** Before changing the invoice modal, document exactly how it works now. Verify the fix preserves the workflow.
+2. **Refactor incrementally.** One component per plan, not a sweeping UI overhaul.
+3. **Don't change patterns.** The codebase uses `'use client'` + fetch-to-API consistently. Don't introduce new patterns (React Query, Zustand) during polish.
+4. **Keep the same URLs.** Don't rename routes during polish. Admin bookmarks and muscle memory depend on current paths.
+5. **Regression test with both admin roles** (kewa + imeri) after each change.
 
-**Phase to Address:** Phase 1 (Foundation) - Error handling is core UX.
-
-**Sources:**
-- [Smashing Magazine: Error States for Mobile Apps](https://www.smashingmagazine.com/2016/09/how-to-design-error-states-for-mobile-apps/)
-- [NN/G: Error Message Guidelines](https://www.nngroup.com/articles/error-message-guidelines/)
+**Phase to address:** UX Polish -- all plans in this phase.
 
 ---
 
-### 11. Too Many Options and Settings
+### 10. Swiss DSG Tenant Data Handling Requirements
 
-**Risk Level:** HIGH
-**Description:** Every setting, option, and configuration adds cognitive load. Non-technical users are paralyzed by choice and intimidated by settings screens. The app should make decisions for them.
+**Severity:** MODERATE
+**Applies to:** Tenant Portal
 
-**Warning Signs:**
-- Imeri never changes any settings
-- User asks "which option should I pick?"
-- Features go unused because they require configuration
-- Onboarding takes more than 2 minutes
+**What goes wrong:** The Swiss Federal Act on Data Protection (FADP/DSG), in force since September 2023, requires transparency about personal data processing. Tenant portal handles personal data (name, email, unit address, communication content). Without compliance:
+- Tenants must be informed how their data is processed (transparency principle)
+- Tenants have right to access their data and right to object
+- Data processing must be documented in a register of processing activities
+- Penalties up to CHF 250,000 target the managing director personally
 
 **Prevention:**
-1. **Make decisions, don't offer choices** - Pick reasonable defaults, hide advanced options.
-2. **No settings screen for v1** - Everything has sensible defaults.
-3. **Progressive disclosure** - Basic view by default, reveal complexity only when needed.
-4. **One clear path** - Each screen has one obvious action to take.
-5. **Remove features that need explanation** - If it needs a tutorial, it's too complex.
+1. **Add privacy notice to tenant registration.** Inform what data is collected, why, and how long it's retained.
+2. **Implement data export for tenants.** Tenant can download their data (tickets, communications).
+3. **Limit data collection.** Only collect what's needed for ticket management. No tracking, no analytics on tenant behavior.
+4. **Audit log tenant data access.** The audit system already exists -- ensure tenant data queries are logged.
+5. **Data retention policy.** Define how long tenant data is kept after move-out. Auto-delete or anonymize after period.
+6. **This is NOT a blocker.** Privacy notice + minimal data collection is sufficient for a small property management app. Don't over-engineer a GDPR-style consent management system.
 
-**Phase to Address:** All phases - Constant discipline required. Review every feature for complexity.
-
-**Sources:**
-- [AlterSquare: Construction Tech UX](https://altersquare.medium.com/why-construction-tech-ux-is-different-designing-for-jobsite-realities-fef93f431721)
+**Phase to address:** Tenant Portal -- include privacy notice in registration flow.
 
 ---
 
-### 12. Requiring Account Creation / Email
+### 11. Offline Queue Grows Unbounded with Media
 
-**Risk Level:** MEDIUM
-**Description:** Imeri doesn't want to create an account, verify an email, or remember a username. Any friction before using the app risks abandonment. He has one email he checks rarely.
+**Severity:** MODERATE
+**Applies to:** Offline PWA
 
-**Warning Signs:**
-- User never completes signup
-- "Forgot password" requests
-- Confusion about username vs email
-- Account verification emails go to spam
+**What goes wrong:** Tenant creates tickets with photos while offline. Each photo is 1-5MB. IndexedDB stores the queue. After creating 10 tickets with photos, the queue is 50MB+. Safari's IndexedDB quota is ~50MB. Queue writes fail silently. Tenant's tickets are lost.
 
 **Prevention:**
-1. **PIN-only authentication** - No email, no username, no password. Just PIN.
-2. **Pre-create accounts** - You create Imeri's account, give him PIN. Zero signup friction.
-3. **Device-based identity** - Device is the identity, PIN is the lock. No "login" needed.
-4. **No email verification** - Not needed for 2-user app.
+1. **Compress photos before queueing.** Target 200KB max per photo (720px, 70% quality JPEG).
+2. **Limit offline queue size.** Show warning at 80% capacity: "Offline storage almost full. Connect to sync."
+3. **Sync photos separately from ticket data.** Queue the ticket text immediately (tiny), queue photos as separate sync items. If photo fails, ticket still exists.
+4. **Monitor quota.** Use `navigator.storage.estimate()` to check available space before writing.
+5. **Clear queue on successful sync.** Don't keep synced items in IndexedDB.
 
-**Phase to Address:** Phase 1 (Foundation) - Simple auth from start.
+**Phase to address:** Offline PWA -- sync queue implementation.
 
 ---
 
-### 13. Assuming Literacy with German Technical Terms
+### 12. Three Auth Methods Sharing One Session System
 
-**Risk Level:** MEDIUM
-**Description:** Technical UI terms ("synchronisieren," "hochladen," "archivieren") may not be in Imeri's working vocabulary, especially for Swiss German speakers who encounter Standard German tech terms.
+**Severity:** LOW
+**Applies to:** Tenant Portal
 
-**Warning Signs:**
-- User asks what buttons mean
-- Wrong button pressed due to confusion
-- User avoids features with unfamiliar names
+**What goes wrong:** The app has three auth methods: PIN (internal), email+password (tenants), magic-link (contractors). All create the same session JWT format. This works but creates edge cases:
+- What if a contractor's email is also registered as a tenant? Two identities, one email.
+- Legacy `role` field in JWT is forced to 'kewa' or 'imeri' even for tenants (see `register/route.ts` line 121: `const legacyRole = roleName === 'accounting' ? 'kewa' : 'imeri'`).
+- Session validation (`session.ts` line 92-93) rejects JWTs where `role` is not 'kewa' or 'imeri' -- this would break tenant sessions.
+
+**Evidence from codebase:**
+- `src/lib/session.ts` line 92: `if (sessionPayload.role !== 'kewa' && sessionPayload.role !== 'imeri') return null`
+- `src/app/api/auth/register/route.ts` line 121: Forces legacy role to 'imeri' for tenants
+- This means tenant sessions use `role: 'imeri'` (property_manager role) as legacy compat -- misleading but functional
 
 **Prevention:**
-1. **Use icons with labels** - Camera icon + "Foto" not just "Anhang hinzufugen"
-2. **Test labels with Imeri** - Show mockups, ask what he thinks each button does.
-3. **Use action verbs** - "Speichern" (save) not "Synchronisieren" (sync)
-4. **Consider Swiss German option** - "Uflade" instead of "Hochladen" if feasible.
+1. **Update session validation to accept all roles.** Remove the 'kewa'/'imeri' restriction. Use `roleName` for authorization, not legacy `role`.
+2. **Or keep the hack.** The legacy `role` field is only used for backward compat. The `roleName` field already carries 'tenant'. Just document that `role: 'imeri'` for tenants is intentional legacy compat.
+3. **Prevent email collision.** Check both `users` table and `partners` table when registering a tenant. Disallow email that exists as contractor.
 
-**Phase to Address:** Phase 1 (Foundation) - Part of UI design.
+**Phase to address:** Tenant Portal -- session system update early in implementation.
 
 ---
 
-## Technical Pitfalls
+### 13. Workbox Precache Bloats Initial Install
 
-### 14. Building Desktop-First, Then "Making It Mobile"
+**Severity:** LOW
+**Applies to:** Offline PWA
 
-**Risk Level:** HIGH
-**Description:** Designing on desktop monitors leads to information-dense layouts that don't translate to mobile. Retrofitting mobile responsiveness onto desktop-first designs results in cramped, unusable mobile experiences.
-
-**Warning Signs:**
-- Desktop version works great, mobile is painful to use
-- "Just make it responsive" conversations
-- Tables and multi-column layouts on mobile
-- Horizontal scrolling required
+**What goes wrong:** Workbox's `precacheAndRoute(self.__WB_MANIFEST)` caches all build assets. A Next.js 16 app with 60+ pages and chunked builds can have 5-15MB of precache. Tenant on mobile data waits minutes for initial install. On iOS, this may exceed the cache budget.
 
 **Prevention:**
-1. **Design mobile-first, literally** - Start Figma/sketches at 375px width.
-2. **Develop mobile-first** - Test every feature on phone before desktop.
-3. **Imeri's phone is the reference device** - Design for his actual screen size.
-4. **No tables** - Use cards/lists that stack vertically.
-5. **Touch-first interactions** - Tap/swipe, not hover/click.
+1. **Don't precache everything.** Only precache: app shell (layout, navigation), tenant pages, critical API responses.
+2. **Use runtime caching for admin pages.** Admin pages should not be precached -- they are not needed offline.
+3. **Lazy-cache tenant routes.** Cache on first visit with `StaleWhileRevalidate`, not on install.
+4. **Monitor precache size.** Keep under 2MB for initial install. Log precache manifest size in build.
+5. **Use `navigateFallback` for offline navigation.** Cache one offline fallback page, not every route.
 
-**Phase to Address:** Phase 1 (Foundation) - Must be development culture from day 1.
-
-**Sources:**
-- [Triare: Mobile-First Design 2025](https://triare.net/insights/mobile-first-design-2025/)
+**Phase to address:** Offline PWA -- service worker configuration.
 
 ---
 
-### 15. Over-Engineering the Building Visualization
+### 14. prompt() and alert() Still in Codebase
 
-**Risk Level:** MEDIUM
-**Description:** The "graphical building visualization" requirement can lead to complex SVG/Canvas implementations that are fragile, hard to maintain, and don't add proportional value over simple lists.
+**Severity:** LOW
+**Applies to:** UX Polish
 
-**Warning Signs:**
-- Weeks spent on visualization while core features wait
-- Visualization doesn't work on all screen sizes
-- Touch interactions on visualization are buggy
-- Maintaining visualization consumes ongoing effort
+**What goes wrong:** The known UAT issue mentions "invoice linking needs proper modal UI (currently uses prompt())". Using `prompt()` and `alert()` in a PWA is problematic because:
+- They block the main thread
+- They look different on every browser/OS
+- Some PWA contexts suppress them entirely
+- They cannot be styled or localized
+- They break the mobile UX feel
+
+**Evidence from codebase (STATE.md):**
+- Invoice linking uses `prompt()` for modal input
+- Likely `alert()` used for error/confirmation dialogs elsewhere
 
 **Prevention:**
-1. **Start with simple grid** - 13 apartments in a CSS grid with tap targets. No SVG.
-2. **Add visual polish later** - Get functionality working first.
-3. **Keep visualization optional** - List view must always work.
-4. **Set time-box** - Maximum 1 week on visualization. If not done, ship grid.
+1. **Replace all `prompt()` with React modal components.** Use the existing Card/Modal pattern.
+2. **Replace all `alert()` with toast notifications.** Non-blocking, dismissible.
+3. **Search codebase for all `prompt(`, `alert(`, `confirm(`.** Replace systematically.
+4. **This is the primary UX Polish deliverable.** Not a surprise pitfall, just documenting it as part of known debt.
 
-**Phase to Address:** Phase 2 or later - After core task management works.
+**Phase to address:** UX Polish -- targeted fixes.
 
 ---
 
-### 16. Not Handling Camera Permissions Gracefully
+## Integration Pitfalls (Cross-Cutting)
 
-**Risk Level:** MEDIUM
-**Description:** First-time camera permission prompts are confusing. If user denies, app breaks. If permission is revoked in settings, app shows cryptic errors.
+### Service Worker Scope Collision
 
-**Warning Signs:**
-- "Camera doesn't work" support requests
-- User denied permission once, now can't figure out how to enable
-- Different behavior across browsers/devices
+**What:** The current `sw.js` is registered at the root scope `/`. Workbox also needs root scope. Having two registrations or conflicting scopes causes undefined behavior.
+
+**Prevention:** Always use ONE service worker at root scope. Merge all functionality into that single file.
+
+### Offline + Auth = Session Expiry While Offline
+
+**What:** Session JWT expires after 7 days (`SESSION_EXPIRATION_SECONDS = 60 * 60 * 24 * 7`). If tenant is offline for extended period, their session expires. When they go online to sync, all queued requests fail with 401. Queue is lost.
 
 **Prevention:**
-1. **Explain before prompting** - "To add photos, we need camera access" with "Allow" button that triggers permission.
-2. **Handle denial gracefully** - Show instructions to enable in settings, not error message.
-3. **Offer file picker fallback** - If camera denied, allow selecting from gallery.
-4. **Test permission flows** - Specifically test: first grant, first deny, revoked in settings.
+- Check session validity before attempting sync
+- If expired, prompt re-login, then replay queue
+- Store queue with enough context to retry after re-auth
+- Consider longer session for tenant role (30 days) since they access less frequently
 
-**Phase to Address:** Phase 1 (Foundation) - Part of photo upload feature.
+### Offline + Tenant Isolation = Cached Data Exposure
 
----
+**What:** If service worker caches API responses aggressively, a shared/public device could expose one tenant's cached data to another tenant logging in on the same device.
 
-## Pitfall Prevention Checklist
+**Prevention:**
+- Clear all caches on logout (`caches.delete()` + IndexedDB clear)
+- Include user identity in cache keys
+- Never cache sensitive tenant data in the service worker Cache API -- use IndexedDB with explicit user scoping
 
-### Phase 1: Foundation
-- [ ] Offline-first architecture with IndexedDB queue
-- [ ] Client-side image compression (720px max, WebP)
-- [ ] 76dp minimum touch targets
-- [ ] Flat data model with soft deletes
-- [ ] Human-readable error messages with retry actions
-- [ ] Connection status indicator
-- [ ] Mobile-first development (test on phone first)
-- [ ] PIN-only auth with device storage
-- [ ] Camera permission handling with fallback
-- [ ] No Background Sync API dependency
+### Push Notifications for Tenants
 
-### Phase 2: Audio Features (if included)
-- [ ] Voice input as enhancement, not requirement
-- [ ] Text input always available as fallback
-- [ ] Whisper API for transcription (not Web Speech API)
-- [ ] User confirmation before saving transcription
-- [ ] Test with Imeri's specific dialect
-- [ ] Store original audio for playback
+**What:** The existing push notification system is built for internal users. Tenants need notifications too (ticket response, maintenance update). But tenant notification preferences, subscription management, and quiet hours need separate handling.
 
-### All Phases
-- [ ] No settings screens or configuration
-- [ ] One clear action per screen
-- [ ] Icons with simple labels
-- [ ] Test every feature with Imeri before shipping
-- [ ] No technical jargon in any user-facing text
+**Prevention:**
+- Extend `notifications` table to support tenant user IDs
+- Add tenant-specific event triggers (ticket responded, maintenance scheduled)
+- Tenant notification preferences should be minimal (on/off, not granular)
+- Don't overcomplicate -- tenants get email notifications as fallback
 
 ---
 
-## Sources Summary
+## Pitfall Prevention Checklist by Phase
 
-### Primary (HIGH Confidence)
-- [MDN Web Docs: Web Speech API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Speech_API)
-- [MDN Web Docs: Background Synchronization API](https://developer.mozilla.org/en-US/docs/Web/API/Background_Synchronization_API)
-- [W3C WCAG: Target Size](https://www.w3.org/WAI/WCAG21/Understanding/target-size.html)
-- [Can I Use: Background Sync](https://caniuse.com/background-sync)
-- [Can I Use: Speech Recognition](https://caniuse.com/speech-recognition)
+### Tenant Portal Phase
+- [ ] Application-layer data isolation (not RLS) -- Pitfall #1, #3
+- [ ] Separate `/api/tenant/` route namespace -- Pitfall #5
+- [ ] Middleware `/tenant/*` matcher with role check -- Pitfall #7
+- [ ] Session validation accepts tenant role -- Pitfall #12
+- [ ] Privacy notice for tenant registration -- Pitfall #10
+- [ ] Tenant query functions always scope by user_id -- Pitfall #1
+- [ ] Cross-path access test (tenant cannot reach /dashboard) -- Pitfall #7
 
-### Secondary (MEDIUM Confidence)
-- [Smashing Magazine: Offline-Friendly Image Upload](https://www.smashingmagazine.com/2025/04/building-offline-friendly-image-upload-system/)
-- [LogRocket: Offline-first frontend apps 2025](https://blog.logrocket.com/offline-first-frontend-apps-2025-indexeddb-sqlite/)
-- [Arxiv: Does Whisper Understand Swiss German?](https://arxiv.org/abs/2404.19310)
-- [NN/G: Touch Target Size](https://www.nngroup.com/articles/touch-target-size/)
-- [NN/G: Error Message Guidelines](https://www.nngroup.com/articles/error-message-guidelines/)
-- [AlterSquare: Construction Tech UX](https://altersquare.medium.com/why-construction-tech-ux-is-different-designing-for-jobsite-realities-fef93f431721)
-- [Cloudinary: Image Compression](https://cloudinary.com/guides/image-effects/best-ways-to-compress-images-before-upload-in-javascript)
+### Offline PWA Phase
+- [ ] Service worker merge (InjectManifest, not GenerateSW) -- Pitfall #2
+- [ ] Push notification handlers preserved -- Pitfall #2
+- [ ] App shell precaching (limited scope) -- Pitfall #13
+- [ ] API response caching with StaleWhileRevalidate -- Pitfall #4
+- [ ] IndexedDB sync queue with client UUIDs -- Pitfall #6
+- [ ] Photo compression before queueing -- Pitfall #11
+- [ ] Session expiry handling in sync queue -- Integration pitfall
+- [ ] Cache cleared on logout -- Integration pitfall
+- [ ] iOS device testing -- Pitfall #8
 
-### Tertiary (Supporting Research)
-- [FHNW: Speech Recognition for Swiss German](https://www.fhnw.ch/en/about-fhnw/schools/school-of-engineering/institutes/research-projects/speech-recognition-for-swiss-german)
-- [Wultra: Secure PIN Code](https://www.wultra.com/secure-pin-code-for-financial-apps)
-- [Portotheme: File Upload Features 2025](https://www.portotheme.com/10-file-upload-system-features-every-developer-should-know-in-2025/)
+### UX Polish Phase
+- [ ] Replace all prompt()/alert()/confirm() -- Pitfall #14
+- [ ] One component per refactoring step -- Pitfall #9
+- [ ] Test with both admin roles after each change -- Pitfall #9
+- [ ] Preserve existing URL structure -- Pitfall #9
+- [ ] No new state management patterns -- Pitfall #9
 
 ---
 
-**Research Confidence Breakdown:**
-- Mobile upload pitfalls: HIGH (multiple authoritative sources, well-documented patterns)
-- Swiss German speech recognition: HIGH (academic research papers, benchmarks available)
-- Touch target requirements: HIGH (W3C standards, Google guidelines)
-- Non-technical user UX: MEDIUM (best practice articles, construction-specific research limited)
-- PIN authentication: MEDIUM (security best practices, context-specific recommendations)
+## Sources
 
-**Research Date:** 2026-01-16
-**Valid Until:** 2026-04-16 (3 months - stable recommendations, browser support may evolve)
+### Primary (HIGH Confidence -- Codebase Analysis)
+- `src/middleware.ts` -- Auth routing, role checking, matcher config
+- `src/lib/session.ts` -- JWT creation, validation, role restrictions
+- `src/lib/permissions.ts` -- RBAC, route permissions, role hierarchy
+- `src/app/api/auth/login/route.ts` -- PIN + email auth flows
+- `src/app/api/auth/register/route.ts` -- Tenant registration with legacy role mapping
+- `src/lib/supabase/server.ts` -- Anon key usage, no auth integration
+- `public/sw.js` -- Push-only service worker (47 lines)
+- `supabase/migrations/004_disable_rls.sql` -- RLS disabled, GRANT ALL to anon
+- `supabase/migrations/029_rls_policies.sql` -- RLS policies using auth.uid() (inactive)
+
+### Secondary (MEDIUM Confidence -- Official Documentation)
+- [Next.js PWA Guide](https://nextjs.org/docs/app/guides/progressive-web-apps) -- Official Next.js PWA support
+- [Supabase RLS Docs](https://supabase.com/docs/guides/database/postgres/row-level-security) -- RLS with custom auth
+- [Supabase Custom Auth Discussion](https://github.com/orgs/supabase/discussions/1849) -- Integrating custom auth with RLS
+- [Serwist (next-pwa successor)](https://javascript.plainenglish.io/building-a-progressive-web-app-pwa-in-next-js-with-serwist-next-pwa-successor-94e05cb418d7) -- Modern service worker tooling
+
+### Tertiary (MEDIUM Confidence -- Community/Research)
+- [PWA + Next.js 15/16: RSC & Offline-First](https://medium.com/@mernstackdevbykevin/progressive-web-app-next-js-15-16-react-server-components-is-it-still-relevant-in-2025-4dff01d32a5d) -- RSC caching pitfalls
+- [LogRocket: Next.js 16 PWA with offline support](https://blog.logrocket.com/nextjs-16-pwa-offline-support) -- Practical implementation guide
+- [Tenant Data Isolation Patterns](https://propelius.ai/blogs/tenant-data-isolation-patterns-and-anti-patterns) -- Multi-tenant anti-patterns
+- [Tenant Isolation in Multi-Tenant Systems](https://securityboulevard.com/2025/12/tenant-isolation-in-multi-tenant-systems-architecture-identity-and-security/) -- Security boundaries
+- [Swiss FADP Data Protection 2025](https://iclg.com/practice-areas/data-protection-laws-and-regulations/switzerland) -- DSG compliance requirements
+- [iOS PWA Limitations 2025](https://ravi6997.medium.com/pwas-on-ios-in-2025-why-your-web-app-might-beat-native-0b1c35acf845) -- iOS cache eviction bugs
+- [Offline-First Frontend Apps 2025](https://blog.logrocket.com/offline-first-frontend-apps-2025-indexeddb-sqlite/) -- IndexedDB sync patterns
+- [Data Sync in PWAs: Conflict Resolution](https://gtcsys.com/comprehensive-faqs-guide-data-synchronization-in-pwas-offline-first-strategies-and-conflict-resolution/) -- Sync queue strategies
+- [Building Native-Like Offline Experience in Next.js PWAs](https://www.getfishtank.com/insights/building-native-like-offline-experience-in-nextjs-pwas) -- Multi-layered offline architecture
+
+---
+
+**Research Confidence:**
+- Tenant isolation pitfalls: HIGH (verified against actual codebase -- the RLS gap is provably real)
+- Service worker merge pitfalls: HIGH (browser limitation -- one SW per scope is documented spec)
+- Offline + Server Components: HIGH (architectural incompatibility is well-documented)
+- Swiss DSG requirements: MEDIUM (legal requirements verified, specific applicability needs legal review)
+- iOS cache eviction: MEDIUM (known WebKit bugs, device-specific testing needed)
+- Sync conflict resolution: MEDIUM (patterns well-documented, specific risk is low for this use case)
+
+**Research Date:** 2026-01-29

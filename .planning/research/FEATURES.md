@@ -1,347 +1,347 @@
-# Features Research: v2.2 Extensions
+# Feature Landscape: v3.0 Tenant Portal, Offline PWA, UX Polish
 
-**Domain:** Property renovation management (Swiss context)
-**Researched:** 2026-01-25
-**Confidence:** MEDIUM (WebSearch-based, verified against industry patterns)
+**Domain:** Residential property management (Swiss context)
+**Researched:** 2026-01-29
+**Confidence:** MEDIUM-HIGH (WebSearch ecosystem survey + codebase analysis)
 
 ## Executive Summary
 
-The v2.2 extensions (Change Orders, Supplier Module, Inspection Workflow, Push Notifications, Knowledge Base) are well-established patterns in construction and property management software. For KEWA's 2-user context with external contractor integration, the focus should be on implementing table stakes features that integrate cleanly with the existing v2.0/v2.1 infrastructure. The complexity is manageable because most patterns already exist in the codebase (work order status workflows, PDF generation, contractor portal, quality gates).
+The v3.0 milestone covers three distinct feature areas: a Tenant Portal for self-service interactions, Offline PWA support for field workers, and UX Polish across the existing app. Research shows tenant self-service portals are now table stakes in property management software (TenantCloud, Buildium, Plentific all offer them). Offline PWA is technically feasible with Next.js 16 + Supabase via IndexedDB sync queues, but requires significant infrastructure work. UX Polish addresses known issues from v2.2 UAT and common mobile-first patterns.
 
-**Key insight:** Change Orders and Inspection Workflow are closely related to existing Work Orders. They extend rather than replace current functionality.
+**Key insight for KEWA context:** The tenant portal should be minimal. KEWA manages residential tenants in Switzerland, not commercial properties. Tenants need to report issues and communicate -- they do NOT need rent payment, lease signing, or community features. The Swiss aroov platform (Garaio REM + Mobiliar) confirms the core Swiss tenant portal pattern: damage reporting, communication, document access.
+
+**Existing infrastructure to leverage:**
+- Contractor magic-link portal (portal routes, token auth) -- extend for tenant auth
+- Comment system (entity-based comments with visibility control) -- extend for tenant messages
+- Service worker (push notifications only) -- extend with caching + offline support
+- `tenant` role already exists in RBAC with `TenantUser` junction table
+- Unit already has `tenant_email`, `tenant_phone`, `tenant_name` fields
+- RegisterRequest already supports `roleName: 'tenant'` with optional `unitId`
 
 ---
 
-## Change Orders
+## 1. Tenant Portal
 
-Change orders are formal amendments to renovation contracts that modify scope, cost, or schedule during active projects. Critical for renovation work where unforeseen conditions frequently arise.
+Self-service portal where tenants can report maintenance issues, communicate with KEWA, and access their unit information. Tenants authenticate via email (already supported in auth types) and see only their own unit data.
 
 ### Table Stakes
 
-| Feature | Description | Complexity | Notes |
-|---------|-------------|------------|-------|
-| Change order creation | Create CO from existing work order or project | Low | Links to work_orders table |
-| Scope description | Text field describing what changed | Low | Required field |
-| Cost impact tracking | Original vs. revised cost with delta calculation | Low | Uses existing cost fields pattern |
-| Schedule impact | Days added/removed, new dates | Low | Uses existing date patterns |
-| Reason classification | Enum: owner_request, unforeseen_conditions, design_error, site_conditions | Low | Standard categories |
-| Approval workflow | Status: draft > submitted > approved/rejected | Medium | Similar to invoice approval |
-| Linked entities | Connect to work order, project, partner | Low | Foreign keys |
-| Audit trail | Who created, submitted, approved, when | Low | Existing audit_log pattern |
+Features tenants expect from any property management portal. Missing = portal feels useless.
+
+| Feature | Description | Complexity | Dependencies | Notes |
+|---------|-------------|------------|--------------|-------|
+| Tenant registration + login | Email/password registration, scoped to unit | Low | Existing `RegisterRequest` with `roleName: 'tenant'`, `unitId` | Auth infrastructure already built; needs tenant login UI |
+| Maintenance ticket creation | Submit issue with category, description, optional photo | Medium | New `tickets` table; existing media system | Core value prop of tenant portal |
+| Ticket status tracking | Tenant sees ticket status: submitted > acknowledged > in_progress > resolved | Low | Status enum on tickets table | Mirrors work order status pattern |
+| Ticket photo upload | Attach photos showing the issue | Low | Existing Supabase storage + media pattern | Tenants upload from mobile camera |
+| Ticket communication thread | Message back-and-forth on a ticket between tenant and KEWA | Medium | Extend existing comment system with `entity_type: 'ticket'` | Existing `CommentVisibility` supports internal/shared |
+| Unit info view | Tenant sees their unit details, address, contact info for KEWA | Low | Read-only view of unit data filtered by `tenant_users` junction | Already have unit data model |
+| Tenant dashboard | Landing page showing open tickets, recent messages, unit info | Low | Aggregation query | Simple overview page |
+| Email notification on ticket updates | Tenant gets email when ticket status changes or KEWA replies | Medium | New email sending capability (not yet in codebase) | Critical -- tenants won't check portal constantly |
+| German language UI | Portal in German (Kundenportal, Schadensmeldung, etc.) | Low | Already German throughout app | Swiss tenant context |
+| Mobile-responsive layout | Portrait-first layout for phone usage from home | Low | Tailwind responsive already in use | Tenants = mobile-first from home |
 
 ### Differentiators
 
-| Feature | Description | Complexity | Notes |
-|---------|-------------|------------|-------|
-| Photo evidence attachment | Before/after photos documenting change reason | Low | Existing media system |
-| Counter-offer on changes | Contractor can propose alternative cost/scope | Medium | Similar to work order counter-offers |
-| Change order PDF generation | Formal document for signatures | Medium | Extend existing PDF pattern |
-| Cumulative CO tracking | Dashboard showing total COs per project, net budget impact | Medium | Aggregation view |
-| Client approval via portal | External approval link (like work order magic link) | Medium | Extend contractor portal pattern |
+Features that elevate the portal beyond basic. Not expected, but valued.
+
+| Feature | Value Proposition | Complexity | Dependencies | Notes |
+|---------|-------------------|------------|--------------|-------|
+| Ticket category with smart routing | Pre-defined categories (Heizung, Wasser, Elektrik, Allgemein) auto-suggest priority | Low | Category enum on tickets | Helps KEWA triage faster |
+| Document access | Tenant can view shared documents (house rules, Hausordnung) | Medium | Extend knowledge base with `tenant_visible` flag | Similar to contractor-visible KB articles |
+| Push notifications for tenants | Browser push when ticket status changes | Low | Existing push notification infrastructure | Service worker already deployed |
+| Ticket urgency levels | Tenant selects urgency (Notfall / Dringend / Normal) | Low | Priority enum on tickets | Helps KEWA prioritize |
+| Tenant profile self-service | Update phone number, email, emergency contact | Low | Update user record | Reduces admin data entry |
+| Announcement board | KEWA posts announcements visible to all tenants (Hausmitteilung) | Medium | New announcements entity or reuse KB | Building-wide communication |
+| Ticket-to-work-order conversion | KEWA converts tenant ticket into internal work order with one click | Medium | Link tickets.id to work_orders | Key workflow: ticket report -> work order -> contractor assignment |
+| Seasonal info display | Show heating oil status, building maintenance schedule | Low | Read from existing supplier/schedule data | Swiss tenants care about Heizung |
 
 ### Anti-Features
 
-| Feature | Why Not |
-|---------|---------|
-| Complex multi-tier approval chains | Only 2 internal users; overkill |
-| Automated CO generation from RFIs | No RFI system exists; manual control preferred |
-| Legal contract amendment clauses | Out of scope; focus on operational tracking |
-| Change order insurance/bonding | Financial instruments beyond operational scope |
+Features to deliberately NOT build. Either overkill for KEWA or out of scope.
+
+| Anti-Feature | Why Avoid | What Instead |
+|--------------|-----------|--------------|
+| Online rent payment | Explicitly out of scope per PROJECT.md; CSV export for accounting suffices | Show rent amount read-only for info |
+| Lease signing / document upload by tenant | Legal complexity; KEWA manages contracts offline | Document viewing only |
+| Community forum / message board between tenants | Only ~20-40 tenants across properties; creates moderation burden | Announcements from KEWA only (one-way) |
+| Tenant screening / application process | DigiRENT handles this in Swiss market; not KEWA's workflow | Out of scope entirely |
+| Maintenance scheduling by tenant | KEWA decides scheduling; tenant just reports | Tenant sees status, not schedule |
+| Multi-language support | German-only for Swiss context; KEWA tenants are local | German UI only |
+| Chatbot / AI ticket triage | Over-engineering for small portfolio; KEWA reviews manually | Category selection by tenant |
+| Tenant satisfaction surveys | Enterprise feature; verbal feedback sufficient for small portfolio | Out of scope |
+| Automatic ticket-to-work-order conversion | PROJECT.md explicitly states "KEWA entscheidet manuell" | Manual conversion button |
 
 ---
 
-## Supplier Module (Pellets)
+## 2. Offline PWA Support
 
-Pellet/fuel tracking for property heating systems. Distinct from contractor work orders - this is consumable material ordering and inventory.
+Progressive Web App with offline capability so field workers (contractors on construction sites, KEWA staff on property visits) can view and create data without connectivity. Sync when back online.
 
 ### Table Stakes
 
-| Feature | Description | Complexity | Notes |
-|---------|-------------|------------|-------|
-| Supplier CRUD | Name, contact, payment terms, notes | Low | Extend partners table with type='supplier' |
-| Order creation | Quantity, unit price, delivery date | Low | New orders table |
-| Order status tracking | ordered > confirmed > delivered > invoiced | Low | Simple status workflow |
-| Delivery recording | Actual delivery date, quantity received, delivery note number | Low | Basic fields |
-| Property/unit association | Which building(s) received the delivery | Low | Foreign key to properties |
-| Invoice linking | Connect delivery to invoice for payment | Low | Extend invoices table |
-| Basic history | View past orders per supplier and property | Low | Standard list view |
+Minimum viable offline experience. Without these, offline mode is unusable.
+
+| Feature | Description | Complexity | Dependencies | Notes |
+|---------|-------------|------------|--------------|-------|
+| PWA manifest + install prompt | `manifest.json` with icons, `display: standalone`, install banner | Low | New manifest file; Next.js metadata API | App must be installable to home screen |
+| Offline page fallback | When offline and navigating to uncached page, show offline indicator | Low | Extend existing service worker with cache-first for app shell | Serwist or custom SW extension |
+| App shell caching | Cache HTML, CSS, JS, fonts for offline navigation | Medium | Service worker precaching strategy | Static assets = CacheFirst; pages = NetworkFirst |
+| Online/offline indicator | Visual indicator showing current connectivity status | Low | `navigator.onLine` + `online`/`offline` events | Banner or icon in header |
+| Offline data reading | View previously loaded work orders, tasks, projects while offline | Medium | IndexedDB store for recently viewed entities | Cache on view; read from IDB when offline |
+| Offline form queue | Create/edit operations queued when offline, synced when online | High | IndexedDB sync queue with operation log | Core offline-first pattern: write to IDB, replay on reconnect |
+| Background sync | Queued operations automatically sync when connectivity returns | Medium | Background Sync API in service worker | Fire-and-forget sync on reconnect |
+| Sync status indicator | Show pending sync count, last sync time, sync progress | Low | Read from IndexedDB queue length | User needs confidence data will sync |
+| Conflict detection | Detect when server data changed while user was offline | Medium | Version field or `updated_at` timestamp comparison | Last-write-wins with user notification |
 
 ### Differentiators
 
-| Feature | Description | Complexity | Notes |
-|---------|-------------|------------|-------|
-| Consumption tracking | Record tank levels, calculate usage rate | Medium | New consumption_logs table |
-| Reorder alerts | Notify when projected stock runs low | Medium | Requires consumption data + threshold logic |
-| Price history | Track CHF/tonne over time for budgeting | Low | Historical records |
-| Seasonal planning | View annual consumption patterns | Medium | Aggregation + visualization |
-| Multi-property ordering | Single order distributed across buildings | Medium | Junction table for allocations |
+Features that make offline genuinely useful vs. just tolerable.
+
+| Feature | Value Proposition | Complexity | Dependencies | Notes |
+|---------|-------------------|------------|--------------|-------|
+| Offline photo capture | Take photos while offline, queue for upload on reconnect | Medium | Blob storage in IndexedDB; sync queue for media | Critical for site inspections |
+| Selective pre-caching | Pre-cache specific project/property data before going to site | Medium | User-triggered download of project bundle | "Download for offline" button |
+| Offline inspection completion | Complete full inspection checklist offline with photos | High | Complex: checklist state + photos + signatures in IDB | High-value use case for site visits |
+| Delta sync | Only sync changed fields, not full records | Medium | Track dirty fields per entity in IDB | Reduces data transfer on reconnect |
+| Retry with exponential backoff | Failed syncs retry automatically with increasing delays | Low | Standard retry pattern in sync worker | Handles flaky connections gracefully |
+| Offline search | Search cached entities while offline | Medium | IndexedDB indexes on key fields | Useful if many items cached |
 
 ### Anti-Features
 
-| Feature | Why Not |
-|---------|---------|
-| IoT tank sensor integration | Infrastructure complexity; manual recording sufficient |
-| Automated reordering | KEWA wants manual control over purchases |
-| Supplier comparison/bidding | Single-property focus; manual selection preferred |
-| Commodity price feeds | Over-engineering for pellet tracking |
+Features to deliberately NOT build. Either technically problematic or unnecessary.
+
+| Anti-Feature | Why Avoid | What Instead |
+|--------------|-----------|--------------|
+| Full offline-first architecture | Massive complexity (CRDT, full local DB mirroring); only 2 internal users + contractors | Selective caching of recently viewed + manual pre-cache |
+| Real-time collaborative offline editing | CRDTs, operational transforms -- enormous complexity | Last-write-wins with conflict notification |
+| Offline push notification delivery | Impossible by definition; push requires connectivity | Queue notifications server-side, deliver on reconnect |
+| Offline PDF generation | @react-pdf/renderer is heavy for client-side; PDFs are view-only | Cache generated PDFs, don't generate offline |
+| Offline authentication | Security concern; token refresh requires server | Use existing session token with extended TTL for offline |
+| Full database mirror to IndexedDB | Storage quota issues (Safari: 50MB); unnecessary for small data set | Cache active project context only |
+| Offline file upload background sync | Background Sync API is not reliable for large files across all browsers | Queue metadata; upload files when user is back online with explicit trigger |
 
 ---
 
-## Inspection/Abnahme Workflow
+## 3. UX Polish
 
-Formal handover inspection at project or work order completion. "Abnahme" is the Swiss/German term for acceptance inspection - critical for formal project closeout.
+Fixes for known UAT issues from v2.2 plus general UX improvements common in property management apps. Addresses mobile-first gaps and workflow friction.
 
-### Table Stakes
+### Table Stakes (Known Issues)
 
-| Feature | Description | Complexity | Notes |
-|---------|-------------|------------|-------|
-| Inspection creation | Create inspection linked to project or work order | Low | New inspections table |
-| Checklist from template | Quality gate checklist items copied to inspection | Low | Uses existing quality_gates |
-| Item-by-item status | Each checklist item: pass/fail/na | Low | JSONB checklist with status |
-| Photo documentation | Required completion photos per item | Low | Existing media system |
-| Defect/snag logging | Document issues found during inspection | Medium | Snag list functionality |
-| Inspector assignment | Who performed the inspection | Low | User reference |
-| Inspection date/time | When the inspection occurred | Low | Timestamp fields |
-| Overall result | Passed/passed_with_conditions/failed | Low | Simple enum |
-| Signature capture | Digital signature from contractor (acknowledgment) | Medium | Base64 image storage |
+Issues explicitly carried forward from v2.2 UAT. Must fix.
 
-### Differentiators
+| Feature | Description | Complexity | Dependencies | Notes |
+|---------|-------------|------------|--------------|-------|
+| Invoice linking modal | Replace `prompt()` with proper modal UI for linking invoices | Low | Existing invoice linking API | STATE.md UAT issue |
+| Checklist item title display | Populate title/description from template into ChecklistItemResult | Low | Template lookup on inspection creation | STATE.md UAT issue |
+| Property-level delivery history | Build delivery history page at property level | Low | Data model exists from Phase 19/20 | STATE.md UAT issue -- data ready, page missing |
 
-| Feature | Description | Complexity | Notes |
-|---------|-------------|------------|-------|
-| Defect follow-up workflow | Create follow-up tasks from failed items | Medium | Generate tasks from snags |
-| Re-inspection tracking | Schedule and track follow-up inspections | Medium | Parent-child inspection relationship |
-| Inspection PDF report | Formal Abnahme protocol document | Medium | PDF generation with checklist, photos, signatures |
-| Contractor acknowledgment via portal | Contractor views and acknowledges inspection results | Medium | Extend magic link portal |
-| Condition updates | Auto-update room conditions based on inspection results | Medium | Trigger condition_history updates |
+### Table Stakes (UX Improvements)
 
-### Anti-Features
+Standard UX patterns missing from the current app that users expect.
 
-| Feature | Why Not |
-|---------|---------|
-| Third-party inspector management | No external inspectors; KEWA inspects internally |
-| Regulatory compliance certificates | Legal certification out of scope |
-| Automated inspection scheduling | Manual scheduling preferred |
-| Inspector certification tracking | No external inspectors to certify |
+| Feature | Description | Complexity | Dependencies | Notes |
+|---------|-------------|------------|--------------|-------|
+| Loading states | Skeleton loaders or spinners for all data fetches | Low | Global pattern or per-component | Replace empty states during load |
+| Error handling UI | User-friendly error messages with retry option | Low | Toast/notification component | Replace raw error text |
+| Empty states | Meaningful illustrations/messages when lists are empty | Low | Per-entity empty state messages | "Keine Projekte vorhanden" with CTA |
+| Form validation feedback | Inline validation errors on form fields | Low | Per-form validation | Prevent submit of invalid data |
+| Confirmation dialogs | Confirm before destructive actions (delete, archive) | Low | Reusable dialog component | Prevent accidental deletes |
+| Breadcrumb navigation | Show location in hierarchy: Property > Unit > Project > Task | Low | Layout component | Deep nesting needs orientation |
+| Toast notifications | Transient success/error messages after actions | Low | Toast component (e.g., sonner) | "Gespeichert", "Geloescht", etc. |
+| Keyboard shortcuts | Common shortcuts (Escape to close modal, Enter to submit) | Low | Event listeners on modals/forms | Power user productivity |
 
----
+### Differentiators (UX Enhancements)
 
-## Push Notifications
+Improvements that elevate the experience beyond functional.
 
-Real-time alerts for project updates, approvals needed, and status changes. Critical for mobile-first contractor experience.
+| Feature | Value Proposition | Complexity | Dependencies | Notes |
+|---------|-------------------|------------|--------------|-------|
+| Optimistic UI updates | Immediate visual feedback, revert on error | Medium | Per-mutation pattern | Feels instant instead of waiting for server |
+| Quick actions from dashboard | One-click common actions (new ticket, new work order) | Low | Dashboard widget | Reduce clicks for frequent actions |
+| Swipe gestures on mobile | Swipe to archive, swipe to complete on list items | Medium | Touch event handling or library | Mobile-first interaction pattern |
+| Search across entities | Global search finding projects, tasks, partners, units | Medium | Combined full-text query or client-side | Currently no cross-entity search |
+| Recent items / favorites | Quick access to recently viewed or pinned entities | Low | LocalStorage or DB table | Power user shortcut |
+| Dark mode | System-aware dark color scheme | Medium | Tailwind dark: variant throughout app | Common user expectation |
+| Bulk operations | Select multiple items for status change, archive, assign | Medium | Multi-select UI + batch API | Useful for task/ticket management |
+| Data export improvements | Export filtered views as CSV/PDF | Low | Extend existing CSV export | Per-table export with current filters |
+| Responsive tables | Horizontal scroll or card view for tables on mobile | Low | Tailwind responsive patterns | Many tables currently overflow on mobile |
+| Pull-to-refresh on mobile | Swipe down to refresh data on mobile views | Low | Touch event handler | Standard mobile pattern |
 
-### Table Stakes
+### Anti-Features (UX)
 
-| Feature | Description | Complexity | Notes |
-|---------|-------------|------------|-------|
-| Web push subscription | Service worker + push API for browser notifications | Medium | PWA pattern |
-| Notification preferences | User can enable/disable notification types | Low | User settings |
-| Work order status alerts | Notify when work order sent, accepted, rejected | Low | Trigger on status change |
-| Approval requests | Alert when invoice/change order needs approval | Low | Trigger on submission |
-| In-app notification center | List of recent notifications | Medium | notifications table + UI |
-| Read/unread tracking | Mark notifications as read | Low | Boolean flag |
-| Click-through to source | Notification links to relevant entity | Low | URL/route reference |
-
-### Differentiators
-
-| Feature | Description | Complexity | Notes |
-|---------|-------------|------------|-------|
-| Contractor magic-link notifications | Push to contractor's browser if permitted | Medium | Token-scoped subscriptions |
-| Deadline reminders | Alert X hours before acceptance deadline expires | Medium | Scheduled notification logic |
-| Batch digest | Daily summary instead of individual pings | Medium | Aggregation + scheduling |
-| Urgency levels | Different treatment for urgent vs. informational | Low | Priority field + visual distinction |
-| Quiet hours | Respect user's preferred notification windows | Low | Time-based filtering |
-
-### Anti-Features
-
-| Feature | Why Not |
-|---------|---------|
-| SMS notifications | Cost + complexity; web push sufficient for 2 users |
-| Native mobile push | PWA web push sufficient; no native app |
-| Email notifications for everything | Explicit project decision to avoid email spam |
-| AI-prioritized notifications | Over-engineering for small user base |
+| Anti-Feature | Why Avoid | What Instead |
+|--------------|-----------|--------------|
+| Multi-language i18n | German-only context; i18n framework adds overhead for zero benefit | Hardcoded German strings |
+| Animated transitions everywhere | Performance overhead on mobile; feels "enterprise" | Subtle transitions on modals/sheets only |
+| Complex onboarding wizard for tenants | Tenants do one thing: report issues; zero learning curve needed | Simple login -> dashboard flow |
+| Customizable dashboard widgets | 2 internal users; fixed dashboard layout sufficient | Pre-built dashboard sections |
+| AI-powered anything | Over-engineering; KEWA is manual-decision-first | Standard search and filters |
+| Real-time collaborative editing | Only 2 users; conflict probability near zero | Standard save/refresh pattern |
 
 ---
 
-## Knowledge Base
+## Feature Dependencies
 
-FAQ and documentation system for internal reference and potentially contractor guidance. Simple, searchable content repository.
+### Dependency Graph
 
-### Table Stakes
+```
+Tenant Portal:
+  - tenant role + auth (existing) -> tenant login UI
+  - tickets table (new) -> ticket CRUD
+  - comment system (existing) -> ticket communication
+  - media system (existing) -> ticket photos
+  - knowledge base (existing) -> tenant document access
+  - push notifications (existing) -> tenant push alerts
+  - email sending (NEW) -> ticket status emails
 
-| Feature | Description | Complexity | Notes |
-|---------|-------------|------------|-------|
-| Article CRUD | Create/edit knowledge base articles | Low | New articles table |
-| Categories | Organize articles by topic (renovation, contractors, finance, etc.) | Low | Category field or junction table |
-| Rich text content | Markdown or HTML content with formatting | Low | Text field + renderer |
-| Search | Full-text search across articles | Medium | PostgreSQL full-text search |
-| View count | Track article popularity | Low | Counter field |
-| Last updated timestamp | Show freshness of content | Low | Automatic timestamp |
-| Author attribution | Who wrote/updated the article | Low | User reference |
+Offline PWA:
+  - service worker (existing) -> extend with caching
+  - manifest.json (NEW) -> PWA install
+  - IndexedDB layer (NEW) -> offline data store
+  - sync queue (NEW) -> offline mutation queue
+  - Background Sync API -> automatic reconnect sync
 
-### Differentiators
+UX Polish:
+  - no new dependencies (fixes existing features)
+  - toast library (sonner or similar) -> notification UI
+```
 
-| Feature | Description | Complexity | Notes |
-|---------|-------------|------------|-------|
-| Contractor FAQ section | Articles visible to contractors via portal | Medium | Visibility flag + portal rendering |
-| Related articles | Link related content | Low | Self-referential relationship |
-| File attachments | PDFs, images, documents attached to articles | Low | Existing media/storage pattern |
-| Article versioning | Track changes over time | Medium | Version history table |
-| Quick-access shortcuts | Pin important articles to dashboard | Low | Boolean flag + display logic |
+### Cross-Feature Dependencies
 
-### Anti-Features
+| From | To | Relationship |
+|------|----|-------------|
+| Tenant Portal | Offline PWA | Tenant portal benefits from PWA install (home screen icon) |
+| Tenant Portal | UX Polish | Polish should include tenant portal UI consistency |
+| Offline PWA | Tenant Portal | Offline ticket creation is a differentiator, not table stakes |
+| UX Polish | Everything | Polish applies to all existing features + new portal |
 
-| Feature | Why Not |
-|---------|---------|
-| Tenant-facing FAQ | Tenant portal is Phase 3; defer |
-| AI chatbot | Over-engineering; simple search sufficient |
-| External content embedding | Security/maintenance concerns |
-| Legal advice articles | Explicit out-of-scope per PROJECT.md |
-| Multi-language support | German-only for KEWA's operational context |
-| Comment/discussion threads | 2 internal users; verbal communication sufficient |
+### Recommended Build Order
 
----
+1. **UX Polish (known issues)** -- Fix v2.2 UAT bugs first (invoice modal, checklist titles, delivery history)
+2. **Tenant Portal (core)** -- Registration, login, ticket creation, status tracking, communication
+3. **Offline PWA (foundation)** -- Manifest, app shell caching, offline indicator, install prompt
+4. **UX Polish (improvements)** -- Loading states, empty states, toast notifications, error handling
+5. **Offline PWA (data sync)** -- IndexedDB, sync queue, background sync, conflict detection
+6. **Tenant Portal (extras)** -- Document access, announcements, ticket-to-work-order conversion
 
-## Dependencies on Existing Features
-
-### Change Orders Depend On:
-- **Work Orders (v2.0):** Change orders modify existing work orders or spawn from them
-- **Partners (v2.1):** Contractor association for approval routing
-- **Offers/Invoices (v2.0):** Cost tracking patterns, potential invoice generation from approved COs
-- **Audit Log (v2.0):** Tracking all CO lifecycle events
-- **PDF Generation (v2.0):** Document generation pattern for CO PDFs
-
-### Supplier Module Depends On:
-- **Partners Table (v2.1):** Extend partner type to include 'supplier' explicitly (already exists as enum)
-- **Properties/Buildings (v2.1):** Link deliveries to buildings
-- **Invoices/Payments (v2.0):** Payment workflow for supplier invoices
-- **Expense Categories (v2.0):** May add 'fuel' or 'materials' category
-
-### Inspection Workflow Depends On:
-- **Quality Gates (v2.0):** Template-based checklists for inspections
-- **Work Orders (v2.0):** Inspection triggers at work order 'done' status
-- **Renovation Projects (v2.0):** Project-level inspections
-- **Media System (v2.0):** Photo documentation
-- **Condition Tracking (v2.0):** Update room conditions based on inspection results
-- **Contractor Portal (v2.0):** Contractor acknowledgment of inspection results
-
-### Push Notifications Depend On:
-- **Users Table (v2.0):** Subscription storage per user
-- **Work Orders (v2.0):** Status change triggers
-- **Invoices (v2.0):** Approval request triggers
-- **Change Orders (v2.2):** Approval request triggers (circular dependency - build notifications first with work order triggers, then add CO triggers)
-
-### Knowledge Base Depends On:
-- **Users Table (v2.0):** Author tracking
-- **Media/Storage (v2.0):** File attachments
-- **Contractor Portal (v2.0):** Optional contractor-visible articles
+**Rationale:** Fix known bugs first (quick wins, user trust). Tenant portal is the primary new feature with clear user value. PWA foundation is low-effort but visible (installable app). Then interleave polish and advanced offline as they're both refinement work.
 
 ---
 
-## Complexity Assessment
+## MVP Recommendation
 
-| Feature Area | Overall Complexity | Rationale |
-|--------------|-------------------|-----------|
-| Change Orders | **Medium** | New entity with status workflow, but follows existing patterns (work orders, invoices). PDF generation adds complexity. |
-| Supplier Module | **Low-Medium** | Simple CRUD + order tracking. Consumption tracking adds medium complexity if included. |
-| Inspection Workflow | **Medium** | Checklist evaluation, snag tracking, signature capture, integration with quality gates. PDF report generation. |
-| Push Notifications | **Medium-High** | Service worker setup, subscription management, trigger integration across multiple entities. PWA infrastructure. |
-| Knowledge Base | **Low** | Standard CRUD + search. Well-understood pattern. |
+### Must Have for v3.0
 
-### Recommended Phase Order
+**Tenant Portal:**
+1. Tenant email registration + login (scoped to unit)
+2. Maintenance ticket creation with category, description, photos
+3. Ticket status tracking (submitted > acknowledged > in_progress > resolved)
+4. Communication thread per ticket
+5. Tenant dashboard (open tickets, unit info)
+6. Email notification on ticket updates (requires new email capability)
 
-Based on complexity, dependencies, and independent value:
+**Offline PWA:**
+1. `manifest.json` with icons + install prompt
+2. App shell caching (offline navigation works)
+3. Online/offline indicator
+4. Offline data reading for recently viewed items
 
-1. **Knowledge Base** (Low complexity, no dependencies on other v2.2 features, provides immediate value)
-2. **Supplier Module** (Low-Medium, independent of other v2.2 features)
-3. **Change Orders** (Medium, builds on existing work order patterns)
-4. **Inspection Workflow** (Medium, leverages quality gates, can trigger from work orders)
-5. **Push Notifications** (Medium-High, needs entities to trigger from, requires PWA infrastructure)
+**UX Polish:**
+1. Fix all 3 carried UAT issues
+2. Loading states across the app
+3. Toast notifications for actions
+4. Empty states with meaningful messages
 
----
+### Defer to Post-v3.0
 
-## Feature Integration Patterns
-
-### Existing Patterns to Reuse
-
-| Pattern | Used In | Reuse For |
-|---------|---------|-----------|
-| Status workflow enum + timestamps | work_orders, invoices | change_orders, supplier_orders, inspections |
-| Magic link portal | contractor portal | contractor acknowledgment of inspections |
-| PDF generation | work order PDF | change order PDF, inspection protocol PDF |
-| Counter-offer flow | work order counter-offers | change order negotiation |
-| Quality gate checklists | template_quality_gates | inspection checklists |
-| Media attachments | work orders, tasks | change orders, inspections, articles |
-| Audit logging | all entities | all new entities |
-
-### New Patterns Needed
-
-| Pattern | Feature | Notes |
-|---------|---------|-------|
-| Service worker + push API | Push Notifications | First PWA feature |
-| Full-text search | Knowledge Base | PostgreSQL tsvector |
-| Signature capture | Inspections | Canvas-based drawing → base64 |
-| Snag/defect tracking | Inspections | List of issues with status |
-| Consumption logs | Supplier Module (differentiator) | Time-series data |
+- Offline form queue + background sync (high complexity, limited user count)
+- Offline photo capture and sync
+- Full offline inspection workflow
+- Dark mode (nice-to-have, not blocking)
+- Swipe gestures (mobile enhancement)
+- Global cross-entity search
+- Tenant document access (depends on KB extension)
+- Announcement board
+- Bulk operations
 
 ---
 
-## Swiss/German Context Considerations
+## Swiss Context Considerations
 
-| Term | English | Usage |
-|------|---------|-------|
-| Abnahme | Acceptance/Handover Inspection | Formal inspection protocol |
-| Mängelliste | Snag list / Punch list | Defects found during inspection |
-| Nachbesserung | Rectification | Follow-up work to fix defects |
-| Lieferant | Supplier | Pellet/material suppliers |
-| Nachtrag | Change order / Addendum | Contract modification |
+| Consideration | Impact | Action |
+|---------------|--------|--------|
+| Datenschutz (Data Protection) | Tenant personal data must be protected; visible only to KEWA + tenant themselves | RLS policies on tenant data; tenant sees only own unit |
+| Swiss hosting | Data should remain in Swiss/EU jurisdiction | Supabase project region (already configured) |
+| Mietrecht (Tenancy Law) | Tenants entitled to habitable conditions; maintenance reporting is a right | Ticket system supports this legal requirement |
+| German UI | All tenant-facing text in German | Schadensmeldung, Kundenportal, Reparaturanfrage, etc. |
+| No automated decisions | Swiss context favors manual review over automation | KEWA manually converts tickets to work orders |
 
-These terms should be used in the German UI where appropriate.
+### German Terminology for Tenant Portal
+
+| Feature | German Term | Context |
+|---------|-------------|---------|
+| Tenant Portal | Mieterportal / Kundenportal | Portal header |
+| Maintenance Request | Schadensmeldung / Reparaturanfrage | Ticket creation |
+| Ticket | Meldung / Anfrage | Ticket entity |
+| Status: Submitted | Eingereicht | First status |
+| Status: Acknowledged | Bestaetigt | KEWA confirms receipt |
+| Status: In Progress | In Bearbeitung | Work underway |
+| Status: Resolved | Erledigt | Issue fixed |
+| Urgency | Dringlichkeit | Priority selector |
+| Emergency | Notfall | Highest priority |
+| Category | Kategorie | Ticket category |
+| Heating | Heizung | Category option |
+| Water/Plumbing | Wasser/Sanitaer | Category option |
+| Electrical | Elektrik | Category option |
+| General | Allgemein | Default category |
+| Documents | Dokumente | Document section |
+| Announcements | Hausmitteilungen | Building announcements |
 
 ---
 
 ## Sources
 
-### Change Orders
-- [Buildertrend - Change Order Software](https://buildertrend.com/project-management/construction-change-order-software/)
-- [Procore - How Change Orders Work](https://www.procore.com/library/how-construction-change-orders-work)
-- [CM Fusion - Change Orders](https://www.cmfusion.com/features/change-orders)
-- [Linarc - Types of Change Orders](https://www.linarc.com/buildspace/what-are-the-different-types-of-change-orders-in-construction)
-- [SmartPM - Mastering Change Orders](https://smartpm.com/blog/mastering-change-orders-in-construction)
+### Tenant Portal
+- [TenantCloud - Property Management Software](https://www.tenantcloud.com)
+- [Veco Plus - Rise of Self-Service Portals](https://veco.software/news-insights/rise-of-self-service)
+- [Plentific - Resident Portal](https://www.plentific.com/resident-portal-app/)
+- [Buildium - Tenant Portal Definition](https://www.buildium.com/dictionary/tenant-portal/)
+- [RealCube - Self-Service Portals](https://www.realcube.estate/blog/self-service-portals-empowering-tenants-and-reducing-operational-load)
+- [Swiss Mobiliar / aroov - Swiss Tenant Portal](https://www.icmif.org/news_story/swiss-mobiliar-launches-tenant-portal-with-property-management-software-company/)
+- [DigiRENT - Swiss Digital Rental](https://digirent.swiss/en/digirent)
+- [Abacus AbaRealEstate - Swiss Property Management](https://www.abacus.ch/en/industry-solutions/real-estate/property-management/overview)
+- [InvGate - Maintenance Ticketing System](https://blog.invgate.com/maintenance-ticketing-system)
+- [Property Inspect - Maintenance Workflow](https://support.propertyinspect.com/en/articles/9976015-action-maintenance-workflow-system)
+- [Buildium - Maintenance Workflows](https://www.buildium.com/blog/property-maintenance-management-workflows-101/)
+- [Altamira - Property Management Ticketing](https://www.altamira.ai/blog/property-management-ticketing-systems/)
 
-### Inspection Workflow
-- [GoAudits - Construction Handover](https://goaudits.com/blog/construction-handover/)
-- [Procore - Final Inspection](https://www.procore.com/library/final-inspection)
-- [GoAudits - Snagging Apps](https://goaudits.com/blog/best-snagging-app-snag-list-software/)
-- [Fluix - Punch List Workflow](https://fluix.io/punch-list-workflow)
-- [Workyard - Punch List Software](https://www.workyard.com/compare/punch-list-software)
+### Offline PWA
+- [MDN - Service Workers for Offline](https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Tutorials/js13kGames/Offline_Service_workers)
+- [HTTP Archive - PWA Almanac 2025](https://almanac.httparchive.org/en/2025/pwa)
+- [Microsoft - Background Syncs](https://learn.microsoft.com/en-us/microsoft-edge/progressive-web-apps/how-to/background-syncs)
+- [web.dev - Offline Data in PWA](https://web.dev/learn/pwa/offline-data)
+- [LogRocket - Offline-First Frontend Apps 2025](https://blog.logrocket.com/offline-first-frontend-apps-2025-indexeddb-sqlite/)
+- [GTCSys - PWA Data Sync & Conflict Resolution](https://gtcsys.com/comprehensive-faqs-guide-data-synchronization-in-pwas-offline-first-strategies-and-conflict-resolution/)
+- [LogRocket - Next.js 16 PWA Offline](https://blog.logrocket.com/nextjs-16-pwa-offline-support)
+- [Next.js Official Docs - PWA Guide](https://nextjs.org/docs/app/guides/progressive-web-apps)
+- [Medium - Offline-First PWA with Next.js, IndexedDB, Supabase (Jan 2026)](https://medium.com/@oluwadaprof/building-an-offline-first-pwa-notes-app-with-next-js-indexeddb-and-supabase-f861aa3a06f9)
 
-### Supplier/Materials
-- [Four Data - Smart Pellet Management](https://fourdata.io/smart-pellet-management-optimized-market-solutions/)
-- [Precoro - Construction Procurement](https://precoro.com/customers/construction)
-- [Current SCM - Procurement Software](https://currentscm.com/solutions/procurement-software/)
-
-### Push Notifications
-- [Reteno - Push Notification Best Practices 2026](https://reteno.com/blog/push-notification-best-practices-ultimate-guide-for-2026)
-- [MDN - Web Push API Best Practices](https://developer.mozilla.org/en-US/docs/Web/API/Push_API/Best_Practices)
-- [MagicBell - Notification System Design](https://www.magicbell.com/blog/notification-system-design)
-- [Analytics Insight - PWA Push Notifications Guide](https://www.analyticsinsight.net/tech-news/the-complete-guide-to-pwa-push-notifications-features-best-practices-installation-steps)
-
-### Knowledge Base
-- [Rentec Direct - Property Management Software 2026](https://www.rentecdirect.com/blog/best-property-management-software-2026/)
-- [Guesty - Must-have PM Features 2026](https://www.guesty.com/blog/must-have-property-management-software-features/)
-- [Desk365 - Knowledge Base Software](https://www.desk365.io/blog/best-knowledge-base-software/)
+### UX Polish
+- [Renting Well - Top PM Software for UX 2025](https://rentingwell.com/2025/05/25/top-property-management-software-for-ux-in-2025/)
+- [RON Design Lab - Tenancy Property SaaS UX](https://rondesignlab.com/cases/tenancy-property-saas-ux-ui-design)
+- [Proprli - Tenant Experience Platform](https://proprli.com/knowledge-center/tenant-experience-platform-improving-services-in-property-management/)
+- [Suffescom - Property Management App Development 2026](https://www.suffescom.com/blog/develop-property-management-app)
 
 ---
 
 ## Metadata
 
 **Confidence breakdown:**
-- Change Orders: MEDIUM-HIGH - Well-established construction industry patterns
-- Supplier Module: MEDIUM - Pellet-specific info limited; general procurement patterns applied
-- Inspection Workflow: MEDIUM-HIGH - Standard Abnahme process, punch list patterns documented
-- Push Notifications: HIGH - PWA patterns well-documented
-- Knowledge Base: HIGH - Standard CRUD + search patterns
+- Tenant Portal: HIGH -- Well-established pattern; Swiss-specific examples found (aroov, DigiRENT); existing codebase has tenant role infrastructure ready
+- Offline PWA: MEDIUM -- Pattern is well-documented but Next.js 16 App Router + offline has known challenges (Serwist compatibility, dynamic routes); IndexedDB sync is complex
+- UX Polish: HIGH -- Known issues documented in STATE.md; standard UX patterns well-understood
 
-**Research date:** 2026-01-25
-**Valid until:** 2026-04-25 (feature patterns stable, 90-day relevance)
+**Research date:** 2026-01-29
+**Valid until:** 2026-04-29 (feature patterns stable, 90-day relevance)
