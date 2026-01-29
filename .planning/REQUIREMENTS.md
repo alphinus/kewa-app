@@ -49,18 +49,18 @@
 
 ## Push Notifications (PUSH)
 
-- [ ] **PUSH-01**: App supports web push via service worker and Push API
-- [ ] **PUSH-02**: User can enable/disable notification types in preferences
-- [ ] **PUSH-03**: User receives push when work order status changes (sent, accepted, rejected)
-- [ ] **PUSH-04**: User receives push when approval is needed (invoice, change order)
-- [ ] **PUSH-05**: App shows in-app notification center with recent notifications
-- [ ] **PUSH-06**: User can mark notifications as read/unread
-- [ ] **PUSH-07**: Clicking notification navigates to relevant entity
-- [ ] **PUSH-08**: Contractors can receive push notifications if permitted
-- [ ] **PUSH-09**: User receives reminder before acceptance deadline expires
-- [ ] **PUSH-10**: User can opt for daily digest instead of individual notifications
-- [ ] **PUSH-11**: Notifications show urgency levels (urgent/normal/info)
-- [ ] **PUSH-12**: User can set quiet hours (no notifications during specified times)
+- [x] **PUSH-01**: App supports web push via service worker and Push API
+- [x] **PUSH-02**: User can enable/disable notification types in preferences
+- [x] **PUSH-03**: User receives push when work order status changes (sent, accepted, rejected)
+- [x] **PUSH-04**: User receives push when approval is needed (invoice, change order)
+- [x] **PUSH-05**: App shows in-app notification center with recent notifications
+- [x] **PUSH-06**: User can mark notifications as read/unread
+- [x] **PUSH-07**: Clicking notification navigates to relevant entity
+- [x] **PUSH-08**: Contractors can receive push notifications if permitted
+- [x] **PUSH-09**: User receives reminder before acceptance deadline expires
+- [x] **PUSH-10**: User can opt for daily digest instead of individual notifications
+- [x] **PUSH-11**: Notifications show urgency levels (urgent/normal/info)
+- [x] **PUSH-12**: User can set quiet hours (no notifications during specified times)
 
 ## Knowledge Base (KNOW)
 
@@ -152,18 +152,18 @@
 | INSP-10 | 23 | Complete |
 | INSP-11 | 23 | Complete |
 | INSP-12 | 23 | Complete |
-| PUSH-01 | 24 | Pending |
-| PUSH-02 | 24 | Pending |
-| PUSH-03 | 24 | Pending |
-| PUSH-04 | 24 | Pending |
-| PUSH-05 | 24 | Pending |
-| PUSH-06 | 24 | Pending |
-| PUSH-07 | 24 | Pending |
-| PUSH-08 | 24 | Pending |
-| PUSH-09 | 24 | Pending |
-| PUSH-10 | 24 | Pending |
-| PUSH-11 | 24 | Pending |
-| PUSH-12 | 24 | Pending |
+| PUSH-01 | 24 | Complete |
+| PUSH-02 | 24 | Complete |
+| PUSH-03 | 24 | Complete |
+| PUSH-04 | 24 | Complete |
+| PUSH-05 | 24 | Complete |
+| PUSH-06 | 24 | Complete |
+| PUSH-07 | 24 | Complete |
+| PUSH-08 | 24 | Complete |
+| PUSH-09 | 24 | Complete |
+| PUSH-10 | 24 | Complete |
+| PUSH-11 | 24 | Complete |
+| PUSH-12 | 24 | Complete |
 
 ---
 
