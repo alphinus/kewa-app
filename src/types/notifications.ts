@@ -119,6 +119,13 @@ export interface CreateNotificationInput {
 }
 
 /**
+ * Input for sending a notification to target users
+ */
+export interface SendNotificationInput extends CreateNotificationInput {
+  targetUserIds: string[]
+}
+
+/**
  * Input for subscribing to push notifications
  */
 export interface SubscribePushInput {
