@@ -12,6 +12,7 @@ import {
   isInternalRole
 } from '@/lib/permissions'
 import { validateContractorAccess } from '@/lib/magic-link'
+import { getPortalSessionFromRequest } from '@/lib/portal/session'
 
 /**
  * Middleware for authentication and authorization
@@ -20,6 +21,7 @@ import { validateContractorAccess } from '@/lib/magic-link'
  * - Session validation for all protected routes
  * - Permission checking for API routes
  * - Contractor portal access via magic link
+ * - Tenant portal access via portal session
  * - Response headers for downstream route handlers
  */
 export async function middleware(request: NextRequest) {
@@ -28,6 +30,11 @@ export async function middleware(request: NextRequest) {
   // Special handling for contractor portal routes
   if (pathname.startsWith('/contractor')) {
     return handleContractorRoute(request)
+  }
+
+  // Special handling for tenant portal routes
+  if (pathname.startsWith('/portal') || pathname.startsWith('/api/portal')) {
+    return handlePortalRoute(request)
   }
 
   // Validate session using unified utility
@@ -141,6 +148,48 @@ async function handleContractorRoute(request: NextRequest): Promise<NextResponse
   return response
 }
 
+/**
+ * Handle tenant portal routes
+ *
+ * Tenants access portal via email+password or invite-based registration.
+ * Portal routes use separate session cookie (portal_session).
+ */
+async function handlePortalRoute(request: NextRequest): Promise<NextResponse> {
+  const { pathname } = request.nextUrl
+
+  // Portal auth routes are public - allow through
+  if (
+    pathname === '/portal/login' ||
+    pathname.startsWith('/portal/register/') ||
+    pathname.startsWith('/api/portal/auth/')
+  ) {
+    return NextResponse.next()
+  }
+
+  // For all other portal routes, validate portal session
+  const portalSession = await getPortalSessionFromRequest(request)
+
+  if (!portalSession) {
+    // No valid portal session
+    if (pathname.startsWith('/api/portal/')) {
+      // API routes return 401
+      return NextResponse.json(
+        { error: 'Nicht authentifiziert' },
+        { status: 401 }
+      )
+    }
+
+    // Page routes redirect to portal login
+    return NextResponse.redirect(new URL('/portal/login', request.url))
+  }
+
+  // Valid portal session - continue with user ID in response headers
+  const response = NextResponse.next()
+  response.headers.set('x-portal-user-id', portalSession.userId)
+
+  return response
+}
+
 // Re-export for testing/verification
 export { validateSession, validateSessionWithRBAC }
 
@@ -148,10 +197,12 @@ export { validateSession, validateSessionWithRBAC }
 // - /dashboard/* routes (internal app)
 // - /api/* routes (except /api/auth/*)
 // - /contractor/* routes (contractor portal)
+// - /portal/* routes (tenant portal)
 export const config = {
   matcher: [
     '/dashboard/:path*',
     '/api/((?!auth).*)',
-    '/contractor/:path*'
+    '/contractor/:path*',
+    '/portal/:path*'
   ]
 }
