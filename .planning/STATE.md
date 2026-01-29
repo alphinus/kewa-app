@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-01-25)
 
 **Core value:** KEWA AG hat volle Transparenz und Kontrolle uber alle Renovationen — mit standardisierten Workflows, externer Handwerker-Integration, Kostenuebersicht und automatischer Zustandshistorie.
-**Current focus:** Milestone v2.2 Extensions — Phase 23 Inspection Advanced in progress
+**Current focus:** Milestone v2.2 Extensions — Phase 24 Push Notifications in progress
 
 ## Current Position
 
-Phase: 23 of 24 (Inspection Advanced) — COMPLETE
-Plan: 3 of 3 executed
-Status: Phase complete
-Last activity: 2026-01-28 — Completed 23-03-PLAN.md (Inspection Integration)
+Phase: 24 of 24 (Push Notifications)
+Plan: 1 of 4 executed
+Status: In progress
+Last activity: 2026-01-29 — Completed 24-01-PLAN.md (Notification Foundation)
 
-Progress: [████████████░░] 77% (27/35 v2.2 plans)
+Progress: [█████████████░] 80% (28/35 v2.2 plans)
 
 ## Milestones Completed
 
@@ -32,14 +32,14 @@ Progress: [████████████░░] 77% (27/35 v2.2 plans)
 | 21 | Change Orders | 10 | Complete (4/4 plans) |
 | 22 | Inspection Core | 8 | Complete (4/4 plans) |
 | 23 | Inspection Advanced | 4 | Complete (3/3 plans) |
-| 24 | Push Notifications | 12 | Not started |
+| 24 | Push Notifications | 12 | In progress (1/4 plans) |
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 27 (v2.2)
+- Total plans completed: 28 (v2.2)
 - Average duration: 14 min
-- Total execution time: 368 min
+- Total execution time: 394 min
 
 **By Phase:**
 
@@ -51,6 +51,7 @@ Progress: [████████████░░] 77% (27/35 v2.2 plans)
 | 21 | 4 | 49 min | 12 min |
 | 22 | 4 | 91 min | 23 min |
 | 23 | 3 | 106 min | 35 min |
+| 24 | 1 | 26 min | 26 min |
 
 *Updated after each plan completion*
 
@@ -144,6 +145,11 @@ Recent decisions affecting current work:
 - [23-03]: Integrated Phase 23 components into InspectionDetail (showHistory prop pattern)
 - [23-03]: Room detail page created at deep nested route for breadcrumb navigation
 - [23-03]: Condition source joins added to rooms API for single-request data fetch
+- [24-01]: VAPID public key exposed to client (NEXT_PUBLIC_), private key server-only
+- [24-01]: Device ID cookie (1-year) identifies browser/device for multi-subscription support
+- [24-01]: pg_cron jobs with DO/EXCEPTION fallback for environments without extension
+- [24-01]: PushProvider in Wave 1 (24-01) not Wave 2 (24-04) - required by 24-02 settings page
+- [24-01]: Service worker notification without PWA icons (no icons exist yet)
 
 ### UAT Issues for Future Phases
 
@@ -161,9 +167,9 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-01-28
-Stopped at: Completed 23-03-PLAN.md (Inspection Integration)
+Last session: 2026-01-29
+Stopped at: Completed 24-01-PLAN.md (Notification Foundation)
 Resume file: None
 
 ---
-*v2.2 Extensions milestone in progress. Phase 23 Inspection Advanced complete (3/3 plans). Next: Phase 24 Push Notifications.*
+*v2.2 Extensions milestone in progress. Phase 24 Push Notifications in progress (1/4 plans). Next: 24-02 Notification Preferences UI.*
