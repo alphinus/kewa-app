@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-01-25)
 ## Current Position
 
 Phase: 24 of 24 (Push Notifications)
-Plan: 3 of 4 executed
+Plan: 4 of 4 executed (all waves complete)
 Status: In progress
-Last activity: 2026-01-29 — Completed 24-04-PLAN.md (In-App Notification Center)
+Last activity: 2026-01-29 — Completed 24-03-PLAN.md (Event Triggers)
 
-Progress: [█████████████░] 86% (30/35 v2.2 plans)
+Progress: [█████████████░] 89% (31/35 v2.2 plans)
 
 ## Milestones Completed
 
@@ -32,14 +32,14 @@ Progress: [█████████████░] 86% (30/35 v2.2 plans)
 | 21 | Change Orders | 10 | Complete (4/4 plans) |
 | 22 | Inspection Core | 8 | Complete (4/4 plans) |
 | 23 | Inspection Advanced | 4 | Complete (3/3 plans) |
-| 24 | Push Notifications | 12 | In progress (3/4 plans) |
+| 24 | Push Notifications | 12 | In progress (4/4 plans) |
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 30 (v2.2)
+- Total plans completed: 31 (v2.2)
 - Average duration: 15 min
-- Total execution time: 441 min
+- Total execution time: 455 min
 
 **By Phase:**
 
@@ -51,7 +51,7 @@ Progress: [█████████████░] 86% (30/35 v2.2 plans)
 | 21 | 4 | 49 min | 12 min |
 | 22 | 4 | 91 min | 23 min |
 | 23 | 3 | 106 min | 35 min |
-| 24 | 3 | 73 min | 24 min |
+| 24 | 4 | 87 min | 22 min |
 
 *Updated after each plan completion*
 
@@ -155,6 +155,11 @@ Recent decisions affecting current work:
 - [24-02]: Urgent notifications bypass both quiet hours and digest mode
 - [24-02]: 410 Gone cleanup in sendPushToUser() removes expired subscriptions
 - [24-02]: Digest API simplified UTC hour matching (TODO: proper timezone conversion)
+- [24-03]: Fire-and-forget notification dispatch with .catch() prevents blocking API responses
+- [24-03]: Contractor notifications only when work order status is 'sent' (assignment only)
+- [24-03]: Approval notifications fire when status changes to under_review/submitted (not after approval)
+- [24-03]: CRON_SECRET for internal trigger API (pg_cron or external cron authentication)
+- [24-03]: Batch deadline processing via getUpcomingDeadlines() for cron efficiency
 - [24-04]: Entity grouping by type:id for cleaner notification display (e.g., "Work Order #42 - 3 Updates")
 - [24-04]: Badge count capped at 9+ for standard notification pattern
 - [24-04]: Supabase Realtime channel per user for instant notification delivery
@@ -177,8 +182,8 @@ None.
 ## Session Continuity
 
 Last session: 2026-01-29
-Stopped at: Completed 24-04-PLAN.md (In-App Notification Center)
+Stopped at: Completed 24-03-PLAN.md (Event Triggers)
 Resume file: None
 
 ---
-*v2.2 Extensions milestone in progress. Phase 24 Push Notifications in progress (3/4 plans). Next: Wave 3 Event Triggers (24-03).*
+*v2.2 Extensions milestone in progress. Phase 24 Push Notifications in progress (4/4 plans). Next: 24-04 In-App Notification Center.*
