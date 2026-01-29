@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-01-29)
 ## Current Position
 
 Phase: 26 of 29 (Tenant Portal Core)
-Plan: 1 of 4 in current phase
+Plan: 2 of 4 in current phase
 Status: In progress
-Last activity: 2026-01-29 -- Completed 26-01-PLAN.md
+Last activity: 2026-01-29 -- Completed 26-02-PLAN.md
 
-Progress: [██░░░░░░░░] 21%
+Progress: [██░░░░░░░░] 22%
 
 ## Milestones Completed
 
@@ -26,16 +26,16 @@ Progress: [██░░░░░░░░] 21%
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 3 (v3.0)
-- Average duration: 26min
-- Total execution time: 76min
+- Total plans completed: 4 (v3.0)
+- Average duration: 33min
+- Total execution time: 134min
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 25 | 2 | 62min | 31min |
-| 26 | 1 | 14min | 14min |
+| 26 | 2 | 72min | 36min |
 
 *Updated after each plan completion*
 
@@ -77,6 +77,12 @@ Phase 26-01 decisions:
 - Ticket number format: T-YYYYMMDD-XXXX with daily sequence
 - Tenant isolation at application layer (no RLS, consistent with Phase 1 decision)
 
+Phase 26-02 decisions:
+- Portal uses separate session cookie (portal_session) with 30-day expiration for mobile users
+- Invite tokens are single-use JWTs with 7-day expiration enforced by password_hash check
+- QR login tokens are short-lived (5 minutes) for multi-device access
+- Portal routes completely isolated from operator routes via middleware
+
 ### UAT Issues (carried from v2.2 -- all resolved in Phase 25)
 
 - ✓ Invoice linking with modal UI (resolved in 25-01)
@@ -90,9 +96,9 @@ Phase 26-01 decisions:
 
 ## Session Continuity
 
-Last session: 2026-01-29 17:27 UTC
-Stopped at: Completed 26-01-PLAN.md (Portal Foundation)
-Resume file: .planning/phases/26-tenant-portal-core/26-02-PLAN.md
+Last session: 2026-01-29 18:39 UTC
+Stopped at: Completed 26-02-PLAN.md (Tenant Auth)
+Resume file: .planning/phases/26-tenant-portal-core/26-03-PLAN.md
 
 ---
-*Phase 26 Plan 01 complete. Database schema, types, and query helpers ready. Next: 26-02 (Tenant Auth) and 26-03 (Ticket API) can run in parallel (Wave 2).*
+*Phase 26 Plan 02 complete. Tenant authentication with invite-based registration, email+password login, and portal session management ready. Next: 26-03 (Ticket API) and 26-04 (Portal UI) can proceed (Wave 2-3).*
