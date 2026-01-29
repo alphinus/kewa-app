@@ -8,10 +8,11 @@
  * Phase 22-02: Inspection UI
  */
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { Button } from '@/components/ui/button'
 import { ChecklistItemCard } from './ChecklistItemCard'
 import { DefectForm } from './DefectForm'
+import { toast } from 'sonner'
 import type { Inspection, ChecklistSectionResult, ChecklistItemResult } from '@/types/inspections'
 
 interface ChecklistExecutionProps {
@@ -30,6 +31,19 @@ export function ChecklistExecution({ inspection, onSave }: ChecklistExecutionPro
   // Defect form state
   const [isDefectFormOpen, setIsDefectFormOpen] = useState(false)
   const [defectChecklistItemId, setDefectChecklistItemId] = useState<string | null>(null)
+
+  // Build lookup map from template checklist_sections
+  const templateItemMap = useMemo(() => {
+    const map = new Map<string, { title: string; description: string | null }>()
+    if (inspection.template?.checklist_sections) {
+      for (const section of inspection.template.checklist_sections) {
+        for (const item of section.items) {
+          map.set(item.id, { title: item.title, description: item.description })
+        }
+      }
+    }
+    return map
+  }, [inspection.template])
 
   // Calculate progress
   const totalItems = checklistItems.reduce((sum, section) => sum + section.items.length, 0)
@@ -137,7 +151,7 @@ export function ChecklistExecution({ inspection, onSave }: ChecklistExecutionPro
         )
       } catch (err) {
         console.error('Photo upload error:', err)
-        alert('Fehler beim Hochladen des Fotos')
+        toast.error('Fehler beim Hochladen des Fotos')
       }
     }
     input.click()
@@ -152,10 +166,10 @@ export function ChecklistExecution({ inspection, onSave }: ChecklistExecutionPro
     setIsSaving(true)
     try {
       await onSave(checklistItems)
-      alert('Checkliste gespeichert')
+      toast.success('Checkliste gespeichert')
     } catch (err) {
       console.error('Save failed:', err)
-      alert('Fehler beim Speichern')
+      toast.error('Fehler beim Speichern')
     } finally {
       setIsSaving(false)
     }
@@ -229,8 +243,8 @@ export function ChecklistExecution({ inspection, onSave }: ChecklistExecutionPro
                     key={item.item_id}
                     item={{
                       id: item.item_id,
-                      title: `Item ${index + 1}`, // TODO: Lookup from template
-                      description: null,
+                      title: templateItemMap.get(item.item_id)?.title || `Punkt ${index + 1}`,
+                      description: templateItemMap.get(item.item_id)?.description || null,
                     }}
                     result={item}
                     onResultChange={(updatedResult) =>

@@ -164,6 +164,7 @@ export interface Inspection {
   template?: {
     id: string
     name: string
+    checklist_sections?: ChecklistSection[]
   }
   defects?: InspectionDefect[]
 }

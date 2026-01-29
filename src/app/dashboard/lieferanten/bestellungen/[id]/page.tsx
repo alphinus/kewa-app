@@ -16,6 +16,7 @@ import { Button } from '@/components/ui/button'
 import { PurchaseOrderStatusBadge } from '@/components/suppliers/PurchaseOrderStatusBadge'
 import { DeliveryForm } from '@/components/suppliers/DeliveryForm'
 import { DeliveryList } from '@/components/suppliers/DeliveryList'
+import { InvoiceLinkModal } from '@/components/suppliers/InvoiceLinkModal'
 import {
   type PurchaseOrderStatus,
   getNextActions,
@@ -88,6 +89,7 @@ export default function BestellungDetailPage({ params }: PageProps) {
   const [showDeliveryForm, setShowDeliveryForm] = useState(false)
   const [deliveryRefreshKey, setDeliveryRefreshKey] = useState(0)
   const [statusUpdating, setStatusUpdating] = useState(false)
+  const [linkDelivery, setLinkDelivery] = useState<Delivery | null>(null)
 
   // Validate UUID format
   const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
@@ -183,38 +185,21 @@ export default function BestellungDetailPage({ params }: PageProps) {
    * Handle invoice link request
    */
   function handleLinkInvoice(delivery: Delivery) {
-    // For now, just show an alert - could be enhanced with a modal
-    const invoiceId = prompt('Rechnungs-ID eingeben:')
-    if (!invoiceId) return
+    setLinkDelivery(delivery)
+  }
 
-    fetch(`/api/deliveries/${delivery.id}/link-invoice`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ invoice_id: invoiceId }),
-    })
-      .then((res) => {
-        if (!res.ok) {
-          return res.json().then((data) => {
-            throw new Error(data.error || 'Verknuepfung fehlgeschlagen')
-          })
-        }
-        setDeliveryRefreshKey((k) => k + 1)
-        // Refresh purchase order
-        return fetch(`/api/purchase-orders/${id}`)
-      })
-      .then((res) => {
-        if (res && res.ok) {
-          return res.json()
-        }
-      })
-      .then((data) => {
-        if (data?.purchase_order) {
-          setPurchaseOrder(data.purchase_order)
-        }
-      })
-      .catch((err) => {
-        alert(err.message)
-      })
+  /**
+   * Handle successful invoice link
+   */
+  async function handleInvoiceLinked() {
+    // Refresh deliveries and purchase order
+    setDeliveryRefreshKey((k) => k + 1)
+
+    const orderResponse = await fetch(`/api/purchase-orders/${id}`)
+    if (orderResponse.ok) {
+      const data = await orderResponse.json()
+      setPurchaseOrder(data.purchase_order)
+    }
   }
 
   // Invalid ID
@@ -563,6 +548,17 @@ export default function BestellungDetailPage({ params }: PageProps) {
           purchaseOrder={purchaseOrder}
           onSave={handleDeliverySave}
           onCancel={() => setShowDeliveryForm(false)}
+        />
+      )}
+
+      {/* Invoice Link Modal */}
+      {linkDelivery && purchaseOrder && (
+        <InvoiceLinkModal
+          open={linkDelivery !== null}
+          onOpenChange={(open) => !open && setLinkDelivery(null)}
+          delivery={linkDelivery}
+          supplierId={purchaseOrder.supplier?.id || ''}
+          onLinked={handleInvoiceLinked}
         />
       )}
     </div>
