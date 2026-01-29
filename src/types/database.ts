@@ -1163,3 +1163,32 @@ export interface UpdateRoomInput {
   notes?: string | null
   // Note: condition is NOT updatable via API - managed by Digital Twin automation
 }
+
+// =============================================
+// PORTAL TYPES (Phase 26)
+// =============================================
+
+// Re-export all portal types
+export type {
+  Ticket,
+  TicketWithCategory,
+  TicketWithDetails,
+  TicketMessage,
+  TicketMessageWithSender,
+  TicketMessageWithAttachments,
+  TicketAttachment,
+  TicketAttachmentWithUrl,
+  TicketCategory,
+  AppSetting,
+  CreateTicketInput,
+  CreateMessageInput,
+  UpdateTicketStatusInput,
+  CreateCategoryInput,
+  UpdateCategoryInput,
+  UpdateSettingInput,
+  TicketsResponse,
+  TicketResponse,
+  TicketMessagesResponse,
+  TicketCategoriesResponse,
+  SettingsResponse,
+} from './portal'

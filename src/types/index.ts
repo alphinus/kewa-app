@@ -238,3 +238,10 @@ export type DependencyType = 'FS' | 'SS' | 'FF' | 'SF'
 
 // Quality gate levels
 export type GateLevel = 'package' | 'phase'
+
+// =============================================
+// PORTAL TYPES (Phase 26)
+// =============================================
+
+// Portal enums
+export type { TicketStatus, TicketUrgency, MessageSenderType } from './portal'
