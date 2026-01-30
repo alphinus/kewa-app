@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-01-29)
 ## Current Position
 
 Phase: 27 of 29 (PWA Foundation)
-Plan: 02 of 3 in current phase
+Plan: 1 of 3 in current phase
 Status: In progress
-Last activity: 2026-01-30 -- Completed 27-02-PLAN.md
+Last activity: 2026-01-30 -- Completed 27-01-PLAN.md
 
-Progress: [█████░░░░░] 42%
+Progress: [████░░░░░░] 41%
 
 ## Milestones Completed
 
@@ -26,9 +26,9 @@ Progress: [█████░░░░░] 42%
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 8 (v3.0)
-- Average duration: 32min
-- Total execution time: 256min
+- Total plans completed: 7 (v3.0)
+- Average duration: 33min
+- Total execution time: 229min
 
 **By Phase:**
 
@@ -36,7 +36,7 @@ Progress: [█████░░░░░] 42%
 |-------|-------|-------|----------|
 | 25 | 2 | 62min | 31min |
 | 26 | 4 | 156min | 39min |
-| 27 | 2 | 38min | 19min |
+| 27 | 1 | 11min | 11min |
 
 *Updated after each plan completion*
 
@@ -96,11 +96,11 @@ Phase 26-04 decisions:
 - Admin portal settings embedded in existing dashboard settings page (no new route needed)
 - Seed data uses bcrypt-hashed password 'test1234' for all test tenants
 
-Phase 27-02 decisions:
-- Cache-first for static assets (.js, .css, fonts, images) - instant load after first visit
-- Network-first with 3s timeout for pages - fresh content when online, cache fallback when offline
-- No pre-caching during install - runtime caching only (cache what user visits)
-- API requests pass through service worker - Phase 28 will handle with IndexedDB
+Phase 27-01 decisions:
+- Auto-show install toast after 2 seconds when beforeinstallprompt fires
+- Session-based dismissal tracking (per-day) to re-prompt next session
+- Manual install button only visible when browser supports install
+- Solid brand color icons (#0f172a slate-900) without complex graphics
 
 ### UAT Issues (carried from v2.2 -- all resolved in Phase 25)
 
@@ -118,8 +118,8 @@ Phase 27-02 decisions:
 ## Session Continuity
 
 Last session: 2026-01-30
-Stopped at: Completed 27-02-PLAN.md
+Stopped at: Completed 27-01-PLAN.md
 Resume file: None
 
 ---
-*Phase 27 PWA Foundation in progress. 2 of 3 plans complete. Next: 27-03 (Offline Detection & Install Prompt).*
+*Phase 27 PWA Foundation in progress. 1 of 3 plans complete. Next: 27-02 (Cache Strategy).*
