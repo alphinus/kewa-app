@@ -6,6 +6,7 @@ import { LogOut, WifiOff } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { PropertySelector } from './PropertySelector'
 import { NotificationBell } from '@/components/notifications/NotificationBell'
+import { SyncStatusBadge } from '@/components/SyncStatusBadge'
 import { useConnectivity } from '@/contexts/ConnectivityContext'
 import type { User } from '@/types'
 import type { BuildingSelectionId } from '@/contexts/BuildingContext'
@@ -79,6 +80,9 @@ export function Header({ user, selectedBuildingId, onBuildingSelect }: HeaderPro
             <span>Offline</span>
           </div>
         )}
+
+        {/* Sync status badge */}
+        <SyncStatusBadge />
 
         {/* User role, notifications, and logout */}
         <div className="flex items-center gap-3 flex-shrink-0">

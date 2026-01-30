@@ -10,6 +10,7 @@
 
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react'
 import { toast } from 'sonner'
+import { processSyncQueue, setLastSyncTime } from '@/lib/db/sync-queue'
 
 interface ConnectivityContextValue {
   isOnline: boolean
@@ -24,10 +25,21 @@ export function ConnectivityProvider({ children }: { children: React.ReactNode }
   const isInitialMount = useRef(true)
 
   useEffect(() => {
-    const handleOnline = () => {
+    const handleOnline = async () => {
       setIsOnline(true)
       if (!isInitialMount.current) {
         toast.success('Wieder verbunden', { duration: 4000 })
+
+        // Trigger sync queue processing on reconnect
+        try {
+          const result = await processSyncQueue()
+          if (result.synced > 0) {
+            setLastSyncTime()
+          }
+        } catch (error) {
+          console.error('Sync queue processing failed:', error)
+          // Don't throw - prevent sync errors from breaking connectivity context
+        }
       }
     }
 
