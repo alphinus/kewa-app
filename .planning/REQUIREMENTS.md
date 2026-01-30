@@ -24,10 +24,10 @@
 
 ## Offline PWA (OFFL)
 
-- [ ] **OFFL-01**: App has PWA manifest with icons and display: standalone for home screen install
-- [ ] **OFFL-02**: App shows install prompt / Add to Home Screen guidance
-- [ ] **OFFL-03**: Service worker caches app shell (HTML, CSS, JS, fonts) for offline navigation
-- [ ] **OFFL-04**: App shows online/offline visual indicator in header
+- [x] **OFFL-01**: App has PWA manifest with icons and display: standalone for home screen install
+- [x] **OFFL-02**: App shows install prompt / Add to Home Screen guidance
+- [x] **OFFL-03**: Service worker caches app shell (HTML, CSS, JS, fonts) for offline navigation
+- [x] **OFFL-04**: App shows online/offline visual indicator in header
 - [ ] **OFFL-05**: Recently viewed entities are cached in IndexedDB for offline reading
 - [ ] **OFFL-06**: Offline form submissions are queued in IndexedDB sync queue
 - [ ] **OFFL-07**: Queued operations sync automatically when connectivity returns
@@ -35,7 +35,7 @@
 - [ ] **OFFL-09**: Conflict detection compares updated_at timestamps with last-write-wins resolution
 - [ ] **OFFL-10**: Offline photo capture queues photos for upload on reconnect
 - [ ] **OFFL-11**: Failed syncs retry with exponential backoff
-- [ ] **OFFL-12**: Existing push notification handlers in service worker are preserved during SW expansion
+- [x] **OFFL-12**: Existing push notification handlers in service worker are preserved during SW expansion
 
 ## UX Polish (UXPL)
 
@@ -103,10 +103,10 @@
 | TPRT-13 | Phase 29 | Pending |
 | TPRT-14 | Phase 26 | Complete |
 | TPRT-15 | Phase 26 | Complete |
-| OFFL-01 | Phase 27 | Pending |
-| OFFL-02 | Phase 27 | Pending |
-| OFFL-03 | Phase 27 | Pending |
-| OFFL-04 | Phase 27 | Pending |
+| OFFL-01 | Phase 27 | Complete |
+| OFFL-02 | Phase 27 | Complete |
+| OFFL-03 | Phase 27 | Complete |
+| OFFL-04 | Phase 27 | Complete |
 | OFFL-05 | Phase 28 | Pending |
 | OFFL-06 | Phase 28 | Pending |
 | OFFL-07 | Phase 28 | Pending |
@@ -114,7 +114,7 @@
 | OFFL-09 | Phase 28 | Pending |
 | OFFL-10 | Phase 28 | Pending |
 | OFFL-11 | Phase 28 | Pending |
-| OFFL-12 | Phase 27 | Pending |
+| OFFL-12 | Phase 27 | Complete |
 | UXPL-01 | Phase 25 | Complete |
 | UXPL-02 | Phase 25 | Complete |
 | UXPL-03 | Phase 25 | Complete |

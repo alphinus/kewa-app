@@ -125,9 +125,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 27-01-PLAN.md -- PWA manifest with icons, display: standalone, install prompt / A2HS guidance
-- [ ] 27-02-PLAN.md -- Service worker expansion (cache-first static, network-first API), preserve push handlers
-- [ ] 27-03-PLAN.md -- Online/offline detection provider, header connectivity indicator
+- [x] 27-01-PLAN.md -- PWA manifest with icons, display: standalone, install prompt / A2HS guidance
+- [x] 27-02-PLAN.md -- Service worker expansion (cache-first static, network-first API), preserve push handlers
+- [x] 27-03-PLAN.md -- Online/offline detection provider, header connectivity indicator
 
 ---
 
@@ -182,7 +182,7 @@ Plans:
 | 24. Push Notifications | v2.2 | 4/4 | Complete | 2026-01-29 |
 | 25. UX Polish | v3.0 | 2/2 | Complete | 2026-01-29 |
 | 26. Tenant Portal Core | v3.0 | 4/4 | Complete | 2026-01-29 |
-| 27. PWA Foundation | v3.0 | 0/3 | Not started | - |
+| 27. PWA Foundation | v3.0 | 3/3 | Complete | 2026-01-30 |
 | 28. Offline Data Sync | v3.0 | 0/3 | Not started | - |
 | 29. Tenant Extras & UX | v3.0 | 0/3 | Not started | - |
 
