@@ -2,10 +2,11 @@
 
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
-import { LogOut } from 'lucide-react'
+import { LogOut, WifiOff } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { PropertySelector } from './PropertySelector'
 import { NotificationBell } from '@/components/notifications/NotificationBell'
+import { useConnectivity } from '@/contexts/ConnectivityContext'
 import type { User } from '@/types'
 import type { BuildingSelectionId } from '@/contexts/BuildingContext'
 
@@ -22,6 +23,7 @@ interface HeaderProps {
 export function Header({ user, selectedBuildingId, onBuildingSelect }: HeaderProps) {
   const router = useRouter()
   const [loggingOut, setLoggingOut] = useState(false)
+  const { isOnline } = useConnectivity()
 
   function handleBuildingSelect(buildingId: BuildingSelectionId) {
     if (onBuildingSelect) {
@@ -69,6 +71,14 @@ export function Header({ user, selectedBuildingId, onBuildingSelect }: HeaderPro
 
         {/* Spacer */}
         <div className="flex-1" />
+
+        {/* Offline indicator */}
+        {!isOnline && (
+          <div className="flex items-center gap-1.5 px-2.5 py-1 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 rounded-full text-xs font-medium">
+            <WifiOff className="h-3.5 w-3.5" />
+            <span>Offline</span>
+          </div>
+        )}
 
         {/* User role, notifications, and logout */}
         <div className="flex items-center gap-3 flex-shrink-0">

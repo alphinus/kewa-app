@@ -5,6 +5,7 @@ import { useInstallPrompt } from '@/hooks/useInstallPrompt'
 import { Header } from '@/components/navigation/header'
 import { MobileNav } from '@/components/navigation/mobile-nav'
 import { BuildingProvider, useBuilding } from '@/contexts/BuildingContext'
+import { ConnectivityProvider } from '@/contexts/ConnectivityContext'
 import type { User } from '@/types'
 
 /**
@@ -70,9 +71,11 @@ export default function DashboardLayout({
 
   return (
     <BuildingProvider>
-      <DashboardLayoutInner user={session.user}>
-        {children}
-      </DashboardLayoutInner>
+      <ConnectivityProvider>
+        <DashboardLayoutInner user={session.user}>
+          {children}
+        </DashboardLayoutInner>
+      </ConnectivityProvider>
     </BuildingProvider>
   )
 }
