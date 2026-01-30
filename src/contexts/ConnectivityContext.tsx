@@ -11,6 +11,7 @@
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react'
 import { toast } from 'sonner'
 import { processSyncQueue, setLastSyncTime } from '@/lib/db/sync-queue'
+import { processPhotoQueue } from '@/lib/sync/photo-uploader'
 
 interface ConnectivityContextValue {
   isOnline: boolean
@@ -32,9 +33,15 @@ export function ConnectivityProvider({ children }: { children: React.ReactNode }
 
         // Trigger sync queue processing on reconnect
         try {
-          const result = await processSyncQueue()
-          if (result.synced > 0) {
+          const syncResult = await processSyncQueue()
+          if (syncResult.synced > 0) {
             setLastSyncTime()
+          }
+
+          // Process photo queue after sync queue (form data is critical, photos secondary)
+          const photoResult = await processPhotoQueue()
+          if (photoResult.uploaded > 0) {
+            toast.success(`${photoResult.uploaded} Foto(s) synchronisiert`)
           }
         } catch (error) {
           console.error('Sync queue processing failed:', error)
