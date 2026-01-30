@@ -82,36 +82,56 @@ INSERT INTO tickets (
   updated_at,
   last_message_at
 )
-SELECT
-  td.category_id,
-  td.unit_id,
-  td.user_id,
-  CASE
-    WHEN td.category_name = 'heizung' THEN 'Heizung funktioniert nicht'
-    WHEN td.category_name = 'wasser_sanitaer' THEN 'Wasserhahn tropft in der Kueche'
-    WHEN td.category_name = 'elektrik' THEN 'Steckdose im Wohnzimmer defekt'
-    ELSE 'Tuerklingel ohne Funktion'
-  END as title,
-  CASE
-    WHEN td.category_name = 'heizung' THEN 'Seit gestern bleibt die Heizung kalt, obwohl das Thermostat voll aufgedreht ist. Es wird langsam sehr kalt in der Wohnung.'
-    WHEN td.category_name = 'wasser_sanitaer' THEN 'Der Wasserhahn im Spuelbecken tropft staendig. Auch wenn man ihn fest zudreht, hoert das Tropfen nicht auf.'
-    WHEN td.category_name = 'elektrik' THEN 'Die Steckdose neben dem Fernseher funktioniert nicht mehr. Andere Steckdosen im Raum funktionieren normal.'
-    ELSE 'Die Tuerklingel funktioniert nicht. Besucher muessen mich per Telefon anrufen.'
-  END as description,
-  CASE (random() * 2)::int
-    WHEN 0 THEN 'normal'::ticket_urgency
-    WHEN 1 THEN 'dringend'::ticket_urgency
-    ELSE 'notfall'::ticket_urgency
-  END as urgency,
-  CASE (random() * 2)::int
-    WHEN 0 THEN 'offen'::ticket_status
-    WHEN 1 THEN 'in_bearbeitung'::ticket_status
-    ELSE 'geschlossen'::ticket_status
-  END as status,
-  CURRENT_TIMESTAMP - (random() * INTERVAL '14 days') as created_at,
-  CURRENT_TIMESTAMP - (random() * INTERVAL '7 days') as updated_at,
-  CURRENT_TIMESTAMP - (random() * INTERVAL '2 days') as last_message_at
-FROM tenant_data td;
+-- Insert tickets one at a time to avoid trigger duplicate ticket_number issue
+DO $seed$
+DECLARE
+  v_user_id UUID;
+  v_unit_id UUID;
+  v_cat_id UUID;
+BEGIN
+  -- Get first tenant
+  SELECT u.id, tu.unit_id INTO v_user_id, v_unit_id
+  FROM users u JOIN tenant_users tu ON tu.user_id = u.id
+  JOIN roles r ON r.id = u.role_id AND r.name = 'tenant'
+  LIMIT 1;
+
+  IF v_user_id IS NULL THEN
+    RAISE NOTICE 'No tenant users found, skipping ticket seed';
+    RETURN;
+  END IF;
+
+  -- Ticket 1: Heizung (notfall, offen)
+  SELECT id INTO v_cat_id FROM ticket_categories WHERE name = 'heizung';
+  INSERT INTO tickets (category_id, unit_id, created_by, title, description, urgency, status)
+  VALUES (v_cat_id, v_unit_id, v_user_id,
+    'Heizung funktioniert nicht',
+    'Seit gestern bleibt die Heizung kalt, obwohl das Thermostat voll aufgedreht ist.',
+    'notfall', 'offen');
+
+  -- Ticket 2: Wasser (normal, in_bearbeitung)
+  SELECT id INTO v_cat_id FROM ticket_categories WHERE name = 'wasser_sanitaer';
+  INSERT INTO tickets (category_id, unit_id, created_by, title, description, urgency, status)
+  VALUES (v_cat_id, v_unit_id, v_user_id,
+    'Wasserhahn tropft in der Kueche',
+    'Der Wasserhahn im Spuelbecken tropft staendig.',
+    'normal', 'in_bearbeitung');
+
+  -- Ticket 3: Elektrik (dringend, offen)
+  SELECT id INTO v_cat_id FROM ticket_categories WHERE name = 'elektrik';
+  INSERT INTO tickets (category_id, unit_id, created_by, title, description, urgency, status)
+  VALUES (v_cat_id, v_unit_id, v_user_id,
+    'Steckdose im Wohnzimmer defekt',
+    'Die Steckdose neben dem Fernseher funktioniert nicht mehr.',
+    'dringend', 'offen');
+
+  -- Ticket 4: Allgemein (normal, geschlossen)
+  SELECT id INTO v_cat_id FROM ticket_categories WHERE name = 'allgemein';
+  INSERT INTO tickets (category_id, unit_id, created_by, title, description, urgency, status, closed_at)
+  VALUES (v_cat_id, v_unit_id, v_user_id,
+    'Tuerklingel ohne Funktion',
+    'Die Tuerklingel funktioniert nicht. Besucher muessen mich per Telefon anrufen.',
+    'normal', 'geschlossen', NOW());
+END $seed$;
 
 -- =============================================
 -- TICKET MESSAGES
@@ -123,7 +143,11 @@ WITH ticket_data AS (
     t.id as ticket_id,
     t.created_by as tenant_id,
     t.created_at,
-    (SELECT id FROM users WHERE email IN ('admin@kewa.ch', 'manager@kewa.ch') LIMIT 1) as operator_id
+    COALESCE(
+      (SELECT id FROM users WHERE email IN ('admin@kewa.ch', 'manager@kewa.ch') LIMIT 1),
+      (SELECT u2.id FROM users u2 JOIN roles r2 ON r2.id = u2.role_id WHERE r2.name IN ('admin', 'kewa') LIMIT 1),
+      (SELECT id FROM users WHERE id = '00000000-0000-0000-0000-000000000001')
+    ) as operator_id
   FROM tickets t
   WHERE t.created_at > CURRENT_TIMESTAMP - INTERVAL '30 days'
 )
@@ -206,29 +230,4 @@ SELECT
   CURRENT_TIMESTAMP - INTERVAL '10 days'
 FROM ticket_data td;
 
--- =============================================
--- UPDATE TICKET NUMBERS
--- =============================================
-
--- Generate proper ticket numbers for seeded tickets
--- Format: T-YYYYMMDD-XXXX
-WITH numbered_tickets AS (
-  SELECT
-    id,
-    'T-' || to_char(created_at, 'YYYYMMDD') || '-' ||
-    LPAD(ROW_NUMBER() OVER (PARTITION BY DATE(created_at) ORDER BY created_at)::text, 4, '0') as ticket_number
-  FROM tickets
-  WHERE ticket_number LIKE 'T-%'
-    AND created_at > CURRENT_TIMESTAMP - INTERVAL '30 days'
-)
-UPDATE tickets t
-SET ticket_number = nt.ticket_number
-FROM numbered_tickets nt
-WHERE t.id = nt.id;
-
--- =============================================
--- COMMIT
--- =============================================
-
--- Add comment for tracking
-COMMENT ON TABLE tickets IS 'Tenant portal tickets - seeded 2026-01-29';
+-- Ticket numbers are auto-generated by the set_ticket_number trigger
