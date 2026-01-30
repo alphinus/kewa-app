@@ -119,7 +119,7 @@ WITH ticket_data AS (
     t.created_at,
     COALESCE(
       (SELECT id FROM users WHERE email IN ('admin@kewa.ch', 'manager@kewa.ch') LIMIT 1),
-      (SELECT u2.id FROM users u2 JOIN roles r2 ON r2.id = u2.role_id WHERE r2.name IN ('admin', 'kewa') LIMIT 1),
+      (SELECT u2.id FROM users u2 JOIN roles r2 ON r2.id = u2.role_id WHERE r2.name = 'admin' LIMIT 1),
       (SELECT id FROM users WHERE id = '00000000-0000-0000-0000-000000000001')
     ) as operator_id
   FROM tickets t
