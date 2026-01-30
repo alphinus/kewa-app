@@ -56,32 +56,6 @@ ON CONFLICT (user_id, unit_id) DO NOTHING;
 -- TICKETS
 -- =============================================
 
--- Create tickets for tenants (mix of statuses and urgencies)
-WITH tenant_data AS (
-  SELECT
-    u.id as user_id,
-    tu.unit_id,
-    cat.id as category_id,
-    cat.name as category_name
-  FROM users u
-  JOIN tenant_users tu ON tu.user_id = u.id
-  JOIN roles r ON r.id = u.role_id AND r.name = 'tenant'
-  CROSS JOIN ticket_categories cat
-  WHERE cat.is_active = true
-  LIMIT 6
-)
-INSERT INTO tickets (
-  category_id,
-  unit_id,
-  created_by,
-  title,
-  description,
-  urgency,
-  status,
-  created_at,
-  updated_at,
-  last_message_at
-)
 -- Insert tickets one at a time to avoid trigger duplicate ticket_number issue
 DO $seed$
 DECLARE
