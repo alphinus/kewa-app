@@ -213,24 +213,24 @@ CREATE OR REPLACE TRIGGER update_notification_preferences_updated_at
 -- =============================================
 -- Wrap in DO block to handle environments without pg_cron extension
 
-DO $$
+DO $outer$
 BEGIN
   -- Purge old notifications daily at 3 AM UTC
   PERFORM cron.schedule(
     'purge-old-notifications',
     '0 3 * * *',
-    $$SELECT purge_old_notifications()$$
+    $cron$SELECT purge_old_notifications()$cron$
   );
 
   -- Send daily digests every hour
   PERFORM cron.schedule(
     'send-daily-digests',
     '0 * * * *',
-    $$SELECT send_daily_digests()$$
+    $cron$SELECT send_daily_digests()$cron$
   );
 EXCEPTION
   WHEN undefined_function THEN
     RAISE NOTICE 'pg_cron extension not available - skipping cron job creation';
   WHEN OTHERS THEN
     RAISE NOTICE 'Could not create cron jobs: %', SQLERRM;
-END $$;
+END $outer$;
