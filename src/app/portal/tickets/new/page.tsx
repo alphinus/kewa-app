@@ -23,7 +23,7 @@ export default function NewTicketPage() {
 
   // Fetch categories on mount
   useEffect(() => {
-    fetch('/api/portal/categories')
+    fetch('/api/portal/categories', { credentials: 'include' })
       .then((res) => res.json())
       .then((data) => {
         setCategories(data.categories || [])
@@ -73,6 +73,7 @@ export default function NewTicketPage() {
       // 1. Create ticket
       const ticketResponse = await fetch('/api/portal/tickets', {
         method: 'POST',
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           category_id: categoryId,
@@ -96,6 +97,7 @@ export default function NewTicketPage() {
           // Create attachment record
           await fetch(`/api/portal/tickets/${ticket.id}/attachments`, {
             method: 'POST',
+            credentials: 'include',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               storagePath: path,

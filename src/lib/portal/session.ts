@@ -20,7 +20,7 @@ export const PORTAL_COOKIE_OPTIONS = {
   secure: process.env.NODE_ENV === 'production',
   sameSite: 'lax' as const,
   maxAge: PORTAL_SESSION_EXPIRATION_SECONDS,
-  path: '/portal'
+  path: '/'
 }
 
 /**
