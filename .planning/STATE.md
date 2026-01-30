@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-01-29)
 ## Current Position
 
 Phase: 28 of 29 (Offline Data Sync)
-Plan: 1 of 3 in current phase
+Plan: 2 of 3 in current phase
 Status: In progress
-Last activity: 2026-01-30 -- Completed 28-01-PLAN.md
+Last activity: 2026-01-30 -- Completed 28-02-PLAN.md
 
-Progress: [██████░░░░] 63%
+Progress: [██████░░░░] 64%
 
 ## Milestones Completed
 
@@ -26,9 +26,9 @@ Progress: [██████░░░░] 63%
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 10 (v3.0)
-- Average duration: 25min
-- Total execution time: 249min
+- Total plans completed: 11 (v3.0)
+- Average duration: 23min
+- Total execution time: 256min
 
 **By Phase:**
 
@@ -37,7 +37,7 @@ Progress: [██████░░░░] 63%
 | 25 | 2 | 62min | 31min |
 | 26 | 4 | 156min | 39min |
 | 27 | 3 | 24min | 8min |
-| 28 | 1 | 7min | 7min |
+| 28 | 2 | 14min | 7min |
 
 *Updated after each plan completion*
 
@@ -115,6 +115,14 @@ Phase 28-01 decisions:
 - Compound index [parentType+parentId] for two-level caching (entity + children)
 - Staleness indicator only renders when offline (no indicator when online = live data)
 
+Phase 28-02 decisions:
+- Exponential backoff sequence: 0ms, 10ms, 20ms, 40ms, 80ms, 160ms, 320ms, 640ms (max 8 attempts)
+- Sequential queue processing (FIFO) to preserve order for dependent mutations
+- Failed items persist with status='failed' for user retry or discard action
+- Last sync time stored in localStorage (not IndexedDB) for simplicity
+- Sync triggers automatically on reconnect via ConnectivityContext
+- Badge shows regardless of online/offline state (user needs visibility during sync)
+
 ### UAT Issues (carried from v2.2 -- all resolved in Phase 25)
 
 - ✓ Invoice linking with modal UI (resolved in 25-01)
@@ -131,8 +139,8 @@ Phase 28-01 decisions:
 ## Session Continuity
 
 Last session: 2026-01-30
-Stopped at: Completed 28-01-PLAN.md
+Stopped at: Completed 28-02-PLAN.md
 Resume file: None
 
 ---
-*Phase 28 Offline Data Sync in progress. Plan 28-01 complete: IndexedDB foundation with Dexie. Next: Plan 28-02 (Sync queue and conflict resolution).*
+*Phase 28 Offline Data Sync in progress. Plans 28-01 and 28-02 complete: IndexedDB foundation with sync queue system. Next: Plan 28-03 (Conflict detection).*
