@@ -20,12 +20,16 @@ WITH tenant_role AS (
   SELECT id FROM roles WHERE name = 'tenant'
 ),
 tenant_users_insert AS (
-  INSERT INTO users (email, password_hash, display_name, role_id)
+  INSERT INTO users (email, password_hash, pin_hash, auth_method, display_name, role_id, is_active, email_verified)
   SELECT
     email,
     '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy' as password_hash, -- 'test1234'
+    '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy' as pin_hash, -- placeholder (not used for tenants)
+    'email_password'::auth_method as auth_method,
     display_name,
-    (SELECT id FROM tenant_role)
+    (SELECT id FROM tenant_role),
+    true,
+    true
   FROM (VALUES
     ('mueller@example.com', 'Hans Mueller'),
     ('schmidt@example.com', 'Anna Schmidt'),
