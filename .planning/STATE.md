@@ -9,12 +9,12 @@ See: .planning/PROJECT.md (updated 2026-01-29)
 
 ## Current Position
 
-Phase: 27 of 29 (PWA Foundation)
-Plan: 3 of 3 in current phase
-Status: Phase complete
-Last activity: 2026-01-30 -- Completed 27-03-PLAN.md
+Phase: 28 of 29 (Offline Data Sync)
+Plan: 1 of 3 in current phase
+Status: In progress
+Last activity: 2026-01-30 -- Completed 28-01-PLAN.md
 
-Progress: [██████░░░░] 60%
+Progress: [██████░░░░] 63%
 
 ## Milestones Completed
 
@@ -26,9 +26,9 @@ Progress: [██████░░░░] 60%
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 9 (v3.0)
-- Average duration: 27min
-- Total execution time: 242min
+- Total plans completed: 10 (v3.0)
+- Average duration: 25min
+- Total execution time: 249min
 
 **By Phase:**
 
@@ -37,6 +37,7 @@ Progress: [██████░░░░] 60%
 | 25 | 2 | 62min | 31min |
 | 26 | 4 | 156min | 39min |
 | 27 | 3 | 24min | 8min |
+| 28 | 1 | 7min | 7min |
 
 *Updated after each plan completion*
 
@@ -107,6 +108,13 @@ Phase 27-03 decisions:
 - Initial mount 100ms delay prevents toasts on first page load
 - Amber warning color for offline badge matching app design language
 
+Phase 28-01 decisions:
+- Cache limits: 50 properties, 200 units, 500 work orders, 1000 tasks/notes per type
+- Eviction strategy: 7-day retention window + count-based trimming for unpinned entities
+- Compound index [entityType+entityId] for efficient single-entity lookups
+- Compound index [parentType+parentId] for two-level caching (entity + children)
+- Staleness indicator only renders when offline (no indicator when online = live data)
+
 ### UAT Issues (carried from v2.2 -- all resolved in Phase 25)
 
 - ✓ Invoice linking with modal UI (resolved in 25-01)
@@ -123,8 +131,8 @@ Phase 27-03 decisions:
 ## Session Continuity
 
 Last session: 2026-01-30
-Stopped at: Phase 27 complete and verified
-Resume file: .planning/phases/27-pwa-foundation/27-VERIFICATION.md
+Stopped at: Completed 28-01-PLAN.md
+Resume file: None
 
 ---
-*Phase 27 PWA Foundation complete and verified. 3 plans, 2 waves. Next: Phase 28 (Offline Data Sync).*
+*Phase 28 Offline Data Sync in progress. Plan 28-01 complete: IndexedDB foundation with Dexie. Next: Plan 28-02 (Sync queue and conflict resolution).*
