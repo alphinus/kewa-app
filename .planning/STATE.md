@@ -9,12 +9,12 @@ See: .planning/PROJECT.md (updated 2026-01-29)
 
 ## Current Position
 
-Phase: 26 of 29 (Tenant Portal Core)
-Plan: 4 of 4 in current phase
-Status: Phase complete
-Last activity: 2026-01-29 -- Completed 26-04-PLAN.md
+Phase: 27 of 29 (PWA Foundation)
+Plan: 02 of 3 in current phase
+Status: In progress
+Last activity: 2026-01-30 -- Completed 27-02-PLAN.md
 
-Progress: [████░░░░░░] 40%
+Progress: [█████░░░░░] 42%
 
 ## Milestones Completed
 
@@ -26,9 +26,9 @@ Progress: [████░░░░░░] 40%
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 6 (v3.0)
-- Average duration: 37min
-- Total execution time: 218min
+- Total plans completed: 8 (v3.0)
+- Average duration: 32min
+- Total execution time: 256min
 
 **By Phase:**
 
@@ -36,6 +36,7 @@ Progress: [████░░░░░░] 40%
 |-------|-------|-------|----------|
 | 25 | 2 | 62min | 31min |
 | 26 | 4 | 156min | 39min |
+| 27 | 2 | 38min | 19min |
 
 *Updated after each plan completion*
 
@@ -95,6 +96,12 @@ Phase 26-04 decisions:
 - Admin portal settings embedded in existing dashboard settings page (no new route needed)
 - Seed data uses bcrypt-hashed password 'test1234' for all test tenants
 
+Phase 27-02 decisions:
+- Cache-first for static assets (.js, .css, fonts, images) - instant load after first visit
+- Network-first with 3s timeout for pages - fresh content when online, cache fallback when offline
+- No pre-caching during install - runtime caching only (cache what user visits)
+- API requests pass through service worker - Phase 28 will handle with IndexedDB
+
 ### UAT Issues (carried from v2.2 -- all resolved in Phase 25)
 
 - ✓ Invoice linking with modal UI (resolved in 25-01)
@@ -110,9 +117,9 @@ Phase 26-04 decisions:
 
 ## Session Continuity
 
-Last session: 2026-01-29
-Stopped at: Phase 26 complete and verified (5/5 must-haves passed)
-Resume file: .planning/phases/26-tenant-portal-core/26-VERIFICATION.md
+Last session: 2026-01-30
+Stopped at: Completed 27-02-PLAN.md
+Resume file: None
 
 ---
-*Phase 26 Tenant Portal Core complete and verified. 4 plans, 16 commits, 3 waves. Next: Phase 27 (PWA Foundation).*
+*Phase 27 PWA Foundation in progress. 2 of 3 plans complete. Next: 27-03 (Offline Detection & Install Prompt).*
