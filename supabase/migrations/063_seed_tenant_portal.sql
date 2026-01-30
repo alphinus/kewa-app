@@ -88,13 +88,13 @@ SELECT
   td.user_id,
   CASE
     WHEN td.category_name = 'heizung' THEN 'Heizung funktioniert nicht'
-    WHEN td.category_name = 'wasser' THEN 'Wasserhahn tropft in der Kueche'
+    WHEN td.category_name = 'wasser_sanitaer' THEN 'Wasserhahn tropft in der Kueche'
     WHEN td.category_name = 'elektrik' THEN 'Steckdose im Wohnzimmer defekt'
     ELSE 'Tuerklingel ohne Funktion'
   END as title,
   CASE
     WHEN td.category_name = 'heizung' THEN 'Seit gestern bleibt die Heizung kalt, obwohl das Thermostat voll aufgedreht ist. Es wird langsam sehr kalt in der Wohnung.'
-    WHEN td.category_name = 'wasser' THEN 'Der Wasserhahn im Spuelbecken tropft staendig. Auch wenn man ihn fest zudreht, hoert das Tropfen nicht auf.'
+    WHEN td.category_name = 'wasser_sanitaer' THEN 'Der Wasserhahn im Spuelbecken tropft staendig. Auch wenn man ihn fest zudreht, hoert das Tropfen nicht auf.'
     WHEN td.category_name = 'elektrik' THEN 'Die Steckdose neben dem Fernseher funktioniert nicht mehr. Andere Steckdosen im Raum funktionieren normal.'
     ELSE 'Die Tuerklingel funktioniert nicht. Besucher muessen mich per Telefon anrufen.'
   END as description,
@@ -111,7 +111,7 @@ SELECT
   CURRENT_TIMESTAMP - (random() * INTERVAL '14 days') as created_at,
   CURRENT_TIMESTAMP - (random() * INTERVAL '7 days') as updated_at,
   CURRENT_TIMESTAMP - (random() * INTERVAL '2 days') as last_message_at
-FROM tenant_data;
+FROM tenant_data td;
 
 -- =============================================
 -- TICKET MESSAGES
@@ -144,7 +144,7 @@ SELECT
   CASE WHEN random() > 0.3 THEN td.created_at + INTERVAL '2 hours' ELSE NULL END,
   CASE WHEN random() > 0.3 THEN td.operator_id ELSE NULL END,
   td.created_at + INTERVAL '5 minutes'
-FROM ticket_data
+FROM ticket_data td
 
 UNION ALL
 
@@ -156,7 +156,7 @@ SELECT
   td.created_at + INTERVAL '3 hours',
   td.tenant_id,
   td.created_at + INTERVAL '2 hours'
-FROM ticket_data
+FROM ticket_data td
 
 UNION ALL
 
@@ -168,7 +168,7 @@ SELECT
   td.created_at + INTERVAL '4 hours',
   td.operator_id,
   td.created_at + INTERVAL '3 hours' + INTERVAL '30 minutes'
-FROM ticket_data
+FROM ticket_data td
 WHERE random() > 0.4;
 
 -- =============================================
@@ -204,7 +204,7 @@ SELECT
   512000, -- 512KB
   'image/jpeg',
   CURRENT_TIMESTAMP - INTERVAL '10 days'
-FROM ticket_data;
+FROM ticket_data td;
 
 -- =============================================
 -- UPDATE TICKET NUMBERS
