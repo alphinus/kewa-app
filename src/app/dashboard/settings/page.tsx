@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
+import { useInstallPrompt } from '@/hooks/useInstallPrompt'
 import type { Role } from '@/types'
 
 // =============================================
@@ -32,6 +33,9 @@ interface UserInfo {
  */
 export default function SettingsPage() {
   const router = useRouter()
+
+  // PWA install prompt
+  const { canInstall, promptInstall } = useInstallPrompt()
 
   // State
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null)
@@ -269,6 +273,22 @@ export default function SettingsPage() {
         </div>
       </div>
 
+      {/* App Installation Card */}
+      {canInstall && (
+        <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-4">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4 flex items-center gap-2">
+            <DownloadIcon className="w-5 h-5" />
+            App Installation
+          </h2>
+          <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+            Installieren Sie KEWA als App fuer schnelleren Zugriff.
+          </p>
+          <Button variant="primary" onClick={promptInstall}>
+            App installieren
+          </Button>
+        </div>
+      )}
+
       {/* Logout Button */}
       <div className="pt-4">
         <Button
@@ -421,6 +441,14 @@ function PortalIcon({ className }: { className?: string }) {
   return (
     <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
+    </svg>
+  )
+}
+
+function DownloadIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
     </svg>
   )
 }

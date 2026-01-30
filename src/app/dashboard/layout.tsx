@@ -1,6 +1,7 @@
 'use client'
 
 import { useSession } from '@/hooks/useSession'
+import { useInstallPrompt } from '@/hooks/useInstallPrompt'
 import { Header } from '@/components/navigation/header'
 import { MobileNav } from '@/components/navigation/mobile-nav'
 import { BuildingProvider, useBuilding } from '@/contexts/BuildingContext'
@@ -17,6 +18,9 @@ function DashboardLayoutInner({
   user: User | undefined
 }) {
   const { selectedBuildingId, selectBuilding } = useBuilding()
+
+  // Trigger install prompt after login
+  useInstallPrompt()
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
