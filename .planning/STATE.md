@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-01-29)
 ## Current Position
 
 Phase: 27 of 29 (PWA Foundation)
-Plan: 1 of 3 in current phase
-Status: In progress
-Last activity: 2026-01-30 -- Completed 27-01-PLAN.md
+Plan: 3 of 3 in current phase
+Status: Phase complete
+Last activity: 2026-01-30 -- Completed 27-03-PLAN.md
 
-Progress: [████░░░░░░] 41%
+Progress: [████░░░░░░] 42%
 
 ## Milestones Completed
 
@@ -26,9 +26,9 @@ Progress: [████░░░░░░] 41%
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 7 (v3.0)
-- Average duration: 33min
-- Total execution time: 229min
+- Total plans completed: 8 (v3.0)
+- Average duration: 29min
+- Total execution time: 234min
 
 **By Phase:**
 
@@ -36,7 +36,7 @@ Progress: [████░░░░░░] 41%
 |-------|-------|-------|----------|
 | 25 | 2 | 62min | 31min |
 | 26 | 4 | 156min | 39min |
-| 27 | 1 | 11min | 11min |
+| 27 | 2 | 16min | 8min |
 
 *Updated after each plan completion*
 
@@ -102,6 +102,11 @@ Phase 27-01 decisions:
 - Manual install button only visible when browser supports install
 - Solid brand color icons (#0f172a slate-900) without complex graphics
 
+Phase 27-03 decisions:
+- Operator app only - portal layout unchanged per CONTEXT.md (home Wi-Fi users)
+- Initial mount 100ms delay prevents toasts on first page load
+- Amber warning color for offline badge matching app design language
+
 ### UAT Issues (carried from v2.2 -- all resolved in Phase 25)
 
 - ✓ Invoice linking with modal UI (resolved in 25-01)
@@ -118,8 +123,8 @@ Phase 27-01 decisions:
 ## Session Continuity
 
 Last session: 2026-01-30
-Stopped at: Completed 27-01-PLAN.md
+Stopped at: Completed 27-03-PLAN.md
 Resume file: None
 
 ---
-*Phase 27 PWA Foundation in progress. 1 of 3 plans complete. Next: 27-02 (Cache Strategy).*
+*Phase 27 PWA Foundation complete. 3 of 3 plans done. Next: Phase 28 (Offline Shell).*
