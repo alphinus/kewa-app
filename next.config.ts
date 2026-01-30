@@ -33,6 +33,15 @@ const nextConfig: NextConfig = {
           },
         ],
       },
+      {
+        source: '/sw-cache.js',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'no-cache, no-store, must-revalidate',
+          },
+        ],
+      },
     ]
   },
 };

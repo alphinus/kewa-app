@@ -1,8 +1,11 @@
 /**
  * KEWA Service Worker
- * Handles push notifications and notification click events
- * Phase: 24-push-notifications
+ * Handles push notifications and offline caching
+ * Phase: 24-push-notifications (push), 27-pwa-foundation (caching)
  */
+
+// Load caching module (install/activate/fetch handlers)
+importScripts('/sw-cache.js')
 
 // Push event: display notification
 self.addEventListener('push', (event) => {
