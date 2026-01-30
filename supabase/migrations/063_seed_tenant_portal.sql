@@ -23,8 +23,8 @@ tenant_users_insert AS (
   INSERT INTO users (email, password_hash, pin_hash, role, auth_method, display_name, role_id, is_active, email_verified)
   SELECT
     email,
-    '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy' as password_hash, -- 'test1234'
-    '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy' as pin_hash, -- placeholder (not used for tenants)
+    '$2b$10$mZk/6eWmIPwvfwz/jkaBceGz2/l6YqX.KPI.FNGWZSMqOFIjsHXi2' as password_hash, -- 'test1234'
+    '$2b$10$mZk/6eWmIPwvfwz/jkaBceGz2/l6YqX.KPI.FNGWZSMqOFIjsHXi2' as pin_hash, -- placeholder (not used for tenants)
     'kewa' as role, -- legacy column (NOT NULL), value unused with role_id system
     'email_password'::auth_method as auth_method,
     display_name,
