@@ -9,6 +9,9 @@
 import { db, type SyncQueueItem } from '@/lib/db/schema'
 import { executeWithRetry } from '@/lib/sync/retry-strategy'
 import { toast } from 'sonner'
+import { detectAndResolveConflict } from '@/lib/sync/conflict-resolver'
+import { cacheEntityOnView } from '@/lib/db/operations'
+import type { CachedEntity } from '@/lib/db/schema'
 
 /**
  * Enqueue a sync item for offline processing
@@ -36,14 +39,16 @@ export async function enqueueSyncItem(
 /**
  * Process all pending items in sync queue
  *
- * @returns Object with synced and failed counts
+ * @returns Object with synced, failed, and conflicts counts
  */
 export async function processSyncQueue(): Promise<{
   synced: number
   failed: number
+  conflicts: number
 }> {
   let synced = 0
   let failed = 0
+  let conflicts = 0
 
   try {
     // Get all pending items ordered by creation time (FIFO)
@@ -75,8 +80,39 @@ export async function processSyncQueue(): Promise<{
           return res
         })
 
-        // Parse response JSON (needed for conflict detection in Plan 03)
+        // Parse response JSON
         const data = await response.json()
+
+        // Handle different operation types
+        if (item.operation === 'update' && item.payload.updated_at) {
+          // Update operation with timestamp - check for conflicts
+          const result = await detectAndResolveConflict({
+            entityType: item.entityType,
+            entityId: item.entityId,
+            localUpdatedAt: item.payload.updated_at,
+            serverResponse: data,
+          })
+
+          if (result.winner === 'server') {
+            conflicts++
+          }
+        } else if (item.operation === 'create') {
+          // Create operation - cache the new entity data
+          await cacheEntityOnView(
+            item.entityType as CachedEntity['entityType'],
+            item.entityId,
+            data
+          )
+        } else if (item.operation === 'delete') {
+          // Delete operation - remove from cache
+          const cached = await db.cachedEntities
+            .where({ entityType: item.entityType, entityId: item.entityId })
+            .first()
+
+          if (cached && cached.id !== undefined) {
+            await db.cachedEntities.delete(cached.id)
+          }
+        }
 
         // Success: remove from queue
         await db.syncQueue.delete(item.id!)
@@ -108,7 +144,7 @@ export async function processSyncQueue(): Promise<{
     console.error('Failed to process sync queue:', error)
   }
 
-  return { synced, failed }
+  return { synced, failed, conflicts }
 }
 
 /**
