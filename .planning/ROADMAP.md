@@ -147,8 +147,8 @@ Plans:
 - [x] 28-01-PLAN.md -- Dexie IndexedDB setup, entity caching layer for offline reads
 - [x] 28-02-PLAN.md -- Sync queue, background sync on reconnect, sync status indicator
 - [x] 28-03-PLAN.md -- Conflict detection (LWW), offline photo queue, exponential backoff retry
-- [ ] 28-04-PLAN.md -- Entity caching integration (wire cacheEntityOnView + offline fallback into detail pages)
-- [ ] 28-05-PLAN.md -- Form + photo integration (wire useOfflineSubmit + useOfflinePhoto into task forms and photo upload)
+- [x] 28-04-PLAN.md -- Entity caching integration (wire cacheEntityOnView + offline fallback into detail pages)
+- [x] 28-05-PLAN.md -- Form + photo integration (wire useOfflineSubmit + useOfflinePhoto into task forms and photo upload)
 
 ---
 
@@ -185,7 +185,7 @@ Plans:
 | 25. UX Polish | v3.0 | 2/2 | Complete | 2026-01-29 |
 | 26. Tenant Portal Core | v3.0 | 4/4 | Complete | 2026-01-29 |
 | 27. PWA Foundation | v3.0 | 3/3 | Complete | 2026-01-30 |
-| 28. Offline Data Sync | v3.0 | 3/5 | Gap closure | - |
+| 28. Offline Data Sync | v3.0 | 5/5 | Complete | 2026-01-31 |
 | 29. Tenant Extras & UX | v3.0 | 0/3 | Not started | - |
 
 ---
