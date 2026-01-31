@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-01-29)
 ## Current Position
 
 Phase: 28 of 29 (Offline Data Sync)
-Plan: 5 of 5 in current phase
-Status: Phase complete (Gap closure plan)
-Last activity: 2026-01-31 -- Completed 28-05-PLAN.md
+Plan: 6 of 6 in current phase
+Status: Phase complete (All gaps closed)
+Last activity: 2026-01-31 -- Completed 28-04-PLAN.md
 
-Progress: [███████░░░] 67%
+Progress: [███████░░░] 68%
 
 ## Milestones Completed
 
@@ -26,9 +26,9 @@ Progress: [███████░░░] 67%
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 14 (v3.0)
+- Total plans completed: 15 (v3.0)
 - Average duration: 20min
-- Total execution time: 285min
+- Total execution time: 302min
 
 **By Phase:**
 
@@ -37,7 +37,7 @@ Progress: [███████░░░] 67%
 | 25 | 2 | 62min | 31min |
 | 26 | 4 | 156min | 39min |
 | 27 | 3 | 24min | 8min |
-| 28 | 5 | 43min | 9min |
+| 28 | 6 | 60min | 10min |
 
 *Updated after each plan completion*
 
@@ -130,6 +130,12 @@ Phase 28-03 decisions:
 - Failed photos retry independently from form data (partial sync works)
 - Photo queue processes AFTER sync queue on reconnect
 
+Phase 28-04 decisions:
+- Network-first strategy with cache fallback (always attempt fetch first)
+- Separate useEffect for offline page load detection
+- Unit page shows only unit header offline (rooms not cached separately)
+- Task page shows only task entity offline (photos/audio/role not available)
+
 Phase 28-05 decisions:
 - Task creation stays online-only (master data not created offline per CONTEXT.md)
 - Task edit mode uses offline queueing for all updates
@@ -152,8 +158,8 @@ Phase 28-05 decisions:
 ## Session Continuity
 
 Last session: 2026-01-31
-Stopped at: Completed 28-05-PLAN.md (Gap closure)
+Stopped at: Completed 28-04-PLAN.md (Gap closure complete)
 Resume file: None
 
 ---
-*Phase 28 Offline Data Sync complete with Gap closure. All 7 OFFL requirements addressed + form integration: entity caching, staleness indicators, form queueing, sync status, retry strategy, conflict detection, and photo queue. Gaps 2 (form submission) and 3 (photo capture) closed. Gap 1 (background sync) remains. Next: Phase 29 or background sync implementation.*
+*Phase 28 Offline Data Sync complete with all gaps closed. All 7 OFFL requirements addressed + UI integration: entity caching wired into 4 detail pages, staleness indicators, form queueing, sync status, retry strategy, conflict detection, and photo queue. Gaps 1 (entity caching), 2 (form submission), and 3 (photo capture) all closed. Phase ready for milestone verification. Next: Phase 29.*
