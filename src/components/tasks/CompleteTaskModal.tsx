@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { Button } from '@/components/ui/button'
 import { PhotoUpload } from '@/components/photos/PhotoUpload'
+import { useOfflineSubmit } from '@/hooks/useOfflineSubmit'
 import type { TaskWithProject, TaskPhotoWithUrl } from '@/types/database'
 
 interface CompleteTaskModalProps {
@@ -20,6 +21,9 @@ const MAX_NOTE_LENGTH = 200
  * Accessible: focus trap, escape to close, proper ARIA
  */
 export function CompleteTaskModal({ task, onClose, onComplete }: CompleteTaskModalProps) {
+  // Offline submission hook
+  const { submitOrQueue } = useOfflineSubmit()
+
   const [note, setNote] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -126,22 +130,21 @@ export function CompleteTaskModal({ task, onClose, onComplete }: CompleteTaskMod
       setLoading(true)
       setError(null)
 
-      const response = await fetch(`/api/tasks/${task.id}`, {
+      const result = await submitOrQueue({
+        operation: 'update',
+        entityType: 'task',
+        entityId: task.id,
+        endpoint: `/api/tasks/${task.id}`,
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
+        payload: {
           status: 'completed',
           completion_note: note.trim() || null,
-        }),
+          updated_at: task.updated_at,
+        },
       })
 
-      if (!response.ok) {
-        const data = await response.json()
-        throw new Error(data.error || 'Failed to complete task')
-      }
-
+      // Call onComplete for both queued and successful submissions
+      // Optimistic UI: assume success even if queued
       onComplete()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Ein Fehler ist aufgetreten')

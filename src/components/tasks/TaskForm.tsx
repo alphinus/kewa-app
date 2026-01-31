@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardFooter } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { ProjectSelect } from '@/components/projects/ProjectSelect'
+import { useOfflineSubmit } from '@/hooks/useOfflineSubmit'
 import type { TaskWithProject, CreateTaskInput, UpdateTaskInput, Task, RecurringType } from '@/types/database'
 import type { Priority, Role } from '@/types'
 
@@ -52,6 +53,9 @@ export function TaskForm({
   onCancel,
   onDelete,
 }: TaskFormProps) {
+  // Offline submission hook
+  const { submitOrQueue } = useOfflineSubmit()
+
   // Form state
   const [projectId, setProjectId] = useState(task?.project_id || '')
   const [title, setTitle] = useState(task?.title || '')
@@ -136,19 +140,21 @@ export function TaskForm({
           recurring_type: userRole === 'kewa' ? recurringType : undefined,
         }
 
-        const response = await fetch(`/api/tasks/${task.id}`, {
+        const result = await submitOrQueue({
+          operation: 'update',
+          entityType: 'task',
+          entityId: task.id,
+          endpoint: `/api/tasks/${task.id}`,
           method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(input),
+          payload: { ...input, updated_at: task.updated_at },
         })
 
-        if (!response.ok) {
-          const error = await response.json()
-          throw new Error(error.error || 'Fehler beim Speichern')
+        if (result.queued) {
+          // Optimistic update: use existing task with updated fields
+          onSave({ ...task, ...input } as unknown as Task)
+        } else if (result.data) {
+          onSave(result.data.task)
         }
-
-        const data = await response.json()
-        onSave(data.task)
       }
     } catch (err) {
       setErrors({
