@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-01-29)
 ## Current Position
 
 Phase: 28 of 29 (Offline Data Sync)
-Plan: 3 of 3 in current phase
-Status: Phase complete
-Last activity: 2026-01-30 -- Completed 28-03-PLAN.md
+Plan: 5 of 5 in current phase
+Status: Phase complete (Gap closure plan)
+Last activity: 2026-01-31 -- Completed 28-05-PLAN.md
 
-Progress: [███████░░░] 65%
+Progress: [███████░░░] 67%
 
 ## Milestones Completed
 
@@ -26,9 +26,9 @@ Progress: [███████░░░] 65%
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 12 (v3.0)
-- Average duration: 22min
-- Total execution time: 261min
+- Total plans completed: 14 (v3.0)
+- Average duration: 20min
+- Total execution time: 285min
 
 **By Phase:**
 
@@ -37,7 +37,7 @@ Progress: [███████░░░] 65%
 | 25 | 2 | 62min | 31min |
 | 26 | 4 | 156min | 39min |
 | 27 | 3 | 24min | 8min |
-| 28 | 3 | 19min | 6min |
+| 28 | 5 | 43min | 9min |
 
 *Updated after each plan completion*
 
@@ -130,6 +130,12 @@ Phase 28-03 decisions:
 - Failed photos retry independently from form data (partial sync works)
 - Photo queue processes AFTER sync queue on reconnect
 
+Phase 28-05 decisions:
+- Task creation stays online-only (master data not created offline per CONTEXT.md)
+- Task edit mode uses offline queueing for all updates
+- Optimistic UI for queued submissions (immediate feedback)
+- Photo upload falls back to queue if online upload fails while offline
+
 ### UAT Issues (carried from v2.2 -- all resolved in Phase 25)
 
 - ✓ Invoice linking with modal UI (resolved in 25-01)
@@ -145,9 +151,9 @@ Phase 28-03 decisions:
 
 ## Session Continuity
 
-Last session: 2026-01-30
-Stopped at: Completed 28-03-PLAN.md
+Last session: 2026-01-31
+Stopped at: Completed 28-05-PLAN.md (Gap closure)
 Resume file: None
 
 ---
-*Phase 28 Offline Data Sync complete. All 7 OFFL requirements addressed: entity caching, staleness indicators, form queueing, sync status, retry strategy, conflict detection, and photo queue. Next: Phase 29 (Milestone wrap-up).*
+*Phase 28 Offline Data Sync complete with Gap closure. All 7 OFFL requirements addressed + form integration: entity caching, staleness indicators, form queueing, sync status, retry strategy, conflict detection, and photo queue. Gaps 2 (form submission) and 3 (photo capture) closed. Gap 1 (background sync) remains. Next: Phase 29 or background sync implementation.*
