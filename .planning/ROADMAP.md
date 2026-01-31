@@ -141,12 +141,14 @@ Plans:
   3. Sync status indicator shows pending operation count and last successful sync time
   4. Conflicts are detected via updated_at timestamp comparison and resolved with last-write-wins; user is notified of overwritten changes
   5. Photos captured offline are queued and uploaded on reconnect; failed syncs retry with exponential backoff
-**Plans**: 3 plans
+**Plans**: 5 plans
 
 Plans:
-- [ ] 28-01-PLAN.md -- Dexie IndexedDB setup, entity caching layer for offline reads
-- [ ] 28-02-PLAN.md -- Sync queue, background sync on reconnect, sync status indicator
-- [ ] 28-03-PLAN.md -- Conflict detection (LWW), offline photo queue, exponential backoff retry
+- [x] 28-01-PLAN.md -- Dexie IndexedDB setup, entity caching layer for offline reads
+- [x] 28-02-PLAN.md -- Sync queue, background sync on reconnect, sync status indicator
+- [x] 28-03-PLAN.md -- Conflict detection (LWW), offline photo queue, exponential backoff retry
+- [ ] 28-04-PLAN.md -- Entity caching integration (wire cacheEntityOnView + offline fallback into detail pages)
+- [ ] 28-05-PLAN.md -- Form + photo integration (wire useOfflineSubmit + useOfflinePhoto into task forms and photo upload)
 
 ---
 
@@ -183,7 +185,7 @@ Plans:
 | 25. UX Polish | v3.0 | 2/2 | Complete | 2026-01-29 |
 | 26. Tenant Portal Core | v3.0 | 4/4 | Complete | 2026-01-29 |
 | 27. PWA Foundation | v3.0 | 3/3 | Complete | 2026-01-30 |
-| 28. Offline Data Sync | v3.0 | 0/3 | Not started | - |
+| 28. Offline Data Sync | v3.0 | 3/5 | Gap closure | - |
 | 29. Tenant Extras & UX | v3.0 | 0/3 | Not started | - |
 
 ---
