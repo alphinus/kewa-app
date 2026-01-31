@@ -3,6 +3,8 @@
 import { useState, useRef, useCallback } from 'react'
 import { Button } from '@/components/ui/button'
 import { compressImage, getCompressedMimeType } from '@/lib/imageCompression'
+import { useOfflinePhoto } from '@/hooks/useOfflinePhoto'
+import { toast } from 'sonner'
 import type { TaskPhotoWithUrl, PhotoType } from '@/types/database'
 
 interface PhotoUploadProps {
@@ -33,6 +35,9 @@ export function PhotoUpload({
   onDelete,
   disabled = false,
 }: PhotoUploadProps) {
+  // Offline photo hook
+  const { queuePhoto, pendingPhotoCount, isOnline } = useOfflinePhoto('task', taskId)
+
   const [uploadState, setUploadState] = useState<UploadState>('idle')
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
@@ -111,36 +116,76 @@ export function PhotoUpload({
    * Handle upload confirmation
    */
   const handleUpload = useCallback(async () => {
-    if (!compressedBlob) return
+    if (!compressedBlob || !selectedFile) return
 
     try {
       setUploadState('uploading')
       setErrorMessage(null)
 
-      const photo = await uploadWithRetry(compressedBlob)
+      if (isOnline) {
+        // Online: use existing upload with retry
+        const photo = await uploadWithRetry(compressedBlob)
 
-      setUploadState('success')
+        setUploadState('success')
 
-      // Clean up preview
-      if (previewUrl) {
-        URL.revokeObjectURL(previewUrl)
-      }
+        // Clean up preview
+        if (previewUrl) {
+          URL.revokeObjectURL(previewUrl)
+        }
 
-      // Reset state after short delay to show success
-      setTimeout(() => {
+        // Reset state after short delay to show success
+        setTimeout(() => {
+          setUploadState('idle')
+          setPreviewUrl(null)
+          setSelectedFile(null)
+          setCompressedBlob(null)
+
+          onUploadComplete?.(photo)
+        }, 1000)
+      } else {
+        // Offline: queue for later upload
+        await queuePhoto(selectedFile)
+        toast.info('Foto wird hochgeladen, sobald die Verbindung wiederhergestellt ist', { duration: 4000 })
+
+        // Clean up preview
+        if (previewUrl) {
+          URL.revokeObjectURL(previewUrl)
+        }
+
+        // Reset state
         setUploadState('idle')
         setPreviewUrl(null)
         setSelectedFile(null)
         setCompressedBlob(null)
-
-        onUploadComplete?.(photo)
-      }, 1000)
+        // Don't call onUploadComplete since photo isn't on server yet
+      }
     } catch (err) {
       console.error('Upload error:', err)
-      setUploadState('error')
-      setErrorMessage(err instanceof Error ? err.message : 'Upload fehlgeschlagen')
+
+      // If online upload failed and we're offline now, queue it
+      if (!isOnline && selectedFile) {
+        try {
+          await queuePhoto(selectedFile)
+          toast.info('Foto wird hochgeladen, sobald die Verbindung wiederhergestellt ist', { duration: 4000 })
+
+          // Clean up and reset
+          if (previewUrl) {
+            URL.revokeObjectURL(previewUrl)
+          }
+          setUploadState('idle')
+          setPreviewUrl(null)
+          setSelectedFile(null)
+          setCompressedBlob(null)
+        } catch (queueErr) {
+          setUploadState('error')
+          setErrorMessage('Fehler beim Speichern des Fotos')
+        }
+      } else {
+        setUploadState('error')
+        setErrorMessage(err instanceof Error ? err.message : 'Upload fehlgeschlagen')
+      }
     }
-  }, [compressedBlob, previewUrl, uploadWithRetry, onUploadComplete])
+  }, [compressedBlob, selectedFile, previewUrl, isOnline, queuePhoto, uploadWithRetry, onUploadComplete])
 
   /**
    * Cancel preview and reset
@@ -288,6 +333,13 @@ export function PhotoUpload({
             </span>
           )}
         </div>
+      )}
+
+      {/* Pending photo queue indicator */}
+      {pendingPhotoCount > 0 && (
+        <p className="text-xs text-amber-600 dark:text-amber-400">
+          {pendingPhotoCount} Foto(s) warten auf Upload
+        </p>
       )}
 
       {/* Upload state: idle - show buttons */}
