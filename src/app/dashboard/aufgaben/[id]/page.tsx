@@ -12,6 +12,10 @@ import { CompleteTaskModal } from '@/components/tasks/CompleteTaskModal'
 import { TaskForm } from '@/components/tasks/TaskForm'
 import type { TaskWithProject, TaskPhotoWithUrl, PhotosResponse, TaskAudioWithUrl, AudiosResponse } from '@/types/database'
 import type { Priority, Role } from '@/types'
+import { cacheEntityOnView } from '@/lib/db/operations'
+import { useOfflineEntity } from '@/hooks/useOfflineEntity'
+import { StalenessIndicator } from '@/components/StalenessIndicator'
+import { useConnectivity } from '@/contexts/ConnectivityContext'
 
 /**
  * Priority badge styling
@@ -111,6 +115,10 @@ export default function TaskDetailPage() {
   const [error, setError] = useState<string | null>(null)
   const [userRole, setUserRole] = useState<Role | null>(null)
 
+  // Offline entity caching
+  const { isOnline } = useConnectivity()
+  const offlineCache = useOfflineEntity('task', taskId)
+
   // Modal states
   const [showCompleteModal, setShowCompleteModal] = useState(false)
   const [showEditForm, setShowEditForm] = useState(false)
@@ -141,12 +149,22 @@ export default function TaskDetailPage() {
 
       const data = await response.json()
       setTask(data.task)
+
+      // Cache task entity on successful fetch
+      await cacheEntityOnView('task', taskId, data.task)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unbekannter Fehler')
+      // If offline and cached data available, use cache
+      // Note: Photos, audio, and user role will not be available offline
+      if (!isOnline && offlineCache.data) {
+        setTask(offlineCache.data)
+        setError(null)
+      } else {
+        setError(err instanceof Error ? err.message : 'Unbekannter Fehler')
+      }
     } finally {
       setLoading(false)
     }
-  }, [taskId])
+  }, [taskId, isOnline, offlineCache.data])
 
   /**
    * Fetch photos for this task
@@ -208,6 +226,14 @@ export default function TaskDetailPage() {
     fetchAudios()
     fetchUserRole()
   }, [fetchTask, fetchPhotos, fetchAudios, fetchUserRole])
+
+  // Handle offline page load with cached data
+  useEffect(() => {
+    if (!isOnline && !task && offlineCache.data && !offlineCache.isLoading) {
+      setTask(offlineCache.data)
+      setLoading(false)
+    }
+  }, [isOnline, task, offlineCache.data, offlineCache.isLoading])
 
   /**
    * Handle photo upload complete
@@ -315,9 +341,12 @@ export default function TaskDetailPage() {
         <CardContent className="p-4 space-y-3">
           {/* Title and badges */}
           <div className="flex items-start justify-between gap-3">
-            <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">
-              {task.title}
-            </h1>
+            <div className="flex-1">
+              <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">
+                {task.title}
+              </h1>
+              <StalenessIndicator cachedAt={offlineCache.cachedAt} />
+            </div>
             <div className="flex gap-2 flex-shrink-0">
               <span className={`px-2 py-1 text-xs font-medium rounded-full ${statusBadge.className}`}>
                 {statusBadge.label}

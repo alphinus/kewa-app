@@ -6,6 +6,7 @@
  *
  * Path: /dashboard/einheiten/[id]
  * Phase 15-04: Unit Detail Page
+ * Phase 28-04: Entity caching integration
  */
 
 'use client'
@@ -23,6 +24,10 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import type { Unit, Room } from '@/types/database'
 import type { RoomCondition } from '@/types'
+import { cacheEntityOnView } from '@/lib/db/operations'
+import { useOfflineEntity } from '@/hooks/useOfflineEntity'
+import { StalenessIndicator } from '@/components/StalenessIndicator'
+import { useConnectivity } from '@/contexts/ConnectivityContext'
 
 interface PageProps {
   params: Promise<{ id: string }>
@@ -113,6 +118,10 @@ export default function UnitDetailPage({ params }: PageProps) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
+  // Offline entity caching
+  const { isOnline } = useConnectivity()
+  const offlineCache = useOfflineEntity('unit', id)
+
   // Form state
   const [showRoomForm, setShowRoomForm] = useState(false)
   const [editingRoom, setEditingRoom] = useState<Room | null>(null)
@@ -149,17 +158,37 @@ export default function UnitDetailPage({ params }: PageProps) {
 
       setUnit(unitData.unit)
       setRooms(roomsData.rooms || [])
+
+      // Cache unit entity on successful fetch
+      await cacheEntityOnView('unit', id, unitData.unit)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Ein Fehler ist aufgetreten')
+      // If offline and cached data available, use cache
+      // Note: Rooms are not cached separately, only show unit header offline
+      if (!isOnline && offlineCache.data) {
+        setUnit(offlineCache.data)
+        setRooms([])
+        setError(null)
+      } else {
+        setError(err instanceof Error ? err.message : 'Ein Fehler ist aufgetreten')
+      }
     } finally {
       setLoading(false)
     }
-  }, [id])
+  }, [id, isOnline, offlineCache.data])
 
   // Load data on mount
   useEffect(() => {
     fetchData()
   }, [fetchData])
+
+  // Handle offline page load with cached data
+  useEffect(() => {
+    if (!isOnline && !unit && offlineCache.data && !offlineCache.isLoading) {
+      setUnit(offlineCache.data)
+      setRooms([])
+      setLoading(false)
+    }
+  }, [isOnline, unit, offlineCache.data, offlineCache.isLoading])
 
   /**
    * Handle add room click
@@ -294,6 +323,9 @@ export default function UnitDetailPage({ params }: PageProps) {
               <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
                 {unit.name}
               </h1>
+            </div>
+            <div className="ml-8">
+              <StalenessIndicator cachedAt={offlineCache.cachedAt} />
             </div>
             <div className="flex flex-wrap items-center gap-2 mt-2 text-sm text-gray-600 dark:text-gray-400 ml-8">
               <span className="px-2 py-0.5 bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 rounded-full text-xs font-medium">
