@@ -13,6 +13,7 @@
  *
  * Path: /dashboard/auftraege/[id]
  * Phase 09-07: Work Order UI Integration
+ * Phase 28-04: Entity caching integration
  */
 
 import { useState, useEffect, use } from 'react'
@@ -21,6 +22,10 @@ import Link from 'next/link'
 import { WorkOrderSendDialog } from '@/components/work-orders/WorkOrderSendDialog'
 import type { WorkOrderWithRelations, WorkOrderSendResponse } from '@/types/work-order'
 import type { WorkOrderStatus } from '@/types'
+import { cacheEntityOnView } from '@/lib/db/operations'
+import { useOfflineEntity } from '@/hooks/useOfflineEntity'
+import { StalenessIndicator } from '@/components/StalenessIndicator'
+import { useConnectivity } from '@/contexts/ConnectivityContext'
 
 interface PageProps {
   params: Promise<{ id: string }>
@@ -128,6 +133,10 @@ export default function WorkOrderDetailPage({ params }: PageProps) {
   const [error, setError] = useState<string | null>(null)
   const [showSendDialog, setShowSendDialog] = useState(false)
 
+  // Offline entity caching
+  const { isOnline } = useConnectivity()
+  const offlineCache = useOfflineEntity('workOrder', id)
+
   // Load work order
   useEffect(() => {
     async function loadWorkOrder() {
@@ -145,15 +154,32 @@ export default function WorkOrderDetailPage({ params }: PageProps) {
 
         const data = await response.json()
         setWorkOrder(data.workOrder)
+
+        // Cache entity on successful fetch
+        await cacheEntityOnView('workOrder', id, data.workOrder)
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Unbekannter Fehler')
+        // If offline and cached data available, use cache
+        if (!isOnline && offlineCache.data) {
+          setWorkOrder(offlineCache.data)
+          setError(null)
+        } else {
+          setError(err instanceof Error ? err.message : 'Unbekannter Fehler')
+        }
       } finally {
         setLoading(false)
       }
     }
 
     loadWorkOrder()
-  }, [id])
+  }, [id, isOnline, offlineCache.data])
+
+  // Handle offline page load with cached data
+  useEffect(() => {
+    if (!isOnline && !workOrder && offlineCache.data && !offlineCache.isLoading) {
+      setWorkOrder(offlineCache.data)
+      setLoading(false)
+    }
+  }, [isOnline, workOrder, offlineCache.data, offlineCache.isLoading])
 
   /**
    * Handle send dialog completion
@@ -252,6 +278,7 @@ export default function WorkOrderDetailPage({ params }: PageProps) {
               {badge.label}
             </span>
           </div>
+          <StalenessIndicator cachedAt={offlineCache.cachedAt} />
           {workOrder.description && (
             <p className="text-gray-600 dark:text-gray-400 mt-1">
               {workOrder.description}

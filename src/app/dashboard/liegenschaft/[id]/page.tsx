@@ -7,6 +7,7 @@
  *
  * Path: /dashboard/liegenschaft/[id]
  * Phase 25-01: UX Polish (UXPL-03)
+ * Phase 28-04: Entity caching integration
  */
 
 import { useState, useEffect, use } from 'react'
@@ -14,6 +15,10 @@ import Link from 'next/link'
 import { Card, CardHeader, CardContent } from '@/components/ui/card'
 import { DeliveryList } from '@/components/suppliers/DeliveryList'
 import { formatSwissDate } from '@/lib/suppliers/purchase-order-queries'
+import { cacheEntityOnView } from '@/lib/db/operations'
+import { useOfflineEntity } from '@/hooks/useOfflineEntity'
+import { StalenessIndicator } from '@/components/StalenessIndicator'
+import { useConnectivity } from '@/contexts/ConnectivityContext'
 
 interface PageProps {
   params: Promise<{ id: string }>
@@ -55,6 +60,10 @@ export default function LiegenschaftDetailPage({ params }: PageProps) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
+  // Offline entity caching
+  const { isOnline } = useConnectivity()
+  const offlineCache = useOfflineEntity('property', id)
+
   // Validate UUID format
   const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
   const isValidId = uuidRegex.test(id)
@@ -79,15 +88,32 @@ export default function LiegenschaftDetailPage({ params }: PageProps) {
 
         const data = await response.json()
         setBuilding(data.building)
+
+        // Cache entity on successful fetch
+        await cacheEntityOnView('property', id, data.building)
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Unbekannter Fehler')
+        // If offline and cached data available, use cache
+        if (!isOnline && offlineCache.data) {
+          setBuilding(offlineCache.data)
+          setError(null)
+        } else {
+          setError(err instanceof Error ? err.message : 'Unbekannter Fehler')
+        }
       } finally {
         setLoading(false)
       }
     }
 
     fetchBuilding()
-  }, [id, isValidId])
+  }, [id, isValidId, isOnline, offlineCache.data])
+
+  // Handle offline page load with cached data
+  useEffect(() => {
+    if (!isOnline && !building && offlineCache.data && !offlineCache.isLoading) {
+      setBuilding(offlineCache.data)
+      setLoading(false)
+    }
+  }, [isOnline, building, offlineCache.data, offlineCache.isLoading])
 
   // Invalid ID
   if (!isValidId) {
@@ -163,9 +189,12 @@ export default function LiegenschaftDetailPage({ params }: PageProps) {
 
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-          {building.name}
-        </h1>
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+            {building.name}
+          </h1>
+          <StalenessIndicator cachedAt={offlineCache.cachedAt} />
+        </div>
       </div>
 
       {/* Building Info */}
