@@ -203,6 +203,7 @@ export async function POST(request: NextRequest) {
     const supabase = await createClient()
 
     // Create unit with defaults
+    // Only use columns that exist in the base schema (001_initial_schema.sql)
     const { data: unit, error: createError } = await supabase
       .from('units')
       .insert({
@@ -211,14 +212,7 @@ export async function POST(request: NextRequest) {
         unit_type: body.unit_type,
         floor: body.floor ?? null,
         position: body.position?.trim() || null,
-        unit_number: body.unit_number?.trim() || null,
-        size_class: body.size_class?.trim() || null,
         tenant_name: body.tenant_name?.trim() || null,
-        tenant_phone: body.tenant_phone?.trim() || null,
-        tenant_email: body.tenant_email?.trim() || null,
-        tenant_move_in_date: body.tenant_move_in_date || null,
-        is_vacant: body.is_vacant !== undefined ? body.is_vacant : true,
-        vacancy_reason: body.vacancy_reason?.trim() || null,
         tenant_visible_to_imeri: body.tenant_visible_to_imeri !== undefined ? body.tenant_visible_to_imeri : true,
       })
       .select()
