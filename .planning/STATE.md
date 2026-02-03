@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-01-29)
 ## Current Position
 
 Phase: 29 of 29 (Tenant Extras & UX)
-Plan: 1 of 4 in current phase
+Plan: 2 of 4 in current phase
 Status: In progress
-Last activity: 2026-02-03 -- Completed 29-01-PLAN.md (Tenant ticket notifications)
+Last activity: 2026-02-03 -- Completed 29-02-PLAN.md (Ticket conversion & profile management)
 
-Progress: [████████░░] 82%
+Progress: [████████░░] 84%
 
 ## Milestones Completed
 
@@ -26,9 +26,9 @@ Progress: [████████░░] 82%
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 15 (v3.0)
-- Average duration: 20min
-- Total execution time: 308min
+- Total plans completed: 16 (v3.0)
+- Average duration: 21min
+- Total execution time: 338min
 
 **By Phase:**
 
@@ -38,7 +38,7 @@ Progress: [████████░░] 82%
 | 26 | 4 | 156min | 39min |
 | 27 | 3 | 24min | 8min |
 | 28 | 5 | 48min | 10min |
-| 29 | 1 | 18min | 18min |
+| 29 | 2 | 48min | 24min |
 
 *Updated after each plan completion*
 
@@ -150,6 +150,11 @@ Phase 29-01 decisions:
 - Admin API uses kewa role check (legacy Role type) for consistency
 - German email content with inline styles for email client compatibility
 
+Phase 29-02 decisions:
+- Manual work order type selection during conversion (no auto-mapping from ticket category)
+- Copy ticket photos to work order (not link/reference) for independent lifecycle
+- Use existing phone column on users table for profile updates
+
 ### UAT Issues (carried from v2.2 -- all resolved in Phase 25)
 
 - ✓ Invoice linking with modal UI (resolved in 25-01)
@@ -168,8 +173,8 @@ Phase 29-01 decisions:
 ## Session Continuity
 
 Last session: 2026-02-03
-Stopped at: Completed 29-01-PLAN.md
+Stopped at: Completed 29-02-PLAN.md
 Resume file: None
 
 ---
-*Phase 29-01 Tenant Ticket Notifications complete. Resend email + React Email templates for ticket status and reply notifications. Admin ticket API endpoints for operator management. Next: 29-02 (if exists) or phase verification.*
+*Phase 29-02 Ticket Conversion & Profile Management complete. One-click ticket-to-work-order conversion with photo copying. Tenant profile page with phone/emergency contact editing. Next: 29-03 (UX improvements) or 29-04.*
