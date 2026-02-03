@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-01-29)
 
 **Core value:** KEWA AG hat volle Transparenz und Kontrolle uber alle Renovationen -- mit standardisierten Workflows, externer Handwerker-Integration, Kostenuebersicht und automatischer Zustandshistorie.
-**Current focus:** Milestone v3.0 Tenant & Offline -- Phase 28 complete, Phase 29 next
+**Current focus:** Milestone v3.0 Tenant & Offline -- Phase 29 in progress
 
 ## Current Position
 
-Phase: 28 of 29 (Offline Data Sync)
-Plan: 5 of 5 in current phase
-Status: Phase complete (verified)
-Last activity: 2026-01-31 -- Completed 28-05-PLAN.md (gap closure)
+Phase: 29 of 29 (Tenant Extras & UX)
+Plan: 1 of 4 in current phase
+Status: In progress
+Last activity: 2026-02-03 -- Completed 29-01-PLAN.md (Tenant ticket notifications)
 
-Progress: [████████░░] 80%
+Progress: [████████░░] 82%
 
 ## Milestones Completed
 
@@ -26,9 +26,9 @@ Progress: [████████░░] 80%
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 14 (v3.0)
-- Average duration: 21min
-- Total execution time: 290min
+- Total plans completed: 15 (v3.0)
+- Average duration: 20min
+- Total execution time: 308min
 
 **By Phase:**
 
@@ -38,6 +38,7 @@ Progress: [████████░░] 80%
 | 26 | 4 | 156min | 39min |
 | 27 | 3 | 24min | 8min |
 | 28 | 5 | 48min | 10min |
+| 29 | 1 | 18min | 18min |
 
 *Updated after each plan completion*
 
@@ -142,6 +143,13 @@ Phase 28-05 decisions:
 - Optimistic UI for queued submissions (immediate feedback)
 - Photo upload falls back to queue if online upload fails while offline
 
+Phase 29-01 decisions:
+- Resend email client with graceful API key handling (logs warning, doesn't crash)
+- Fire-and-forget pattern for both push and email notifications
+- Reuse existing notification types (work_order_status) for ticket notifications
+- Admin API uses kewa role check (legacy Role type) for consistency
+- German email content with inline styles for email client compatibility
+
 ### UAT Issues (carried from v2.2 -- all resolved in Phase 25)
 
 - ✓ Invoice linking with modal UI (resolved in 25-01)
@@ -155,11 +163,13 @@ Phase 28-05 decisions:
 
 **Phase 26-04:** Seed migration 063 created but not applied. API endpoints from 26-03 not verified to exist. Run database reset to apply all pending migrations before Phase 27.
 
+**Phase 29-01:** Resend API key required for email notifications. Add RESEND_API_KEY to environment variables.
+
 ## Session Continuity
 
-Last session: 2026-01-31
-Stopped at: Phase 28 verified and complete
+Last session: 2026-02-03
+Stopped at: Completed 29-01-PLAN.md
 Resume file: None
 
 ---
-*Phase 28 Offline Data Sync verified (5/5 must-haves). All 7 OFFL requirements complete: entity caching with offline fallback on 4 detail pages, form queueing via useOfflineSubmit, sync status indicator, LWW conflict resolution, photo queue via useOfflinePhoto, and exponential backoff retry. Next: Phase 29 (Tenant Extras & UX Improvements).*
+*Phase 29-01 Tenant Ticket Notifications complete. Resend email + React Email templates for ticket status and reply notifications. Admin ticket API endpoints for operator management. Next: 29-02 (if exists) or phase verification.*
