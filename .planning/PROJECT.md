@@ -8,29 +8,21 @@ Ein umfassendes Renovations-Management-System für KEWA AG. Standardisierte Proj
 
 KEWA AG hat volle Transparenz und Kontrolle über alle Renovationen — mit standardisierten Workflows, externer Handwerker-Integration, Kostenübersicht und automatischer Zustandshistorie.
 
-## Current Milestone: v3.0 Tenant & Offline
-
-**Goal:** Add tenant self-service portal, offline PWA support, and polish existing UX issues across the app.
-
-**Target features:**
-- Tenant Portal for self-service ticket creation and communication
-- Offline Support with PWA sync queue and conflict resolution
-- UX Polish fixing pending issues (invoice modal, checklist titles, delivery history) and improvements
-
-## Current State (v2.2 Shipped)
+## Current State (v3.0 Shipped)
 
 **Tech Stack:** Next.js 16 + React 19 + Supabase + Tailwind CSS 4
-**Codebase:** ~100,000+ LOC TypeScript, ~700+ files
-**Status:** v2.2 Extensions shipped
+**Codebase:** ~110,000+ LOC TypeScript, ~750+ files
+**Status:** v3.0 Tenant & Offline shipped
 
-**Shipped Features (v2.2):**
-- Knowledge Base with Tiptap WYSIWYG editor, categories, full-text search, version history, contractor visibility
-- Supplier Core + Advanced with purchase orders, deliveries, consumption tracking, reorder alerts, price analytics
-- Change Orders with approval workflow, counter-offers, PDF generation, magic-link client portal
-- Inspection Core + Advanced with checklists, defect logging, signatures, re-inspections, room condition automation
-- Push Notifications with service worker, preference controls, quiet hours, notification center, real-time updates
+**Shipped Features (v3.0):**
+- Tenant Portal with WhatsApp-style message threads, real-time updates, QR multi-device login, German mobile-first UI
+- PWA Foundation with installable manifest, service worker caching, connectivity indicator
+- Offline Data Sync with IndexedDB caching, form submission queue, automatic sync on reconnect, LWW conflict resolution
+- Ticket-to-WorkOrder conversion, email/push notifications for tenants
+- UX Pattern Library with skeleton loaders, empty states, error boundaries, confirmation dialogs, breadcrumbs, Sonner toasts
 
 **Previous Milestones:**
+- v2.2 Extensions (shipped 2026-01-29) — See milestones/v2.2-ROADMAP.md (to be created)
 - v2.1 Master Data Management (shipped 2026-01-25) — See milestones/v2.1-ROADMAP.md
 - v2.0 Advanced Features (shipped 2026-01-19) — See milestones/v2.0-ROADMAP.md
 - v1.0 MVP (shipped 2025-03-XX) — See milestones/v1.0-ROADMAP.md
@@ -79,11 +71,14 @@ KEWA AG hat volle Transparenz und Kontrolle über alle Renovationen — mit stan
 - ✓ INSP-01 to INSP-12: Inspection Workflow (checklists, defects, signatures, re-inspections, room conditions) — v2.2
 - ✓ PUSH-01 to PUSH-12: Push Notifications (service worker, preferences, triggers, notification center) — v2.2
 
-### Active (v3.0)
+**v3.0:**
+- ✓ TPRT-01 to TPRT-15: Tenant Portal (registration, tickets, messages, dashboard, notifications) — v3.0
+- ✓ OFFL-01 to OFFL-12: Offline PWA (manifest, service worker, IndexedDB caching, sync queue, conflict resolution) — v3.0
+- ✓ UXPL-01 to UXPL-10: UX Polish (toast notifications, skeleton loaders, empty states, breadcrumbs) — v3.0
 
-- [ ] TPRT: Tenant Portal (self-service, ticket creation, communication)
-- [ ] OFFL: Offline Support (PWA, sync queue, conflict resolution)
-- [ ] UXPOL: UX Polish (invoice modal, checklist titles, delivery history, general improvements)
+### Active
+
+*No active requirements — planning next milestone*
 
 ### Future
 
@@ -148,8 +143,12 @@ KEWA AG hat volle Transparenz und Kontrolle über alle Renovationen — mit stan
 | BuildingContext for filtering | Cross-app building selection with 'all' option | ✓ v2.1 |
 | Template-first project flow | Select template before project details (KEWA workflow) | ✓ v2.1 |
 | Setup wizard for onboarding | Guided first-time setup for new deployments | ✓ v2.1 |
-| Mieter-Portal in Phase 3 | MVP-Fokus auf Renovation, Mieter später | — Planned |
+| Mieter-Portal in Phase 3 | MVP-Fokus auf Renovation, Mieter später | ✓ v3.0 |
+| Application-layer tenant isolation | Simpler than RLS, consistent auth pattern | ✓ v3.0 |
+| Manual service worker (no Serwist) | Turbopack conflict avoidance | ✓ v3.0 |
+| Last-Write-Wins conflict resolution | Server timestamp authority, simple sync | ✓ v3.0 |
+| Network-first API, cache-first static | Optimized for field workers with intermittent connectivity | ✓ v3.0 |
 
 ---
-*Last updated: 2026-01-29 — v3.0 Tenant & Offline milestone started*
+*Last updated: 2026-02-03 — v3.0 Tenant & Offline shipped*
 *Source: KEWA-RENOVATION-OPS-SPEC_v1 + Original v2.0 Scope*

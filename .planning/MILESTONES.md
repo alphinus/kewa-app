@@ -1,5 +1,47 @@
 # Project Milestones: KEWA Liegenschafts-Aufgabenverwaltung
 
+## v3.0 Tenant & Offline (Shipped: 2026-02-03)
+
+**Delivered:** Tenant self-service portal with maintenance ticket management, PWA with offline data sync and automatic background sync, and UX polish with skeleton loaders and toast notifications.
+
+**Phases completed:** 25-29 (17 plans total)
+
+**Key accomplishments:**
+
+- Tenant Portal with WhatsApp-style message threads, real-time Supabase updates, QR multi-device login, German mobile-first UI
+- PWA installable app with manifest, service worker caching for offline shell navigation, connectivity indicator
+- Offline Data Sync with IndexedDB caching, form submission queue, automatic sync on reconnect, Last-Write-Wins conflict resolution
+- Ticket-to-WorkOrder conversion with email and push notifications for tenants via Resend
+- UX Pattern Library with skeleton loaders, empty states, error boundaries, confirmation dialogs, breadcrumbs, Sonner toasts
+
+**Stats:**
+
+- 77 commits
+- 5 phases (25-29), 17 plans
+- 37 requirements satisfied
+- 5 days from milestone start to ship (2026-01-29 → 2026-02-03)
+
+**Git range:** `feat(25-01)` → `docs(29): complete Tenant Extras & UX Improvements phase`
+
+**What's next:** v3.1 (Integrations, Analytics) or production deployment with tenant onboarding
+
+---
+
+## v2.2 Extensions (Shipped: 2026-01-29)
+
+**Delivered:** Knowledge Base with WYSIWYG editing, Supplier Management with purchase orders and deliveries, Change Orders with approval workflow, Inspection Workflow with checklists and signatures, Push Notifications with service worker.
+
+**Phases completed:** 18-24 (25 plans total)
+
+**Stats:**
+
+- 7 phases (18-24), 25 plans
+- 4 days from milestone start to ship (2026-01-26 → 2026-01-29)
+
+**Git range:** `feat(18-01)` → `docs(24): complete Push Notifications phase`
+
+---
+
 ## v2.1 Master Data Management (Shipped: 2026-01-25)
 
 **Delivered:** Complete master data management — Partner/Contractor CRUD with WorkOrder integration, multi-property administration with context switching, unit and room management, template creation and editing UI, admin dashboard with setup wizard for first-time onboarding.
