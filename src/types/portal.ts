@@ -85,6 +85,8 @@ export interface Ticket {
   closed_by: string | null
   cancelled_at: string | null
   last_message_at: string | null
+  converted_to_wo_id: string | null
+  conversion_message: string | null
   created_at: string
   updated_at: string
 }
@@ -227,6 +229,15 @@ export interface UpdateCategoryInput {
  */
 export interface UpdateSettingInput {
   value: string
+}
+
+/**
+ * Input for converting a ticket to a work order
+ */
+export interface ConvertTicketInput {
+  work_order_type: string
+  partner_id: string
+  description?: string
 }
 
 // =============================================
