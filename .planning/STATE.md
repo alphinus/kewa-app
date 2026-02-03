@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-01-29)
 ## Current Position
 
 Phase: 29 of 29 (Tenant Extras & UX)
-Plan: 2 of 4 in current phase
+Plan: 3 of 4 in current phase
 Status: In progress
-Last activity: 2026-02-03 -- Completed 29-02-PLAN.md (Ticket conversion & profile management)
+Last activity: 2026-02-03 -- Completed 29-03-PLAN.md (UX Pattern Components)
 
-Progress: [████████░░] 84%
+Progress: [████████░░] 88%
 
 ## Milestones Completed
 
@@ -26,9 +26,9 @@ Progress: [████████░░] 84%
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 16 (v3.0)
-- Average duration: 21min
-- Total execution time: 338min
+- Total plans completed: 17 (v3.0)
+- Average duration: 22min
+- Total execution time: 375min
 
 **By Phase:**
 
@@ -38,7 +38,7 @@ Progress: [████████░░] 84%
 | 26 | 4 | 156min | 39min |
 | 27 | 3 | 24min | 8min |
 | 28 | 5 | 48min | 10min |
-| 29 | 2 | 48min | 24min |
+| 29 | 3 | 85min | 28min |
 
 *Updated after each plan completion*
 
@@ -155,12 +155,19 @@ Phase 29-02 decisions:
 - Copy ticket photos to work order (not link/reference) for independent lifecycle
 - Use existing phone column on users table for profile updates
 
+Phase 29-03 decisions:
+- Breadcrumbs auto-generate from pathname, skip dashboard/portal segments
+- Skeleton components use react-loading-skeleton with CSS import
+- EmptyState uses Button component for consistent CTA styling
+- ConfirmationDialog builds on existing Dialog component
+- FormField uses aria attributes for accessibility
+
 ### UAT Issues (carried from v2.2 -- all resolved in Phase 25)
 
-- ✓ Invoice linking with modal UI (resolved in 25-01)
-- ✓ Checklist item titles from template (resolved in 25-01)
-- ✓ Property-level delivery history page (resolved in 25-01)
-- ✓ Blocking alert() dialogs replaced with toast notifications (resolved in 25-02)
+- Invoice linking with modal UI (resolved in 25-01)
+- Checklist item titles from template (resolved in 25-01)
+- Property-level delivery history page (resolved in 25-01)
+- Blocking alert() dialogs replaced with toast notifications (resolved in 25-02)
 
 ### Blockers/Concerns
 
@@ -173,8 +180,8 @@ Phase 29-02 decisions:
 ## Session Continuity
 
 Last session: 2026-02-03
-Stopped at: Completed 29-02-PLAN.md
+Stopped at: Completed 29-03-PLAN.md
 Resume file: None
 
 ---
-*Phase 29-02 Ticket Conversion & Profile Management complete. One-click ticket-to-work-order conversion with photo copying. Tenant profile page with phone/emergency contact editing. Next: 29-03 (UX improvements) or 29-04.*
+*Phase 29-03 UX Pattern Components complete. Reusable EmptyState, ErrorBoundary, ConfirmationDialog, FormField, Breadcrumbs, and skeleton loaders. Integrated into Aufgaben, Auftraege, and Portal Tickets pages. Next: 29-04 (final polish) to complete v3.0.*
