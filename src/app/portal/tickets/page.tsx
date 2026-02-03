@@ -1,13 +1,17 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { Plus } from 'lucide-react'
+import { Plus, Ticket } from 'lucide-react'
 import { getPortalUser } from '@/lib/portal/session'
 import { getTickets } from '@/lib/portal/ticket-queries'
 import { TicketCard } from '@/components/portal/TicketCard'
+import { Breadcrumbs } from '@/components/ui/breadcrumbs'
+import { Button } from '@/components/ui/button'
 
 /**
  * Portal ticket list page
  * Shows all tickets for the authenticated tenant
+ *
+ * Phase 29: Integrated EmptyState pattern and Breadcrumbs
  */
 export default async function PortalTicketsPage() {
   // Check authentication
@@ -21,15 +25,19 @@ export default async function PortalTicketsPage() {
 
   return (
     <div className="px-4 py-6 max-w-2xl mx-auto">
+      {/* Breadcrumbs */}
+      <div className="mb-4">
+        <Breadcrumbs />
+      </div>
+
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Meine Tickets</h1>
-        <Link
-          href="/portal/tickets/new"
-          className="flex items-center justify-center gap-2 min-h-[48px] px-4 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
-        >
-          <Plus className="w-5 h-5" />
-          Neues Ticket
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Meine Tickets</h1>
+        <Link href="/portal/tickets/new">
+          <Button>
+            <Plus className="w-5 h-5 mr-1" />
+            Neues Ticket
+          </Button>
         </Link>
       </div>
 
@@ -41,14 +49,21 @@ export default async function PortalTicketsPage() {
           ))}
         </div>
       ) : (
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8 text-center">
-          <p className="text-gray-600 mb-4">Noch keine Tickets erstellt</p>
-          <Link
-            href="/portal/tickets/new"
-            className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            <Plus className="w-4 h-4" />
-            Erstes Ticket erstellen
+        <div className="py-12 flex flex-col items-center justify-center text-center bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700">
+          <div className="text-gray-400 dark:text-gray-500 mb-4">
+            <Ticket className="h-12 w-12" />
+          </div>
+          <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-1">
+            Keine Tickets
+          </h3>
+          <p className="text-gray-600 dark:text-gray-400 mb-4 max-w-sm">
+            Sie haben noch keine Tickets erstellt.
+          </p>
+          <Link href="/portal/tickets/new">
+            <Button>
+              <Plus className="w-4 h-4 mr-1" />
+              Neues Ticket erstellen
+            </Button>
           </Link>
         </div>
       )}

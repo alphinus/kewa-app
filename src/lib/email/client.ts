@@ -21,6 +21,12 @@ if (!process.env.RESEND_API_KEY) {
  * Resend client singleton
  *
  * Initialized with API key from environment.
- * Will fail gracefully on send if key is missing.
+ * Uses a dummy key placeholder when not configured to prevent initialization errors.
+ * The send function will check for valid key before attempting to send.
  */
-export const resend = new Resend(process.env.RESEND_API_KEY || '')
+export const resend = new Resend(process.env.RESEND_API_KEY || 're_disabled')
+
+/**
+ * Check if email sending is enabled
+ */
+export const isEmailEnabled = !!process.env.RESEND_API_KEY

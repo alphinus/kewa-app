@@ -2,8 +2,13 @@
 
 import { useState, useEffect, useCallback, Suspense } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
+import { CheckSquare } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { EmptyState } from '@/components/ui/empty-state'
+import { ConfirmationDialog } from '@/components/ui/confirmation-dialog'
+import { Breadcrumbs } from '@/components/ui/breadcrumbs'
+import { TaskListSkeleton } from '@/components/skeletons/TaskListSkeleton'
 import { TaskList } from '@/components/tasks/TaskList'
 import { TaskForm } from '@/components/tasks/TaskForm'
 import { useBuilding } from '@/contexts/BuildingContext'
@@ -182,6 +187,9 @@ function AufgabenPageContent() {
 
   return (
     <div className="space-y-4">
+      {/* Breadcrumbs */}
+      <Breadcrumbs />
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -242,18 +250,21 @@ function AufgabenPageContent() {
 
       {/* Loading state (includes context loading) */}
       {(loading || contextLoading) && !error && (
-        <div className="space-y-3">
-          {[1, 2, 3].map((i) => (
-            <div
-              key={i}
-              className="h-24 bg-gray-200 dark:bg-gray-800 rounded-xl animate-pulse"
-            />
-          ))}
-        </div>
+        <TaskListSkeleton />
+      )}
+
+      {/* Empty state */}
+      {!loading && !contextLoading && !error && tasks.length === 0 && (
+        <EmptyState
+          icon={<CheckSquare className="h-12 w-12" />}
+          title="Keine Aufgaben"
+          description="Es gibt aktuell keine offenen Aufgaben."
+          action={{ label: 'Neue Aufgabe', onClick: handleNewTask }}
+        />
       )}
 
       {/* Task list */}
-      {!loading && !contextLoading && !error && (
+      {!loading && !contextLoading && !error && tasks.length > 0 && (
         <TaskList
           tasks={tasks}
           onTaskClick={handleTaskClick}
@@ -275,37 +286,15 @@ function AufgabenPageContent() {
       )}
 
       {/* Delete confirmation dialog */}
-      {deleteConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <Card className="w-full max-w-sm">
-            <CardContent className="p-6 space-y-4">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-                Aufgabe loeschen?
-              </h3>
-              <p className="text-gray-600 dark:text-gray-400">
-                Moechten Sie &quot;{deleteConfirm.title}&quot; wirklich loeschen?
-                Diese Aktion kann nicht rueckgaengig gemacht werden.
-              </p>
-              <div className="flex gap-3">
-                <Button
-                  variant="secondary"
-                  onClick={() => setDeleteConfirm(null)}
-                  fullWidth
-                >
-                  Abbrechen
-                </Button>
-                <Button
-                  variant="danger"
-                  onClick={handleDeleteConfirm}
-                  fullWidth
-                >
-                  Loeschen
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      )}
+      <ConfirmationDialog
+        open={!!deleteConfirm}
+        onOpenChange={(open) => !open && setDeleteConfirm(null)}
+        title="Aufgabe loeschen?"
+        description={`Moechten Sie "${deleteConfirm?.title || ''}" wirklich loeschen? Diese Aktion kann nicht rueckgaengig gemacht werden.`}
+        confirmLabel="Loeschen"
+        variant="danger"
+        onConfirm={handleDeleteConfirm}
+      />
     </div>
   )
 }
@@ -314,17 +303,16 @@ export default function AufgabenPage() {
   return (
     <Suspense fallback={
       <div className="space-y-4">
-        <div className="h-8 w-32 bg-gray-200 dark:bg-gray-800 rounded animate-pulse" />
+        <div className="h-6 w-40 bg-gray-200 dark:bg-gray-800 rounded animate-pulse" />
+        <div className="flex items-center justify-between">
+          <div className="h-8 w-32 bg-gray-200 dark:bg-gray-800 rounded animate-pulse" />
+          <div className="h-12 w-28 bg-gray-200 dark:bg-gray-800 rounded-lg animate-pulse" />
+        </div>
         <div className="flex gap-3">
           <div className="h-12 w-32 bg-gray-200 dark:bg-gray-800 rounded-lg animate-pulse" />
           <div className="h-12 flex-1 bg-gray-200 dark:bg-gray-800 rounded-lg animate-pulse" />
         </div>
-        {[1, 2, 3].map((i) => (
-          <div
-            key={i}
-            className="h-24 bg-gray-200 dark:bg-gray-800 rounded-xl animate-pulse"
-          />
-        ))}
+        <TaskListSkeleton />
       </div>
     }>
       <AufgabenPageContent />
