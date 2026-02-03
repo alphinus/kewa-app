@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-01-29)
 
 **Core value:** KEWA AG hat volle Transparenz und Kontrolle uber alle Renovationen -- mit standardisierten Workflows, externer Handwerker-Integration, Kostenuebersicht und automatischer Zustandshistorie.
-**Current focus:** Milestone v3.0 Tenant & Offline -- Phase 29 in progress
+**Current focus:** Milestone v3.0 Tenant & Offline -- Complete
 
 ## Current Position
 
-Phase: 29 of 29 (Tenant Extras & UX)
-Plan: 3 of 4 in current phase
-Status: In progress
-Last activity: 2026-02-03 -- Completed 29-03-PLAN.md (UX Pattern Components)
+Phase: 29 of 29 (Tenant Extras & UX Improvements)
+Plan: 3 of 3 in current phase
+Status: Phase complete (verified)
+Last activity: 2026-02-03 -- Completed Phase 29 (all 3 plans)
 
-Progress: [████████░░] 88%
+Progress: [██████████] 100%
 
 ## Milestones Completed
 
@@ -22,6 +22,7 @@ Progress: [████████░░] 88%
 - v2.0 Advanced Features (2026-01-19) -- Phases 7-12.3
 - v2.1 Master Data Management (2026-01-25) -- Phases 13-17
 - v2.2 Extensions (2026-01-29) -- Phases 18-24
+- v3.0 Tenant & Offline (2026-02-03) -- Phases 25-29
 
 ## Performance Metrics
 
@@ -164,10 +165,10 @@ Phase 29-03 decisions:
 
 ### UAT Issues (carried from v2.2 -- all resolved in Phase 25)
 
-- Invoice linking with modal UI (resolved in 25-01)
-- Checklist item titles from template (resolved in 25-01)
-- Property-level delivery history page (resolved in 25-01)
-- Blocking alert() dialogs replaced with toast notifications (resolved in 25-02)
+- ✓ Invoice linking with modal UI (resolved in 25-01)
+- ✓ Checklist item titles from template (resolved in 25-01)
+- ✓ Property-level delivery history page (resolved in 25-01)
+- ✓ Blocking alert() dialogs replaced with toast notifications (resolved in 25-02)
 
 ### Blockers/Concerns
 
@@ -180,8 +181,8 @@ Phase 29-03 decisions:
 ## Session Continuity
 
 Last session: 2026-02-03
-Stopped at: Completed 29-03-PLAN.md
+Stopped at: Milestone v3.0 complete
 Resume file: None
 
 ---
-*Phase 29-03 UX Pattern Components complete. Reusable EmptyState, ErrorBoundary, ConfirmationDialog, FormField, Breadcrumbs, and skeleton loaders. Integrated into Aufgaben, Auftraege, and Portal Tickets pages. Next: 29-04 (final polish) to complete v3.0.*
+*Milestone v3.0 Tenant & Offline complete. All 37 requirements verified across 5 phases (25-29). Tenants can submit/track tickets via dedicated portal with email/push notifications, KEWA operators use app offline with sync, ticket-to-work-order conversion, profile management, and consistent UX patterns. Next: /gsd:audit-milestone for milestone review.*

@@ -6,7 +6,7 @@
 - **v2.0 Advanced Features** - Phases 7-12.3 (shipped 2026-01-19)
 - **v2.1 Master Data Management** - Phases 13-17 (shipped 2026-01-25)
 - **v2.2 Extensions** - Phases 18-24 (shipped 2026-01-29)
-- **v3.0 Tenant & Offline** - Phases 25-29 (in progress)
+- **v3.0 Tenant & Offline** - Phases 25-29 (shipped 2026-02-03)
 
 ## Overview
 
@@ -165,9 +165,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 29-01-PLAN.md -- Tenant email notifications (status change, reply), push notification integration
-- [ ] 29-02-PLAN.md -- Ticket-to-work-order conversion, tenant profile management
-- [ ] 29-03-PLAN.md -- Loading states, empty states, error handling, confirmation dialogs, form validation, breadcrumbs
+- [x] 29-01-PLAN.md -- Tenant email notifications (status change, reply), push notification integration
+- [x] 29-02-PLAN.md -- Ticket-to-work-order conversion, tenant profile management
+- [x] 29-03-PLAN.md -- Loading states, empty states, error handling, confirmation dialogs, form validation, breadcrumbs
 
 ---
 
@@ -186,7 +186,7 @@ Plans:
 | 26. Tenant Portal Core | v3.0 | 4/4 | Complete | 2026-01-29 |
 | 27. PWA Foundation | v3.0 | 3/3 | Complete | 2026-01-30 |
 | 28. Offline Data Sync | v3.0 | 5/5 | Complete | 2026-01-31 |
-| 29. Tenant Extras & UX | v3.0 | 0/3 | Not started | - |
+| 29. Tenant Extras & UX | v3.0 | 3/3 | Complete | 2026-02-03 |
 
 ---
 
