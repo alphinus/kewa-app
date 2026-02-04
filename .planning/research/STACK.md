@@ -1,416 +1,341 @@
-# Technology Stack: v3.0 Tenant Portal + Offline PWA + UX Polish
+# Technology Stack: Production Hardening
 
-**Project:** KEWA Renovation Operations System
-**Milestone:** v3.0
-**Researched:** 2026-01-29
-**Mode:** Stack dimension of ecosystem research
+**Project:** KeWa-App (Property Management SaaS)
+**Researched:** 2026-02-04
+**Context:** 110K LOC Next.js 16 app requiring performance, security, and i18n cleanup
 
-## Executive Summary
+## Recommended Stack
 
-v3.0 adds three capabilities to an existing 100K+ LOC Next.js 16 codebase: a tenant self-service portal, offline PWA support, and UX polish. The existing stack already handles tenant auth (email+password, RBAC, permissions), so the tenant portal is primarily a UI/routing concern with new database tables for tickets. Offline PWA is the significant new technical surface -- requiring service worker expansion, IndexedDB for local data, and a sync queue. UX polish needs a toast notification library for user feedback but no other new dependencies.
+### 1. Performance Profiling & Monitoring
 
-**Key finding:** The existing codebase has more scaffolding for v3.0 than expected. Tenant auth, RBAC permissions for tickets, tenant-unit linking, and service worker registration are all already built. The new stack additions are minimal and targeted.
+| Technology | Version | Purpose | Why | Confidence |
+|------------|---------|---------|-----|------------|
+| Next.js Bundle Analyzer (experimental) | Built-in 16.1+ | Bundle size analysis with Turbopack | Native Turbopack integration, module graph awareness, shows import stack | HIGH |
+| @vercel/speed-insights | Latest | Real-time Web Vitals monitoring | Zero-config Vercel integration, tracks LCP/FID/CLS from real users | HIGH |
+| Lighthouse CI | Latest | CI/CD performance regression testing | Industry standard, prevents regressions, GitHub Actions integration | HIGH |
+| bundle-phobia-cli | Latest | Pre-installation package size checking | Prevents bloat before it enters codebase, CLI automation | MEDIUM |
 
----
-
-## Recommended Additions
-
-### 1. Dexie.js -- IndexedDB Wrapper for Offline Data
-
-| Property | Value |
-|----------|-------|
-| Package | `dexie` |
-| Version | 4.2.1 |
-| Purpose | Client-side IndexedDB database for offline data storage and sync queue |
-| Confidence | HIGH (npm registry, official docs verified) |
-
-**Why Dexie over alternatives:**
-
-- **Not idb-keyval:** idb-keyval is key-value only. KEWA needs structured data (tickets, work orders, sync queue entries) with queries, indexes, and transactions. idb-keyval cannot do WHERE clauses or compound indexes.
-- **Not raw IndexedDB:** The IndexedDB API is notoriously verbose and callback-heavy. Dexie wraps it with promises, schema versioning, and a fluent query API. No reason to hand-write what Dexie solves.
-- **Not PouchDB:** PouchDB targets CouchDB replication. KEWA uses Supabase/Postgres. PouchDB's sync model is incompatible. Dexie works with any backend via manual sync.
-- **Dexie specifically:** 13,800+ GitHub stars, 787K weekly downloads, built-in schema migrations, React hooks via `dexie-react-hooks`, observable queries via `useLiveQuery()`. The reactive queries mean components auto-update when IndexedDB data changes -- critical for showing sync status.
-
-**What it provides:**
-- Structured offline data storage with indexes and queries
-- Schema versioning (important as offline schema evolves)
-- `useLiveQuery()` hook for reactive UI updates from IndexedDB
-- Transaction support for atomic offline operations
-- Cross-tab/worker observation (service worker writes, UI reacts)
-
-### 2. dexie-react-hooks -- React Hooks for Dexie
-
-| Property | Value |
-|----------|-------|
-| Package | `dexie-react-hooks` |
-| Version | 4.2.0 |
-| Purpose | React hooks (`useLiveQuery`) for reactive IndexedDB queries |
-| Confidence | HIGH (npm registry, official docs verified) |
-
-**Why a separate package:**
-Dexie core is framework-agnostic. The React hooks package adds `useLiveQuery()`, `useObservable()`, and others. This is the official pattern -- Dexie core + framework-specific hooks.
-
-**What it provides:**
-- `useLiveQuery()`: Observable IndexedDB queries that re-render components on data change
-- Works across tabs and service workers -- if the SW writes to IndexedDB, the UI tab sees it immediately
-- RAM-sparse: only the queried data is in memory, not the entire database
-
-### 3. Sonner -- Toast Notifications for UX Feedback
-
-| Property | Value |
-|----------|-------|
-| Package | `sonner` |
-| Version | 2.0.7 |
-| Purpose | Toast notifications for user feedback (sync status, errors, confirmations) |
-| Confidence | HIGH (npm registry verified) |
-
-**Why Sonner:**
-- Zero dependencies, lightweight
-- No hooks or complex setup -- call `toast()` from anywhere
-- Stacking animation out of the box
-- TypeScript-first
-- Works with Next.js App Router (client component only, which is fine for toasts)
-- The app currently has NO toast/notification UI for user actions (only push notifications). Every form submission, sync event, and error needs visual feedback.
-
-**Why not react-hot-toast:**
-Both are good. Sonner is newer (v2.0), has stacking animations, and zero-config setup. react-hot-toast is 5KB and battle-tested but lacks built-in stacking. For a new addition in 2026, Sonner is the community consensus.
-
-**What it provides:**
-- `toast.success()`, `toast.error()`, `toast.loading()` for sync status
-- `toast.promise()` for async operations (submit ticket, sync data)
-- Offline/online status toasts
-- Action confirmation toasts
-
----
-
-## Existing Stack -- No Changes Needed
-
-These are already in `package.json` and fully sufficient for v3.0:
-
-| Existing Technology | v3.0 Usage | Why No Change |
-|---------------------|------------|---------------|
-| `next` 16.1.2 | App Router for `/tenant` routes, `manifest.ts` metadata API | Already supports PWA manifest via `app/manifest.ts` convention |
-| `react` 19.2.3 | Tenant portal UI components | Current |
-| `@supabase/supabase-js` 2.90.1 | Ticket CRUD, tenant data | Already works for all data operations |
-| `@supabase/ssr` 0.8.0 | Server-side Supabase client | Already used for auth and data |
-| `jose` 6.1.3 | JWT session tokens for tenants | Already creates tenant sessions |
-| `bcryptjs` 3.0.3 | Password hashing for tenant email auth | Already used in `/api/auth/login` for email+password |
-| `tailwindcss` 4 | Tenant portal styling | Already the design system |
-| `lucide-react` 0.562.0 | Icons for tenant UI | Already the icon library |
-| `date-fns` 4.1.0 | Date formatting in tickets | Already used everywhere |
-| `web-push` 3.6.7 | Tenant notifications | Already handles push subscriptions |
-| `clsx` + `tailwind-merge` | Conditional classes | Already the styling utilities |
-
-### Auth System -- Already Complete for Tenants
-
-This is the most important finding. The existing auth system already supports tenant email+password authentication:
-
-- `users` table has `email`, `password_hash`, `auth_method='email_password'`, `role_id` fields
-- `roles` table has `tenant` role with permissions: `units:read`, `tickets:create`, `tickets:read`
-- `tenant_users` table links users to units with `move_in_date`, `move_out_date`
-- `/api/auth/login` handles email+password login with full RBAC session creation
-- `/api/auth/register` creates tenant users with unit linking
-- `LoginRequest` type already has `email` and `password` fields
-- `PERMISSIONS` constants include `TICKETS_READ`, `TICKETS_CREATE`, `TICKETS_UPDATE`, `TICKETS_CONVERT`
-- `ROLE_HIERARCHY` places tenant at level 20
-- Middleware sets RBAC headers for all authenticated requests
-
-**What IS needed:** The middleware currently blocks non-internal roles from `/dashboard` via `isInternalRole()`. A new `/tenant` route tree needs to be added to the middleware matcher, and tenant routes need their own layout. This is routing config, not a stack addition.
-
-### Service Worker -- Exists, Needs Expansion
-
-The existing `public/sw.js` handles push notifications only (push event, notificationclick, pushsubscriptionchange). PushContext.tsx registers the SW at `/sw.js` with `updateViaCache: 'none'`. For v3.0 offline support, this SW needs to be expanded to add:
-
-1. Cache API handlers (fetch event interception)
-2. Background sync event handlers
-3. IndexedDB sync queue processing
-
-This is code expansion of an existing file, not a stack change.
-
----
-
-## Service Worker Strategy: Manual Expansion (No Serwist)
-
-This is the most consequential architectural decision for v3.0.
-
-### Recommendation: Manual service worker expansion
-
-**Why NOT Serwist (`@serwist/next` v9.5.0):**
-
-1. **Webpack requirement conflicts with project:** Serwist's `@serwist/next` requires webpack. Next.js 16.1.2 defaults to Turbopack. The project's `next.config.ts` already has `turbopack: { root: __dirname }` configuration. Using Serwist means `next build --webpack` (slower builds, against Next.js 16 direction). The `@serwist/turbopack` package (v9.5.0) exists but has reported issues with `process.env` being undefined in workers.
-
-2. **Existing SW would need rewrite:** Serwist generates and manages the service worker from `app/sw.ts`. The existing `public/sw.js` with custom push notification logic and the PushContext registration pattern would need complete rewrite. Migration cost outweighs benefit.
-
-3. **Precaching is not the goal:** Serwist's primary value is precaching build assets. KEWA is a data-heavy internal tool. Users need recent data, not cached HTML shells. The offline requirement is about queueing mutations and caching API responses.
-
-4. **KEWA's offline scope is narrow:** Offline support targets: (a) queue ticket submissions when offline, (b) cache recent API data for read access, (c) show offline/online indicators. This does not need a full PWA framework.
-
-**Why manual SW expansion works:**
-
-1. **Existing SW is already hand-written:** `public/sw.js` is 46 lines of clean code. Adding fetch event handlers and sync logic is straightforward.
-2. **No build tooling conflict:** Hand-written `public/sw.js` works with both Turbopack and webpack. No build plugin needed.
-3. **Cache API and Background Sync API are native browser APIs.** No wrapper needed for basic runtime caching strategies.
-4. **Workbox CDN for specific strategies:** If needed, `importScripts('https://storage.googleapis.com/workbox-cdn/releases/7.4.0/workbox-sw.js')` can be added inside the SW file. One line, no npm dependency, no build conflict.
-
-**Background Sync browser support note:** The Background Sync API is only supported in Chromium browsers (Chrome, Edge, Samsung Internet). Firefox and Safari do not support it. The implementation must include a fallback: retry the sync queue every time the SW starts up or when the `online` event fires. This is the standard approach documented by Workbox.
-
-**Confidence:** MEDIUM-HIGH. Manual approach is proven and recommended by Next.js official docs. More code to maintain, but scope is narrow enough.
-
----
-
-## Web App Manifest -- Built-in Next.js Feature
-
-No package needed. Next.js 16 App Router supports manifests via file convention:
-
-```
-app/manifest.ts  -->  generates /manifest.webmanifest automatically
+**Installation:**
+```bash
+npm install -D @lhci/cli
+npm install @vercel/speed-insights
+npm install -g bundle-phobia-cli
 ```
 
-The `MetadataRoute.Manifest` TypeScript type provides full type safety. Next.js auto-injects the `<link rel="manifest">` tag into `<head>`. Zero-dependency.
+**Setup Notes:**
+- **Next.js Bundle Analyzer**: Use `next build --experimental-turbopack-bundle-analyzer` (built-in, no package needed)
+- **Speed Insights**: Add `<SpeedInsights />` component to root layout
+- **Lighthouse CI**: Requires `.lighthouserc.js` config for Next.js server startup
+- **BundlePhobia**: Use before `npm install` to check package impact
 
-**What the manifest provides:**
-- `name`, `short_name`: KEWA branding
-- `start_url: '/'`
-- `display: 'standalone'` for app-like experience
-- `theme_color`, `background_color` matching Tailwind theme
-- `icons` array (192x192 and 512x512 PNGs in `/public/`)
-- iOS meta tags via layout.tsx viewport metadata
+### 2. Security Auditing
 
----
+| Technology | Version | Purpose | Why | Confidence |
+|------------|---------|---------|-----|------------|
+| npm audit | Built-in | Dependency vulnerability scanning | Zero-config, catches CVE/NVD issues, free | HIGH |
+| Semgrep OSS | Latest | Static security analysis (SAST) | OWASP Top 10 detection, 250% better true positive rate, Express/NestJS support | HIGH |
+| eslint-plugin-security | Latest | ESLint security rules | Lightweight, catches common patterns (eval, SQL injection), integrates with existing ESLint | HIGH |
+| OWASP ZAP | Latest | Dynamic security testing (DAST) | Industry standard penetration testing, CI/CD integration, API security testing | MEDIUM |
+| Snyk OSS (optional) | Latest | Enhanced dependency scanning | Better coverage than npm audit, automated fixes, free for open source | MEDIUM |
 
-## Conflict Resolution Strategy: Last-Write-Wins
+**Installation:**
+```bash
+# Core security tools
+npm install -D eslint-plugin-security
+npm install -g @semgrep/cli
 
-For the offline sync queue, the conflict resolution strategy:
+# Optional: Snyk for enhanced dependency scanning
+npm install -g snyk
+```
 
-**Last-Write-Wins (LWW) with server timestamp authority.**
+**Setup Notes:**
+- **npm audit**: Run `npm audit --production` to exclude dev dependencies
+- **Semgrep**: Use `semgrep --config=auto` for OWASP rule set, supports JavaScript/TypeScript
+- **eslint-plugin-security**: Add to `.eslintrc` extends array
+- **OWASP ZAP**: Docker container for CI/CD, may report false positives on Next.js eval usage
+- **Snyk**: Alternative to npm audit with 25% fewer false positives
 
-**Why LWW is correct for KEWA:**
-- KEWA has 2 internal users (admin, property manager) and tenants. Simultaneous conflicting edits to the same record are extremely unlikely.
-- Tenants create tickets (write-only operation). They do not edit shared data concurrently.
-- Internal users primarily work on desktop with stable connections. Offline mode is for mobile/field use.
-- LWW with `updated_at` timestamps is simple, predictable, and sufficient.
+### 3. i18n (German Umlaut Cleanup)
 
-**Why NOT CRDTs or OT:**
-- CRDTs add significant complexity (custom data types, merge functions). Overkill for 2 internal users + tenant ticket creation.
-- OT requires centralized transformation. Not needed when writes are independent.
-- The data model is record-level (create ticket, update status), not field-level collaborative editing.
+| Technology | Version | Purpose | Why | Confidence |
+|------------|---------|---------|-----|------------|
+| Node.js Script (custom) | N/A | One-time ae/oe/ue → ä/ö/ü conversion | Simple find/replace, no runtime overhead | HIGH |
+| VS Code Find/Replace | Built-in | Manual verification | No dependencies, precise control | HIGH |
 
----
+**Recommended Approach: Zero-Dependency Script**
 
-## Installation Commands
+For a German-only app with existing hardcoded strings, a simple Node.js script is sufficient:
+
+```javascript
+// scripts/convert-umlauts.js
+const fs = require('fs');
+const path = require('path');
+const glob = require('glob');
+
+const replacements = [
+  { from: /\bae\b/g, to: 'ä' },     // Word boundary to avoid "maestro" → "mästro"
+  { from: /\bAe\b/g, to: 'Ä' },
+  { from: /\boe\b/g, to: 'ö' },
+  { from: /\bOe\b/g, to: 'Ö' },
+  { from: /\bue\b/g, to: 'ü' },
+  { from: /\bUe\b/g, to: 'Ü' },
+  { from: /\bss\b/g, to: 'ß' },
+];
+
+const files = glob.sync('**/*.{ts,tsx,js,jsx}', {
+  ignore: ['node_modules/**', '.next/**', 'build/**']
+});
+
+files.forEach(file => {
+  let content = fs.readFileSync(file, 'utf8');
+  let modified = false;
+
+  replacements.forEach(({ from, to }) => {
+    if (content.match(from)) {
+      content = content.replace(from, to);
+      modified = true;
+    }
+  });
+
+  if (modified) {
+    fs.writeFileSync(file, content, 'utf8');
+    console.log(`Updated: ${file}`);
+  }
+});
+```
+
+**Why NOT react-i18next or next-intl:**
+- German-only UI (no multi-language requirement)
+- Existing strings are hardcoded (not in translation files)
+- Adding i18n framework creates runtime overhead for zero benefit
+- Simple UTF-8 encoding fixes suffice
+
+**If Future Multi-Language Required:**
+- **next-intl**: 2.1M weekly downloads, Next.js App Router native support
+- **react-i18next**: Most popular (9M+ downloads), but overkill for single language
+
+### 4. Supporting Tools
+
+| Tool | Purpose | When to Use |
+|------|---------|-------------|
+| size-limit | Package size enforcement | CI/CD check to prevent bundle bloat |
+| webpack-bundle-analyzer | Webpack fallback | If reverting from Turbopack |
+| dotenv-vault | Secrets management | If .env needs versioning/encryption |
+| TruffleHog | Secrets scanning | CI/CD check for committed credentials |
+
+**Not Recommended:**
+```bash
+# Don't install these for this project:
+npm install react-i18next next-intl  # Overkill for German-only
+npm install @next/bundle-analyzer     # Incompatible with Turbopack dev mode
+```
+
+## Alternatives Considered
+
+| Category | Recommended | Alternative | Why Not |
+|----------|-------------|-------------|---------|
+| Bundle Analysis | Next.js experimental analyzer | @next/bundle-analyzer | Webpack-only, incompatible with Turbopack |
+| Bundle Analysis | Next.js experimental analyzer | webpack-bundle-analyzer | Turbopack doesn't use Webpack |
+| Dependency Scanning | npm audit + Semgrep | Snyk Pro | Costs $99/mo, overkill for single dev |
+| Dependency Scanning | npm audit + Semgrep | Socket.dev | Commercial, unnecessary for this scale |
+| DAST | OWASP ZAP | Burp Suite Pro | $499/year, ZAP is free and sufficient |
+| i18n | Custom script | react-i18next | Runtime overhead for zero benefit |
+| i18n | Custom script | next-intl | Requires translation file refactor |
+| Performance Monitoring | @vercel/speed-insights | Sentry Performance | $26/mo, Vercel integration is free |
+| Performance Monitoring | @vercel/speed-insights | New Relic | Enterprise pricing, overkill |
+
+## Installation Command
 
 ```bash
-# New dependencies for v3.0
-npm install dexie@^4.2.1 dexie-react-hooks@^4.2.0 sonner@^2.0.7
+# Performance
+npm install @vercel/speed-insights
+npm install -D @lhci/cli
+
+# Security
+npm install -D eslint-plugin-security
+npm install -g @semgrep/cli bundle-phobia-cli
+
+# Optional: Enhanced dependency scanning
+npm install -g snyk
 ```
 
-3 new packages total. Bundle impact:
-- `dexie`: ~42KB minified (tree-shakeable, only loaded on client)
-- `dexie-react-hooks`: ~3KB (React bindings only)
-- `sonner`: ~12KB (zero dependencies)
+## Configuration Requirements
 
-No new dev dependencies needed.
+### 1. Lighthouse CI (`.lighthouserc.js`)
 
----
-
-## Anti-Recommendations
-
-### DO NOT Add
-
-| Library/Service | Why Not |
-|-----------------|---------|
-| `@serwist/next` / `serwist` | Conflicts with Turbopack config, replaces existing SW, overkill for narrow offline scope |
-| `next-pwa` / `@ducanh2912/next-pwa` | Unmaintained / predecessor to Serwist, author recommends migration away |
-| `workbox` (npm packages) | Build-time webpack plugins conflict with Turbopack. Use CDN `importScripts` in SW if needed |
-| Supabase Auth (native) | Project uses custom JWT auth (`jose` + `bcryptjs`) with 3 auth methods. Supabase Auth would conflict with existing RBAC |
-| PouchDB | Designed for CouchDB replication, incompatible with Supabase/Postgres backend |
-| framer-motion | 30KB+ for cosmetic animations. Tailwind CSS 4 transitions are sufficient for UX polish scope |
-| Supabase Realtime / WebSocket | Sync queue uses REST replay, not real-time streams. Tickets are request-response, not live chat |
-| zod / form validation library | Existing codebase validates inline with TypeScript. Adding zod only for tenant forms creates inconsistency |
-| react-query / SWR | Offline sync uses Dexie + custom sync queue, not cache-based data fetching |
-
-### DO NOT Change
-
-| Current | Alternative | Why Keep Current |
-|---------|-------------|------------------|
-| Custom JWT auth (`jose`) | NextAuth / Auth.js | 3 auth methods (PIN, email, magic-link) already work. NextAuth adds complexity for no benefit |
-| Hand-written SW (`public/sw.js`) | Serwist-generated | Existing push handlers, no Turbopack conflict |
-| `public/sw.js` location | `app/sw.ts` (Serwist pattern) | Convention already established, PushContext already registers from `/sw.js` |
-
----
-
-## Integration Points
-
-### 1. Service Worker Merge Strategy
-
-The existing `public/sw.js` (push-only, 46 lines) must be expanded. Merge strategy:
-
-- **Keep:** All existing event handlers (push, notificationclick, pushsubscriptionchange)
-- **Add:** `install` event for optional static asset pre-caching
-- **Add:** `activate` event for cache cleanup on SW update
-- **Add:** `fetch` event listener with caching strategy (network-first for API calls, cache-first for static assets)
-- **Add:** `sync` event listener for Background Sync queue processing (with online-event fallback)
-- **Add:** Dexie import for reading/writing sync queue from within the SW
-
-**Dexie in service worker:** Dexie works in service workers. The same database definition used in the main thread can be imported in the SW. The SW reads the sync queue and replays pending mutations when online.
-
-### 2. Middleware Extension for Tenant Routes
-
-Current middleware matcher:
-```typescript
-matcher: ['/dashboard/:path*', '/api/((?!auth).*)', '/contractor/:path*']
+```javascript
+module.exports = {
+  ci: {
+    collect: {
+      startServerCommand: 'npm run start',
+      startServerReadyPattern: 'ready on',
+      url: ['http://localhost:3000'],
+      numberOfRuns: 3,
+    },
+    assert: {
+      preset: 'lighthouse:recommended',
+      assertions: {
+        'categories:performance': ['error', { minScore: 0.9 }],
+        'categories:accessibility': ['error', { minScore: 0.9 }],
+      },
+    },
+    upload: {
+      target: 'temporary-public-storage',
+    },
+  },
+};
 ```
 
-Must add `/tenant/:path*`:
-```typescript
-matcher: ['/dashboard/:path*', '/api/((?!auth).*)', '/contractor/:path*', '/tenant/:path*']
-```
+### 2. ESLint Security Plugin (`.eslintrc.json`)
 
-A `handleTenantRoute()` function validates the session cookie and checks `roleName === 'tenant'`. The existing session infrastructure (JWT in httpOnly cookie) works identically for tenants -- the session is already created with tenant role data in `/api/auth/login`.
-
-### 3. Dexie Database Schema
-
-```typescript
-// src/lib/offline/db.ts
-import Dexie, { type EntityTable } from 'dexie'
-
-interface SyncQueueEntry {
-  id?: number          // auto-increment
-  url: string          // API endpoint
-  method: string       // POST, PUT, PATCH
-  body: string         // JSON serialized request body
-  timestamp: number    // Date.now() when queued
-  retryCount: number   // number of failed sync attempts
-  status: 'pending' | 'syncing' | 'failed'
-}
-
-interface CachedTicket {
-  id: string
-  title: string
-  description: string
-  status: string
-  unit_id: string
-  created_at: string
-  updated_at: string
-}
-
-const db = new Dexie('kewa-offline') as Dexie & {
-  syncQueue: EntityTable<SyncQueueEntry, 'id'>
-  tickets: EntityTable<CachedTicket, 'id'>
-}
-
-db.version(1).stores({
-  syncQueue: '++id, status, timestamp',
-  tickets: 'id, unit_id, status, updated_at'
-})
-
-export { db }
-```
-
-### 4. Online/Offline Detection
-
-Custom hook using native browser APIs:
-
-```typescript
-// src/hooks/useOnlineStatus.ts
-// navigator.onLine + window 'online'/'offline' events
-// Triggers toast notifications via Sonner
-// Triggers sync queue processing when coming online
-```
-
-No library needed. Native browser APIs are sufficient.
-
-### 5. Toast Integration (Sonner)
-
-```typescript
-// In root layout (client component wrapper):
-import { Toaster } from 'sonner'
-
-// Usage anywhere:
-import { toast } from 'sonner'
-toast.success('Ticket erstellt')
-toast.error('Verbindungsfehler')
-toast.loading('Daten werden synchronisiert...')
-```
-
-### 6. Manifest Integration
-
-```typescript
-// app/manifest.ts
-import type { MetadataRoute } from 'next'
-
-export default function manifest(): MetadataRoute.Manifest {
-  return {
-    name: 'KEWA Renovation Operations',
-    short_name: 'KEWA',
-    description: 'Renovations-Management-System fuer KEWA AG',
-    start_url: '/',
-    display: 'standalone',
-    background_color: '#ffffff',
-    theme_color: '#1e40af',
-    icons: [
-      { src: '/icon-192x192.png', sizes: '192x192', type: 'image/png' },
-      { src: '/icon-512x512.png', sizes: '512x512', type: 'image/png' },
-    ],
+```json
+{
+  "extends": [
+    "next/core-web-vitals",
+    "plugin:security/recommended"
+  ],
+  "plugins": ["security"],
+  "rules": {
+    "security/detect-object-injection": "warn",
+    "security/detect-non-literal-regexp": "warn"
   }
 }
 ```
 
----
+### 3. Vercel Speed Insights (`app/layout.tsx`)
 
-## Confidence Assessment
+```typescript
+import { SpeedInsights } from '@vercel/speed-insights/next';
 
-| Area | Confidence | Reason |
-|------|------------|--------|
-| Tenant auth needs | HIGH | Verified by reading: auth.ts, session.ts, middleware.ts, login route, register route, RBAC migrations, permissions.ts. Email+password auth fully built. |
-| Dexie recommendation | HIGH | npm registry verified (4.2.1, 787K weekly downloads), React hooks verified (4.2.0), well-documented API |
-| Sonner recommendation | HIGH | npm registry verified (2.0.7, zero deps), community consensus for 2026, no existing toast library in codebase |
-| Manual SW over Serwist | MEDIUM-HIGH | Turbopack conflict verified via multiple sources. @serwist/turbopack has known issues. Manual approach documented by Next.js official docs. Risk: more code to maintain, mitigated by narrow scope. |
-| LWW conflict resolution | HIGH | Correct for KEWA's user model (2 internal users + tenants with write-only tickets) |
-| No manifest package | HIGH | Verified via official Next.js docs: `app/manifest.ts` convention auto-generates manifest |
-| Background Sync fallback | HIGH | MDN docs confirm limited browser support. Workbox docs document the fallback pattern. |
+export default function RootLayout({ children }) {
+  return (
+    <html>
+      <body>
+        {children}
+        <SpeedInsights />
+      </body>
+    </html>
+  );
+}
+```
 
----
+### 4. GitHub Actions: Lighthouse CI
+
+```yaml
+# .github/workflows/lighthouse.yml
+name: Lighthouse CI
+on: [pull_request]
+
+jobs:
+  lighthouse:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm ci
+      - run: npm run build
+      - run: npm install -g @lhci/cli
+      - run: lhci autorun
+```
+
+### 5. GitHub Actions: Security Scanning
+
+```yaml
+# .github/workflows/security.yml
+name: Security Scan
+on: [push, pull_request]
+
+jobs:
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run npm audit
+        run: npm audit --audit-level=moderate
+
+      - name: Run Semgrep
+        uses: semgrep/semgrep-action@v1
+        with:
+          config: auto
+
+      - name: Run ESLint Security
+        run: npx eslint . --ext .ts,.tsx,.js,.jsx
+```
+
+## Tool Confidence Assessment
+
+| Tool | Confidence | Reasoning |
+|------|------------|-----------|
+| Next.js Bundle Analyzer | HIGH | Official Next.js 16.1 feature, Turbopack-native |
+| @vercel/speed-insights | HIGH | Zero-config Vercel integration, production-proven |
+| Lighthouse CI | HIGH | Industry standard since 2019, extensive Next.js usage |
+| npm audit | HIGH | Built-in, catches known CVEs, no setup required |
+| Semgrep | HIGH | OWASP Top 10 coverage, 250% better detection (2025 improvements) |
+| eslint-plugin-security | HIGH | 5M+ downloads/week, catches common patterns |
+| OWASP ZAP | MEDIUM | May produce Next.js false positives (eval usage in framework) |
+| bundle-phobia-cli | MEDIUM | Community tool, less critical than core monitoring |
+| Snyk | MEDIUM | Commercial tool, free tier limited, optional enhancement |
+| Custom umlaut script | HIGH | Simple UTF-8 replacement, no dependencies, verified approach |
+
+## Turbopack Compatibility Notes
+
+**Compatible:**
+- Next.js experimental bundle analyzer (`next build --experimental-turbopack-bundle-analyzer`)
+- Lighthouse CI (tests production build)
+- Semgrep (static analysis, bundler-agnostic)
+- ESLint plugins (runtime-agnostic)
+- Speed Insights (runtime monitoring)
+
+**Incompatible:**
+- `@next/bundle-analyzer` (Webpack-only, throws warning with `next dev --turbopack`)
+- `webpack-bundle-analyzer` (Webpack-only)
+
+**Workaround for Legacy Tools:**
+Build with Turbopack, analyze with Next.js experimental analyzer. For Webpack-based tools, temporarily build without `--turbo` flag, though this is not recommended for Next.js 16+.
+
+## Cost Analysis
+
+| Tool | Pricing | Recommendation |
+|------|---------|----------------|
+| Next.js Bundle Analyzer | Free (built-in) | Use always |
+| Speed Insights | Free (Vercel) | Use always |
+| Lighthouse CI | Free (open source) | Use in CI/CD |
+| npm audit | Free (built-in) | Use always |
+| Semgrep OSS | Free (open source) | Use always |
+| eslint-plugin-security | Free (open source) | Use always |
+| OWASP ZAP | Free (open source) | Use for pentesting |
+| BundlePhobia CLI | Free (open source) | Use pre-install checks |
+| Snyk Free | Free (limited) | Optional, 200 tests/month |
+| Snyk Pro | $99/mo | Skip (npm audit + Semgrep sufficient) |
+
+**Total Cost:** $0 (all recommended tools are free)
 
 ## Sources
 
-**Official Documentation:**
-- [Next.js PWA Guide](https://nextjs.org/docs/app/guides/progressive-web-apps) -- manifest.ts convention, service worker setup, Serwist recommendation
-- [Next.js Manifest File Convention](https://nextjs.org/docs/app/api-reference/file-conventions/metadata/manifest) -- MetadataRoute.Manifest type
-- [Workbox Caching Strategies](https://developer.chrome.com/docs/workbox/caching-strategies-overview) -- NetworkFirst, CacheFirst, StaleWhileRevalidate patterns
-- [Workbox Background Sync](https://developer.chrome.com/docs/workbox/modules/workbox-background-sync) -- Queue and retry pattern
-- [Background Synchronization API (MDN)](https://developer.mozilla.org/en-US/docs/Web/API/Background_Synchronization_API) -- Browser support, API reference
-- [Dexie.js Documentation](https://dexie.org) -- IndexedDB wrapper, schema versioning
-- [dexie-react-hooks](https://dexie.org/docs/dexie-react-hooks/useLiveQuery()) -- useLiveQuery API
-- [Sonner Documentation](https://sonner.emilkowal.ski/) -- Toast component API
+### Performance Profiling
+- [Next.js 16.1 Release Notes](https://nextjs.org/blog/next-16-1) - Experimental Bundle Analyzer
+- [Next.js Bundle Analyzer Demo](https://turbopack-bundle-analyzer-demo.vercel.sh/)
+- [Vercel Speed Insights Documentation](https://vercel.com/docs/speed-insights)
+- [Lighthouse CI Performance Monitoring](https://web.dev/articles/lighthouse-ci)
+- [Next.js Speed Insights Guide](https://nextjs.org/learn/seo/monitor/nextjs-speed-insights)
+- [BundlePhobia Package Size Tool](https://bundlephobia.com)
 
-**Package Registries (verified 2026-01-29):**
-- [dexie@4.2.1 on npm](https://www.npmjs.com/package/dexie) -- 787K weekly downloads, 13.8K GitHub stars
-- [dexie-react-hooks@4.2.0 on npm](https://www.npmjs.com/package/dexie-react-hooks) -- 71 dependents
-- [sonner@2.0.7 on npm](https://www.npmjs.com/package/sonner) -- 2,451 dependents, zero dependencies
-- [serwist@9.5.0 on npm](https://www.npmjs.com/package/serwist) -- evaluated and rejected
-- [@serwist/turbopack@9.5.0 on npm](https://www.npmjs.com/package/@serwist/turbopack) -- experimental, known issues
+### Security Auditing
+- [Semgrep JavaScript/TypeScript Analysis (2025)](https://semgrep.dev/blog/2025/a-technical-deep-dive-into-semgreps-javascript-vulnerability-detection/)
+- [Top NPM Vulnerability Scanners](https://spectralops.io/blog/best-npm-vulnerability-scanners/)
+- [OWASP ZAP API Security Testing (2026)](https://oneuptime.com/blog/post/2026-01-25-owasp-zap-api-security/view)
+- [eslint-plugin-security NPM Package](https://www.npmjs.com/package/eslint-plugin-security)
+- [Snyk vs npm audit Comparison](https://nearform.com/insights/comparing-npm-audit-with-snyk/)
 
-**Ecosystem Research:**
-- [Serwist Getting Started](https://serwist.pages.dev/docs/next/getting-started) -- webpack requirement documented
-- [Serwist Turbopack Issue #54](https://github.com/serwist/serwist/issues/54) -- 56+ upvotes, status: backlog/planned
-- [IndexedDB Library Comparison](https://npm-compare.com/dexie,idb-keyval,localforage) -- Dexie vs idb-keyval vs localforage
-- [LogRocket: Next.js 16 PWA with Offline Support](https://blog.logrocket.com/nextjs-16-pwa-offline-support) -- Serwist + IndexedDB approach
-- [Next.js PWA without Extra Packages](https://adropincalm.com/blog/nextjs-offline-service-worker/) -- Manual SW approach
-- [Offline Conflict Resolution Strategies](https://www.adalo.com/posts/offline-vs-real-time-sync-managing-data-conflicts) -- LWW vs OT vs CRDTs
+### i18n (German Umlauts)
+- [GitHub: betterletter - German Umlaut Conversion Tool](https://github.com/alexpovel/betterletter)
+- [German Umlaut Alternative Spellings Guide](https://blogs.transparent.com/german/writing-the-letters-%E2%80%9Ca%E2%80%9D-%E2%80%9Co%E2%80%9D-and-%E2%80%9Cu%E2%80%9D-without-a-german-keyboard/)
+- [next-intl Documentation](https://next-intl.dev/)
+- [React i18n Best Libraries](https://phrase.com/blog/posts/react-i18n-best-libraries/)
 
-**Codebase Verification (read directly):**
-- `src/lib/auth.ts` -- Custom JWT auth with bcryptjs, jose
-- `src/lib/session.ts` -- Session validation, cookie management, RBAC support
-- `src/middleware.ts` -- Route protection, contractor handling, internal role gating
-- `src/lib/permissions.ts` -- RBAC constants including TICKETS_*, TENANTS_*, role hierarchy
-- `src/lib/magic-link.ts` -- Magic link pattern (reference for tenant portal pattern)
-- `src/contexts/PushContext.tsx` -- SW registration at `/sw.js`
-- `src/app/api/auth/login/route.ts` -- Email+password auth handler (already handles tenants)
-- `src/app/api/auth/register/route.ts` -- Tenant user creation with unit linking
-- `src/types/auth.ts` -- TenantUser, TenantWithUnit types already defined
-- `public/sw.js` -- Push-only service worker (46 lines)
-- `next.config.ts` -- Turbopack config, SW cache headers
-- `package.json` -- Current dependencies
-- `supabase/migrations/023_users_auth.sql` -- tenant_users table, auth fields
-- `supabase/migrations/022_rbac.sql` -- tenant role, ticket permissions
+### Bundle Analysis
+- [Next.js Turbopack Bundle Analyzer Discussion](https://github.com/vercel/next.js/discussions/86731)
+- [@next/bundle-analyzer Turbopack Incompatibility Issue](https://github.com/vercel/next.js/issues/77482)
+- [Next.js 16.1 Bundle Analyzer Review](https://staticmania.com/blog/next.js-16.1-review)

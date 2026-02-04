@@ -1,226 +1,283 @@
-# Project Research Summary
+# Production Hardening Research Summary
 
-**Project:** KEWA Renovation Operations System -- v3.0 Tenant & Offline
-**Domain:** Residential property management (Swiss context), PWA offline retrofit, UX polish
-**Researched:** 2026-01-29
-**Confidence:** MEDIUM-HIGH
+**Project:** KeWa-App (Property Management SaaS)
+**Domain:** Next.js 16 Enterprise Application Hardening
+**Researched:** 2026-02-04
+**Confidence:** HIGH
 
 ## Executive Summary
 
-v3.0 adds three capabilities to an existing 100K+ LOC Next.js 16 codebase: a tenant self-service portal, offline PWA support, and UX polish. Research reveals the existing codebase has far more v3.0 scaffolding than expected. Tenant auth (email+password), RBAC with tenant role and ticket permissions, the `tenant_users` junction table, and service worker registration are all already built. The tenant portal is primarily a UI/routing concern with new database tables for tickets. The Swiss property management market confirms that tenant self-service portals (damage reporting, communication, document access) are table stakes -- platforms like aroov, TenantCloud, and Buildium all offer them. KEWA's small portfolio (2 internal users, ~20-40 tenants) means the portal should be minimal: ticket creation, status tracking, messaging. No rent payments, no lease signing, no community features.
+Production hardening for 110K LOC Next.js 16 applications requires a systematic approach across three domains: performance optimization, security audit, and i18n cleanup. The app's "general sluggishness" complaint likely stems from Dynamic APIs in layouts forcing entire app into server-side rendering, N+1 database queries without caching, and bundle bloat from 750+ files. Critical security gaps exist in Server Actions (missing authorization checks), custom Route Handlers (CSRF vulnerability), and middleware (CVE-2025-29927 bypass). German umlaut fixes require careful encoding validation to prevent data corruption.
 
-The significant new technical surface is offline PWA support. The existing service worker handles only push notifications (47 lines). It must be expanded with caching strategies, IndexedDB for local data via Dexie.js, and a sync queue for offline mutations. The critical architectural decision is the service worker approach: **manual expansion of the existing `public/sw.js` is recommended over Serwist**, because Serwist requires webpack while the project uses Turbopack (Next.js 16 default). The `@serwist/turbopack` package exists but has known issues with `process.env` being undefined in workers. Manual SW expansion avoids build tooling conflicts entirely and is sufficient for KEWA's narrow offline scope (queue ticket submissions, cache recent data, show online/offline indicators). Only 3 new npm packages are needed: `dexie`, `dexie-react-hooks`, and `sonner`.
+Recommended approach: Start with security (highest risk), then performance profiling before optimization (avoid premature fixes), finally i18n as isolated cosmetic changes. The biggest quick win is auditing for Dynamic APIs in root/nested layouts—a single `cookies()` call forces the entire app into dynamic rendering, eliminating all static optimization. Security requires immediate CVE patches (CVSS 9-10 vulnerabilities in React/Next.js) and systematic Server Action authorization audit. Database encoding migration needs dedicated phase with corruption prevention.
 
-The primary risks are (1) tenant data isolation -- RLS policies exist but are dead code because the app uses custom JWT auth with Supabase's anon key, making `auth.uid()` always NULL, so all isolation must be application-layer; (2) service worker merge -- adding caching to the existing push-only SW must preserve push notification handlers or notifications silently break; and (3) iOS cache eviction -- Safari aggressively evicts service worker caches, so IndexedDB (more persistent) should store critical offline data, not the Cache API alone.
+Key risks: Breaking active user sessions during security patches, corrupting data during character encoding migration, and over-optimizing without bundle analysis (wasting effort on wrong targets). Mitigation: incremental deployment with feature flags, test on database copy first, and profile with Lighthouse/bundle analyzer before changing code.
 
 ## Key Findings
 
 ### Recommended Stack
 
-The existing stack (Next.js 16, React 19, Supabase, custom JWT auth via jose/bcryptjs, Tailwind 4) requires no changes. Three targeted additions:
+Research identifies zero-cost tooling for all three hardening domains, avoiding commercial APM solutions. Next.js 16.1 includes experimental Turbopack-native bundle analyzer, eliminating need for Webpack-based tools. Vercel Speed Insights provides real-time Web Vitals monitoring for free. Security scanning uses built-in npm audit plus Semgrep OSS (OWASP Top 10 coverage, 250% better true positive rate than commercial tools). German umlauts need simple UTF-8 find/replace, not full i18n framework overhead.
 
-| Package | Version | Purpose | Rationale |
-|---------|---------|---------|-----------|
-| `dexie` | 4.2.1 | IndexedDB wrapper for offline data + sync queue | Structured queries, schema versioning, cross-tab observation, 787K weekly downloads |
-| `dexie-react-hooks` | 4.2.0 | `useLiveQuery()` for reactive IndexedDB queries | Components auto-update when offline data changes; official Dexie React bindings |
-| `sonner` | 2.0.7 | Toast notifications for user feedback | Zero dependencies, 12KB, `toast()` callable from anywhere, no existing toast UI in app |
+**Core technologies:**
+- Next.js experimental bundle analyzer: Turbopack-native bundle visualization — identifies bloat before optimization
+- @vercel/speed-insights: Zero-config Web Vitals tracking — monitors LCP/INP/CLS from real users
+- Semgrep OSS: Static security analysis — catches OWASP Top 10 with 250% fewer false positives
+- Lighthouse CI: Performance regression testing — prevents future degradation in CI/CD
+- eslint-plugin-security: Lightweight security linting — integrates with existing ESLint setup
+- Custom Node.js script: German umlaut conversion — avoids runtime overhead of i18n frameworks
 
-**Anti-recommendations:** No Serwist/next-pwa (Turbopack conflict), no PouchDB (CouchDB-only sync model), no framer-motion (30KB for cosmetic animations), no react-query/SWR (Dexie handles offline data), no Supabase Auth (conflicts with existing custom JWT).
-
-**Researcher Disagreement -- Service Worker Tooling:**
-The STACK researcher recommends manual SW expansion (no Serwist) due to the Turbopack conflict. The ARCHITECTURE researcher recommends Serwist despite the webpack requirement. **Resolution: Manual approach wins.** The project's `next.config.ts` already has `turbopack: { root: __dirname }`. Switching to `next build --webpack` is a regression against Next.js 16's direction, slows builds, and the `@serwist/turbopack` alternative has reported issues. The offline scope is narrow enough (queue mutations, cache API responses) that native Cache API + Background Sync API + Dexie covers everything without a framework. If specific Workbox strategies are needed, `importScripts()` from CDN inside `public/sw.js` provides them with zero build coupling.
+**Critical compatibility note:** @next/bundle-analyzer is Webpack-only and incompatible with Turbopack. Use Next.js 16.1+ experimental analyzer instead.
 
 ### Expected Features
 
-**Tenant Portal -- Must Have (Table Stakes):**
-- Tenant email+password registration and login (scoped to unit)
-- Maintenance ticket creation with category, description, photos
-- Ticket status tracking (eingereicht > bestaetigt > in Bearbeitung > erledigt)
-- Communication thread per ticket (extends existing comment system)
-- Tenant dashboard (open tickets, unit info)
-- Email notification on ticket updates
-- German language UI throughout
-- Mobile-responsive portrait-first layout
+Production-ready enterprise apps require two feature tiers: table stakes (missing = unprofessional) and differentiators (fast vs functional). The app currently lacks security headers (CSP, HSTS), has inconsistent input validation, and serves all routes dynamically despite mostly static content. Performance differentiators focus on eliminating request waterfalls, optimizing Server Components, and leveraging React Compiler (already enabled).
 
-**Tenant Portal -- Should Have (Differentiators):**
-- Ticket categories with smart routing (Heizung, Wasser, Elektrik, Allgemein)
-- Ticket urgency levels (Notfall / Dringend / Normal)
-- Push notifications for tenants (existing infrastructure)
-- Ticket-to-work-order conversion (manual, one-click for KEWA)
-- Tenant profile self-service (update phone, email)
+**Must have (table stakes):**
+- Core Web Vitals compliance (LCP < 2.5s, INP < 200ms, CLS < 0.1) — Google ranking factor
+- Security headers (CSP, HSTS, X-Frame-Options) — OWASP A01:2025 mitigation
+- JWT token security (HttpOnly, SameSite=strict) — prevent XSS/CSRF
+- Database query indexes — fix N+1 causing sluggishness
+- Dependency vulnerability resolution — OWASP A03:2025 supply chain
+- Error boundaries — prevent white screen of death
+- Proper UTF-8 encoding — German umlauts display correctly
 
-**Offline PWA -- Must Have:**
-- PWA manifest with icons + install prompt (Next.js `app/manifest.ts` convention)
-- App shell caching for offline navigation
-- Online/offline visual indicator
-- Offline data reading (IndexedDB cache of recently viewed items)
-- Offline form queue (sync when online)
-- Sync status indicator (pending count, last sync time)
+**Should have (competitive):**
+- Parallel data fetching — eliminate waterfalls (30-60% faster page loads)
+- Server Component optimization — 15-20% faster rendering, smaller bundles
+- Supabase index optimization — 100x speedup on filtered queries
+- Bundle size analysis — identify bloat from large dependencies
+- Lazy loading for heavy components — reduce initial bundle
+- Cache-first for static assets — instant offline load (already implemented)
 
-**Offline PWA -- Should Have:**
-- Offline photo capture (queue for upload)
-- Retry with exponential backoff
-- Conflict detection with LWW resolution
+**Defer (v2+):**
+- Full i18n framework (next-intl) — app is German-only, no multi-language requirement
+- Advanced caching strategies — service worker already handles offline
+- WebAuthn/passkeys — two internal users with PINs, not needed
+- Complete rewrite — profile and fix specific bottlenecks instead
 
-**UX Polish -- Must Have:**
-- Fix 3 known UAT issues (invoice linking modal, checklist item titles, delivery history page)
-- Toast notifications via Sonner
-- Loading states (skeletons/spinners)
-- Empty states with meaningful messages
-- Error handling UI with retry
-
-**Defer to Post-v3.0:**
-- Full offline-first architecture (CRDTs, full DB mirror)
-- Dark mode
-- Swipe gestures
-- Global cross-entity search
-- Tenant document access (KB extension)
-- Announcement board
-- Bulk operations
-- Online rent payment (explicitly out of scope per PROJECT.md)
+**Anti-features to avoid:**
+- Replacing service worker with Serwist (Turbopack conflict documented)
+- Switching from JWT to sessions (custom PIN auth works for use case)
+- Over-engineered security (focus on OWASP Top 10, not every CVE)
+- Premature optimization (profile first, prioritize by impact)
 
 ### Architecture Approach
 
-The architecture extends three existing patterns: (1) route-group isolation (`/dashboard` for internal, `/contractor` for magic-link, now `/tenant` for session-based tenant auth), (2) middleware-enforced RBAC with per-route-group handlers, and (3) the single service worker at root scope. Tenant data isolation is application-layer only -- every `/api/tenant/*` route filters through `tenant_users` join. RLS is dead code and should not be relied upon.
+Performance monitoring integrates at three architectural layers: middleware (request-level metrics), root layout (client Web Vitals), and instrumentation.ts (OpenTelemetry for server-side tracing). Security hardening uses defense in depth: next.config.ts headers, middleware CSRF validation, API route input validation, and dependency audit. German umlaut correction uses AST-based find/replace targeting string literals only, avoiding false positives in code identifiers.
 
-**Major Components:**
+**Major components:**
 
-1. **Tenant Route Group** (`/tenant/*`) -- Separate layout, mobile-first, no BuildingContext. Includes login, dashboard, ticket CRUD, messaging, profile.
-2. **Tenant API Namespace** (`/api/tenant/*`) -- Physically separate from internal routes. Every query scoped by authenticated tenant's `unit_id(s)` via `getTenantContext()` utility.
-3. **Tickets Data Model** -- New tables: `tickets`, `ticket_messages`, `ticket_attachments`. Categories: maintenance, defect, request, complaint. Status: open > in_progress > resolved > closed.
-4. **Offline Infrastructure** (`src/lib/offline/`) -- Dexie database (`db.ts`), sync queue (`sync-queue.ts`), sync engine (`sync-engine.ts`), conflict resolver (`conflict-resolver.ts`), online detector (`online-detector.ts`).
-5. **Expanded Service Worker** (`public/sw.js`) -- Preserves existing push handlers. Adds: install/activate events, fetch interception (network-first for API, cache-first for static assets), sync event handler, Dexie import for queue processing.
-6. **Toast/Feedback Layer** -- Sonner `<Toaster>` in root layout. Used for sync status, action confirmations, error messages, offline/online transitions.
+1. **Middleware layer (src/middleware.ts)** — Adds request timing wrapper, security headers injection, CSRF token validation for Route Handlers. Already handles session validation and route protection; extend with performance tracking and Origin header validation.
 
-**Key Architecture Decisions:**
+2. **Root layout (src/app/layout.tsx)** — Integrates Web Vitals reporting via useReportWebVitals hook, initializes monitoring services. Critical: audit for Dynamic APIs (cookies(), headers(), searchParams) which force entire app into dynamic rendering.
 
-| Decision | Choice | Rationale |
-|----------|--------|-----------|
-| Service worker tooling | Manual expansion (no Serwist) | Turbopack compatibility, narrow offline scope, existing SW preservation |
-| Tenant data isolation | Application-layer filtering | RLS is dead code (anon key, auth.uid()=NULL); app-layer is pragmatic for 2+N users |
-| Offline data store | Dexie.js (IndexedDB) | Structured queries, schema versioning, reactive hooks, cross-tab observation |
-| Conflict resolution | Last-write-wins (LWW) | Tenants create tickets (write-only); concurrent edits near-impossible with 2 internal users |
-| PWA manifest | Next.js `app/manifest.ts` | Zero dependencies, built-in type safety, auto-injected into `<head>` |
-| Caching strategy | Network-first for API, cache-first for static assets | Fresh data preferred; static assets rarely change |
+3. **Security headers (next.config.ts)** — Centralized CSP, HSTS, X-Frame-Options configuration. Currently only has service worker headers; needs expansion to all routes with Supabase domain whitelisting.
+
+4. **Data caching (throughout app)** — Audit 188 files with Supabase queries for missing unstable_cache() wrappers. Non-fetch requests bypass Next.js caching, causing repeated database queries.
+
+5. **Character encoding (codebase-wide)** — AST-based jscodeshift transform for ae/oe/ue → ä/ö/ü replacement in string literals. Requires manual review for URL paths (breaking), database identifiers (migration required), and variable names (case-by-case).
+
+**Key integration points:**
+- Middleware: Performance tracking, security validation (both modify same file)
+- API routes: Input validation audit (all /app/api/*/route.ts files)
+- Server Actions: Authorization check pattern (all files with 'use server')
+- Service worker: Cache strategy review (public/sw.js, public/sw-cache.js)
 
 ### Critical Pitfalls
 
-| # | Pitfall | Severity | Prevention |
-|---|---------|----------|------------|
-| 1 | **RLS policies are dead code** -- anon key bypasses all isolation, `auth.uid()` returns NULL | CRITICAL | Application-layer filtering in every `/api/tenant/*` route; dedicated tenant query functions that always join through `tenant_users` |
-| 2 | **Service worker replacement destroys push notifications** -- only one SW per scope, replacing `sw.js` silently kills push | CRITICAL | Merge into single file; expand existing `public/sw.js` with caching logic alongside existing push handlers; test push after adding caching |
-| 3 | **Session JWT incompatible with Supabase RLS** -- custom JWT (jose) not recognized by Supabase `auth.uid()` | CRITICAL | Same as #1; do not rely on RLS; use application-layer isolation |
-| 4 | **Server Components cannot render offline** -- RSC requires server; offline needs client-first data flow | CRITICAL | Cache app shell statically; use IndexedDB for offline data; client components read from IDB first; scope offline narrowly |
-| 5 | **Tenant sees admin data through shared API routes** -- existing routes return all data, no user scoping | CRITICAL | Separate `/api/tenant/*` namespace; never reuse admin query functions for tenant data |
-| 6 | **iOS Safari cache eviction** -- WebKit aggressively evicts SW caches after days of inactivity | MODERATE | Store critical data in IndexedDB (more persistent); never assume cache persistence; re-cache on every app open |
-| 7 | **Offline queue grows unbounded with media** -- photos in IndexedDB hit Safari's ~50MB quota | MODERATE | Compress photos to 200KB before queueing; monitor quota via `navigator.storage.estimate()`; sync photos separately from ticket text |
-| 8 | **Session expiry while offline** -- 7-day JWT expires during extended offline; sync queue fails with 401 | MODERATE | Check session validity before sync; prompt re-login then replay queue; consider 30-day session for tenant role |
+Top 5 pitfalls represent highest risk or highest impact for this project. Breaking active sessions during CVE patches causes business disruption. Dynamic APIs in layouts are the most likely cause of "general sluggishness" (10-50x slower). Server Actions without auth checks are authorization bypass vulnerabilities. Character encoding migration risks permanent data corruption if database encoding mismatches. Missing bundle analysis wastes optimization effort on wrong targets.
+
+1. **Dynamic APIs in root layout destroying performance** — Using cookies(), searchParams, or headers() in root layout opts entire app into dynamic rendering, eliminating all static optimization (10-50x slower). Prevention: Grep for Dynamic APIs in app/**/layout.tsx, move into Suspense boundaries, use middleware for auth checks instead. Detection: Build output shows all routes as ƒ (Dynamic), Cache-Control: private headers, 0% edge cache hit rate. Highest impact quick win.
+
+2. **Server Actions without authorization checks** — Custom auth doesn't automatically protect Server Actions; users can invoke any action once they get the ID. Prevention: Establish pattern where every Server Action starts with getSession() + permission check, audit all 'use server' files, create requireAuth() utility. Detection: Grep for 'use server' and verify auth check in function body. Authorization bypass = regulatory compliance violations.
+
+3. **Breaking active user sessions during CVE patches** — React/Next.js received critical RCE patches (CVE-2025-66478, CVE-2025-55182) with CVSS 10.0 severity. Rushing to patch without session migration causes mass logouts. Prevention: Test patches on staging with active sessions, deploy during low-traffic windows, have rollback plan. Detection: Sudden spike in authentication failures.
+
+4. **Character encoding migration corrupting data** — Fixing ae→ä without proper validation corrupts existing data if database claims UTF-8 but uses SQL_ASCII/Latin1. Prevention: Run pg_encoding query first, test on database copy, validate column widths for multibyte expansion, export backup with explicit encoding. Detection: Run data scanning query comparing max bytes to column widths. Requires dedicated phase.
+
+5. **Bundle analysis skipped before optimization** — Team optimizes "obvious" issues but ships massive unexpected dependencies. 110K LOC app likely has significant dead code, entire libraries imported for small functions, duplicate dependencies. Prevention: Install @next/bundle-analyzer, run ANALYZE=true npm run build, focus on chart libraries (100-500KB), date libraries (moment.js → date-fns), icon libraries (selective import). Detection: Build shows large "First Load JS", Lighthouse flags "Reduce unused JavaScript".
+
+**Additional high-severity pitfalls:**
+- CVE-2025-29927 middleware authorization bypass (upgrade Next.js immediately)
+- Server/Client component boundary confusion (functions/secrets leaked to client)
+- Missing data caching for non-fetch requests (database hammered)
+- PWA cache strategy serving stale data (safety risk for inspection data)
+- Environment variables exposed to client bundle (credential leaks)
+- Custom auth CSRF vulnerability in Route Handlers (prefer Server Actions)
 
 ## Implications for Roadmap
 
-### Phase 1: UX Polish (Known Issues)
+Based on research, suggested phase structure prioritizes security (immediate risk), then performance profiling (measure before optimizing), then targeted optimization (highest impact first), finally i18n (cosmetic, isolated).
 
-**Rationale:** Fix v2.2 UAT bugs first. Quick wins that restore user trust before introducing new features. These are small, isolated fixes with no architectural dependencies.
-**Delivers:** Fixed invoice linking modal (replace `prompt()`), populated checklist item titles from templates, property-level delivery history page.
-**Features from FEATURES.md:** UX Polish table stakes (known issues).
-**Pitfalls to avoid:** #9 (UX refactoring breaks existing workflows) -- refactor one component at a time, test with both admin roles, preserve URL structure.
+### Phase 1: Security Audit & CVE Patching
+**Rationale:** Critical vulnerabilities (CVSS 9-10) require immediate attention before any refactoring. Security patches may cause breaking changes; isolating them prevents diagnosing whether security update or optimization broke production. Authorization gaps are regulatory compliance risks.
 
-### Phase 2: Tenant Portal Core
+**Delivers:** Next.js upgraded to 14.2.25+/15.2.3+, Server Actions with authorization pattern, CSRF protection for Route Handlers, security headers configured, dependency vulnerabilities resolved to 0 critical/high.
 
-**Rationale:** The primary new feature of v3.0. Auth infrastructure is 90% built. This phase establishes the tenant route group, data model, and isolation pattern that everything else builds on. Must ship before offline because offline ticket creation depends on the ticket data model.
-**Delivers:** Tenant login, dashboard, ticket CRUD (create/list/detail), messaging thread, photo attachments, push notifications for new tickets.
-**Features from FEATURES.md:** All tenant portal table stakes.
-**Stack used:** Existing auth (jose, bcryptjs), existing Supabase, new `tickets`/`ticket_messages`/`ticket_attachments` tables.
-**Pitfalls to avoid:** #1 (RLS dead code -- use app-layer isolation), #5 (shared API routes -- create `/api/tenant/*` namespace), #7 (middleware gap -- add `/tenant/*` matcher), #12 (session validation -- update to accept tenant role), #10 (Swiss DSG -- add privacy notice to registration).
+**Addresses:**
+- Table stakes: Security headers, JWT token security, dependency vulnerabilities, error boundaries
+- Pitfalls: CVE-2025-29927 bypass, breaking sessions during patches, Server Actions without auth, CSRF in Route Handlers, env vars exposed to client
 
-### Phase 3: PWA Foundation + Offline Infrastructure
+**Avoids:** Testing security patches alongside performance changes (isolates failure cause), rushing CVE fixes without session testing (user disruption).
 
-**Rationale:** Service worker changes affect the entire app. Better to have tenant portal stable first, then add offline capabilities. This phase lays the infrastructure: manifest, SW expansion, IndexedDB setup, online/offline detection.
-**Delivers:** Installable PWA (manifest + install prompt), app shell caching, offline fallback page, online/offline indicator, toast notification system (Sonner), IndexedDB database setup (Dexie).
-**Stack used:** Dexie 4.2.1, dexie-react-hooks 4.2.0, Sonner 2.0.7, native Cache API, native Background Sync API.
-**Pitfalls to avoid:** #2 (SW replacement kills push -- merge into existing sw.js), #4 (RSC can't render offline -- cache app shell, IDB for data), #13 (precache bloat -- only cache app shell + critical paths, not all 60+ pages).
+**Estimated effort:** 16-24 hours
+**Breaking changes:** Possible (test thoroughly, deploy during low-traffic window)
 
-### Phase 4: Offline Data Sync + Sync Queue
+### Phase 2: Performance Profiling & Baseline
+**Rationale:** Cannot optimize without knowing current state. Bundle analysis identifies what's actually bloating the bundle (not assumptions). Lighthouse establishes baseline metrics. Dynamic API audit likely reveals highest-impact quick win.
 
-**Rationale:** Depends on Phase 3 infrastructure (IndexedDB, SW, online detection) and Phase 2 data model (tickets). This is the highest-complexity phase. Separate from PWA foundation to reduce risk.
-**Delivers:** Offline form queue, background sync, conflict detection (LWW), sync status indicator, offline data reading for recently viewed items.
-**Pitfalls to avoid:** #6 (sync queue loses writes -- use client-generated UUIDs, idempotent operations), #8 (session expiry while offline -- check before sync, prompt re-login), #11 (unbounded media queue -- compress photos, monitor quota).
+**Delivers:** Bundle analysis report, Lighthouse baseline metrics, Dynamic API location audit, database query performance report, monitoring infrastructure (Web Vitals, OpenTelemetry).
 
-### Phase 5: Tenant Portal Extras + UX Improvements
+**Uses:**
+- Next.js experimental bundle analyzer
+- Lighthouse CI
+- @vercel/speed-insights
+- Supabase Query Performance Report
 
-**Rationale:** Polish and enhancement phase. All infrastructure is stable. Add differentiator features and app-wide UX improvements. Can be partially deferred if timeline is tight.
-**Delivers:** Ticket categories with smart routing, urgency levels, ticket-to-work-order conversion, tenant profile self-service, loading states, empty states, error handling UI, confirmation dialogs, breadcrumb navigation.
-**Features from FEATURES.md:** Tenant portal differentiators + UX Polish table stakes (improvements).
-**Pitfalls to avoid:** #9 (UX refactoring breaks workflows -- incremental, test with both roles), #14 (replace remaining prompt()/alert()/confirm()).
+**Addresses:**
+- Pitfalls: Bundle analysis skipped (wastes effort), missing monitoring (can't detect regressions), Dynamic APIs in layouts (10-50x slowdown)
+
+**Estimated effort:** 8-12 hours
+**Breaking changes:** None (observability only)
+
+### Phase 3: Performance Quick Wins
+**Rationale:** Fix highest-impact issues identified in Phase 2 profiling. Dynamic API removal, database index creation, and bundle pruning deliver measurable improvement with minimal risk. Deploying incrementally allows rollback if issues arise.
+
+**Delivers:** Dynamic APIs moved to Suspense boundaries, database indexes for slow queries, heavy dependencies lazy loaded, parallel data fetching for dashboard, measurable LCP/INP/CLS improvement.
+
+**Implements:**
+- Middleware request timing wrapper (architecture component)
+- Root layout Web Vitals reporting (architecture component)
+- unstable_cache() for Supabase queries (architecture component)
+
+**Addresses:**
+- Table stakes: Core Web Vitals compliance, database query indexes
+- Differentiators: Parallel data fetching, Server Component optimization, lazy loading, bundle size reduction
+- Pitfalls: Server/Client boundary confusion (test serialization), missing data caching (wrap Supabase calls)
+
+**Avoids:** Large refactoring without incremental deployment (use feature flags), premature optimization (based on profiling data).
+
+**Estimated effort:** 32-48 hours
+**Breaking changes:** Possible (test each change in isolation)
+
+### Phase 4: PWA Cache Strategy Review
+**Rationale:** Aggressive caching may serve stale inspection data (safety risk) or fill device storage. Requires review after performance optimizations complete, as cache strategy depends on which data is static vs dynamic.
+
+**Delivers:** Cache strategy differentiated by content type (static assets: cache-first, API data: network-first, critical user data: network-only), cache versioning, storage quota monitoring.
+
+**Addresses:**
+- Pitfalls: PWA cache causing stale data (safety risk), storage overflow (app crashes)
+
+**Estimated effort:** 8-12 hours
+**Breaking changes:** None (improves existing service worker)
+
+### Phase 5: German Umlaut Correction
+**Rationale:** Cosmetic changes isolated in dedicated phase to avoid merge conflicts with performance work. Character encoding requires careful validation but low technical risk if string literals only.
+
+**Delivers:** ae/oe/ue → ä/ö/ü replacement in all UI strings, UTF-8 encoding verification, German collation for sort order, database encoding audit.
+
+**Implements:**
+- AST-based jscodeshift transform (architecture approach)
+- Manual review of URL paths, database identifiers (architecture decision)
+
+**Addresses:**
+- Table stakes: Proper UTF-8 encoding
+- Pitfalls: Character encoding corruption (test on DB copy first), German collation breaking sort order (set de_DE.UTF8)
+
+**Avoids:** False positives in English words (AST targets string literals), database migration without validation (test first).
+
+**Estimated effort:** 16-24 hours (8h planning + 8-16h execution)
+**Breaking changes:** None if UI strings only; requires migration if database identifiers changed (recommend defer)
+
+### Phase 6: Input Validation & XSS Audit
+**Rationale:** Manual code review benefits from monitoring (identify hot paths). Lower urgency than authorization gaps (Phase 1) but completes security hardening. Can run in parallel with Phase 5.
+
+**Delivers:** Zod schemas for all API routes, dangerouslySetInnerHTML audit, malicious input testing.
+
+**Addresses:**
+- Differentiators: Security Misconfiguration audit (A02:2025), Injection prevention (A05:2025)
+
+**Estimated effort:** 8-16 hours
+**Breaking changes:** None (adds validation)
 
 ### Phase Ordering Rationale
 
-- **UAT fixes first:** The 3 known issues are small, isolated, and blocking user confidence. Clear them before new feature work.
-- **Tenant portal before offline:** The ticket data model must exist before offline ticket creation can be built. Auth and routing changes are foundational.
-- **PWA foundation before sync:** Installing the PWA, caching the shell, and setting up IndexedDB are prerequisites for the sync queue.
-- **Sync queue separate from PWA foundation:** The sync queue is the highest-complexity piece. Isolating it in its own phase reduces blast radius if it takes longer than expected.
-- **Extras last:** Differentiator features and polish improvements are low-risk and can be partially deferred without blocking the milestone.
+- **Security first (Phase 1):** Critical CVEs require immediate patching; isolating security changes prevents diagnosing whether security or optimization broke production. Authorization gaps are compliance risks.
+- **Profile before optimize (Phase 2):** Avoid premature optimization by identifying actual bottlenecks. Dynamic API audit likely reveals 10-50x performance gain with minimal code change.
+- **Quick wins (Phase 3):** Fix highest-impact issues identified in profiling. Incremental deployment with feature flags allows rollback.
+- **PWA review (Phase 4):** Depends on Phase 3 understanding which data is static vs dynamic.
+- **i18n isolated (Phase 5):** Cosmetic changes in dedicated phase avoid merge conflicts. Can run in parallel with Phase 6.
+- **Input validation (Phase 6):** Lower urgency than authorization (Phase 1); benefits from monitoring (Phase 2). Can run in parallel with Phase 5.
+
+**Parallel execution opportunities:**
+- Phase 5 (i18n) and Phase 6 (input validation) are independent
+- Phase 2 (profiling) can start immediately after Phase 1 security patches tested
 
 ### Research Flags
 
-**Phases needing deeper research during planning:**
-- **Phase 3 (PWA Foundation):** Manual SW expansion strategy needs concrete implementation research -- fetch event interception patterns, cache versioning, Workbox CDN `importScripts` integration. The Background Sync API's Chromium-only support requires a fallback strategy using `online` events.
-- **Phase 4 (Offline Data Sync):** Sync queue architecture, retry strategies, photo compression pipeline, IndexedDB quota management. This is the least-documented pattern for Next.js 16 specifically.
+Phases likely needing deeper research during planning:
+- **Phase 3 (Performance Quick Wins):** Database index creation may require Supabase-specific research for lock behavior, downtime mitigation. N+1 query patterns in 188 files need systematic identification approach.
+- **Phase 5 (German Umlaut Correction):** Database encoding validation specific to Supabase (PostgreSQL) collation settings. May need migration planning if existing data has encoding issues.
 
-**Phases with standard patterns (skip deep research):**
-- **Phase 1 (UX Polish):** Replacing `prompt()` with modals, adding loading states, building a list page -- all standard React patterns.
-- **Phase 2 (Tenant Portal Core):** CRUD app with auth, messaging, file upload. Well-documented, existing codebase patterns to follow (contractor portal is the template).
-- **Phase 5 (Extras + UX):** Standard feature additions and UI improvements.
+Phases with standard patterns (skip research-phase):
+- **Phase 1 (Security Audit):** CVE patches follow standard npm update process, security headers well-documented in Next.js production checklist.
+- **Phase 2 (Performance Profiling):** Lighthouse and bundle analyzer have established workflows, no domain-specific challenges.
+- **Phase 4 (PWA Cache Strategy):** Service worker caching strategies well-documented, no novel patterns.
+- **Phase 6 (Input Validation):** Zod validation is standard practice, XSS audit follows OWASP checklist.
 
 ## Confidence Assessment
 
 | Area | Confidence | Notes |
 |------|------------|-------|
-| Stack | HIGH | Only 3 new packages, all verified on npm with high adoption. Existing stack fully sufficient. |
-| Features | MEDIUM-HIGH | Tenant portal features well-established in industry. Offline feature scope clear but implementation complexity is high. |
-| Architecture | HIGH | Codebase directly inspected. Integration points well-understood. Tenant route group follows existing contractor portal pattern. |
-| Pitfalls | HIGH | Critical pitfalls (#1, #2, #5) verified against actual source code. RLS gap is provably real. SW replacement risk is browser spec. |
+| Stack | HIGH | All tools have official Next.js 16 support, Vercel/OSS sources, 2025-2026 docs. Turbopack compatibility explicitly verified. |
+| Features | HIGH | Table stakes derived from OWASP Top 10 2025, Core Web Vitals standards, Next.js production checklist. Differentiators from performance case studies. |
+| Architecture | HIGH | Integration points match existing codebase structure (middleware.ts, layout.tsx confirmed). Multi-layer monitoring approach is industry standard. |
+| Pitfalls | HIGH | Critical pitfalls sourced from CVE advisories, Next.js security blog, production case studies. Character encoding risks from PostgreSQL migration guides. |
 
-**Overall confidence:** MEDIUM-HIGH
+**Overall confidence:** HIGH
 
-The tenant portal and UX polish phases are high-confidence (established patterns, existing infrastructure). The offline PWA phases are medium-confidence (well-documented patterns exist but Next.js 16 + Turbopack + manual SW is less trodden territory).
+Research based on official Next.js docs (production checklist, security guide, OpenTelemetry), Vercel blog posts, OWASP Top 10 2025, CVE advisories (Datadog, Next.js security updates), and production case studies (2025-2026). All recommended tools have active maintenance and official Next.js 16 support.
 
 ### Gaps to Address
 
-- **Email sending capability:** Tenant ticket email notifications require email sending, which does not exist in the codebase. Research did not evaluate email providers (Resend, Postmark, SES). Address during Phase 2 planning.
-- **Legacy role field hack:** Tenant sessions use `role: 'imeri'` for backward compatibility. Session validation (`session.ts` line 92) rejects non-kewa/non-imeri roles. This needs a clean fix, not just documenting the hack. Address during Phase 2 planning.
-- **Background Sync browser support:** Chromium-only. Firefox and Safari do not support the Background Sync API. The fallback (retry on `online` event + SW startup) is documented but needs concrete implementation planning. Address during Phase 3 planning.
-- **iOS device testing:** iOS Safari's cache eviction behavior can only be validated on real devices. Allocate testing time during Phase 3 verification.
-- **Swiss DSG compliance specifics:** Privacy notice content, data retention periods, and tenant data export requirements need legal input. Not a technical blocker but must be addressed before tenant portal ships.
+- **Database encoding validation:** Research assumes PostgreSQL UTF-8, but Supabase-specific collation settings need verification. Run `SELECT datname, pg_encoding_to_char(encoding) as encoding, datcollate, datctype FROM pg_database` query during Phase 5 planning.
+
+- **Server Action authorization pattern:** Need to audit existing auth implementation to establish consistent pattern. Research recommends requireAuth() utility, but exact implementation depends on current session management approach.
+
+- **Bundle analysis results:** Cannot recommend specific optimizations until analyzer identifies actual bloat. Phase 3 plan will be refined based on Phase 2 profiling data.
+
+- **Dynamic API locations:** Research flags this as likely cause of sluggishness, but cannot confirm until grep audit completes. If no Dynamic APIs found in layouts, investigate alternative causes (database queries, bundle size).
+
+- **Session migration strategy:** If CVE patches require auth mechanism changes, need to design graceful migration. Test on staging with active sessions to detect breaking changes.
 
 ## Sources
 
-### Primary (HIGH Confidence -- Codebase Analysis)
-- `src/lib/auth.ts`, `src/lib/session.ts`, `src/middleware.ts` -- Custom auth, JWT, routing
-- `src/lib/permissions.ts` -- RBAC constants, role hierarchy, route permissions
-- `src/app/api/auth/login/route.ts`, `register/route.ts` -- Email+password auth flow
-- `src/lib/supabase/server.ts`, `client.ts` -- Anon key usage, no Supabase Auth integration
-- `public/sw.js` -- Push-only service worker (47 lines)
-- `supabase/migrations/004_disable_rls.sql` -- RLS disabled, GRANT ALL to anon
-- `supabase/migrations/029_rls_policies.sql` -- RLS policies using auth.uid() (dead code)
-- `supabase/migrations/022_rbac.sql`, `023_users_auth.sql` -- Tenant role, permissions, tenant_users table
+### Primary (HIGH confidence)
+- [Next.js Production Checklist](https://nextjs.org/docs/app/guides/production-checklist) — Dynamic APIs, caching, security headers
+- [Next.js Security Blog - Server Components and Actions](https://nextjs.org/blog/security-nextjs-server-components-actions) — Authorization, CSRF protection
+- [OWASP Top 10 2025](https://owasp.org/Top10/2025/en/) — Security requirements, A01-A10 categories
+- [Next.js 16.1 Release Notes](https://nextjs.org/blog/next-16-1) — Experimental bundle analyzer, Turbopack compatibility
+- [Next.js Security Update December 2025](https://nextjs.org/blog/security-update-2025-12-11) — CVE-2025-66478, CVE-2025-55182 patches
+- [CVE-2025-29927 Analysis - Datadog](https://securitylabs.datadoghq.com/articles/nextjs-middleware-auth-bypass/) — Middleware bypass vulnerability
+- [Next.js OpenTelemetry Guide](https://nextjs.org/docs/app/guides/open-telemetry) — Performance monitoring integration
+- [Vercel Speed Insights Documentation](https://vercel.com/docs/speed-insights) — Web Vitals tracking
+- [Next.js Data Security Guide](https://nextjs.org/docs/app/guides/data-security) — Environment variables, sensitive data tainting
 
-### Secondary (HIGH Confidence -- Official Documentation)
-- [Next.js PWA Guide](https://nextjs.org/docs/app/guides/progressive-web-apps) -- Manifest, SW setup
-- [Next.js Manifest File Convention](https://nextjs.org/docs/app/api-reference/file-conventions/metadata/manifest) -- `app/manifest.ts`
-- [Workbox Caching Strategies](https://developer.chrome.com/docs/workbox/caching-strategies-overview) -- NetworkFirst, CacheFirst
-- [Background Sync API (MDN)](https://developer.mozilla.org/en-US/docs/Web/API/Background_Synchronization_API) -- Browser support, fallback patterns
-- [Dexie.js Documentation](https://dexie.org) -- IndexedDB wrapper, useLiveQuery
-- [Supabase RLS Docs](https://supabase.com/docs/guides/database/postgres/row-level-security) -- RLS with custom auth limitations
+### Secondary (MEDIUM confidence)
+- [Semgrep JavaScript/TypeScript Analysis (2025)](https://semgrep.dev/blog/2025/a-technical-deep-dive-into-semgreps-javascript-vulnerability-detection/) — SAST capabilities, OWASP coverage
+- [Vercel Blog - Common App Router Mistakes](https://vercel.com/blog/common-mistakes-with-the-next-js-app-router-and-how-to-fix-them) — Dynamic API pitfalls, Server/Client boundaries
+- [Complete Next.js Security Guide 2025](https://www.turbostarter.dev/blog/complete-nextjs-security-guide-2025-authentication-api-protection-and-best-practices) — JWT security, input validation
+- [PostgreSQL German Umlauts Full Text Search](https://www.dbi-services.com/blog/dealing-with-german-umlaute-in-postgresqls-full-text-search/) — Collation settings, encoding
+- [Supabase Query Optimization](https://supabase.com/docs/guides/database/query-optimization) — Index creation, performance
+- [Medium - Migrating to Next.js 16 Performance Guide](https://medium.com/@Adekola_Olawale/migrating-to-next-js-16-a-practical-performance-first-guide-e9680dd252b4) — Optimization strategies
+- [PWA Security Best Practices](https://www.zeepalm.com/blog/pwa-security-best-practices) — Cache security, scope restriction
 
-### Tertiary (MEDIUM Confidence -- Community/Ecosystem)
-- [LogRocket: Next.js 16 PWA with Offline Support](https://blog.logrocket.com/nextjs-16-pwa-offline-support) -- Serwist + IndexedDB approach
-- [Swiss Mobiliar / aroov](https://www.icmif.org/news_story/swiss-mobiliar-launches-tenant-portal-with-property-management-software-company/) -- Swiss tenant portal pattern
-- [Serwist Turbopack Issue #54](https://github.com/serwist/serwist/issues/54) -- 56+ upvotes, status: backlog/planned
-- [Swiss FADP/DSG 2025](https://iclg.com/practice-areas/data-protection-laws-and-regulations/switzerland) -- Data protection requirements
-- [iOS PWA Limitations 2025](https://ravi6997.medium.com/pwas-on-ios-in-2025-why-your-web-app-might-beat-native-0b1c35acf845) -- Cache eviction bugs
-- [GTCSys: PWA Data Sync & Conflict Resolution](https://gtcsys.com/comprehensive-faqs-guide-data-synchronization-in-pwas-offline-first-strategies-and-conflict-resolution/) -- Sync queue strategies
+### Tertiary (LOW confidence, needs validation)
+- [Medium - Server Components Broke Our App Twice](https://medium.com/lets-code-future/next-js-server-components-broke-our-app-twice-worth-it-e511335eed22) — Anecdotal boundary confusion issues
+- [Medium - 10 Performance Mistakes in Next.js 16](https://medium.com/@sureshdotariya/10-performance-mistakes-in-next-js-16-that-are-killing-your-app-and-how-to-fix-them-2facfab26bea) — Community-identified pitfalls
+- [GitHub - ast-i18n](https://github.com/sibelius/ast-i18n) — AST-based string transformation approach
 
 ---
-*Research completed: 2026-01-29*
+*Research completed: 2026-02-04*
 *Ready for roadmap: yes*

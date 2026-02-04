@@ -1,657 +1,739 @@
-# Architecture Patterns
+# Architecture Integration: Performance, Security, i18n
 
-**Domain:** Tenant Portal + Offline PWA + UX Polish for Renovation Operations System
-**Researched:** 2026-01-29
-**Confidence:** HIGH (based on codebase analysis + verified external sources)
+**Project:** KEWA Renovation Operations System
+**Milestone:** v3.1 Production Hardening
+**Researched:** 2026-02-04
 
 ## Executive Summary
 
-The existing KEWA architecture is well-structured for these additions. The auth system already defines the `tenant` role, `email_password` auth method, `tenant_users` junction table, and ticket permissions in the RBAC schema. The service worker (`sw.js`) handles only push notifications today and must be expanded for offline caching. The key architectural challenge is integrating three new capabilities (tenant portal, offline sync, UX fixes) without disrupting the existing internal dashboard, contractor portal, and notification infrastructure.
+Performance monitoring, security measures, and i18n fixes integrate with existing Next.js 16 architecture through multiple layers: middleware (performance tracking, security headers), layout components (monitoring initialization), API routes (security validation), and codebase-wide search-replace (umlaut corrections).
 
----
+**Key integration points:**
+- Middleware: Security headers, request timing
+- Root layout: Performance monitoring initialization
+- API routes: Security validation middleware
+- Codebase: Automated search-replace for umlauts
 
-## Integration Points
+## Current Architecture Overview
 
-### Existing Architecture Map
+### Existing Structure
 
 ```
-src/
-  app/
-    layout.tsx              <-- Root: PushProvider wraps everything
-    login/                  <-- PIN + email login page
-    dashboard/              <-- Internal app (admin, property_manager, accounting)
-      layout.tsx            <-- BuildingProvider + Header + MobileNav
-      [feature]/page.tsx    <-- ~60 pages
-    contractor/[token]/     <-- Magic-link contractor portal
-      layout.tsx            <-- Minimal header, mobile-first
-      [workOrderId]/        <-- Work order detail pages
-    portal/                 <-- Change order + inspection approval portals
-      change-orders/[token]/
-      inspections/[token]/
-    api/
-      auth/                 <-- login, logout, register, session, magic-link
-      [feature]/            <-- ~90 API routes
-  middleware.ts             <-- Session + RBAC for /dashboard, /api, /contractor
-  lib/
-    auth.ts                 <-- PIN/password hash, session creation
-    session.ts              <-- JWT validation, cookie management
-    permissions.ts          <-- RBAC permission checks
-    magic-link.ts           <-- Token validation for contractors
-  contexts/
-    BuildingContext.tsx      <-- Property filtering (dashboard only)
-    PushContext.tsx          <-- Service worker registration + push subscription
-  hooks/
-    useSession.ts           <-- Client-side session fetch
-public/
-  sw.js                     <-- Push notification handlers only (47 lines)
+Next.js 16 App Router
+├── Middleware (src/middleware.ts)
+│   ├── Session validation (RBAC-aware)
+│   ├── Route protection
+│   ├── Portal routing (/portal, /contractor)
+│   └── Request header injection
+│
+├── Route Groups
+│   ├── /dashboard (internal: KEWA + Imeri)
+│   ├── /portal (tenants: email auth)
+│   └── /contractor (external: magic-link)
+│
+├── Layouts
+│   ├── Root layout (app/layout.tsx)
+│   │   └── PushProvider, Toaster
+│   ├── Dashboard layout (app/dashboard/layout.tsx)
+│   │   └── BuildingContext, ConnectivityContext, Header, MobileNav
+│   ├── Portal layout (app/portal/layout.tsx)
+│   └── Contractor layout (app/contractor/[token]/layout.tsx)
+│
+├── API Routes (/api/*)
+│   ├── Auth routes (/api/auth/*) — public
+│   ├── Portal routes (/api/portal/*) — portal session
+│   ├── Contractor routes (/api/contractor/*) — magic-link token
+│   └── Internal routes (/api/*) — session + RBAC
+│
+└── Service Worker (public/sw.js)
+    ├── Push notifications
+    └── Offline caching (sw-cache.js)
 ```
 
-### Integration Point 1: Authentication (Tenant Portal)
+### Authentication Flows
 
-**Current state:**
-- `middleware.ts` handles three route groups: `/dashboard/*` (session + internal role), `/api/*` (session + permissions), `/contractor/*` (magic-link token)
-- Session JWT contains: `userId`, `role` (legacy: kewa/imeri), `roleId`, `roleName` (admin/property_manager/accounting/tenant/external_contractor), `permissions[]`
-- `validateSession()` in `session.ts` rejects non-kewa/imeri legacy roles (line 92: `if (sessionPayload.role !== 'kewa' && sessionPayload.role !== 'imeri')`)
-- Email+password login already works in `/api/auth/login` via `handleEmailAuth()`
-- User registration already creates tenant users with `tenant_users` junction table
+| Route Group | Auth Method | Validation Point | Session Type |
+|-------------|-------------|------------------|--------------|
+| /dashboard | PIN (internal) | Middleware + API | httpOnly cookie (session) |
+| /portal | Email/Password | Middleware + API | httpOnly cookie (portal_session) |
+| /contractor | Magic-link token | Middleware | URL token validation |
 
-**Required changes:**
-- Extend `validateSession()` / `validateSessionWithRBAC()` to accept tenant sessions (the legacy role field mapping needs a tenant-compatible value)
-- Add `/tenant/*` route group to middleware matcher
-- Add tenant-specific middleware handler (session-based, not magic-link)
-- The `isInternalRole()` check correctly returns false for tenants (no change needed)
+## Performance Monitoring Integration
 
-**Risk:** LOW. The auth infrastructure is 90% ready. The gap is the legacy role field -- tenants are mapped to `'imeri'` in `register.ts` (line 121), which is a hack that must be fixed cleanly.
+### Approach: Multi-Layer Instrumentation
 
-### Integration Point 2: Service Worker (Offline PWA)
+Performance monitoring integrates at three architectural layers.
 
-**Current state:**
-- `public/sw.js` is 47 lines of plain JavaScript handling only push events (`push`, `notificationclick`, `pushsubscriptionchange`)
-- Registered in `PushContext.tsx` via `navigator.serviceWorker.register('/sw.js')`
-- `next.config.ts` sets `Cache-Control: no-cache` and `Service-Worker-Allowed: /` headers
-- No `manifest.json` exists
-- No PWA metadata in root layout
-- No caching, no IndexedDB, no offline fallback
+#### Layer 1: Middleware (Request-Level Metrics)
 
-**Required changes:**
-- Migrate from hand-written `sw.js` to Serwist-managed service worker
-- Preserve existing push notification handlers in the new SW
-- Add precaching for app shell (HTML, CSS, JS)
-- Add runtime caching strategies (stale-while-revalidate for assets, network-first for API)
-- Add IndexedDB stores for offline data and sync queue
-- Add web app manifest
-- Update `next.config.ts` to use `withSerwistInit` wrapper
-- Build must use `--webpack` flag (Serwist requires webpack; Next.js 16 defaults to Turbopack)
+**Location:** `src/middleware.ts`
 
-**Risk:** MEDIUM. The service worker transition from manual to Serwist is the riskiest integration. Push notification handlers must be preserved. The `--webpack` flag for build is a constraint that affects CI/CD.
+**What to add:**
+- Request timing wrapper
+- Response time header injection
+- Route-specific timing
+- Edge function latency tracking
 
-### Integration Point 3: Data Layer (Tenant Isolation)
-
-**Current state:**
-- `tenant_users` table links users to units (with `is_primary`, `move_in_date`, `move_out_date`)
-- Units belong to buildings, buildings belong to properties
-- RLS is disabled (`004_disable_rls.sql` migration exists)
-- All API routes query Supabase without tenant scoping -- they rely on middleware auth headers
-- Permissions for tenant role: `units:read`, `tickets:create`, `tickets:read`
-
-**Required changes:**
-- New `tickets` table (does not exist yet)
-- All tenant API endpoints must filter by `tenant_users.unit_id` JOIN
-- Tenant must never see data from other units/buildings (application-level enforcement)
-
-**Risk:** MEDIUM. Application-level filtering is pragmatic since RLS is globally disabled. But every tenant API endpoint must consistently apply the unit filter. Missing a filter equals a data leak.
-
-### Integration Point 4: Middleware Router
-
-**Current state:**
+**Implementation pattern:**
 ```typescript
-export const config = {
-  matcher: [
-    '/dashboard/:path*',
-    '/api/((?!auth).*)',
-    '/contractor/:path*'
-  ]
+export async function middleware(request: NextRequest) {
+  const startTime = performance.now()
+
+  // Existing auth/routing logic...
+  const response = await handleRoute(request)
+
+  // Add performance headers
+  const duration = performance.now() - startTime
+  response.headers.set('x-response-time', `${duration}ms`)
+  response.headers.set('x-middleware-duration', `${duration}ms`)
+
+  // Optional: Send to monitoring service
+  await reportMetric({
+    route: request.nextUrl.pathname,
+    duration,
+    method: request.method,
+  })
+
+  return response
 }
 ```
 
-**Required changes:**
+**Why middleware:** Captures all requests (pages + API), minimal overhead (~60-70ms baseline), edge-compatible.
+
+**Sources:**
+- [Middleware.io - Configure Middleware APM for Next.js](https://docs.middleware.io/apm-configuration/next-js)
+- [Sentry - Error and Performance Monitoring for Next.js](https://sentry.io/for/nextjs/)
+
+#### Layer 2: Root Layout (Client Metrics)
+
+**Location:** `src/app/layout.tsx`
+
+**What to add:**
+- Web Vitals reporting (CLS, LCP, FID, TTFB)
+- Performance observer initialization
+- Error boundary integration
+
+**Implementation pattern:**
 ```typescript
-export const config = {
-  matcher: [
-    '/dashboard/:path*',
-    '/tenant/:path*',        // NEW
-    '/api/((?!auth).*)',
-    '/contractor/:path*'
-  ]
+import { useReportWebVitals } from 'next/web-vitals'
+
+export default function RootLayout({ children }) {
+  // Web Vitals reporting
+  useReportWebVitals((metric) => {
+    // Send to monitoring service
+    reportWebVital(metric)
+  })
+
+  return (
+    <html>
+      <body>
+        {/* Existing providers */}
+        <PushProvider>
+          {children}
+        </PushProvider>
+        <Toaster />
+      </body>
+    </html>
+  )
 }
 ```
 
-New handler function `handleTenantRoute()`: validates session cookie (not magic-link), checks `roleName === 'tenant'`, injects `x-tenant-user-id` and `x-tenant-unit-ids` headers.
+**Why root layout:** Runs once per app load, captures client-side metrics, non-blocking.
 
-### Integration Point 5: Root Layout (PWA)
+**Sources:**
+- [Next.js Analytics Guide](https://nextjs.org/docs/pages/guides/analytics)
+- [PostHog - Next.js Monitoring Tutorial](https://posthog.com/tutorials/nextjs-monitoring)
 
-**Current state:**
-- Root layout wraps everything in `PushProvider`
-- No manifest link
-- No theme-color meta tag (only in contractor layout)
+#### Layer 3: OpenTelemetry (Server-Side Instrumentation)
 
-**Required changes:**
-- Add manifest link: `<link rel="manifest" href="/manifest.json" />`
-- Add PWA meta tags (theme-color, apple-mobile-web-app-capable)
-- PushProvider stays (service worker registration moves to Serwist, but push subscription logic remains in PushContext)
+**Location:** `instrumentation.ts` (new file at project root)
 
----
+**What to add:**
+- Automatic span tracing for API routes
+- Database query timing
+- External API call tracking
+- Resource metrics (memory, CPU)
 
-## New Components
-
-### Route Structure: Tenant Portal
-
-```
-src/app/tenant/
-  layout.tsx                    <-- Tenant layout (simplified nav, no BuildingContext)
-  page.tsx                      <-- Tenant dashboard (unit info, open tickets)
-  login/page.tsx                <-- Tenant login (email + password only)
-  tickets/
-    page.tsx                    <-- Own ticket list
-    new/page.tsx                <-- Create ticket (form + photo upload)
-    [id]/page.tsx               <-- Ticket detail + message thread
-  profile/
-    page.tsx                    <-- Tenant profile, notification settings
-```
-
-**Rationale:** Separate `/tenant` route group (not under `/dashboard`) because:
-1. Different layout (no BuildingContext, no admin nav, simplified mobile-first UI)
-2. Different auth flow (email+password, not PIN)
-3. Different data scope (own unit only, not all properties)
-4. Follows existing pattern: `/dashboard` = internal, `/contractor` = external token-based, `/tenant` = external session-based
-
-### API Routes: Tenant Portal
-
-```
-src/app/api/tenant/
-  tickets/
-    route.ts                    <-- GET (own), POST (create)
-    [id]/route.ts               <-- GET detail, PUT update
-    [id]/messages/route.ts      <-- GET/POST thread messages
-  unit/
-    route.ts                    <-- GET own unit info
-  profile/
-    route.ts                    <-- GET/PUT own profile
-```
-
-**Rationale:** Separate `/api/tenant/*` namespace enforces data isolation at the route level. These routes always filter by the authenticated tenant's `unit_id(s)`. Internal ticket management by KEWA staff uses separate `/api/tickets/*` routes with full access.
-
-### Database: New Tables
-
-```sql
--- Tenant support tickets
-CREATE TABLE tickets (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  tenant_user_id UUID NOT NULL REFERENCES users(id),
-  unit_id UUID NOT NULL REFERENCES units(id),
-  building_id UUID NOT NULL REFERENCES buildings(id),
-  title TEXT NOT NULL,
-  description TEXT NOT NULL,
-  category TEXT NOT NULL,           -- 'maintenance', 'defect', 'request', 'complaint'
-  priority TEXT DEFAULT 'normal',   -- 'low', 'normal', 'high', 'urgent'
-  status TEXT DEFAULT 'open',       -- 'open', 'in_progress', 'resolved', 'closed'
-  assigned_to UUID REFERENCES users(id),
-  resolved_at TIMESTAMPTZ,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW()
-);
-
--- Ticket messages (thread between tenant and KEWA)
-CREATE TABLE ticket_messages (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  ticket_id UUID NOT NULL REFERENCES tickets(id) ON DELETE CASCADE,
-  sender_id UUID NOT NULL REFERENCES users(id),
-  content TEXT NOT NULL,
-  is_internal BOOLEAN DEFAULT false,  -- Internal notes hidden from tenant
-  created_at TIMESTAMPTZ DEFAULT NOW()
-);
-
--- Ticket attachments (photos of issues)
-CREATE TABLE ticket_attachments (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  ticket_id UUID NOT NULL REFERENCES tickets(id) ON DELETE CASCADE,
-  message_id UUID REFERENCES ticket_messages(id),
-  file_path TEXT NOT NULL,
-  file_name TEXT NOT NULL,
-  file_size INTEGER,
-  mime_type TEXT,
-  uploaded_by UUID NOT NULL REFERENCES users(id),
-  created_at TIMESTAMPTZ DEFAULT NOW()
-);
-```
-
-### Offline Infrastructure: New Modules
-
-```
-src/lib/offline/
-  db.ts                         <-- IndexedDB schema (idb library wrapper)
-  sync-queue.ts                 <-- Queued mutations store
-  sync-engine.ts                <-- Background sync orchestrator
-  conflict-resolver.ts          <-- Last-write-wins via updated_at
-  online-detector.ts            <-- Navigator.onLine + fetch probe
-
-src/hooks/
-  useOfflineStatus.ts           <-- Online/offline state hook
-  useOfflineData.ts             <-- Read from IndexedDB with network fallback
-
-src/contexts/
-  OfflineContext.tsx             <-- Sync status, queue depth, last sync time
-
-src/app/~offline/
-  page.tsx                      <-- Serwist offline fallback page
-```
-
-### Service Worker: Expanded
-
-```
-src/app/sw.ts                   <-- Serwist source (replaces public/sw.js)
-  - Serwist precaching + runtime caching (defaultCache)
-  - Push notification handlers (migrated from existing sw.js)
-  - Background sync event handler
-  - Offline fallback routing to /~offline
-
-public/manifest.json            <-- PWA web app manifest (NEW)
-```
-
----
-
-## Data Flow
-
-### Tenant Portal Data Flow
-
-```
-Tenant Browser
-  |
-  |--> /tenant/login (email + password)
-  |      |--> POST /api/auth/login { email, password }
-  |      |      |--> Supabase: users WHERE email AND auth_method='email_password'
-  |      |      |--> JWT: { userId, role, roleName:'tenant', permissions }
-  |      |      |--> Set session cookie
-  |      |--> Redirect to /tenant
-  |
-  |--> /tenant/tickets (list)
-  |      |--> middleware: validate session, check roleName='tenant'
-  |      |--> Set headers: x-tenant-unit-ids
-  |      |--> GET /api/tenant/tickets
-  |             |--> Filter: tickets WHERE unit_id IN (tenant's unit_ids)
-  |
-  |--> /tenant/tickets/new (create)
-         |--> POST /api/tenant/tickets { title, description, category, photos }
-                |--> Validate unit_id belongs to tenant
-                |--> Create ticket + upload attachments
-                |--> Trigger push notification to KEWA admin
-```
-
-### Offline Data Flow
-
-```
-User Action (create ticket, update status, etc.)
-  |
-  |--> Write to IndexedDB (optimistic, immediate)
-  |      |--> UI updates instantly from local store
-  |
-  |--> Check navigator.onLine
-  |      |
-  |      |--> ONLINE:
-  |      |      |--> POST to API
-  |      |      |--> Success: Mark synced in IndexedDB
-  |      |      |--> Failure (network): Add to sync queue
-  |      |
-  |      |--> OFFLINE:
-  |             |--> Add to sync queue in IndexedDB
-  |             |--> Queue entry: { id, operation, endpoint, payload, timestamp, retries }
-  |
-  |--> Connection restored (online event)
-         |--> Sync engine processes queue (FIFO)
-         |--> For each entry:
-         |      |--> Send to API
-         |      |--> 200: Remove from queue, update synced flag
-         |      |--> 409: Apply LWW conflict resolution
-         |      |--> 5xx: Retry with exponential backoff (max 3)
-         |--> Pull latest data from server
-         |--> Reconcile local IndexedDB with server state
-```
-
-### Conflict Resolution: Last-Write-Wins
-
-LWW with `updated_at` is sufficient for KEWA because:
-1. Tenants only edit their own tickets (no concurrent multi-user edits)
-2. Internal users manage tickets on the admin side (different fields typically)
-3. Low data complexity (text tickets, not collaborative documents)
-
-```
-Conflict detected (server returns 409):
-  |--> Compare local.updated_at vs server.updated_at
-  |      |--> Server newer: Discard local, accept server version
-  |      |--> Local newer: Re-send local version (force)
-  |      |--> Equal: Accept server (deterministic tiebreak)
-  |--> Update IndexedDB with winner
-  |--> Toast: "Daten aktualisiert" (non-blocking)
-```
-
----
-
-## Service Worker Migration Plan
-
-### Current sw.js (47 lines, push only)
-
-```javascript
-// Three event listeners:
-self.addEventListener('push', ...)           // Show notification
-self.addEventListener('notificationclick', ...) // Navigate to URL
-self.addEventListener('pushsubscriptionchange', ...) // Re-subscribe
-```
-
-### Target sw.ts (Serwist-managed)
-
+**Implementation pattern:**
 ```typescript
-import { defaultCache } from "@serwist/next/worker";
-import type { PrecacheEntry, SerwistGlobalConfig } from "serwist";
-import { Serwist } from "serwist";
+export async function register() {
+  if (process.env.NEXT_RUNTIME === 'nodejs') {
+    const { NodeSDK } = await import('@opentelemetry/sdk-node')
+    const { OTLPTraceExporter } = await import('@opentelemetry/exporter-trace-otlp-http')
 
-declare global {
-  interface WorkerGlobalScope extends SerwistGlobalConfig {
-    __SW_MANIFEST: (PrecacheEntry | string)[] | undefined;
-  }
-}
-declare const self: ServiceWorkerGlobalScope;
-
-const serwist = new Serwist({
-  precacheEntries: self.__SW_MANIFEST,
-  skipWaiting: true,
-  clientsClaim: true,
-  navigationPreload: true,
-  runtimeCaching: defaultCache,
-  fallbacks: {
-    entries: [{
-      url: "/~offline",
-      matcher({ request }) { return request.destination === "document"; },
-    }],
-  },
-});
-
-serwist.addEventListeners();
-
-// === PRESERVED: Push notification handlers (from existing sw.js) ===
-self.addEventListener('push', (event) => {
-  const data = event.data.json();
-  const options = {
-    body: data.body,
-    tag: data.tag || `notification-${Date.now()}`,
-    data: { url: data.url, notificationId: data.notificationId },
-    requireInteraction: data.urgency === 'urgent',
-    renotify: true,
-  };
-  event.waitUntil(self.registration.showNotification(data.title, options));
-});
-
-self.addEventListener('notificationclick', (event) => {
-  event.notification.close();
-  const url = event.notification.data.url || '/';
-  event.waitUntil(
-    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
-      for (const client of clientList) {
-        if (client.url.includes(url) && 'focus' in client) return client.focus();
-      }
-      if (clients.openWindow) return clients.openWindow(url);
-    })
-  );
-});
-
-self.addEventListener('pushsubscriptionchange', (event) => {
-  event.waitUntil(
-    fetch('/api/push/subscribe', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        subscription: event.newSubscription,
-        oldEndpoint: event.oldSubscription?.endpoint,
+    const sdk = new NodeSDK({
+      traceExporter: new OTLPTraceExporter({
+        url: process.env.OTEL_EXPORTER_OTLP_ENDPOINT,
       }),
     })
-  );
-});
-```
 
-### next.config.ts Changes
-
-```typescript
-import type { NextConfig } from "next";
-import withSerwistInit from "@serwist/next";
-
-const withSerwist = withSerwistInit({
-  swSrc: "src/app/sw.ts",
-  swDest: "public/sw.js",
-  cacheOnNavigation: true,
-  reloadOnOnline: false,    // IMPORTANT: false to prevent form data loss
-  disable: process.env.NODE_ENV === "development",
-});
-
-const nextConfig: NextConfig = {
-  output: 'standalone',
-  reactCompiler: true,
-  turbopack: { root: __dirname },
-  experimental: {
-    parallelServerCompiles: false,
-    parallelServerBuildTraces: false,
-  },
-  // Note: sw.js headers now managed by Serwist
-};
-
-export default withSerwist(nextConfig);
-```
-
-### Build Script Change
-
-```json
-{
-  "scripts": {
-    "build": "next build --webpack"
+    sdk.start()
   }
 }
 ```
 
-**Critical:** Serwist requires webpack for the build step. Dev mode continues with Turbopack since Serwist is disabled in dev.
+**Why instrumentation.ts:** Runs before app starts, automatic Next.js span creation, supports all observability providers.
 
----
+**Sources:**
+- [Next.js OpenTelemetry Guide](https://nextjs.org/docs/app/guides/open-telemetry)
+- [SigNoz - Monitor NextJS with OpenTelemetry](https://signoz.io/blog/opentelemetry-nextjs/)
 
-## Data Isolation Strategy
+### Performance Monitoring Decision Matrix
 
-### Application-Level Enforcement (Primary)
+| Metric Type | Where to Capture | Integration Point | Overhead |
+|-------------|------------------|-------------------|----------|
+| Request timing | Middleware | `src/middleware.ts` | ~5-10ms |
+| Web Vitals (LCP, CLS, FID) | Root layout | `src/app/layout.tsx` | None (async) |
+| API response time | Middleware + OpenTelemetry | `instrumentation.ts` | ~10-20ms |
+| Database queries | OpenTelemetry | Auto-instrumented | ~5-15ms |
+| Service worker events | Service worker | `public/sw.js` | None (background) |
 
-Every tenant-facing API route uses a shared context extractor:
+### Recommended Tooling
 
+Based on ecosystem research, three tiers:
+
+**Tier 1 (Vercel-hosted apps):**
+- **Vercel Analytics** — Built-in, zero config, Web Vitals + Server timing
+- Advantage: Native integration, no external service
+
+**Tier 2 (Self-hosted or multi-provider):**
+- **Sentry** — Error + performance, traces through RSCs and Server Actions
+- **OpenTelemetry** — Platform-agnostic, vendor-neutral observability
+
+**Tier 3 (Comprehensive APM):**
+- **New Relic** — Full APM with middleware/SSR/transaction naming
+- **Highlight.io** — Web Vitals + request latency + alerting
+
+**For KEWA context (Vercel deployment assumed):**
+- Start with Vercel Analytics (already available)
+- Add OpenTelemetry for custom metrics
+- Consider Sentry if error tracking needed
+
+## Security Hardening Integration
+
+### Approach: Defense in Depth
+
+Security measures integrate at configuration (headers), middleware (request validation), and application (input sanitization) layers.
+
+#### Layer 1: Security Headers (next.config.ts)
+
+**Location:** `next.config.ts`
+
+**What to add:**
+- Content-Security-Policy (CSP)
+- Strict-Transport-Security (HSTS)
+- X-Frame-Options (clickjacking prevention)
+- X-Content-Type-Options (MIME sniffing prevention)
+- Referrer-Policy
+- Permissions-Policy
+
+**Current state:**
 ```typescript
-// src/lib/tenant-context.ts
-async function getTenantContext(request: NextRequest) {
-  const userId = request.headers.get('x-user-id');
-  const roleName = request.headers.get('x-user-role-name');
-
-  if (roleName !== 'tenant') {
-    return { error: 'Not a tenant', status: 403 };
-  }
-
-  const { data: tenantUnits } = await supabase
-    .from('tenant_users')
-    .select('unit_id, units(building_id)')
-    .eq('user_id', userId)
-    .is('move_out_date', null);  // Active tenancies only
-
-  return {
-    userId,
-    unitIds: tenantUnits.map(t => t.unit_id),
-    buildingIds: tenantUnits.map(t => t.units.building_id),
-  };
+// next.config.ts currently only has service worker headers
+async headers() {
+  return [
+    {
+      source: '/sw.js',
+      headers: [
+        { key: 'Cache-Control', value: 'no-cache, no-store, must-revalidate' },
+        { key: 'Service-Worker-Allowed', value: '/' },
+      ],
+    },
+  ]
 }
 ```
 
-Every `/api/tenant/*` route calls this and filters all queries by `unitIds`.
+**What to add:**
+```typescript
+async headers() {
+  return [
+    // Existing service worker headers...
+    {
+      source: '/:path*',
+      headers: [
+        {
+          key: 'Content-Security-Policy',
+          value: [
+            "default-src 'self'",
+            "script-src 'self' 'unsafe-inline' 'unsafe-eval'", // Note: unsafe-eval needed for Next.js dev
+            "style-src 'self' 'unsafe-inline'",
+            "img-src 'self' data: https:",
+            "font-src 'self' data:",
+            "connect-src 'self' https://*.supabase.co",
+            "frame-ancestors 'none'",
+          ].join('; '),
+        },
+        {
+          key: 'Strict-Transport-Security',
+          value: 'max-age=63072000; includeSubDomains; preload',
+        },
+        {
+          key: 'X-Frame-Options',
+          value: 'DENY',
+        },
+        {
+          key: 'X-Content-Type-Options',
+          value: 'nosniff',
+        },
+        {
+          key: 'Referrer-Policy',
+          value: 'strict-origin-when-cross-origin',
+        },
+        {
+          key: 'Permissions-Policy',
+          value: 'camera=(), microphone=(), geolocation=()',
+        },
+      ],
+    },
+  ]
+}
+```
 
-### Defense-in-Depth Layers
+**Why next.config.ts:** Centralized header management, applies to all responses, no runtime overhead.
 
-1. **Middleware header injection:** Tenant unit_ids passed via `x-tenant-unit-ids` header
-2. **Route namespace isolation:** `/api/tenant/*` physically separate from internal routes
-3. **Ownership verification:** Updates/deletes verify `ticket.tenant_user_id === session.userId`
-4. **Internal-only fields:** `ticket_messages.is_internal` flag hides staff notes from tenant view
-5. **Audit logging:** All tenant data access logged (Swiss Datenschutz compliance)
+**Considerations:**
+- CSP `unsafe-inline` and `unsafe-eval` needed for Next.js (gradual restriction)
+- Supabase domains must be whitelisted in `connect-src`
+- Service worker requires specific CSP exceptions
 
-### Swiss Data Privacy (Datenschutz)
+**Sources:**
+- [Next.js Security Checklist](https://blog.arcjet.com/next-js-security-checklist/)
+- [DEV Community - Security Headers for Next.js](https://dev.to/simplr_sh/securing-your-nextjs-application-the-basic-defenders-security-headers-o31)
 
-- Tenant personal data (email, name) stored with `is_active` flag for soft-delete
-- Tenants see only their own unit/building data
-- Internal notes (`is_internal: true`) never exposed to tenants
-- 7-day session expiry (existing behavior, appropriate for tenants)
-- Full audit trail for data access/modifications
+#### Layer 2: CSRF Protection (Middleware Enhancement)
 
----
+**Location:** `src/middleware.ts`
 
-## Build Order
+**What to add:**
+- Origin header validation (already exists for Server Actions)
+- Explicit CSRF token validation for custom route handlers
+- SameSite cookie enforcement (already using `sameSite: 'lax'`)
 
-### Phase 1: Tenant Portal Auth + Core (Build first)
+**Current state:**
+```typescript
+// middleware.ts validates session but relies on Next.js built-in CSRF protection
+// Server Actions: Next.js compares Origin to Host (automatic)
+// Route Handlers: No explicit CSRF validation
+```
 
-**Why first:** Auth changes touch `middleware.ts` which is foundational. Establish the tenant route group, login flow, and data isolation pattern before building on top of it.
+**What to add:**
+```typescript
+// For API routes using custom handlers (not Server Actions)
+export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl
+
+  // For state-changing API routes (POST/PUT/DELETE)
+  if (pathname.startsWith('/api/') && request.method !== 'GET') {
+    // Validate Origin matches Host
+    const origin = request.headers.get('origin')
+    const host = request.headers.get('host')
+
+    if (origin && !origin.includes(host || '')) {
+      return NextResponse.json(
+        { error: 'CSRF validation failed' },
+        { status: 403 }
+      )
+    }
+  }
+
+  // Existing auth logic...
+}
+```
+
+**Why middleware:** Single enforcement point, runs before route handlers, edge-compatible.
+
+**CSRF protection status:**
+- **Server Actions:** Protected by Next.js (Origin/Host comparison)
+- **Route Handlers:** Need explicit validation (add to middleware)
+- **Cookies:** Already using `sameSite: 'lax'` (good)
+
+**Sources:**
+- [Next.js Security Blog - Server Components and Actions](https://nextjs.org/blog/security-nextjs-server-components-actions)
+- [Medium - Next.js Security Considerations](https://medium.com/@farihatulmaria/security-considerations-when-building-a-next-js-application-and-mitigating-common-security-risks-c9d551fcacdb)
+
+#### Layer 3: Input Validation & XSS Prevention
+
+**Location:** All API routes + components using user input
+
+**What to audit:**
+1. **Check for `dangerouslySetInnerHTML` usage**
+   - Search codebase: `grep -r "dangerouslySetInnerHTML" src/`
+   - Replace with sanitized alternatives (DOMPurify)
+
+2. **Validate API route inputs**
+   - All `request.json()` calls should validate schema
+   - Use Zod or similar for runtime validation
+
+3. **SQL injection prevention**
+   - Already using Supabase (parameterized queries by default)
+   - Audit any raw SQL in migration files
+
+**Example pattern:**
+```typescript
+// API route input validation
+import { z } from 'zod'
+
+const schema = z.object({
+  title: z.string().min(1).max(200),
+  description: z.string().optional(),
+})
+
+export async function POST(request: Request) {
+  const body = await request.json()
+
+  // Validate and sanitize
+  const validated = schema.safeParse(body)
+  if (!validated.success) {
+    return NextResponse.json(
+      { error: 'Invalid input', details: validated.error },
+      { status: 400 }
+    )
+  }
+
+  // Use validated.data (guaranteed safe)
+}
+```
+
+**Why API routes:** Single enforcement point per endpoint, type-safe validation, prevents injection.
+
+**Sources:**
+- [Next.js Data Security Guide](https://nextjs.org/docs/app/guides/data-security)
+- [TurboStarter - Complete Next.js Security Guide 2025](https://www.turbostarter.dev/blog/complete-nextjs-security-guide-2025-authentication-api-protection-and-best-practices)
+
+#### Layer 4: Dependency Audit
+
+**Location:** `package.json` + npm audit
+
+**What to audit:**
+1. **Run npm audit**
+   ```bash
+   npm audit
+   npm audit fix
+   ```
+
+2. **Check for outdated packages**
+   ```bash
+   npm outdated
+   ```
+
+3. **Review critical dependencies:**
+   - `next` (currently 16.1.2 — check for security patches)
+   - `@supabase/supabase-js` (currently 2.90.1)
+   - `jose` (JWT library — security-critical)
+   - `bcryptjs` (password hashing)
+
+**Why dependency audit:** Third-party vulnerabilities are OWASP Top 10, automated detection available.
+
+**Sources:**
+- [OWASP Node.js Security Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Nodejs_Security_Cheat_Sheet.html)
+
+### Security Audit Checklist
+
+| Vulnerability | Current State | Action Required | Priority |
+|---------------|---------------|-----------------|----------|
+| **CSRF** | Partial (Server Actions protected, Route Handlers manual) | Add Origin validation in middleware | HIGH |
+| **XSS** | Unknown (audit needed) | Search for `dangerouslySetInnerHTML`, validate React escaping | HIGH |
+| **SQL Injection** | Protected (Supabase uses parameterized queries) | Audit for raw SQL in migrations | MEDIUM |
+| **Security Headers** | Missing CSP, HSTS, etc. | Add to `next.config.ts` | HIGH |
+| **Dependency Vulnerabilities** | Unknown (audit needed) | Run `npm audit`, update packages | HIGH |
+| **Session Security** | Good (httpOnly, sameSite, JWT) | Validate JWT secret strength | LOW |
+| **Input Validation** | Inconsistent (some routes validate, others don't) | Add Zod schemas to all API routes | MEDIUM |
+| **Rate Limiting** | None | Consider adding (Vercel Edge Middleware) | MEDIUM |
+
+## i18n Umlaut Correction Integration
+
+### Approach: Automated Search-Replace
+
+German umlauts (ä, ö, ü) are currently written as `ae`, `ue`, `oe` throughout the codebase. Need systematic replacement.
 
 **Scope:**
-- Fix legacy role mapping for tenant sessions in `session.ts`
-- Extend middleware for `/tenant/*` routes with `handleTenantRoute()`
-- Tenant login page (email+password, reuse existing flow)
-- Tenant layout with simplified mobile-first navigation
-- Tickets database migration (tickets, ticket_messages, ticket_attachments)
-- Tenant context utility (`getTenantContext`)
-- Tenant dashboard (unit info + ticket summary)
-- Ticket CRUD (create, list, detail)
-- Ticket messaging thread
-- Photo attachments for tickets
-- Push notification triggers for new tickets
+- TypeScript/TSX files (`.ts`, `.tsx`)
+- Exclude: `node_modules`, `.next`, `build`
+- Target: String literals, comments, variable names (case-by-case)
 
-**Dependencies:** Existing auth system (ready), RBAC schema (ready), tenant_users table (ready)
+### File Categories for Replacement
 
-### Phase 2: Offline PWA Support (Build second)
+Based on grep analysis, files contain `ae/ue/oe` patterns:
 
-**Why second:** Service worker changes affect the entire app. Better to have tenant portal stable first, then add offline capabilities across both internal dashboard and tenant portal.
+**Category 1: User-facing strings (HIGH priority)**
+- Component files (e.g., `ProfileForm.tsx`, `TicketConvertDialog.tsx`)
+- Page files (e.g., `tickets/page.tsx`, `auftraege/page.tsx`)
+- API response messages
 
-**Scope:**
-- Install @serwist/next + serwist + idb
-- Migrate sw.js to Serwist-managed sw.ts
-- Preserve push notification handlers
-- Web app manifest (manifest.json)
-- PWA meta tags in root layout
-- Precaching for app shell
-- Runtime caching strategies (stale-while-revalidate for assets, network-first for API)
-- IndexedDB database setup (idb wrapper)
-- Sync queue implementation
-- Background sync engine
-- Online/offline detection hook + context
-- Offline fallback page (/~offline)
-- Conflict resolution (LWW with updated_at)
-- Build script update (--webpack flag)
+**Category 2: Database content (MEDIUM priority)**
+- Migration files (SQL strings)
+- Seed data
+- Default templates
 
-**Dependencies:** Phase 1 complete (stable routes for caching)
+**Category 3: Code identifiers (LOW priority — manual review)**
+- Function names (e.g., `auftraege` → likely stays as-is for URL paths)
+- Route paths (e.g., `/dashboard/auftraege` → breaking change)
+- Database column names (requires migration)
 
-### Phase 3: UX Polish (Build last)
+### Replacement Strategy
 
-**Why last:** Polish touches many existing components. Doing this after architectural changes (auth, SW) avoids merge conflicts and lets us polish the new tenant portal UI simultaneously.
+#### Phase 1: Automated String Replacement
 
-**Scope:**
-- Invoice linking modal (replace `prompt()`)
-- Checklist item title lookup from templates (fix "Item 1", "Item 2" display)
-- Property-level delivery history page
-- General UX improvements across dashboard and tenant portal
+Use AST-based tooling to avoid false positives.
 
-**Dependencies:** All architectural changes complete
+**Tool options:**
+1. **jscodeshift** (Facebook's codemod tool)
+   - AST-aware transformations
+   - Can target string literals specifically
+   - Avoids replacing in imports, function names
 
----
+2. **Custom script with TypeScript AST**
+   - More control
+   - Can handle edge cases
 
-## Anti-Patterns to Avoid
+**Example jscodeshift transform:**
+```javascript
+// umlaut-transform.js
+module.exports = function(fileInfo, api) {
+  const j = api.jscodeshift
+  const root = j(fileInfo.source)
 
-### Anti-Pattern 1: Shared Routes with Role Checks
-**What:** Putting tenant pages under `/dashboard` with `if (role === 'tenant')` conditionals.
-**Why bad:** Tenant sees admin navigation, BuildingContext is unnecessary, data leak risk from shared components.
-**Instead:** Separate `/tenant` route group with its own layout.
+  // Replace string literals
+  root.find(j.StringLiteral).forEach(path => {
+    path.node.value = path.node.value
+      .replace(/ae/g, 'ä')
+      .replace(/ue/g, 'ü')
+      .replace(/oe/g, 'ö')
+      .replace(/Ae/g, 'Ä')
+      .replace(/Ue/g, 'Ü')
+      .replace(/Oe/g, 'Ö')
+  })
 
-### Anti-Pattern 2: Cache All API Responses in Service Worker
-**What:** Caching all API responses in the service worker runtime cache.
-**Why bad:** Stale data served to users, cache invalidation nightmare, storage limits hit.
-**Instead:** Cache only app shell and static assets in SW. Use IndexedDB for specific offline-needed data with explicit sync queue.
+  return root.toSource()
+}
+```
 
-### Anti-Pattern 3: Dual Service Workers
-**What:** Keeping `sw.js` for push and creating a second SW for caching.
-**Why bad:** Only one service worker per scope. Second registration silently replaces the first.
-**Instead:** Single Serwist-managed SW that handles both push events and caching.
+**Run:**
+```bash
+npx jscodeshift -t umlaut-transform.js src/**/*.{ts,tsx}
+```
 
-### Anti-Pattern 4: RLS as Only Isolation
-**What:** Relying solely on Supabase RLS for tenant data isolation.
-**Why bad:** RLS is currently disabled globally (migration 004). Enabling now risks breaking all existing queries.
-**Instead:** Application-level filtering in API routes. RLS can be considered as future hardening.
+**Sources:**
+- [Codemod - Automated i18n](https://codemod.com/i18n)
+- [GitHub - ast-i18n](https://github.com/sibelius/ast-i18n)
 
-### Anti-Pattern 5: Same Login Page for PIN and Email
-**What:** Adding email/password fields to the existing `/login` page used by KEWA staff.
-**Why bad:** Confuses internal users (PIN entry) with tenants (email+password). Different UX expectations.
-**Instead:** Separate `/tenant/login` page. Main `/login` stays PIN-only for internal users.
+#### Phase 2: Manual Review
 
-### Anti-Pattern 6: reloadOnOnline: true
-**What:** Setting Serwist to auto-reload when coming back online.
-**Why bad:** If tenant is filling out a ticket form offline and connection restores, forced reload destroys unsaved form data.
-**Instead:** Set `reloadOnOnline: false`. Show non-intrusive toast "Verbindung wiederhergestellt" and sync in background.
+**What needs manual review:**
+1. **URL paths** (breaking changes)
+   - `/dashboard/auftraege` → `/dashboard/aufträge`?
+   - Requires redirect rules or route updates
 
----
+2. **Database column names**
+   - e.g., `auftraege` table/column
+   - Requires migration + code updates
 
-## Technology Additions
+3. **API endpoint paths**
+   - `/api/auftraege` → `/api/aufträge`?
+   - May break existing integrations
 
-| Technology | Version | Purpose | Confidence |
-|------------|---------|---------|------------|
-| @serwist/next | latest | Service worker management for Next.js | HIGH |
-| serwist | latest | Core service worker library (Workbox successor for Next.js) | HIGH |
-| idb | ^8.x | IndexedDB wrapper with promise-based API | HIGH |
+**Recommendation:**
+- **User-facing strings:** Replace with umlauts (non-breaking)
+- **URLs/routes:** Keep as-is OR add redirects (breaking, deferred)
+- **Database identifiers:** Keep as-is (migration complexity not worth it)
 
-**Rejected alternatives:**
+#### Phase 3: Verification
 
-| Technology | Reason for Rejection |
-|------------|---------------------|
-| next-pwa | Unmaintained, requires webpack, Serwist is its maintained successor |
-| workbox (direct) | Serwist wraps Workbox with Next.js-specific configuration |
-| PouchDB | Overkill for sync queue pattern; idb is lighter |
-| RxDB | Too heavy for ticket sync use case |
+**Post-replacement checks:**
+1. **TypeScript compilation**
+   ```bash
+   npm run type-check
+   ```
 
----
+2. **Search for remaining patterns**
+   ```bash
+   grep -r "ae\|ue\|oe" src/ --include="*.ts" --include="*.tsx"
+   ```
 
-## Caching Strategy Detail
+3. **Manual testing of UI**
+   - Login flow
+   - Dashboard navigation
+   - Portal tickets
+   - Contractor portal
 
-### Precache (Install time)
+### i18n Replacement Checklist
 
-- App shell HTML
-- Static CSS/JS bundles
-- Font files
-- Offline fallback page (`/~offline`)
+| File Type | Pattern | Action | Breaking? |
+|-----------|---------|--------|-----------|
+| UI labels/text | `"Auftraege"` → `"Aufträge"` | Auto-replace | No |
+| Comments | `// Auftraege` → `// Aufträge"` | Auto-replace | No |
+| Route paths | `/auftraege` → `/aufträge` | Manual decision (keep as-is OR redirect) | Yes (if changed) |
+| Database names | `auftraege` table | Keep as-is | N/A |
+| Variable names | `const auftraege =` | Manual review (case-by-case) | Possibly |
 
-### Runtime Cache
+## Build Order & Dependencies
 
-| Resource | Strategy | Rationale |
-|----------|----------|-----------|
-| Static assets (JS, CSS, images) | StaleWhileRevalidate | Fast load, background update |
-| API data requests | NetworkFirst | Fresh data preferred, cached fallback |
-| Navigation (pages) | NetworkFirst with offline fallback | Serve page if online, fallback if not |
-| Font files | CacheFirst | Rarely change |
-| Supabase Storage (photos) | CacheFirst | Immutable once uploaded |
+Based on architectural integration points, suggested phase structure:
 
-### IndexedDB Stores
+### Phase 1: Security Headers & CSRF Protection
+**Why first:** No dependencies, immediate security improvement, non-breaking.
 
-| Store | Purpose | Key |
-|-------|---------|-----|
-| `tickets` | Cached ticket data for offline viewing | `id` |
-| `ticket-drafts` | Unsaved ticket drafts | `id` |
-| `sync-queue` | Pending mutations to sync | `id` (auto-increment) |
-| `metadata` | Last sync timestamp, app version | `key` |
+**Tasks:**
+1. Add security headers to `next.config.ts`
+2. Add Origin validation to middleware
+3. Test all route groups still work
 
----
+**Estimated effort:** 2-4 hours
+**Breaking changes:** None
+
+### Phase 2: Dependency Audit & Updates
+**Why second:** Unblock other work, may reveal performance/security issues.
+
+**Tasks:**
+1. Run `npm audit` and review findings
+2. Update vulnerable packages
+3. Test critical flows (auth, data submission)
+4. Update `package.json` with new versions
+
+**Estimated effort:** 4-8 hours
+**Breaking changes:** Possible (test thoroughly)
+
+### Phase 3: Performance Monitoring
+**Why third:** Depends on stable codebase (post-updates), enables measurement before optimization.
+
+**Tasks:**
+1. Add middleware timing wrapper
+2. Add `useReportWebVitals` to root layout
+3. Create `instrumentation.ts` for OpenTelemetry
+4. Configure monitoring service (Vercel Analytics or Sentry)
+5. Establish baseline metrics
+
+**Estimated effort:** 6-12 hours
+**Breaking changes:** None (observability only)
+
+### Phase 4: Input Validation Audit
+**Why fourth:** Manual code review, benefits from monitoring (identify hot paths).
+
+**Tasks:**
+1. Audit all API routes for input validation
+2. Add Zod schemas where missing
+3. Search for `dangerouslySetInnerHTML`
+4. Test with malicious inputs
+
+**Estimated effort:** 8-16 hours
+**Breaking changes:** None (adds validation)
+
+### Phase 5: Umlaut Correction
+**Why last:** Cosmetic, non-critical, may touch many files (merge conflicts).
+
+**Tasks:**
+1. Create jscodeshift transform
+2. Run on `src/` directory
+3. Manual review of changes
+4. Type-check and test
+5. Update any documentation
+
+**Estimated effort:** 4-8 hours
+**Breaking changes:** None (UI text only)
+
+### Dependency Graph
+
+```
+Phase 1 (Security Headers)
+  └─> No dependencies
+
+Phase 2 (Dependency Audit)
+  └─> No dependencies
+
+Phase 3 (Performance Monitoring)
+  └─> Depends on Phase 2 (stable dependencies)
+
+Phase 4 (Input Validation)
+  └─> Depends on Phase 3 (monitoring identifies critical paths)
+
+Phase 5 (Umlaut Correction)
+  └─> No dependencies (can run in parallel with Phase 4)
+```
+
+**Parallel execution opportunity:**
+- Phases 1-2 can run sequentially (fast)
+- Phase 3 can start after Phase 2
+- Phases 4-5 can run in parallel (independent)
+
+## Integration Risks & Mitigations
+
+### Risk 1: CSP Breaking Existing Functionality
+
+**What could break:**
+- Inline scripts (Next.js uses some in dev mode)
+- Third-party scripts (analytics, monitoring)
+- Service worker (requires `worker-src` directive)
+
+**Mitigation:**
+- Start with permissive CSP (`unsafe-inline`, `unsafe-eval`)
+- Use `report-only` mode first
+- Gradually tighten after testing
+
+### Risk 2: Middleware Performance Overhead
+
+**Impact:**
+- Middleware runs on EVERY request
+- Each monitoring call adds latency (~5-20ms)
+- Edge function timeout (max 25s on Vercel)
+
+**Mitigation:**
+- Use async/non-blocking monitoring calls
+- Batch metrics instead of per-request
+- Monitor middleware duration itself
+- Consider conditional instrumentation (sample rate)
+
+### Risk 3: Umlaut Replacement False Positives
+
+**What could break:**
+- English words containing `ae/ue/oe` (e.g., "maestro", "cue")
+- Technical terms (e.g., "queues")
+- Third-party library strings
+
+**Mitigation:**
+- Use AST-based replacement (string literals only)
+- Manual review of all changes
+- Test suite execution post-replacement
+- Git diff review before commit
+
+### Risk 4: Dependency Updates Breaking Changes
+
+**Impact:**
+- Major version updates may have breaking API changes
+- Next.js updates can break middleware/layouts
+- Supabase client changes may affect auth
+
+**Mitigation:**
+- Read changelogs before updating
+- Test auth flows thoroughly
+- Update one major dependency at a time
+- Keep rollback plan (Git revert)
 
 ## Sources
 
-- Serwist official docs: https://serwist.pages.dev/docs/next/getting-started (HIGH confidence)
-- LogRocket Next.js 16 PWA guide (Jan 2026): https://blog.logrocket.com/nextjs-16-pwa-offline-support (MEDIUM confidence)
-- Next.js multi-tenant guide: https://nextjs.org/docs/app/guides/multi-tenant (HIGH confidence)
-- Codebase analysis: middleware.ts, auth.ts, session.ts, permissions.ts, sw.js, RBAC migrations 022-024, notifications migration 061 (HIGH confidence - direct source code review)
+### Performance Monitoring
+- [Sentry - Error and Performance Monitoring for Next.js](https://sentry.io/for/nextjs/)
+- [Next.js Analytics Guide](https://nextjs.org/docs/pages/guides/analytics)
+- [Next.js OpenTelemetry Guide](https://nextjs.org/docs/app/guides/open-telemetry)
+- [PostHog - Next.js Monitoring Tutorial](https://posthog.com/tutorials/nextjs-monitoring)
+- [New Relic - Next.js Monitoring](https://newrelic.com/blog/how-to-relic/nextjs-monitor-application-data)
+- [SigNoz - Monitor NextJS with OpenTelemetry](https://signoz.io/blog/opentelemetry-nextjs/)
+- [Middleware.io - Configure Middleware APM](https://docs.middleware.io/apm-configuration/next-js)
+- [Medium - Monitoring Tools for Next.js 2025](https://joodi.medium.com/20-essential-monitoring-tools-for-next-js-in-2025-edba6621128c)
+
+### Security Hardening
+- [Next.js Security Checklist](https://blog.arcjet.com/next-js-security-checklist/)
+- [Next.js Security Blog - Server Components](https://nextjs.org/blog/security-nextjs-server-components-actions)
+- [DEV Community - Security Headers for Next.js](https://dev.to/simplr_sh/securing-your-nextjs-application-the-basic-defenders-security-headers-o31)
+- [Medium - Next.js Security Considerations](https://medium.com/@farihatulmaria/security-considerations-when-building-a-next-js-application-and-mitigating-common-security-risks-c9d551fcacdb)
+- [TurboStarter - Complete Next.js Security Guide 2025](https://www.turbostarter.dev/blog/complete-nextjs-security-guide-2025-authentication-api-protection-and-best-practices)
+- [Next.js Data Security Guide](https://nextjs.org/docs/app/guides/data-security)
+- [OWASP Node.js Security Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Nodejs_Security_Cheat_Sheet.html)
+
+### i18n Automation
+- [Codemod - Automated i18n](https://codemod.com/i18n)
+- [GitHub - ast-i18n](https://github.com/sibelius/ast-i18n)
+- [GitHub - a18n Automated I18n](https://github.com/FallenMax/a18n)
+
+---
+
+*Research complete — ready for phase planning*

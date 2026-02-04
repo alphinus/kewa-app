@@ -1,509 +1,1127 @@
-# Domain Pitfalls: v3.0 Tenant Portal + Offline PWA + UX Polish
+# Domain Pitfalls: Production Hardening
 
-**Domain:** Property management app with new user class, offline retrofit, UI refactoring
-**Researched:** 2026-01-29
-**Milestone:** v3.0 Tenant & Offline
-**Confidence:** HIGH (verified against codebase, official docs, and multiple sources)
+**Domain:** Next.js Production Application (110K LOC, active users)
+**Researched:** 2026-02-04
+**Context:** Performance optimization, security audit, character encoding fixes
+**Milestone:** v3.1 Production Hardening
+
+---
 
 ## Priority Summary
 
-| # | Pitfall | Severity | Phase Impact | Detection Difficulty |
-|---|---------|----------|-------------|---------------------|
-| 1 | RLS policies are dead code — anon key bypasses all isolation | CRITICAL | Tenant Portal | Low (code inspection) |
-| 2 | Service worker replacement destroys push notifications | CRITICAL | Offline PWA | High (only manifests in production) |
-| 3 | Session JWT incompatible with Supabase RLS auth.uid() | CRITICAL | Tenant Portal | Medium (silent data leak) |
-| 4 | Server Components cannot render offline | CRITICAL | Offline PWA | Low (architectural) |
-| 5 | Tenant sees admin data through shared API routes | CRITICAL | Tenant Portal | Medium (requires security audit) |
-| 6 | IndexedDB sync queue loses writes on conflict | MODERATE | Offline PWA | High (race condition) |
-| 7 | Middleware routing gap between /dashboard and /tenant | MODERATE | Tenant Portal | Medium |
-| 8 | iOS service worker cache eviction breaks offline | MODERATE | Offline PWA | High (device-specific) |
-| 9 | UX refactoring breaks existing workflows | MODERATE | UX Polish | Medium |
-| 10 | Swiss DSG tenant data handling requirements | MODERATE | Tenant Portal | Low (compliance) |
-| 11 | Offline queue grows unbounded with media | MODERATE | Offline PWA | Medium |
-| 12 | Three auth methods sharing one session system | LOW | Tenant Portal | Low |
-| 13 | Workbox precache bloats initial install | LOW | Offline PWA | Low |
-| 14 | prompt() and alert() still in codebase | LOW | UX Polish | Low |
+| # | Pitfall | Severity | Detection | Time to Fix |
+|---|---------|----------|-----------|-------------|
+| 1 | Breaking active user sessions during CVE patches | CRITICAL | Low | 4 hours |
+| 2 | Character encoding migration corrupting data | CRITICAL | Low | Planning: 8h, Exec: 16h |
+| 3 | Dynamic APIs in root layout destroying performance | CRITICAL | Low | 2 hours |
+| 4 | Server Actions without authorization checks | CRITICAL | Medium | 8 hours |
+| 5 | CVE-2025-29927 middleware authorization bypass | CRITICAL | Low | 2 hours |
+| 6 | Server/Client Component boundary confusion | HIGH | Medium | 12 hours |
+| 7 | Missing data caching for non-fetch requests | HIGH | High | 16 hours |
+| 8 | PWA cache strategy causing stale data | HIGH | High | 8 hours |
+| 9 | Bundle analysis skipped before optimization | HIGH | Low | 2 hours |
+| 10 | Large refactoring without incremental deployment | MODERATE | Low | Planning only |
+| 11 | Security dependency updates breaking build | MODERATE | Low | 4 hours |
+| 12 | Environment variables exposed to client | MODERATE | Low | 3 hours |
+| 13 | Custom auth CSRF vulnerability | MODERATE | Medium | 6 hours |
+| 14 | German collation breaking sort order | MINOR | Low | 2 hours |
+| 15 | Missing monitoring for performance regressions | MINOR | Low | 4 hours |
 
 ---
 
-## Critical Pitfalls
+## CRITICAL PITFALLS
 
-### 1. RLS Policies Are Dead Code -- Anon Key Bypasses All Isolation
+Mistakes causing production downtime, data loss, or security breaches.
+
+### 1. Breaking Active User Sessions During Security Patches
 
 **Severity:** CRITICAL
-**Applies to:** Tenant Portal
+**Phase Impact:** Security Audit (Phase 1)
 
-**What goes wrong:** Migration `029_rls_policies.sql` defines tenant data isolation policies using `auth.uid()`. However, the app uses custom auth (PIN/email/magic-link) with the Supabase **anon key** (`NEXT_PUBLIC_SUPABASE_ANON_KEY`). Migration `004_disable_rls.sql` granted `GRANT ALL ON ... TO anon, authenticated`. The RLS policies call `is_internal_user(auth.uid())` and `is_tenant_of_unit(auth.uid(), id)`, but `auth.uid()` returns NULL for anon-key connections because no Supabase Auth session exists. This means:
+**What goes wrong:** Applying critical CVE patches (CVE-2025-66478, CVE-2025-55182) without session management strategy causes mass logouts, disrupting active users.
 
-- All RLS policies that check `auth.uid()` silently fail
-- The `anon` role has GRANT ALL on core tables from migration 004
-- Tenant data isolation does NOT exist at the database level
-- A tenant user hitting any API endpoint can potentially read all data
+**Why it happens:** React Server Components and Next.js received critical RCE vulnerability patches in December 2025 / January 2026 with CVSS 10.0 severity. These patches affect default framework configurations, requiring immediate updates. Teams rush to patch without considering session state.
 
-**Evidence from codebase:**
-- `src/lib/supabase/server.ts` line 9: uses `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-- `src/lib/supabase/client.ts` line 6: same anon key
-- No `accessToken` hook or `setAuth` calls anywhere in the codebase
-- No custom JWT signing with Supabase's secret anywhere
-- RLS policies in `029_rls_policies.sql` all reference `auth.uid()`
-
-**Why it happens:** The original system was admin-only (2 internal users). RLS was added as future-proofing but never activated because no external users accessed the database directly. Now that tenants need data isolation, the gap becomes a security breach.
-
-**Warning signs:**
-- A tenant API endpoint returns data from other tenants' units
-- Supabase logs show all queries executing as `anon` role
-- `auth.uid()` returns NULL in RLS policy evaluations
+**Consequences:**
+- All users logged out simultaneously
+- Support tickets spike
+- User trust erodes
+- Business operations disrupted
 
 **Prevention:**
-1. **Do NOT rely on RLS for tenant isolation.** The custom auth system doesn't integrate with Supabase Auth, so `auth.uid()` will always be NULL.
-2. **Implement application-layer isolation.** Every tenant API route must filter by the tenant's `user_id` from the session JWT (which IS validated by the middleware). Add `WHERE` clauses scoping to the tenant's linked units via `tenant_users` table.
-3. **Create dedicated tenant query functions** in `src/lib/tenant/` that always join through `tenant_users` to the session user. Never expose raw table queries to tenant routes.
-4. **Alternatively, bridge the auth systems:** Mint Supabase-compatible JWTs signed with the Supabase JWT secret (from Dashboard > Settings > API), including `sub` = user_id and `role` = 'authenticated'. Pass via the `accessToken` hook on the Supabase client. This activates RLS but requires significant refactoring.
-5. **Recommendation:** Application-layer isolation is simpler and safer for this 2-admin + tenants system. RLS bridge is over-engineering for the user count.
+1. Test patch on staging with active sessions first
+2. Implement graceful session migration if auth mechanism changes
+3. Add user notification before applying breaking patches
+4. Deploy during low-traffic windows
+5. Have rollback plan ready
 
-**Phase to address:** Tenant Portal -- must be solved before any tenant-facing feature ships.
+**Detection:**
+- Sudden spike in authentication failures in monitoring
+- Session validation errors in logs
+- User complaints about unexpected logouts
+
+**Phase to address:** Phase 1 (Security Audit) - before touching auth code
+
+**Sources:**
+- [Next.js Security Update December 2025](https://nextjs.org/blog/security-update-2025-12-11)
+- [CVE-2025-66478 Advisory](https://nextjs.org/blog/CVE-2025-66478)
+- [Critical RCE in React & Next.js](https://www.ox.security/blog/rce-in-react-server-components/)
 
 ---
 
-### 2. Service Worker Replacement Destroys Push Notifications
+### 2. Character Encoding Migration Causing Data Corruption
 
 **Severity:** CRITICAL
-**Applies to:** Offline PWA
+**Phase Impact:** Character Encoding Fixes (Dedicated Phase)
 
-**What goes wrong:** The current `public/sw.js` handles only push notifications (push event, notificationclick, pushsubscriptionchange). Adding offline caching requires Workbox or Serwist, which typically **generates** a new service worker. If the new service worker replaces `sw.js` without preserving the push event handlers, all push notification subscriptions break. Users stop receiving notifications with no error. The push subscription endpoint in the database becomes stale.
+**What goes wrong:** Fixing German umlaut encoding (ae→ä) without proper migration strategy corrupts existing data, breaks backups, or causes data loss.
 
-Browsers only allow ONE service worker per scope. You cannot run two workers side by side.
+**Why it happens:**
+- Database claims UTF-8 but actually uses SQL_ASCII or Latin1
+- Column widths insufficient for multibyte characters
+- Conversion happens without validation scan
+- No rollback when partial corruption detected
 
-**Evidence from codebase:**
-- `public/sw.js`: 47 lines, handles push/notificationclick/pushsubscriptionchange only
-- Service worker registered somewhere in the app (push notifications phase 24)
-- No Workbox or caching logic exists yet
-
-**Why it happens:** Workbox's `GenerateSW` mode creates an entirely new service worker file, overwriting existing handlers. Developers add offline caching, test it works, and don't notice push broke because push requires a real server to test.
-
-**Warning signs:**
-- Push notifications stop arriving after deploying offline support
-- `navigator.serviceWorker.controller` changes scope or file
-- Push subscription endpoint becomes invalid
-- No errors in console (push simply stops working)
+**Consequences:**
+- Permanent data corruption (ä becomes ���)
+- Backup restores fail due to encoding mismatch
+- Search/sorting breaks for German text
+- Cascading failures in related systems
 
 **Prevention:**
-1. **Use Workbox InjectManifest mode, NOT GenerateSW.** InjectManifest lets you write your own service worker that includes BOTH Workbox caching AND existing push handlers.
-2. **Keep the same scope** (`/`) and same filename (`sw.js`) or ensure proper migration.
-3. **Merge into a single file:** Start with the existing push handlers in `sw.js`, then add Workbox imports:
-   ```js
-   // Existing push handlers (keep as-is)
-   self.addEventListener('push', ...);
-   self.addEventListener('notificationclick', ...);
-   self.addEventListener('pushsubscriptionchange', ...);
-
-   // NEW: Workbox caching
-   import { precacheAndRoute } from 'workbox-precaching';
-   precacheAndRoute(self.__WB_MANIFEST);
-   // ... routing strategies
+1. **Before touching data:** Run PostgreSQL query to verify actual encoding:
+   ```sql
+   SELECT datname, pg_encoding_to_char(encoding) as encoding,
+          datcollate, datctype
+   FROM pg_database
+   WHERE datname = 'your_database';
    ```
-4. **Test push AFTER adding caching.** Verify push still works in production-like environment.
-5. **Include `skipWaiting()` and `clientsClaim()` carefully** -- these can cause the new worker to take over immediately, which is desired for caching updates but must not disrupt push subscriptions.
+2. Scan all text columns for length issues after conversion (multibyte expansion)
+3. Test on database copy first, verify all data
+4. Validate that client encoding matches database encoding
+5. Export backup before migration with explicit encoding
+6. Implement conversion in phases: read-only validation, then write
 
-**Phase to address:** Offline PWA -- the very first step must be merging the service worker, not replacing it.
+**Detection:**
+- Run data scanning query before migration:
+   ```sql
+   SELECT column_name, max(length(column_name)) as max_length,
+          max(octet_length(column_name)) as max_bytes
+   FROM your_table
+   GROUP BY column_name;
+   ```
+- Compare max_bytes to column width definitions
+- Test conversion on sample data, verify visual correctness
+
+**Phase to address:** Dedicated phase after security audit - high risk of data loss requires isolated focus
+
+**Sources:**
+- [MySQL UTF-8 to UTF8MB4 Migration Guide](https://saveriomiroddi.github.io/An-in-depth-dbas-guide-to-migrating-a-mysql-database-from-the-utf8-to-the-utf8mb4-charset/)
+- [PostgreSQL German Umlauts Best Practices](https://www.dbi-services.com/blog/dealing-with-german-umlaute-in-postgresqls-full-text-search/)
+- [Oracle Unicode Migration Overview](https://docs.oracle.com/database/121/DUMAG/ch1overview.htm)
 
 ---
 
-### 3. Session JWT Incompatible with Supabase RLS auth.uid()
+### 3. Dynamic APIs in Root Layout Destroying Performance
 
 **Severity:** CRITICAL
-**Applies to:** Tenant Portal
+**Phase Impact:** Performance Audit (Phase 1)
 
-**What goes wrong:** The app's session system (`src/lib/session.ts`) creates JWTs with `jose` library signed with `SESSION_SECRET`. These are stored in an httpOnly cookie named `session`. Supabase RLS expects JWTs signed with Supabase's JWT secret (different key), containing `sub` claim = user UUID and `role` = 'authenticated'. The two JWT systems are completely independent -- the app JWT authenticates users at the middleware level, but Supabase has no awareness of user identity. All database queries run as anonymous.
+**What goes wrong:** Using `cookies()`, `searchParams`, or `headers()` in root layout opts **entire application** into dynamic rendering, eliminating all static optimization benefits.
 
-**Evidence from codebase:**
-- `src/lib/session.ts`: JWT created with `jose` using `SESSION_SECRET` env var
-- `src/lib/supabase/server.ts`: Client uses anon key, no auth integration
-- Session payload: `{ userId, role, roleId, roleName, permissions }` -- not Supabase-compatible format
-- Middleware passes identity via headers (`x-user-id`, `x-user-role-name`) not via Supabase auth
+**Why it happens:** Team adds "just one small check" (auth verification, feature flag, analytics) to root layout without understanding it forces every page to render dynamically on every request.
 
-**Why it happens:** The original design deliberately chose custom auth over Supabase Auth for simplicity (PIN auth, 2 users). This was the right call for v1. But it means the database layer has no user context.
+**Consequences:**
+- 10-50x slower page loads
+- Server costs spike (every page now SSR)
+- CDN edge caching completely bypassed
+- Cold start penalties on every request
+- Users experience the "general sluggishness" this milestone addresses
 
 **Prevention:**
-- Same as Pitfall #1 -- tenant isolation must happen at the application layer (query scoping), not database layer (RLS).
-- Every tenant query function must accept and enforce user_id from the validated session.
-- The `getCurrentUser()` function in session.ts returns `{ id, role }` which is sufficient for application-layer filtering.
+1. **Audit immediately:** Search codebase for Dynamic APIs in layout files:
+   ```bash
+   grep -r "cookies()" app/**/layout.tsx
+   grep -r "searchParams" app/**/layout.tsx
+   grep -r "headers()" app/**/layout.tsx
+   ```
+2. Move Dynamic API usage into Suspense boundaries:
+   ```typescript
+   // ❌ KILLS PERFORMANCE
+   export default function RootLayout({ children }) {
+     const user = cookies().get('user'); // ENTIRE APP NOW DYNAMIC
+     return <html>{children}</html>;
+   }
 
-**Phase to address:** Tenant Portal -- architectural decision needed before implementation.
+   // ✅ PRESERVES STATIC OPTIMIZATION
+   export default function RootLayout({ children }) {
+     return (
+       <html>
+         <Suspense fallback={<Skeleton />}>
+           <UserProvider /> {/* Dynamic API isolated here */}
+         </Suspense>
+         {children}
+       </html>
+     );
+   }
+   ```
+3. Use middleware for auth checks instead of layout checks
+4. Enable verbose build output to see which routes are static vs dynamic
+
+**Detection:**
+- Build output shows all routes as ƒ (Dynamic) instead of ○ (Static)
+- Response headers show `Cache-Control: private, no-cache, no-store`
+- Vercel Analytics shows 0% edge cache hit rate
+- Lighthouse performance scores drop significantly
+
+**Phase to address:** Phase 1 (Performance Audit) - highest impact quick win
+
+**Sources:**
+- [Next.js Production Checklist](https://nextjs.org/docs/app/guides/production-checklist)
+- [Common App Router Mistakes - Vercel](https://vercel.com/blog/common-mistakes-with-the-next-js-app-router-and-how-to-fix-them)
 
 ---
 
-### 4. Server Components Cannot Render Offline
+### 4. Server Actions Without Authorization Checks
 
 **Severity:** CRITICAL
-**Applies to:** Offline PWA
+**Phase Impact:** Security Audit (Phase 1)
 
-**What goes wrong:** The existing app uses `'use client'` components extensively (dashboard pages, task lists, etc.) that fetch data via `/api/` routes. However, these client components still require the Next.js server to serve the initial HTML/JS bundles. When offline, if the page shell is not cached, the user sees nothing -- not even a loading state. Server Components (RSC) are worse: they execute on the server and stream HTML, which is impossible offline.
+**What goes wrong:** Custom auth doesn't automatically protect Server Actions. Users can invoke any Server Action with arbitrary arguments once they get the action's ID.
 
-The fundamental architecture clash: Next.js is server-first. Offline is client-first. These two models need explicit bridging.
-
-**Evidence from codebase:**
-- `src/app/dashboard/page.tsx`: `'use client'` -- fetches via `/api/tasks`
-- `src/app/dashboard/aufgaben/page.tsx`: `'use client'` -- fetches via `/api/tasks`
-- All data comes from server-side Supabase queries
-- No IndexedDB, no local data storage, no cache layer
-
-**Why it happens:** The app was built server-first (correct for admin app with reliable internet). Offline support requires a fundamentally different data flow: read from local cache first, sync to server when possible.
-
-**Warning signs:**
-- Offline user sees blank page or browser error
-- Cached page loads but data sections are empty
-- Navigation between pages fails offline (needs server for RSC payloads)
+**Consequences:**
+- Complete authorization bypass
+- Users delete/modify others' data
+- IDOR (Insecure Direct Object Reference) vulnerabilities
+- Regulatory compliance violations (GDPR, data protection)
 
 **Prevention:**
-1. **Cache the app shell.** Use Workbox to precache all static assets (JS, CSS, fonts) and the HTML skeleton. This ensures the app renders offline.
-2. **Cache API responses.** Use Workbox's `StaleWhileRevalidate` strategy for `/api/` routes. Serve cached response immediately, update cache in background when online.
-3. **Do NOT try to cache RSC payloads.** RSC responses are serialized React components -- they are not user data. Cache the raw API data instead.
-4. **Add an offline data layer.** Use IndexedDB (via Dexie or idb) to store the last-fetched state of lists (tasks, tickets). Client components read from IndexedDB first, then fetch from server.
-5. **Network-first for mutations.** Writes (POST/PUT/DELETE) queue in IndexedDB when offline, sync when online.
-6. **Tenant portal can be simpler.** Tenants see limited data (their unit's tickets). Cache this small dataset aggressively.
-7. **Scope offline support narrowly.** Not every page needs to work offline. Prioritize: ticket creation, ticket list, communication. Admin pages can require network.
+1. **Establish pattern:** Every Server Action starts with auth check:
+   ```typescript
+   // ✅ REQUIRED PATTERN
+   'use server';
 
-**Phase to address:** Offline PWA -- must be the architectural foundation before any page-level work.
+   export async function deleteInspection(inspectionId: string) {
+     // ALWAYS CHECK FIRST
+     const session = await getSession();
+     if (!session) throw new Error('Unauthorized');
+
+     const inspection = await db.inspection.findUnique({
+       where: { id: inspectionId }
+     });
+
+     if (inspection.userId !== session.userId) {
+       throw new Error('Forbidden');
+     }
+
+     // Now safe to proceed
+     await db.inspection.delete({ where: { id: inspectionId } });
+   }
+   ```
+2. Audit all files matching `app/**/actions.ts` or containing `'use server'`
+3. Create shared auth utility to enforce pattern:
+   ```typescript
+   async function requireAuth() {
+     const session = await getSession();
+     if (!session) throw new Error('Unauthorized');
+     return session;
+   }
+   ```
+4. Add ESLint rule to flag Server Actions without auth calls
+
+**Detection:**
+- Grep for `'use server'` and verify auth check in function body
+- Manual audit of all Server Actions
+- Penetration testing with modified action IDs
+
+**Phase to address:** Phase 1 (Security Audit) - authorization is critical
+
+**Sources:**
+- [How to Think About Security in Next.js](https://nextjs.org/blog/security-nextjs-server-components-actions)
+- [Next.js Security Checklist](https://blog.arcjet.com/next-js-security-checklist/)
+- [Complete Next.js Security Guide 2025](https://www.turbostarter.dev/blog/complete-nextjs-security-guide-2025-authentication-api-protection-and-best-practices)
 
 ---
 
-### 5. Tenant Sees Admin Data Through Shared API Routes
+### 5. CVE-2025-29927 Middleware Authorization Bypass
 
 **Severity:** CRITICAL
-**Applies to:** Tenant Portal
+**Phase Impact:** Security Audit (Phase 1)
 
-**What goes wrong:** All existing API routes (`/api/tasks`, `/api/units`, `/api/projects`, etc.) return ALL data because they were built for admin users. If tenant routes call these same endpoints, the tenant sees everything. The middleware checks permissions but the ROUTE_PERMISSIONS map (`src/lib/permissions.ts`) grants read access to anyone with `tasks:read` -- it doesn't scope by user identity.
+**What goes wrong:** Attackers bypass middleware authentication by manipulating `x-middleware-subrequest` header, gaining unauthorized access to protected routes.
 
-**Evidence from codebase:**
-- `src/app/api/tasks/route.ts` (inferred): Queries all tasks, filters by building/unit/status but NOT by user
-- `src/lib/permissions.ts`: `ROUTE_PERMISSIONS` maps `'GET /api/tasks'` to `[PERMISSIONS.TASKS_READ]` -- any user with this permission sees all tasks
-- Middleware sets `x-user-id` header but API routes don't use it for scoping
-- `PERMISSIONS.TENANTS_READ` and `TICKETS_CREATE` exist but no tenant-specific API routes exist yet
+**Why it happens:** Next.js middleware vulnerability (CVSS 9.1) in versions before 12.3.5, 13.5.9, 14.2.25, or 15.2.3 when self-hosted with `output: standalone` and relying solely on middleware for auth without downstream validation.
 
-**Why it happens:** Existing routes assume all users are internal. Adding a new user class requires either scoping existing routes (risky -- breaks admin functionality) or creating separate tenant routes.
+**Consequences:**
+- Complete authentication bypass
+- Access to protected routes/data
+- Admin functionality exposed to unauthenticated users
 
 **Prevention:**
-1. **Create separate `/api/tenant/` route namespace.** Don't modify existing admin routes. New routes that always scope by tenant identity.
-2. **Tenant routes always filter by tenant_users join.** Every query: `SELECT ... FROM tickets t JOIN tenant_users tu ON tu.unit_id = t.unit_id WHERE tu.user_id = $session.userId`.
-3. **Add middleware matcher for `/tenant/` path.** Add to `config.matcher` in middleware.ts, verify tenant role.
-4. **Tenant dashboard at `/tenant/` not `/dashboard/`.** Separate route trees prevent accidental data exposure through shared layouts.
-5. **Never reuse admin query functions for tenant data.** Create `src/lib/tenant/` with dedicated query functions that enforce scoping.
+1. **Immediate:** Upgrade Next.js to patched version (check current version first)
+   ```bash
+   npm list next
+   # Upgrade to 14.2.25+ or 15.2.3+
+   npm install next@latest
+   ```
+2. Never rely solely on middleware for critical auth - always validate in:
+   - Server Components
+   - Server Actions
+   - API Route Handlers
+3. Implement defense in depth: auth checks at multiple layers
 
-**Phase to address:** Tenant Portal -- must be the data access pattern before building any UI.
+**Detection:**
+- Check Next.js version: `grep "\"next\":" package.json`
+- Verify if using standalone output: `grep "output: 'standalone'" next.config.js`
+- Test auth routes with manipulated headers:
+   ```bash
+   curl -H "x-middleware-subrequest: 1" https://app.com/admin
+   ```
+
+**Phase to address:** Phase 1 (Security Audit) - before any other changes
+
+**Sources:**
+- [CVE-2025-29927 Analysis - Datadog](https://securitylabs.datadoghq.com/articles/nextjs-middleware-auth-bypass/)
+- [Next.js CVE-2025-29927 Attack Guide](https://pentest-tools.com/blog/cve-2025-29927-next-js-bypass)
 
 ---
 
-## Moderate Pitfalls
+## HIGH SEVERITY PITFALLS
 
-### 6. IndexedDB Sync Queue Loses Writes on Conflict
+Mistakes causing significant technical debt, performance degradation, or partial outages.
+
+### 6. Server/Client Component Boundary Confusion
+
+**Severity:** HIGH
+**Phase Impact:** Performance Optimization (Phase 2)
+
+**What goes wrong:** Refactoring to optimize Server/Client boundaries breaks serialization, causes hydration mismatches, or exposes sensitive server code to client bundles.
+
+**Why it happens:**
+- Team doesn't understand "use client" boundary rules
+- Passing functions/class instances across boundaries
+- Marking large component trees as client when only leaf needs interactivity
+- Moving code without testing serialization
+
+**Consequences:**
+- "Functions cannot be passed directly to Client Components" errors in production
+- Sensitive API keys/secrets leaked to client bundle
+- JavaScript bundle size explodes (entire dependency trees marked client)
+- Hydration mismatches causing UI flicker/broken state
+
+**Prevention:**
+1. **Before refactoring:** Document current boundaries
+   ```bash
+   # Map all client components
+   find app -type f -name "*.tsx" -exec grep -l "use client" {} \;
+   ```
+2. Test serialization explicitly:
+   ```typescript
+   // All props must be serializable
+   type SerializableProps = {
+     // ✅ OK
+     strings: string;
+     numbers: number;
+     arrays: string[];
+     objects: { key: string };
+
+     // ❌ NOT SERIALIZABLE
+     functions?: () => void; // NO
+     dates?: Date; // Use string instead
+     classInstances?: MyClass; // NO
+   };
+   ```
+3. Add "use client" only to leaf components that need interactivity
+4. Use composition pattern for server/client separation:
+   ```typescript
+   // Server Component
+   export default async function Page() {
+     const data = await fetchData(); // Server-side
+     return <ClientButton data={data} />; // Pass serializable data
+   }
+
+   // Client Component (separate file)
+   'use client';
+   export function ClientButton({ data }) {
+     const [state, setState] = useState();
+     // Interactive logic here
+   }
+   ```
+5. Enable TypeScript strict mode to catch some serialization issues
+
+**Detection:**
+- Build warnings about large client bundles
+- Runtime errors: "Error: Functions cannot be passed..."
+- Bundle analyzer shows unexpected server-only code in client bundle
+- Check with: `npm run build -- --experimental-show-bundle-info`
+
+**Phase to address:** Phase 2 (Performance Optimization) - after security fixes, before major refactoring
+
+**Sources:**
+- [Next.js Server Components Broke Our App Twice](https://medium.com/lets-code-future/next-js-server-components-broke-our-app-twice-worth-it-e511335eed22)
+- [Common App Router Mistakes](https://vercel.com/blog/common-mistakes-with-the-next-js-app-router-and-how-to-fix-them)
+- [Server and Client Components Guide](https://nextjs.org/docs/app/getting-started/server-and-client-components)
+
+---
+
+### 7. Missing Data Caching for Non-Fetch Requests
+
+**Severity:** HIGH
+**Phase Impact:** Performance Optimization (Phase 2)
+
+**What goes wrong:** Database queries, API calls using non-fetch libraries (Prisma, Supabase client, Axios) bypass Next.js caching, causing repeated expensive operations.
+
+**Why it happens:** Developers assume all data requests are cached like `fetch()`. Non-fetch requests require explicit caching with `unstable_cache()`.
+
+**Consequences:**
+- Database hammered with identical queries on every request
+- Expensive API calls repeated unnecessarily
+- Slow response times despite "caching enabled"
+- Database connection pool exhaustion
+
+**Prevention:**
+1. **Audit all data fetching:** Search for database/API calls
+   ```bash
+   # Find potential uncached calls
+   grep -r "prisma\." app/
+   grep -r "supabase\." app/
+   grep -r "axios\." app/
+   grep -r "db\." app/
+   ```
+2. Wrap with explicit caching:
+   ```typescript
+   import { unstable_cache } from 'next/cache';
+
+   // ❌ NOT CACHED
+   async function getInspections() {
+     return await db.inspection.findMany();
+   }
+
+   // ✅ CACHED
+   const getInspections = unstable_cache(
+     async () => db.inspection.findMany(),
+     ['inspections-list'], // Cache key
+     {
+       revalidate: 3600, // 1 hour
+       tags: ['inspections'] // For on-demand revalidation
+     }
+   );
+   ```
+3. Use React Cache for request-level deduplication:
+   ```typescript
+   import { cache } from 'react';
+
+   // Deduplicate within single request
+   export const getUser = cache(async (id: string) => {
+     return db.user.findUnique({ where: { id } });
+   });
+   ```
+4. Monitor query counts in production to detect cache misses
+
+**Detection:**
+- Database monitoring shows identical queries repeating
+- Response times don't improve despite "caching"
+- Connection pool exhaustion errors
+- Add logging to track cache hits/misses
+
+**Phase to address:** Phase 2 (Performance Optimization) - systematic data layer audit
+
+**Sources:**
+- [Next.js Production Checklist - Data Caching](https://nextjs.org/docs/app/guides/production-checklist)
+
+---
+
+### 8. PWA Cache Strategy Causing Stale Data or Storage Overflow
+
+**Severity:** HIGH
+**Phase Impact:** Performance Optimization (Phase 2)
+
+**What goes wrong:** Aggressive PWA caching serves stale data to users or fills device storage, causing app crashes or data loss when browser evicts cache.
+
+**Why it happens:**
+- Cache-first strategy applied to dynamic data
+- No cache invalidation strategy
+- Caching everything including large assets
+- No storage quota monitoring
+
+**Consequences:**
+- Users see outdated inspection data (safety risk)
+- Device storage fills up, browser evicts cache
+- App crashes when expected cached data missing
+- Offline functionality broken after cache eviction
+
+**Prevention:**
+1. **Differentiate caching strategies by content type:**
+   ```javascript
+   // service-worker.js
+
+   // Static assets: Cache-first
+   registerRoute(
+     /\.(js|css|png|jpg|svg)$/,
+     new CacheFirst({
+       cacheName: 'static-assets',
+       plugins: [
+         new ExpirationPlugin({
+           maxEntries: 100,
+           maxAgeSeconds: 30 * 24 * 60 * 60, // 30 days
+         }),
+       ],
+     })
+   );
+
+   // API data: Network-first with stale-while-revalidate
+   registerRoute(
+     /\/api\//,
+     new NetworkFirst({
+       cacheName: 'api-data',
+       plugins: [
+         new ExpirationPlugin({
+           maxEntries: 50,
+           maxAgeSeconds: 5 * 60, // 5 minutes
+         }),
+       ],
+     })
+   );
+
+   // Critical user data: Network-only (offline fallback)
+   registerRoute(
+     /\/api\/inspections\//,
+     new NetworkOnly()
+   );
+   ```
+2. Implement cache version management and migration:
+   ```javascript
+   const CACHE_VERSION = 'v2';
+
+   self.addEventListener('activate', (event) => {
+     event.waitUntil(
+       caches.keys().then((cacheNames) => {
+         return Promise.all(
+           cacheNames
+             .filter((name) => name !== CACHE_VERSION)
+             .map((name) => caches.delete(name))
+         );
+       })
+     );
+   });
+   ```
+3. Monitor storage quota:
+   ```typescript
+   if ('storage' in navigator && 'estimate' in navigator.storage) {
+     const { usage, quota } = await navigator.storage.estimate();
+     const percentUsed = (usage / quota) * 100;
+     if (percentUsed > 80) {
+       // Warn user, clear old caches
+     }
+   }
+   ```
+4. Test offline behavior with stale cache on staging
+
+**Detection:**
+- Users report seeing old data
+- Console errors: "QuotaExceededError"
+- Storage usage monitoring shows growth
+- Test: Disconnect network, clear cache, verify fallback
+
+**Phase to address:** Phase 2 (Performance Optimization) - after data caching audit
+
+**Sources:**
+- [PWA Offline Capabilities - Romexsoft](https://www.romexsoft.com/blog/what-is-pwa-progressive-web-apps-and-offline-capabilities/)
+- [Debugging Progressive Web Apps](https://blog.pixelfreestudio.com/debugging-progressive-web-apps-common-pitfalls/)
+- [PWA Service Worker Caching Strategies](https://www.magicbell.com/blog/offline-first-pwas-service-worker-caching-strategies)
+
+---
+
+### 9. Bundle Analysis Skipped Before Optimization
+
+**Severity:** HIGH
+**Phase Impact:** Performance Optimization (Phase 2)
+
+**What goes wrong:** Team optimizes "obvious" issues but ships massive unexpected dependencies, negating performance gains.
+
+**Why it happens:** No systematic approach to identifying what's actually bloating the bundle. Optimizing based on assumptions rather than data.
+
+**Consequences:**
+- 110K LOC app likely has significant dead code
+- Entire libraries imported when only small functions needed
+- Duplicate dependencies (React imported multiple times)
+- Optimization effort wasted on wrong targets
+
+**Prevention:**
+1. **Install and run bundle analyzer immediately:**
+   ```bash
+   npm install --save-dev @next/bundle-analyzer
+   ```
+   ```javascript
+   // next.config.js
+   const withBundleAnalyzer = require('@next/bundle-analyzer')({
+     enabled: process.env.ANALYZE === 'true',
+   });
+
+   module.exports = withBundleAnalyzer({
+     // your config
+   });
+   ```
+   ```bash
+   ANALYZE=true npm run build
+   ```
+2. Focus on these common large codebase issues:
+   - Chart libraries (recharts, chart.js) - often 100-500KB
+   - Date libraries (moment.js → date-fns or dayjs)
+   - Icon libraries (import all vs selective)
+   - UI component libraries (MUI, Ant Design - entire lib vs components)
+   - Lodash (import specific functions, not whole library)
+3. Use dynamic imports for heavy components:
+   ```typescript
+   // ❌ BAD: Always loads heavy chart library
+   import { LineChart } from 'recharts';
+
+   // ✅ GOOD: Only loads when needed
+   const LineChart = dynamic(() =>
+     import('recharts').then((mod) => mod.LineChart),
+     { ssr: false }
+   );
+   ```
+4. Check for duplicate dependencies:
+   ```bash
+   npm ls react
+   npm ls react-dom
+   # Should only show one version
+   ```
+
+**Detection:**
+- Build output shows large "First Load JS"
+- Lighthouse flags "Reduce unused JavaScript"
+- Bundle analyzer shows unexpected large modules
+- Slow page load despite "optimizations"
+
+**Phase to address:** Phase 2 (Performance Optimization) - first step before any optimization work
+
+**Sources:**
+- [Next.js Production Checklist](https://nextjs.org/docs/app/guides/production-checklist)
+- [10 Performance Mistakes in Next.js 16](https://medium.com/@sureshdotariya/10-performance-mistakes-in-next-js-16-that-are-killing-your-app-and-how-to-fix-them-2facfab26bea)
+
+---
+
+## MODERATE PITFALLS
+
+Mistakes causing delays, technical debt, or user frustration but recoverable.
+
+### 10. Large Refactoring Without Incremental Deployment
 
 **Severity:** MODERATE
-**Applies to:** Offline PWA
+**Phase Impact:** All Phases (Strategy)
 
-**What goes wrong:** Tenant creates a ticket offline. Goes online. Another admin has modified the related data. Sync queue tries to POST the ticket but the referenced data has changed. Without conflict resolution, the write either fails silently (data loss) or creates inconsistent state.
+**What goes wrong:** Big-bang deployment of performance optimizations causes unexpected breakage across unrelated features. No way to isolate which change caused production issue.
 
-For this app specifically: ticket creation is the primary offline use case. Tickets reference a unit_id (stable) and contain text/photos (no conflicts). The risk is lower than general-purpose offline sync but still present.
+**Why it happens:** Pressure to "fix performance" leads to bundling multiple changes into one release. 110K LOC + 750 files = high complexity, many edge cases.
+
+**Consequences:**
+- Production issue, unclear which change caused it
+- Rollback loses all optimization work
+- Team loses confidence in optimization effort
+- Extended debugging sessions under production pressure
 
 **Prevention:**
-1. **Use client-generated UUIDs** for new records. Prevents duplicate creation on retry.
-2. **Last-write-wins is acceptable** for this domain. Tenants create tickets, admins respond. No concurrent edits on the same entity.
-3. **Validate on sync, not on create.** Store locally without validation, validate when syncing. If validation fails, show "could not sync" with option to edit and retry.
-4. **Queue operations as idempotent.** POST with client-generated ID = PUT-or-create. Safe to retry.
-5. **Store pending items visually distinct.** Tenant sees "Ticket (pending sync)" until confirmed.
+1. **Phase approach with feature flags:**
+   ```typescript
+   // lib/features.ts
+   export const features = {
+     optimizedInspectionList: process.env.NEXT_PUBLIC_FF_INSPECTION_OPT === 'true',
+     improvedCaching: process.env.NEXT_PUBLIC_FF_CACHING === 'true',
+     // ...
+   };
+   ```
+   ```typescript
+   // Gradual rollout
+   export default async function InspectionList() {
+     if (features.optimizedInspectionList) {
+       return <OptimizedInspectionList />;
+     }
+     return <LegacyInspectionList />; // Keep old version
+   }
+   ```
+2. Deploy optimizations in priority order:
+   - Week 1: Critical security patches only
+   - Week 2: High-impact performance win #1 (e.g., Dynamic API fixes)
+   - Week 3: High-impact performance win #2 (e.g., data caching)
+   - Week 4: Bundle optimization
+3. Use canary releases:
+   - Deploy to 5% of users first
+   - Monitor for 24-48 hours
+   - Gradually increase to 100%
+4. Maintain rollback capability for each phase
+5. Document what changed in each deployment for debugging
 
-**Phase to address:** Offline PWA -- sync queue implementation.
+**Detection:**
+- Test each change in isolation on staging
+- Monitor error rates after each deployment
+- Track performance metrics per deployment
+- A/B test optimized vs legacy versions
+
+**Phase to address:** Phase planning strategy - inform roadmap structure
+
+**Sources:**
+- [How to Refactor Complex Codebases](https://www.freecodecamp.org/news/how-to-refactor-complex-codebases/)
+- [Refactoring at Scale - Key Points](https://understandlegacycode.com/blog/key-points-of-refactoring-at-scale/)
+- [Mistakes in Large Established Codebases](https://www.seangoedecke.com/large-established-codebases/)
 
 ---
 
-### 7. Middleware Routing Gap Between /dashboard and /tenant
+### 11. Security Dependency Updates Breaking Build
 
 **Severity:** MODERATE
-**Applies to:** Tenant Portal
+**Phase Impact:** Security Audit (Phase 1)
 
-**What goes wrong:** Current middleware (`src/middleware.ts`) protects `/dashboard/*` (internal only) and `/contractor/*` (magic link). Adding `/tenant/*` requires careful middleware updates. If misconfigured:
-- Tenant accesses `/dashboard/` (admin area) -- data leak
-- Tenant gets redirected to wrong login page
-- Tenant session not validated on `/tenant/*` routes
+**What goes wrong:** Running `npm audit fix` to patch vulnerabilities breaks the build due to breaking changes in dependencies.
 
-**Evidence from codebase:**
-- `middleware.ts` line 68-72: `/dashboard` routes check `isInternalRole()` -- tenants would be rejected
-- `middleware.ts` config.matcher: `['/dashboard/:path*', '/api/((?!auth).*)', '/contractor/:path*']` -- no `/tenant/` matcher
-- Session validation returns `roleName` which could be 'tenant' -- properly identified but not routed
+**Consequences:**
+- Security updates blocked
+- Build failures in CI/CD
+- Team wastes time debugging dependency issues
+- Delayed security patches increase vulnerability window
 
 **Prevention:**
-1. **Add `/tenant/:path*` to middleware config.matcher.**
-2. **Add `handleTenantRoute()` handler** similar to `handleContractorRoute()`.
-3. **Verify tenant role explicitly:** `if (session.roleName !== 'tenant') redirect to /login`.
-4. **Test cross-path access:** Tenant hitting `/dashboard/*` must get redirected, not 403.
-5. **Separate login flow for tenants.** Tenants use email+password (already in login route). Add `/login?mode=tenant` or separate `/tenant/login` page.
+1. **Never run `npm audit fix` blindly in production codebase:**
+   ```bash
+   # ❌ DON'T DO THIS
+   npm audit fix
+   git commit -m "fix vulnerabilities"
 
-**Phase to address:** Tenant Portal -- first implementation step.
+   # ✅ DO THIS
+   # 1. Review audit report first
+   npm audit
+
+   # 2. Fix only high/critical, no breaking changes
+   npm audit fix --only=prod --audit-level=high
+
+   # 3. Test build
+   npm run build
+   npm run test
+
+   # 4. Review what changed
+   git diff package.json package-lock.json
+   ```
+2. Update dependencies incrementally with testing:
+   ```bash
+   # Update one at a time
+   npm update next
+   npm run build && npm test
+   git commit -m "chore: update next.js to X.Y.Z"
+
+   npm update react react-dom
+   npm run build && npm test
+   git commit -m "chore: update react to X.Y.Z"
+   ```
+3. Use tools like Dependabot with auto-merge only for patch versions:
+   ```yaml
+   # .github/dependabot.yml
+   version: 2
+   updates:
+     - package-ecosystem: "npm"
+       directory: "/"
+       schedule:
+         interval: "weekly"
+       open-pull-requests-limit: 5
+       # Auto-merge only patch updates
+       versioning-strategy: increase-if-necessary
+   ```
+4. Test in staging environment before merging
+5. Keep lockfile committed to ensure reproducible builds
+
+**Detection:**
+- CI build failures after dependency updates
+- Type errors after updates
+- Runtime errors with new dependency versions
+- Test failures pointing to dependency behavior changes
+
+**Phase to address:** Phase 1 (Security Audit) - systematic, tested approach
+
+**Sources:**
+- [Next.js Security Checklist](https://blog.arcjet.com/next-js-security-checklist/)
+- [Using Components with Known Vulnerabilities](https://www.cybersecuritydive.com/news/critical-vulnerabilities-found-in-react-and-nextjs/807016/)
 
 ---
 
-### 8. iOS Service Worker Cache Eviction Breaks Offline
+### 12. Environment Variables Exposed to Client Bundle
 
 **Severity:** MODERATE
-**Applies to:** Offline PWA
+**Phase Impact:** Security Audit (Phase 1)
 
-**What goes wrong:** iOS Safari aggressively evicts service worker caches. Known WebKit bugs (Bug 190269, 199110) cause cache contents to disappear unexpectedly. PWA installed to home screen may lose all cached data after a few days of inactivity. Users who rely on offline access find the app broken after a weekend.
+**What goes wrong:** Sensitive configuration (database URLs, API keys, secrets) accidentally shipped to client JavaScript bundle, exposing credentials publicly.
 
-This is particularly relevant because tenants are "mobile-first, from home" users who may use iOS devices.
+**Why it happens:**
+- Misunderstanding `NEXT_PUBLIC_` prefix meaning
+- Importing server-only config in Client Components
+- Not validating which env vars are actually public-safe
+
+**Consequences:**
+- Database credentials exposed in browser DevTools
+- API keys stolen, abused (billing impact)
+- Security compliance violations
+- Credential rotation required (downtime)
 
 **Prevention:**
-1. **Never assume cache persistence.** Always have a network fallback.
-2. **Store critical data in IndexedDB, not Cache API.** IndexedDB is more persistent on iOS.
-3. **Show clear state when cache is empty.** "Loading data..." not blank screen.
-4. **Re-cache on every app open.** Don't rely on stale cache; refresh data proactively.
-5. **Test on actual iOS devices.** Simulator doesn't reproduce eviction behavior.
-6. **Set realistic expectations.** Offline support means "survives brief connectivity loss," not "works for days offline."
+1. **Audit current environment variables:**
+   ```bash
+   # List all env vars in codebase
+   grep -r "process.env" app/ --include="*.ts" --include="*.tsx"
 
-**Phase to address:** Offline PWA -- testing and validation phase.
+   # Check .env files
+   cat .env.local .env.production
+   ```
+2. **Strict naming convention:**
+   ```bash
+   # ✅ PUBLIC (safe to expose)
+   NEXT_PUBLIC_API_URL=https://api.example.com
+   NEXT_PUBLIC_APP_VERSION=1.0.0
+
+   # ✅ PRIVATE (server-only)
+   DATABASE_URL=postgresql://...
+   SUPABASE_SERVICE_KEY=...
+   JWT_SECRET=...
+   STRIPE_SECRET_KEY=...
+   ```
+3. **Server-only access pattern:**
+   ```typescript
+   // lib/env.server.ts
+   // Mark as server-only
+   import 'server-only';
+
+   export const serverEnv = {
+     databaseUrl: process.env.DATABASE_URL!,
+     jwtSecret: process.env.JWT_SECRET!,
+   };
+
+   // This will cause build error if imported in Client Component
+   ```
+4. Add to `.gitignore`:
+   ```
+   .env.local
+   .env*.local
+   .env.production
+   ```
+5. Use Next.js built-in validation:
+   ```typescript
+   // next.config.js
+   module.exports = {
+     env: {
+       // Explicitly whitelist public vars
+       NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
+     },
+   };
+   ```
+
+**Detection:**
+- Inspect production bundle in browser DevTools > Sources
+- Search bundle for sensitive strings (database, api.key, secret)
+- Run build and check `.next/static/chunks` for leaked env vars
+- Use tool: `npx @next/bundle-analyzer` and search output
+
+**Phase to address:** Phase 1 (Security Audit) - immediate audit before other work
+
+**Sources:**
+- [Next.js Environment Variables Guide 2026](https://thelinuxcode.com/nextjs-environment-variables-2026-build-time-vs-runtime-security-and-production-patterns/)
+- [Next.js Data Security Guide](https://nextjs.org/docs/app/guides/data-security)
+- [Next.js Production Checklist](https://nextjs.org/docs/app/guides/production-checklist)
 
 ---
 
-### 9. UX Refactoring Breaks Existing Workflows
+### 13. Custom Auth CSRF Vulnerability in Route Handlers
 
 **Severity:** MODERATE
-**Applies to:** UX Polish
+**Phase Impact:** Security Audit (Phase 1)
 
-**What goes wrong:** The UX polish phase fixes known issues (invoice modal uses `prompt()`, checklist titles show "Item 1", delivery history missing). Refactoring these touches components used by admins daily. Changing the invoice linking flow, for example, could break the accounting workflow that the 2 internal users rely on.
+**What goes wrong:** Custom Route Handlers (`app/api/*/route.ts`) lack CSRF protection that Server Actions have built-in, allowing cross-site attacks to perform authenticated actions.
 
-**Evidence from codebase (known UAT issues):**
-- Invoice linking needs proper modal UI (currently uses `prompt()`)
-- Checklist item titles need template lookup (shows "Item 1", "Item 2")
-- Property-level delivery history page not built
-- These touch: `InvoiceForm`, `ChecklistExecution`, `DeliveryList` components
+**Consequences:**
+- Attackers trigger state-changing operations (delete, update) via victim's authenticated session
+- Data manipulation/deletion
+- Account takeover scenarios
 
 **Prevention:**
-1. **Test existing behavior first.** Before changing the invoice modal, document exactly how it works now. Verify the fix preserves the workflow.
-2. **Refactor incrementally.** One component per plan, not a sweeping UI overhaul.
-3. **Don't change patterns.** The codebase uses `'use client'` + fetch-to-API consistently. Don't introduce new patterns (React Query, Zustand) during polish.
-4. **Keep the same URLs.** Don't rename routes during polish. Admin bookmarks and muscle memory depend on current paths.
-5. **Regression test with both admin roles** (kewa + imeri) after each change.
+1. **Identify vulnerable endpoints:**
+   ```bash
+   # Find all Route Handlers
+   find app -type f -path "*/api/*/route.ts"
 
-**Phase to address:** UX Polish -- all plans in this phase.
+   # Audit for state-changing operations without CSRF protection
+   # Look for POST, PUT, DELETE methods
+   ```
+2. **Implement CSRF token validation:**
+   ```typescript
+   // lib/csrf.ts
+   import { cookies, headers } from 'next/headers';
+
+   export async function validateCsrfToken() {
+     const token = headers().get('x-csrf-token');
+     const cookieToken = cookies().get('csrf-token')?.value;
+
+     if (!token || token !== cookieToken) {
+       throw new Error('CSRF validation failed');
+     }
+   }
+
+   // app/api/inspections/route.ts
+   export async function POST(request: Request) {
+     await validateCsrfToken(); // ADD THIS
+
+     // Rest of handler
+   }
+   ```
+3. **Alternative: Use Server Actions instead of Route Handlers**
+   - Server Actions have built-in CSRF protection
+   - Simpler security model
+   - Better for form submissions and mutations
+4. Add Origin/Referer header validation:
+   ```typescript
+   export async function POST(request: Request) {
+     const origin = headers().get('origin');
+     const allowedOrigins = [process.env.NEXT_PUBLIC_APP_URL];
+
+     if (!origin || !allowedOrigins.includes(origin)) {
+       return new Response('Forbidden', { status: 403 });
+     }
+
+     // Rest of handler
+   }
+   ```
+
+**Detection:**
+- Audit all Route Handlers for state-changing operations
+- Test with CSRF attack simulation:
+   ```html
+   <!-- Attacker's page -->
+   <form action="https://yourapp.com/api/delete" method="POST">
+     <input name="id" value="victim-data" />
+   </form>
+   <script>document.forms[0].submit();</script>
+   ```
+- Check if request succeeds without valid token
+
+**Phase to address:** Phase 1 (Security Audit) - custom auth requires extra scrutiny
+
+**Sources:**
+- [Next.js Security Checklist](https://blog.arcjet.com/next-js-security-checklist/)
+- [How to Think About Security in Next.js](https://nextjs.org/blog/security-nextjs-server-components-actions)
 
 ---
 
-### 10. Swiss DSG Tenant Data Handling Requirements
+## MINOR PITFALLS
 
-**Severity:** MODERATE
-**Applies to:** Tenant Portal
+Mistakes causing annoyance, minor performance issues, or cosmetic problems but easily fixable.
 
-**What goes wrong:** The Swiss Federal Act on Data Protection (FADP/DSG), in force since September 2023, requires transparency about personal data processing. Tenant portal handles personal data (name, email, unit address, communication content). Without compliance:
-- Tenants must be informed how their data is processed (transparency principle)
-- Tenants have right to access their data and right to object
-- Data processing must be documented in a register of processing activities
-- Penalties up to CHF 250,000 target the managing director personally
+### 14. German Collation Breaking Sort Order
+
+**Severity:** MINOR
+**Phase Impact:** Character Encoding Fixes
+
+**What goes wrong:** After fixing character encoding (ae→ä), sort order breaks because database collation doesn't respect German alphabetization rules.
+
+**Why it happens:** Encoding (how characters are stored) ≠ Collation (how strings are sorted). UTF-8 encoding doesn't automatically mean German sorting rules.
+
+**Consequences:**
+- Names/addresses sorted incorrectly (ä sorted after z instead of near a)
+- User confusion
+- Search/filter results feel "broken"
+- Compliance issues if alphabetization required
 
 **Prevention:**
-1. **Add privacy notice to tenant registration.** Inform what data is collected, why, and how long it's retained.
-2. **Implement data export for tenants.** Tenant can download their data (tickets, communications).
-3. **Limit data collection.** Only collect what's needed for ticket management. No tracking, no analytics on tenant behavior.
-4. **Audit log tenant data access.** The audit system already exists -- ensure tenant data queries are logged.
-5. **Data retention policy.** Define how long tenant data is kept after move-out. Auto-delete or anonymize after period.
-6. **This is NOT a blocker.** Privacy notice + minimal data collection is sufficient for a small property management app. Don't over-engineer a GDPR-style consent management system.
+1. **Check current collation:**
+   ```sql
+   SELECT datname, datcollate, datctype
+   FROM pg_database
+   WHERE datname = 'your_database';
+   ```
+2. **Set German locale when fixing encoding:**
+   ```sql
+   -- Option 1: Set at database creation (requires recreation)
+   CREATE DATABASE kewa_app
+     ENCODING = 'UTF8'
+     LC_COLLATE = 'de_DE.UTF8'
+     LC_CTYPE = 'de_DE.UTF8';
 
-**Phase to address:** Tenant Portal -- include privacy notice in registration flow.
+   -- Option 2: Set for specific columns (non-destructive)
+   ALTER TABLE contacts
+     ALTER COLUMN name TYPE VARCHAR(255)
+     COLLATE "de_DE.UTF8";
+   ```
+3. **Application-level sorting if DB change not feasible:**
+   ```typescript
+   // Use Intl.Collator for German sorting
+   const germanCollator = new Intl.Collator('de-DE');
+
+   names.sort((a, b) => germanCollator.compare(a, b));
+   // Correctly sorts: "Müller" before "Neumann"
+   ```
+4. Test with German characters in staging:
+   ```sql
+   -- Test data
+   INSERT INTO contacts (name) VALUES
+     ('Müller'), ('Mueller'), ('Becker'), ('Äpfel'),
+     ('Apfel'), ('Öhler'), ('Zahner'), ('Über');
+
+   -- Verify sort order
+   SELECT name FROM contacts ORDER BY name COLLATE "de_DE.UTF8";
+   ```
+
+**Detection:**
+- User reports incorrect sorting
+- Automated test with German test data
+- Visual inspection of sorted lists in app
+
+**Phase to address:** Same phase as character encoding fixes - bundle together
+
+**Sources:**
+- [PostgreSQL German Umlauts Full Text Search](https://www.dbi-services.com/blog/dealing-with-german-umlaute-in-postgresqls-full-text-search/)
+- [PostgreSQL Order By with German Umlauts](https://bytes.com/topic/postgresql/answers/173467-order-does-wrong-unicode-chars-german-umlauts)
 
 ---
 
-### 11. Offline Queue Grows Unbounded with Media
+### 15. Missing Monitoring for Performance Regressions
 
-**Severity:** MODERATE
-**Applies to:** Offline PWA
+**Severity:** MINOR
+**Phase Impact:** Monitoring Setup (Phase 3)
 
-**What goes wrong:** Tenant creates tickets with photos while offline. Each photo is 1-5MB. IndexedDB stores the queue. After creating 10 tickets with photos, the queue is 50MB+. Safari's IndexedDB quota is ~50MB. Queue writes fail silently. Tenant's tickets are lost.
+**What goes wrong:** Team optimizes performance, deploys, but has no way to detect if future changes regress performance. Sluggishness returns unnoticed.
+
+**Consequences:**
+- Performance gains eroded over time
+- No alerts when regression occurs
+- Can't pinpoint which deployment caused regression
+- Users suffer degraded experience silently
 
 **Prevention:**
-1. **Compress photos before queueing.** Target 200KB max per photo (720px, 70% quality JPEG).
-2. **Limit offline queue size.** Show warning at 80% capacity: "Offline storage almost full. Connect to sync."
-3. **Sync photos separately from ticket data.** Queue the ticket text immediately (tiny), queue photos as separate sync items. If photo fails, ticket still exists.
-4. **Monitor quota.** Use `navigator.storage.estimate()` to check available space before writing.
-5. **Clear queue on successful sync.** Don't keep synced items in IndexedDB.
+1. **Implement Core Web Vitals tracking:**
+   ```typescript
+   // app/layout.tsx
+   import { Analytics } from '@vercel/analytics/react';
+   import { SpeedInsights } from '@vercel/speed-insights/next';
 
-**Phase to address:** Offline PWA -- sync queue implementation.
+   export default function RootLayout({ children }) {
+     return (
+       <html>
+         <body>
+           {children}
+           <Analytics />
+           <SpeedInsights />
+         </body>
+       </html>
+     );
+   }
+   ```
+2. **Custom performance monitoring:**
+   ```typescript
+   // lib/monitoring.ts
+   export function reportWebVitals(metric) {
+     // Send to your analytics
+     if (metric.label === 'web-vital') {
+       analytics.track('Web Vitals', {
+         name: metric.name, // LCP, FID, CLS, FCP, TTFB
+         value: metric.value,
+         page: window.location.pathname,
+       });
+     }
+   }
+
+   // app/layout.tsx
+   'use client';
+   import { useReportWebVitals } from 'next/web-vitals';
+
+   export function WebVitals() {
+     useReportWebVitals(reportWebVitals);
+     return null;
+   }
+   ```
+3. **Set performance budgets in CI:**
+   ```javascript
+   // lighthouse-ci.config.js
+   module.exports = {
+     ci: {
+       collect: {
+         url: ['http://localhost:3000/'],
+       },
+       assert: {
+         assertions: {
+           'first-contentful-paint': ['warn', { maxNumericValue: 2000 }],
+           'largest-contentful-paint': ['error', { maxNumericValue: 3000 }],
+           'cumulative-layout-shift': ['error', { maxNumericValue: 0.1 }],
+           'total-blocking-time': ['warn', { maxNumericValue: 300 }],
+         },
+       },
+     },
+   };
+   ```
+4. Monitor these key metrics:
+   - LCP (Largest Contentful Paint) - loading performance
+   - FID (First Input Delay) - interactivity
+   - CLS (Cumulative Layout Shift) - visual stability
+   - TTFB (Time to First Byte) - server response time
+   - Bundle sizes over time
+
+**Detection:**
+- Alerts when metrics exceed thresholds
+- Weekly performance reports
+- Compare before/after optimization metrics
+- Track trends over deployments
+
+**Phase to address:** Phase 3 (Monitoring Setup) - after optimizations implemented
+
+**Sources:**
+- [Best Practices for Monitoring PWAs](https://www.datadoghq.com/blog/progressive-web-application-monitoring/)
+- [Next.js Production Checklist](https://nextjs.org/docs/app/guides/production-checklist)
 
 ---
 
-### 12. Three Auth Methods Sharing One Session System
+## PHASE-SPECIFIC WARNINGS
 
-**Severity:** LOW
-**Applies to:** Tenant Portal
+Guidance on which phases require extra caution or deeper research.
 
-**What goes wrong:** The app has three auth methods: PIN (internal), email+password (tenants), magic-link (contractors). All create the same session JWT format. This works but creates edge cases:
-- What if a contractor's email is also registered as a tenant? Two identities, one email.
-- Legacy `role` field in JWT is forced to 'kewa' or 'imeri' even for tenants (see `register/route.ts` line 121: `const legacyRole = roleName === 'accounting' ? 'kewa' : 'imeri'`).
-- Session validation (`session.ts` line 92-93) rejects JWTs where `role` is not 'kewa' or 'imeri' -- this would break tenant sessions.
-
-**Evidence from codebase:**
-- `src/lib/session.ts` line 92: `if (sessionPayload.role !== 'kewa' && sessionPayload.role !== 'imeri') return null`
-- `src/app/api/auth/register/route.ts` line 121: Forces legacy role to 'imeri' for tenants
-- This means tenant sessions use `role: 'imeri'` (property_manager role) as legacy compat -- misleading but functional
-
-**Prevention:**
-1. **Update session validation to accept all roles.** Remove the 'kewa'/'imeri' restriction. Use `roleName` for authorization, not legacy `role`.
-2. **Or keep the hack.** The legacy `role` field is only used for backward compat. The `roleName` field already carries 'tenant'. Just document that `role: 'imeri'` for tenants is intentional legacy compat.
-3. **Prevent email collision.** Check both `users` table and `partners` table when registering a tenant. Disallow email that exists as contractor.
-
-**Phase to address:** Tenant Portal -- session system update early in implementation.
-
----
-
-### 13. Workbox Precache Bloats Initial Install
-
-**Severity:** LOW
-**Applies to:** Offline PWA
-
-**What goes wrong:** Workbox's `precacheAndRoute(self.__WB_MANIFEST)` caches all build assets. A Next.js 16 app with 60+ pages and chunked builds can have 5-15MB of precache. Tenant on mobile data waits minutes for initial install. On iOS, this may exceed the cache budget.
-
-**Prevention:**
-1. **Don't precache everything.** Only precache: app shell (layout, navigation), tenant pages, critical API responses.
-2. **Use runtime caching for admin pages.** Admin pages should not be precached -- they are not needed offline.
-3. **Lazy-cache tenant routes.** Cache on first visit with `StaleWhileRevalidate`, not on install.
-4. **Monitor precache size.** Keep under 2MB for initial install. Log precache manifest size in build.
-5. **Use `navigateFallback` for offline navigation.** Cache one offline fallback page, not every route.
-
-**Phase to address:** Offline PWA -- service worker configuration.
+| Phase Topic | Likely Pitfall | Mitigation Strategy |
+|-------------|----------------|---------------------|
+| **Security Patching** | Breaking active sessions, CVE fixes causing build breaks | Phase 1: Test patches on staging with active sessions first. Have rollback plan. Update one CVE at a time. |
+| **Performance - Dynamic APIs** | Overzealous refactoring breaking functionality | Phase 1: Audit locations first, fix incrementally with testing between each change. |
+| **Authorization Audit** | Missing auth checks in Server Actions, middleware bypass | Phase 1: Systematic audit of all Server Actions, establish required pattern before making changes. |
+| **Character Encoding** | Data corruption, backup incompatibility, collation issues | Dedicated phase: Test on database copy first. Validate all text data. Include collation fix. |
+| **Server/Client Boundaries** | Serialization errors, hydration mismatches, secret exposure | Phase 2: Document current boundaries before changing. Test serialization explicitly. Move "use client" incrementally. |
+| **Data Caching** | Over-caching dynamic data (stale), under-caching (performance) | Phase 2: Categorize queries by staleness tolerance. Cache static/slow queries first, leave real-time queries uncached. |
+| **PWA Caching** | Stale data served offline, storage overflow, cache eviction | Phase 2: Differentiate strategies by content type. Network-first for user data, cache-first for static. Monitor storage quota. |
+| **Bundle Optimization** | Breaking dynamic imports, removing actually-used code | Phase 2: Run bundle analyzer FIRST before any optimization. Validate each optimization doesn't break functionality. |
+| **Large Refactoring** | Big-bang deployment causing unrelated breakage | All phases: Deploy incrementally with feature flags. Canary releases. Maintain rollback capability. |
+| **Dependency Updates** | Breaking changes in security patches | Phase 1: Update dependencies one at a time. Test build after each. Use Dependabot for patch-only auto-merge. |
+| **Environment Variables** | Secrets exposed to client bundle | Phase 1: Audit all process.env usage. Use server-only pattern. Verify bundle doesn't contain secrets. |
+| **CSRF Protection** | Custom Route Handlers vulnerable to cross-site attacks | Phase 1: Audit all Route Handlers. Add CSRF validation. Prefer Server Actions when possible. |
+| **German Collation** | Sort order breaks after encoding fix | Same phase as encoding: Test sort with German test data. Set de_DE collation alongside UTF-8. |
+| **Performance Monitoring** | Can't detect future regressions | Phase 3: Implement before declaring "done". Set performance budgets in CI. Track Core Web Vitals. |
 
 ---
 
-### 14. prompt() and alert() Still in Codebase
+## SUMMARY: Critical Prevention Strategies
 
-**Severity:** LOW
-**Applies to:** UX Polish
+**Before starting any phase:**
 
-**What goes wrong:** The known UAT issue mentions "invoice linking needs proper modal UI (currently uses prompt())". Using `prompt()` and `alert()` in a PWA is problematic because:
-- They block the main thread
-- They look different on every browser/OS
-- Some PWA contexts suppress them entirely
-- They cannot be styled or localized
-- They break the mobile UX feel
+1. ✅ **Test on staging first** - Never test optimizations or security patches directly in production
+2. ✅ **One change at a time** - Isolate variables for easier debugging when issues occur
+3. ✅ **Measure before optimizing** - Bundle analysis, performance profiling, security scan to know current state
+4. ✅ **Maintain rollback capability** - Feature flags, database backups, deployment rollback plan
+5. ✅ **Deploy incrementally** - Canary releases, gradual rollouts, not big-bang deployments
+6. ✅ **Monitor actively** - Real-time alerts, performance tracking, error monitoring
+7. ✅ **Document changes** - What changed, why, expected impact for future debugging
 
-**Evidence from codebase (STATE.md):**
-- Invoice linking uses `prompt()` for modal input
-- Likely `alert()` used for error/confirmation dialogs elsewhere
+**Highest priority prevention actions for this project:**
 
-**Prevention:**
-1. **Replace all `prompt()` with React modal components.** Use the existing Card/Modal pattern.
-2. **Replace all `alert()` with toast notifications.** Non-blocking, dismissible.
-3. **Search codebase for all `prompt(`, `alert(`, `confirm(`.** Replace systematically.
-4. **This is the primary UX Polish deliverable.** Not a surprise pitfall, just documenting it as part of known debt.
-
-**Phase to address:** UX Polish -- targeted fixes.
-
----
-
-## Integration Pitfalls (Cross-Cutting)
-
-### Service Worker Scope Collision
-
-**What:** The current `sw.js` is registered at the root scope `/`. Workbox also needs root scope. Having two registrations or conflicting scopes causes undefined behavior.
-
-**Prevention:** Always use ONE service worker at root scope. Merge all functionality into that single file.
-
-### Offline + Auth = Session Expiry While Offline
-
-**What:** Session JWT expires after 7 days (`SESSION_EXPIRATION_SECONDS = 60 * 60 * 24 * 7`). If tenant is offline for extended period, their session expires. When they go online to sync, all queued requests fail with 401. Queue is lost.
-
-**Prevention:**
-- Check session validity before attempting sync
-- If expired, prompt re-login, then replay queue
-- Store queue with enough context to retry after re-auth
-- Consider longer session for tenant role (30 days) since they access less frequently
-
-### Offline + Tenant Isolation = Cached Data Exposure
-
-**What:** If service worker caches API responses aggressively, a shared/public device could expose one tenant's cached data to another tenant logging in on the same device.
-
-**Prevention:**
-- Clear all caches on logout (`caches.delete()` + IndexedDB clear)
-- Include user identity in cache keys
-- Never cache sensitive tenant data in the service worker Cache API -- use IndexedDB with explicit user scoping
-
-### Push Notifications for Tenants
-
-**What:** The existing push notification system is built for internal users. Tenants need notifications too (ticket response, maintenance update). But tenant notification preferences, subscription management, and quiet hours need separate handling.
-
-**Prevention:**
-- Extend `notifications` table to support tenant user IDs
-- Add tenant-specific event triggers (ticket responded, maintenance scheduled)
-- Tenant notification preferences should be minimal (on/off, not granular)
-- Don't overcomplicate -- tenants get email notifications as fallback
+| Priority | Action | Why Critical | Time Required |
+|----------|--------|--------------|---------------|
+| 🔴 1 | Upgrade Next.js for CVE fixes | Multiple CVSS 9-10 vulnerabilities | 2 hours |
+| 🔴 2 | Audit Server Actions for missing auth | Authorization bypass risk | 4 hours |
+| 🔴 3 | Check for Dynamic APIs in layouts | Likely cause of "general sluggishness" | 1 hour |
+| 🟡 4 | Run bundle analyzer | Identify what's actually bloating the bundle | 1 hour |
+| 🟡 5 | Plan character encoding migration | High data corruption risk if done wrong | 8 hours (planning) |
+| 🟡 6 | Audit environment variables | Secret exposure risk | 2 hours |
+| 🟢 7 | Setup performance monitoring | Prevent future regressions | 3 hours |
 
 ---
 
-## Pitfall Prevention Checklist by Phase
+**Total confidence level:** HIGH for Next.js-specific pitfalls, MEDIUM for database migration specifics (requires project-specific validation)
 
-### Tenant Portal Phase
-- [ ] Application-layer data isolation (not RLS) -- Pitfall #1, #3
-- [ ] Separate `/api/tenant/` route namespace -- Pitfall #5
-- [ ] Middleware `/tenant/*` matcher with role check -- Pitfall #7
-- [ ] Session validation accepts tenant role -- Pitfall #12
-- [ ] Privacy notice for tenant registration -- Pitfall #10
-- [ ] Tenant query functions always scope by user_id -- Pitfall #1
-- [ ] Cross-path access test (tenant cannot reach /dashboard) -- Pitfall #7
-
-### Offline PWA Phase
-- [ ] Service worker merge (InjectManifest, not GenerateSW) -- Pitfall #2
-- [ ] Push notification handlers preserved -- Pitfall #2
-- [ ] App shell precaching (limited scope) -- Pitfall #13
-- [ ] API response caching with StaleWhileRevalidate -- Pitfall #4
-- [ ] IndexedDB sync queue with client UUIDs -- Pitfall #6
-- [ ] Photo compression before queueing -- Pitfall #11
-- [ ] Session expiry handling in sync queue -- Integration pitfall
-- [ ] Cache cleared on logout -- Integration pitfall
-- [ ] iOS device testing -- Pitfall #8
-
-### UX Polish Phase
-- [ ] Replace all prompt()/alert()/confirm() -- Pitfall #14
-- [ ] One component per refactoring step -- Pitfall #9
-- [ ] Test with both admin roles after each change -- Pitfall #9
-- [ ] Preserve existing URL structure -- Pitfall #9
-- [ ] No new state management patterns -- Pitfall #9
-
----
-
-## Sources
-
-### Primary (HIGH Confidence -- Codebase Analysis)
-- `src/middleware.ts` -- Auth routing, role checking, matcher config
-- `src/lib/session.ts` -- JWT creation, validation, role restrictions
-- `src/lib/permissions.ts` -- RBAC, route permissions, role hierarchy
-- `src/app/api/auth/login/route.ts` -- PIN + email auth flows
-- `src/app/api/auth/register/route.ts` -- Tenant registration with legacy role mapping
-- `src/lib/supabase/server.ts` -- Anon key usage, no auth integration
-- `public/sw.js` -- Push-only service worker (47 lines)
-- `supabase/migrations/004_disable_rls.sql` -- RLS disabled, GRANT ALL to anon
-- `supabase/migrations/029_rls_policies.sql` -- RLS policies using auth.uid() (inactive)
-
-### Secondary (MEDIUM Confidence -- Official Documentation)
-- [Next.js PWA Guide](https://nextjs.org/docs/app/guides/progressive-web-apps) -- Official Next.js PWA support
-- [Supabase RLS Docs](https://supabase.com/docs/guides/database/postgres/row-level-security) -- RLS with custom auth
-- [Supabase Custom Auth Discussion](https://github.com/orgs/supabase/discussions/1849) -- Integrating custom auth with RLS
-- [Serwist (next-pwa successor)](https://javascript.plainenglish.io/building-a-progressive-web-app-pwa-in-next-js-with-serwist-next-pwa-successor-94e05cb418d7) -- Modern service worker tooling
-
-### Tertiary (MEDIUM Confidence -- Community/Research)
-- [PWA + Next.js 15/16: RSC & Offline-First](https://medium.com/@mernstackdevbykevin/progressive-web-app-next-js-15-16-react-server-components-is-it-still-relevant-in-2025-4dff01d32a5d) -- RSC caching pitfalls
-- [LogRocket: Next.js 16 PWA with offline support](https://blog.logrocket.com/nextjs-16-pwa-offline-support) -- Practical implementation guide
-- [Tenant Data Isolation Patterns](https://propelius.ai/blogs/tenant-data-isolation-patterns-and-anti-patterns) -- Multi-tenant anti-patterns
-- [Tenant Isolation in Multi-Tenant Systems](https://securityboulevard.com/2025/12/tenant-isolation-in-multi-tenant-systems-architecture-identity-and-security/) -- Security boundaries
-- [Swiss FADP Data Protection 2025](https://iclg.com/practice-areas/data-protection-laws-and-regulations/switzerland) -- DSG compliance requirements
-- [iOS PWA Limitations 2025](https://ravi6997.medium.com/pwas-on-ios-in-2025-why-your-web-app-might-beat-native-0b1c35acf845) -- iOS cache eviction bugs
-- [Offline-First Frontend Apps 2025](https://blog.logrocket.com/offline-first-frontend-apps-2025-indexeddb-sqlite/) -- IndexedDB sync patterns
-- [Data Sync in PWAs: Conflict Resolution](https://gtcsys.com/comprehensive-faqs-guide-data-synchronization-in-pwas-offline-first-strategies-and-conflict-resolution/) -- Sync queue strategies
-- [Building Native-Like Offline Experience in Next.js PWAs](https://www.getfishtank.com/insights/building-native-like-offline-experience-in-nextjs-pwas) -- Multi-layered offline architecture
-
----
-
-**Research Confidence:**
-- Tenant isolation pitfalls: HIGH (verified against actual codebase -- the RLS gap is provably real)
-- Service worker merge pitfalls: HIGH (browser limitation -- one SW per scope is documented spec)
-- Offline + Server Components: HIGH (architectural incompatibility is well-documented)
-- Swiss DSG requirements: MEDIUM (legal requirements verified, specific applicability needs legal review)
-- iOS cache eviction: MEDIUM (known WebKit bugs, device-specific testing needed)
-- Sync conflict resolution: MEDIUM (patterns well-documented, specific risk is low for this use case)
-
-**Research Date:** 2026-01-29
+**Research sources:** 28 sources across official Next.js docs, security advisories, production case studies, and database migration guides (2025-2026)
