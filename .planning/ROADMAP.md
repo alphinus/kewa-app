@@ -84,11 +84,14 @@ Production-ready enterprise hardening across security (CVE patching, auth harden
 5. Auth endpoints rate-limited (10+ rapid requests return 429)
 6. App displays error boundary instead of white screen when component crashes
 
-**Plans:** TBD
+**Plans:** 5 plans
 
 Plans:
-- [ ] 30-01: TBD
-- [ ] 30-02: TBD
+- [ ] 30-01-PLAN.md — CVE patching: Next.js 16.1.6 upgrade, npm audit fix
+- [ ] 30-02-PLAN.md — Security headers: CSP, X-Frame-Options, cookie hardening
+- [ ] 30-03-PLAN.md — Rate limiting: Upstash ratelimit on 13 auth endpoints
+- [ ] 30-04-PLAN.md — Error boundaries: global-error.tsx and error.tsx
+- [ ] 30-05-PLAN.md — Security audit: Service worker, env vars, Server Actions
 
 ---
 
