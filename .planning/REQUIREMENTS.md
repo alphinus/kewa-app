@@ -56,25 +56,25 @@
 
 | REQ-ID | Phase | Status |
 |--------|-------|--------|
-| PERF-01 | TBD | Pending |
-| PERF-02 | TBD | Pending |
-| PERF-03 | TBD | Pending |
-| PERF-04 | TBD | Pending |
-| PERF-05 | TBD | Pending |
-| PERF-06 | TBD | Pending |
-| PERF-07 | TBD | Pending |
-| SEC-01 | TBD | Pending |
-| SEC-02 | TBD | Pending |
-| SEC-03 | TBD | Pending |
-| SEC-04 | TBD | Pending |
-| SEC-05 | TBD | Pending |
-| SEC-06 | TBD | Pending |
-| SEC-07 | TBD | Pending |
-| SEC-08 | TBD | Pending |
-| SEC-09 | TBD | Pending |
-| I18N-01 | TBD | Pending |
-| I18N-02 | TBD | Pending |
-| I18N-03 | TBD | Pending |
+| PERF-01 | Phase 31 | Pending |
+| PERF-02 | Phase 31 | Pending |
+| PERF-03 | Phase 32 | Pending |
+| PERF-04 | Phase 32 | Pending |
+| PERF-05 | Phase 33 | Pending |
+| PERF-06 | Phase 33 | Pending |
+| PERF-07 | Phase 33 | Pending |
+| SEC-01 | Phase 30 | Pending |
+| SEC-02 | Phase 30 | Pending |
+| SEC-03 | Phase 30 | Pending |
+| SEC-04 | Phase 30 | Pending |
+| SEC-05 | Phase 30 | Pending |
+| SEC-06 | Phase 30 | Pending |
+| SEC-07 | Phase 30 | Pending |
+| SEC-08 | Phase 30 | Pending |
+| SEC-09 | Phase 30 | Pending |
+| I18N-01 | Phase 34 | Pending |
+| I18N-02 | Phase 34 | Pending |
+| I18N-03 | Phase 34 | Pending |
 
 ---
 

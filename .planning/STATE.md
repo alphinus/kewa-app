@@ -2,19 +2,19 @@
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-02-03)
+See: .planning/PROJECT.md (updated 2026-02-04)
 
 **Core value:** KEWA AG hat volle Transparenz und Kontrolle uber alle Renovationen -- mit standardisierten Workflows, externer Handwerker-Integration, Kostenuebersicht und automatischer Zustandshistorie.
-**Current focus:** Milestone v3.1 Production Hardening — researching
+**Current focus:** Milestone v3.1 Production Hardening — Phase 30 Security Audit
 
 ## Current Position
 
-Phase: 30 (not started)
-Plan: —
-Status: Researching domain
-Last activity: 2026-02-04 — Milestone v3.1 started
+Phase: 30 of 34 (Security Audit & CVE Patching)
+Plan: Ready to plan
+Status: Roadmap created, ready for phase planning
+Last activity: 2026-02-04 — v3.1 roadmap created with 5 phases
 
-Progress: [██████████] 100%
+Progress: [░░░░░░░░░░] 0% (0/5 phases v3.1)
 
 ## Milestones Completed
 
@@ -48,6 +48,19 @@ Key v3.0 architecture decisions:
 - Last-Write-Wins conflict resolution with server timestamp authority
 - Network-first for API, cache-first for static assets
 
+### v3.1 Roadmap Structure
+
+**5 phases derived from 19 requirements:**
+- Phase 30: Security Audit & CVE Patching (SEC-01 to SEC-09)
+- Phase 31: Performance Profiling & Baseline (PERF-01, PERF-02)
+- Phase 32: Database Optimization (PERF-03, PERF-04)
+- Phase 33: Bundle & Rendering Optimization (PERF-05, PERF-06, PERF-07)
+- Phase 34: German Umlaut Correction (I18N-01, I18N-02, I18N-03)
+
+**Coverage:** 19/19 requirements mapped (100%)
+
+**Execution order:** 30 → 31 → 32 → 33 → 34 (Phase 34 can run parallel with 31-33)
+
 ### Blockers/Concerns
 
 **Environment setup needed for production:**
@@ -62,11 +75,9 @@ From v3.0-MILESTONE-AUDIT.md:
 
 ## Session Continuity
 
-Last session: 2026-02-03
-Stopped at: Milestone v3.0 complete and archived
+Last session: 2026-02-04
+Stopped at: v3.1 roadmap created with 5 phases
 Resume file: None
 
 ---
-*v3.0 Tenant & Offline shipped. 37/37 requirements satisfied. Tenants can submit/track tickets via dedicated portal with email/push notifications, KEWA operators use app offline with sync, ticket-to-work-order conversion, profile management, and consistent UX patterns.*
-
-*Next: `/gsd:new-milestone` to start v3.1 or production deployment*
+*v3.1 Production Hardening roadmap complete. 5 phases planned: Security (9 reqs), Performance Profiling (2 reqs), Database Optimization (2 reqs), Bundle & Rendering (3 reqs), German Umlauts (3 reqs). Next: `/gsd:plan-phase 30`*
