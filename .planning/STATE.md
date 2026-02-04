@@ -5,14 +5,14 @@
 See: .planning/PROJECT.md (updated 2026-02-03)
 
 **Core value:** KEWA AG hat volle Transparenz und Kontrolle uber alle Renovationen -- mit standardisierten Workflows, externer Handwerker-Integration, Kostenuebersicht und automatischer Zustandshistorie.
-**Current focus:** Milestone v3.0 complete — planning next milestone
+**Current focus:** Milestone v3.1 Production Hardening — researching
 
 ## Current Position
 
-Phase: 29 of 29 (complete)
-Plan: All complete
-Status: Ready for next milestone
-Last activity: 2026-02-03 — v3.0 milestone archived
+Phase: 30 (not started)
+Plan: —
+Status: Researching domain
+Last activity: 2026-02-04 — Milestone v3.1 started
 
 Progress: [██████████] 100%
 

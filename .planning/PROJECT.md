@@ -8,6 +8,16 @@ Ein umfassendes Renovations-Management-System für KEWA AG. Standardisierte Proj
 
 KEWA AG hat volle Transparenz und Kontrolle über alle Renovationen — mit standardisierten Workflows, externer Handwerker-Integration, Kostenübersicht und automatischer Zustandshistorie.
 
+## Current Milestone: v3.1 Production Hardening
+
+**Goal:** App wird schneller, sicherer, und alle deutschen Umlaute werden korrigiert.
+
+**Target features:**
+- Performance-Optimierung (Bottlenecks identifizieren und beheben)
+- Security Audit (OWASP Top 10, Auth Hardening, Data Protection)
+- Dependency Audit (npm audit, veraltete Packages updaten)
+- Rechtschreibung (ae→ä, ue→ü, oe→ö im gesamten Codebase)
+
 ## Current State (v3.0 Shipped)
 
 **Tech Stack:** Next.js 16 + React 19 + Supabase + Tailwind CSS 4
