@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { verifyInviteToken } from '@/lib/portal/invite-tokens'
+import { checkRateLimit } from '@/lib/rate-limit'
 
 /**
  * GET /api/portal/auth/verify-invite/[token]
@@ -11,6 +12,10 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ token: string }> }
 ) {
+  // Rate limiting
+  const rateLimitResponse = await checkRateLimit(request)
+  if (rateLimitResponse) return rateLimitResponse
+
   try {
     const { token } = await params
 

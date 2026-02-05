@@ -5,6 +5,7 @@ import { hashPassword } from '@/lib/auth'
 import { verifyInviteToken } from '@/lib/portal/invite-tokens'
 import { createPortalSession, PORTAL_COOKIE_NAME, PORTAL_COOKIE_OPTIONS } from '@/lib/portal/session'
 import { createAuthAuditLog } from '@/lib/audit'
+import { checkRateLimit } from '@/lib/rate-limit'
 
 /**
  * POST /api/portal/auth/register/[token]
@@ -15,6 +16,10 @@ export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ token: string }> }
 ) {
+  // Rate limiting
+  const rateLimitResponse = await checkRateLimit(request)
+  if (rateLimitResponse) return rateLimitResponse
+
   const headersList = await headers()
   const ipAddress = headersList.get('x-forwarded-for')?.split(',')[0] || 'unknown'
   const userAgent = headersList.get('user-agent') || 'unknown'

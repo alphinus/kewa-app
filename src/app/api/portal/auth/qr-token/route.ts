@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { SignJWT } from 'jose'
 import { getPortalUser } from '@/lib/portal/session'
+import { checkRateLimit } from '@/lib/rate-limit'
 
 const QR_TOKEN_EXPIRATION_SECONDS = 5 * 60 // 5 minutes
 
@@ -10,6 +11,10 @@ const QR_TOKEN_EXPIRATION_SECONDS = 5 * 60 // 5 minutes
  * Generate short-lived QR login token for multi-device access
  */
 export async function POST(request: NextRequest) {
+  // Rate limiting
+  const rateLimitResponse = await checkRateLimit(request)
+  if (rateLimitResponse) return rateLimitResponse
+
   try {
     // Validate portal session (must be logged in)
     const user = await getPortalUser()

@@ -3,6 +3,7 @@ import { cookies, headers } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
 import { createSession, SESSION_COOKIE_NAME, SESSION_COOKIE_OPTIONS } from '@/lib/auth'
 import { createAuthAuditLog } from '@/lib/audit'
+import { checkRateLimit } from '@/lib/rate-limit'
 
 /**
  * POST /api/auth/magic-link/verify
@@ -16,6 +17,10 @@ import { createAuthAuditLog } from '@/lib/audit'
  * }
  */
 export async function POST(request: NextRequest) {
+  // Rate limiting
+  const rateLimitResponse = await checkRateLimit(request)
+  if (rateLimitResponse) return rateLimitResponse
+
   const headersList = await headers()
   const ipAddress = headersList.get('x-forwarded-for')?.split(',')[0] || 'unknown'
   const userAgent = headersList.get('user-agent') || 'unknown'

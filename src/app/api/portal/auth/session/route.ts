@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getPortalUser } from '@/lib/portal/session'
+import { checkRateLimit } from '@/lib/rate-limit'
 
 /**
  * GET /api/portal/auth/session
@@ -7,6 +8,10 @@ import { getPortalUser } from '@/lib/portal/session'
  * Check portal session status
  */
 export async function GET(request: NextRequest) {
+  // Rate limiting
+  const rateLimitResponse = await checkRateLimit(request)
+  if (rateLimitResponse) return rateLimitResponse
+
   try {
     const user = await getPortalUser()
 

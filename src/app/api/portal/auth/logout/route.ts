@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { PORTAL_COOKIE_NAME } from '@/lib/portal/session'
+import { checkRateLimit } from '@/lib/rate-limit'
 
 /**
  * POST /api/portal/auth/logout
@@ -8,6 +9,10 @@ import { PORTAL_COOKIE_NAME } from '@/lib/portal/session'
  * Logout tenant from portal
  */
 export async function POST(request: NextRequest) {
+  // Rate limiting
+  const rateLimitResponse = await checkRateLimit(request)
+  if (rateLimitResponse) return rateLimitResponse
+
   try {
     const cookieStore = await cookies()
     cookieStore.delete(PORTAL_COOKIE_NAME)

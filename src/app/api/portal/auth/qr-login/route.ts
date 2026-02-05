@@ -4,6 +4,7 @@ import { jwtVerify, type JWTPayload } from 'jose'
 import { createClient } from '@/lib/supabase/server'
 import { createPortalSession, PORTAL_COOKIE_NAME, PORTAL_COOKIE_OPTIONS } from '@/lib/portal/session'
 import { createAuthAuditLog } from '@/lib/audit'
+import { checkRateLimit } from '@/lib/rate-limit'
 
 interface QRTokenPayload extends JWTPayload {
   userId: string
@@ -16,6 +17,10 @@ interface QRTokenPayload extends JWTPayload {
  * Login via QR code token
  */
 export async function POST(request: NextRequest) {
+  // Rate limiting
+  const rateLimitResponse = await checkRateLimit(request)
+  if (rateLimitResponse) return rateLimitResponse
+
   const headersList = await headers()
   const ipAddress = headersList.get('x-forwarded-for')?.split(',')[0] || 'unknown'
   const userAgent = headersList.get('user-agent') || 'unknown'
