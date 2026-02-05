@@ -130,10 +130,11 @@ Plans:
 2. Dashboard page loads without N+1 queries (Supabase query log shows single query per table)
 3. Property heatmap page loads in < 2 seconds with 50+ units
 
-**Plans:** TBD
+**Plans:** 2 plans
 
 Plans:
-- [ ] 32-01: TBD
+- [ ] 32-01-PLAN.md — Query profiling and performance indexes
+- [ ] 32-02-PLAN.md — N+1 elimination with React cache()
 
 ---
 
@@ -195,7 +196,7 @@ Phase 34 can run in parallel with 31-33 after 30 completes.
 | 25-29 | v3.0 | 17/17 | Complete | 2026-02-03 |
 | 30. Security Audit | v3.1 | 5/5 | Complete | 2026-02-05 |
 | 31. Performance Profiling | v3.1 | 3/3 | Complete | 2026-02-05 |
-| 32. Database Optimization | v3.1 | 0/TBD | Not started | - |
+| 32. Database Optimization | v3.1 | 0/2 | Not started | - |
 | 33. Bundle & Rendering | v3.1 | 0/TBD | Not started | - |
 | 34. German Umlauts | v3.1 | 0/TBD | Not started | - |
 
