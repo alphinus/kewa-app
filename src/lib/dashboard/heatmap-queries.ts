@@ -2,13 +2,14 @@
  * Heatmap Query Module
  *
  * Fetch unit data with room conditions for building heatmap display.
- * Uses unit_condition_summary view for aggregated condition data.
+ * Uses single query with embedded rooms and computes aggregates in TypeScript.
  *
  * Phase 12-02: Property Dashboard & Heatmap
+ * Phase 32-02: PERF-04 N+1 elimination - refactored to single query
  * Requirements: DASH-02, DASH-03 (building heatmap, unit conditions)
  */
 
-import { createClient } from '@/lib/supabase/server'
+import { getCachedUnitsWithRooms } from '@/lib/supabase/cached-queries'
 import type { RoomCondition } from '@/types'
 
 export interface HeatmapUnit {
@@ -33,10 +34,42 @@ export interface HeatmapUnit {
 }
 
 /**
+ * Compute condition aggregates from rooms array
+ *
+ * Replaces database view query - compute in TypeScript to eliminate N+1
+ */
+function computeConditionSummary(rooms: Array<{ condition: RoomCondition }>) {
+  const total = rooms.length
+  const newRooms = rooms.filter(r => r.condition === 'new').length
+  const partialRooms = rooms.filter(r => r.condition === 'partial').length
+  const oldRooms = rooms.filter(r => r.condition === 'old').length
+
+  // Renovation percentage = (new + partial) / total * 100
+  const renovationPercentage = total > 0
+    ? Math.round(((newRooms + partialRooms) / total) * 100)
+    : 0
+
+  // Overall condition: worst condition present
+  let overallCondition: RoomCondition | null = null
+  if (oldRooms > 0) overallCondition = 'old'
+  else if (partialRooms > 0) overallCondition = 'partial'
+  else if (newRooms > 0) overallCondition = 'new'
+
+  return {
+    total_rooms: total,
+    new_rooms: newRooms,
+    partial_rooms: partialRooms,
+    old_rooms: oldRooms,
+    renovation_percentage: renovationPercentage,
+    overall_condition: overallCondition
+  }
+}
+
+/**
  * Fetch heatmap data for all units in a building
  *
- * Combines unit basic info, condition summary, and room-level conditions
- * for heatmap visualization.
+ * Single query with embedded rooms relation - no N+1.
+ * Condition aggregates computed in TypeScript.
  *
  * @param buildingId - Building to fetch units for
  * @returns Array of units with condition data
@@ -44,49 +77,30 @@ export interface HeatmapUnit {
 export async function fetchHeatmapData(
   buildingId: string
 ): Promise<HeatmapUnit[]> {
-  const supabase = await createClient()
+  // Single cached query with embedded rooms - eliminates N+1
+  const units = await getCachedUnitsWithRooms(buildingId)
 
-  // Fetch unit condition summaries
-  const { data: summaries } = await supabase
-    .from('unit_condition_summary')
-    .select('*')
-    .eq('building_id', buildingId)
+  // Filter to apartments only and compute condition aggregates
+  return units
+    .filter(unit => unit.unit_type === 'apartment')
+    .map(unit => {
+      const rooms = unit.rooms ?? []
+      const summary = computeConditionSummary(rooms)
 
-  // Fetch units with room details
-  const { data: units } = await supabase
-    .from('units')
-    .select(`
-      id, name, floor, position, unit_type, tenant_name,
-      rooms (id, name, room_type, condition)
-    `)
-    .eq('building_id', buildingId)
-    .eq('unit_type', 'apartment')
-    .order('floor', { ascending: false })
-
-  // Merge unit data with condition summary
-  return (units || []).map(unit => {
-    const summary = (summaries || []).find(s => s.unit_id === unit.id)
-    const rooms = (unit.rooms || []) as Array<{
-      id: string
-      name: string
-      room_type: string
-      condition: RoomCondition
-    }>
-
-    return {
-      id: unit.id,
-      name: unit.name,
-      floor: unit.floor,
-      position: unit.position,
-      unit_type: unit.unit_type,
-      tenant_name: unit.tenant_name,
-      total_rooms: summary?.total_rooms || rooms.length,
-      new_rooms: summary?.new_rooms || 0,
-      partial_rooms: summary?.partial_rooms || 0,
-      old_rooms: summary?.old_rooms || 0,
-      renovation_percentage: summary?.renovation_percentage || 0,
-      overall_condition: summary?.overall_condition || null,
-      rooms
-    }
-  })
+      return {
+        id: unit.id,
+        name: unit.name,
+        floor: unit.floor,
+        position: unit.position,
+        unit_type: unit.unit_type,
+        tenant_name: unit.tenant_name,
+        total_rooms: summary.total_rooms,
+        new_rooms: summary.new_rooms,
+        partial_rooms: summary.partial_rooms,
+        old_rooms: summary.old_rooms,
+        renovation_percentage: summary.renovation_percentage,
+        overall_condition: summary.overall_condition,
+        rooms
+      }
+    })
 }
