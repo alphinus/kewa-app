@@ -108,10 +108,12 @@ Plans:
 2. Bundle analysis report identifies top 10 largest dependencies with size in KB
 3. Real user Web Vitals monitored (Vercel Speed Insights integrated)
 
-**Plans:** TBD
+**Plans:** 3 plans
 
 Plans:
-- [ ] 31-01: TBD
+- [ ] 31-01-PLAN.md — Speed Insights + Bundle Analyzer setup
+- [ ] 31-02-PLAN.md — Lighthouse CI + GitHub Actions workflows
+- [ ] 31-03-PLAN.md — Baseline collection and documentation
 
 ---
 
@@ -192,7 +194,7 @@ Phase 34 can run in parallel with 31-33 after 30 completes.
 | 18-24 | v2.2 | 25/25 | Complete | 2026-01-29 |
 | 25-29 | v3.0 | 17/17 | Complete | 2026-02-03 |
 | 30. Security Audit | v3.1 | 5/5 | Complete | 2026-02-05 |
-| 31. Performance Profiling | v3.1 | 0/TBD | Not started | - |
+| 31. Performance Profiling | v3.1 | 0/3 | Planned | - |
 | 32. Database Optimization | v3.1 | 0/TBD | Not started | - |
 | 33. Bundle & Rendering | v3.1 | 0/TBD | Not started | - |
 | 34. German Umlauts | v3.1 | 0/TBD | Not started | - |
@@ -201,4 +203,4 @@ Phase 34 can run in parallel with 31-33 after 30 completes.
 
 ---
 
-*Last updated: 2026-02-05 — Phase 30 complete*
+*Last updated: 2026-02-05 — Phase 31 planned*
