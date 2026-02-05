@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-02-04)
 
 **Core value:** KEWA AG hat volle Transparenz und Kontrolle uber alle Renovationen -- mit standardisierten Workflows, externer Handwerker-Integration, Kostenuebersicht und automatischer Zustandshistorie.
-**Current focus:** Milestone v3.1 Production Hardening — Phase 31 Performance Profiling
+**Current focus:** Milestone v3.1 Production Hardening — Phase 31 Complete
 
 ## Current Position
 
 Phase: 31 of 34 (Performance Profiling & Baseline)
-Plan: 1 of 3 complete
-Status: In progress
-Last activity: 2026-02-05 — Completed 31-01-PLAN.md (Performance Tooling)
+Plan: 3 of 3 complete
+Status: Phase complete
+Last activity: 2026-02-05 — Completed 31-03-PLAN.md (Baseline Metrics Collection)
 
-Progress: [██░░░░░░░░] 20% (1/5 phases v3.1)
+Progress: [████░░░░░░] 40% (2/5 phases v3.1)
 
 ## Milestones Completed
 
@@ -24,14 +24,14 @@ Progress: [██░░░░░░░░] 20% (1/5 phases v3.1)
 - v2.2 Extensions (2026-01-29) — Phases 18-24
 - v3.0 Tenant & Offline (2026-02-03) — Phases 25-29
 
-**Total:** 30 phases, 121 plans shipped
+**Total:** 31 phases, 124 plans shipped
 
 ## Performance Metrics
 
 **v3.1 Milestone (in progress):**
 - Phase 30: 5 plans, ~30min total
-- Phase 31: 1 plan complete, ~5min total
-- Commits: 13
+- Phase 31: 3 plans, ~38min total
+- Commits: 17
 
 **v3.0 Milestone:**
 - Total plans completed: 17
@@ -55,19 +55,35 @@ Key v3.1 decisions (Phase 30):
 Key v3.1 decisions (Phase 31):
 - cross-env for Windows-compatible ANALYZE=true script
 - openAnalyzer: false for CI environments
+- Median of 3 runs for stable Lighthouse baseline
+- TBT as INP proxy in synthetic testing
 
 ### v3.1 Roadmap Structure
 
 **5 phases derived from 19 requirements:**
 - Phase 30: Security Audit & CVE Patching (SEC-01 to SEC-09) — COMPLETE
-- Phase 31: Performance Profiling & Baseline (PERF-01, PERF-02) — IN PROGRESS (1/3)
+- Phase 31: Performance Profiling & Baseline (PERF-01, PERF-02) — COMPLETE
 - Phase 32: Database Optimization (PERF-03, PERF-04)
 - Phase 33: Bundle & Rendering Optimization (PERF-05, PERF-06, PERF-07)
 - Phase 34: German Umlaut Correction (I18N-01, I18N-02, I18N-03)
 
-**Coverage:** 9/19 requirements complete (47%)
+**Coverage:** 11/19 requirements complete (58%)
 
-**Execution order:** 31 → 32 → 33 → 34 (Phase 34 can run parallel with 31-33)
+**Execution order:** 32 → 33 → 34
+
+### Performance Baseline (from Phase 31)
+
+Login page Core Web Vitals:
+- Performance: 83 (target: 75+) - PASS
+- LCP: 3204ms (target: <4000ms) - PASS
+- TBT: 338ms (target: <200ms) - WARN
+- CLS: 0.000 (target: <0.1) - PASS
+
+Bundle size: 2.27MB total client JS
+Top optimization targets:
+- Recharts: 337KB
+- ProseMirror/TipTap: 292KB
+- Supabase: 177KB
 
 ### User Setup Required
 
@@ -95,8 +111,8 @@ From v3.0-MILESTONE-AUDIT.md:
 ## Session Continuity
 
 Last session: 2026-02-05
-Stopped at: Completed 31-01-PLAN.md
+Stopped at: Completed 31-03-PLAN.md (Phase 31 complete)
 Resume file: None
 
 ---
-*Phase 31 in progress. Performance tooling installed (speed-insights, bundle-analyzer, lhci, puppeteer). Next: 31-02 (Lighthouse baseline)*
+*Phase 31 complete. Performance baseline captured. Next: Phase 32 (Database Optimization)*
