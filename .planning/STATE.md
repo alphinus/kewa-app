@@ -10,9 +10,9 @@ See: .planning/PROJECT.md (updated 2026-02-04)
 ## Current Position
 
 Phase: 31 of 34 (Performance Profiling & Baseline)
-Plan: Ready to plan
-Status: Phase 30 complete, ready for phase 31 planning
-Last activity: 2026-02-05 — Phase 30 Security Audit complete (5/5 plans)
+Plan: 2 of 3 complete
+Status: In progress
+Last activity: 2026-02-05 — Completed 31-02-PLAN.md (Lighthouse CI)
 
 Progress: [██░░░░░░░░] 20% (1/5 phases v3.1)
 
@@ -24,13 +24,14 @@ Progress: [██░░░░░░░░] 20% (1/5 phases v3.1)
 - v2.2 Extensions (2026-01-29) — Phases 18-24
 - v3.0 Tenant & Offline (2026-02-03) — Phases 25-29
 
-**Total:** 30 phases, 119 plans shipped
+**Total:** 30 phases, 121 plans shipped
 
 ## Performance Metrics
 
 **v3.1 Milestone (in progress):**
 - Phase 30: 5 plans, ~30min total
-- Commits: 11
+- Phase 31: 2 plans complete, ~10min total
+- Commits: 15
 
 **v3.0 Milestone:**
 - Total plans completed: 17
@@ -51,11 +52,17 @@ Key v3.1 decisions (Phase 30):
 - CSP with unsafe-inline/unsafe-eval (Next.js compatibility)
 - German error messages in error boundaries
 
+Key v3.1 decisions (Phase 31):
+- Performance >= 75 score threshold with warn (not blocking)
+- LCP < 4000ms threshold (appropriate for B2B authenticated pages)
+- treosh/lighthouse-ci-action for CI integration
+- temporary-public-storage for Lighthouse reports
+
 ### v3.1 Roadmap Structure
 
 **5 phases derived from 19 requirements:**
-- ✅ Phase 30: Security Audit & CVE Patching (SEC-01 to SEC-09) — COMPLETE
-- Phase 31: Performance Profiling & Baseline (PERF-01, PERF-02)
+- Phase 30: Security Audit & CVE Patching (SEC-01 to SEC-09) — COMPLETE
+- Phase 31: Performance Profiling & Baseline (PERF-01, PERF-02) — IN PROGRESS (2/3)
 - Phase 32: Database Optimization (PERF-03, PERF-04)
 - Phase 33: Bundle & Rendering Optimization (PERF-05, PERF-06, PERF-07)
 - Phase 34: German Umlaut Correction (I18N-01, I18N-02, I18N-03)
@@ -69,6 +76,10 @@ Key v3.1 decisions (Phase 30):
 **For Phase 30 (Rate Limiting):**
 - UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN in .env.local
 - Get from: console.upstash.com → Create Database
+
+**For Phase 31 (Lighthouse Auth Script):**
+- Install puppeteer: `npm install puppeteer --save-dev`
+- Set LIGHTHOUSE_TEST_PIN env var with valid PIN
 
 ### Blockers/Concerns
 
@@ -86,8 +97,8 @@ From v3.0-MILESTONE-AUDIT.md:
 ## Session Continuity
 
 Last session: 2026-02-05
-Stopped at: Phase 30 complete, ready for Phase 31
+Stopped at: Completed 31-02-PLAN.md
 Resume file: None
 
 ---
-*Phase 30 complete. Security hardened: Next.js 16.1.6 (CVE patched), CSP headers, rate limiting on 13 auth endpoints, error boundaries. Next: `/gsd:plan-phase 31`*
+*Phase 31 in progress. Lighthouse CI configured with GitHub Actions workflows. Next: 31-03 (baseline capture)*
