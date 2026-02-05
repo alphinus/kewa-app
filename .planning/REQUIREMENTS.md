@@ -6,8 +6,8 @@
 
 ## Performance (PERF)
 
-- [ ] **PERF-01**: Lighthouse audit establishes Core Web Vitals baseline (LCP, INP, CLS scores documented)
-- [ ] **PERF-02**: Bundle analysis identifies large dependencies and optimization opportunities
+- [x] **PERF-01**: Lighthouse audit establishes Core Web Vitals baseline (LCP, INP, CLS scores documented)
+- [x] **PERF-02**: Bundle analysis identifies large dependencies and optimization opportunities
 - [ ] **PERF-03**: Database indexes created for slow queries (p95 < 100ms target)
 - [ ] **PERF-04**: N+1 query patterns eliminated from high-traffic pages
 - [ ] **PERF-05**: Dashboard pages use parallel data fetching (no request waterfalls)
@@ -56,8 +56,8 @@
 
 | REQ-ID | Phase | Status |
 |--------|-------|--------|
-| PERF-01 | Phase 31 | Pending |
-| PERF-02 | Phase 31 | Pending |
+| PERF-01 | Phase 31 | Complete |
+| PERF-02 | Phase 31 | Complete |
 | PERF-03 | Phase 32 | Pending |
 | PERF-04 | Phase 32 | Pending |
 | PERF-05 | Phase 33 | Pending |

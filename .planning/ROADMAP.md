@@ -111,9 +111,9 @@ Plans:
 **Plans:** 3 plans
 
 Plans:
-- [ ] 31-01-PLAN.md — Speed Insights + Bundle Analyzer setup
-- [ ] 31-02-PLAN.md — Lighthouse CI + GitHub Actions workflows
-- [ ] 31-03-PLAN.md — Baseline collection and documentation
+- [x] 31-01-PLAN.md — Speed Insights + Bundle Analyzer setup
+- [x] 31-02-PLAN.md — Lighthouse CI + GitHub Actions workflows
+- [x] 31-03-PLAN.md — Baseline collection and documentation
 
 ---
 
@@ -194,13 +194,13 @@ Phase 34 can run in parallel with 31-33 after 30 completes.
 | 18-24 | v2.2 | 25/25 | Complete | 2026-01-29 |
 | 25-29 | v3.0 | 17/17 | Complete | 2026-02-03 |
 | 30. Security Audit | v3.1 | 5/5 | Complete | 2026-02-05 |
-| 31. Performance Profiling | v3.1 | 0/3 | Planned | - |
+| 31. Performance Profiling | v3.1 | 3/3 | Complete | 2026-02-05 |
 | 32. Database Optimization | v3.1 | 0/TBD | Not started | - |
 | 33. Bundle & Rendering | v3.1 | 0/TBD | Not started | - |
 | 34. German Umlauts | v3.1 | 0/TBD | Not started | - |
 
-**Total:** 30 phases complete, 4 phases planned
+**Total:** 31 phases complete, 3 phases planned
 
 ---
 
-*Last updated: 2026-02-05 — Phase 31 planned*
+*Last updated: 2026-02-05 — Phase 31 complete*
