@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-02-04)
 ## Current Position
 
 Phase: 30 of 34 (Security Audit & CVE Patching)
-Plan: 05 of N (Security Audit - SW, Env Vars, Server Actions complete)
+Plan: 03 of N (Auth Rate Limiting complete)
 Status: In progress
-Last activity: 2026-02-05 — Completed 30-05-PLAN.md (Security Audit)
+Last activity: 2026-02-05 — Completed 30-03-PLAN.md (Auth Rate Limiting)
 
-Progress: [████░░░░░░] ~20% (4 plans complete in Phase 30)
+Progress: [█████░░░░░] ~25% (5 plans complete in Phase 30)
 
 ## Milestones Completed
 
@@ -66,6 +66,7 @@ Key v3.0 architecture decisions:
 **Environment setup needed for production:**
 - Resend API key required for email notifications (RESEND_API_KEY)
 - Push notification VAPID keys in environment secrets
+- Upstash Redis credentials (UPSTASH_REDIS_REST_URL, UPSTASH_REDIS_REST_TOKEN)
 
 ### Tech Debt
 
@@ -77,12 +78,13 @@ From v3.0-MILESTONE-AUDIT.md:
 
 - Pinned Next.js to exact 16.1.6 (no caret prefix) for deterministic security patches
 - CSP and security headers on all routes, session cookies hardened to SameSite=Strict
+- Upstash Redis for serverless-compatible distributed rate limiting (10 req/60s per IP)
 
 ## Session Continuity
 
 Last session: 2026-02-05
-Stopped at: Completed 30-05-PLAN.md (Security Audit - SW, Env Vars, Server Actions)
+Stopped at: Completed 30-03-PLAN.md (Auth Rate Limiting)
 Resume file: None
 
 ---
-*Phase 30 in progress. 30-01 complete: Next.js 16.1.6 patching CVE-2025-29927, CVE-2025-55183, CVE-2025-55184. 30-02 complete: CSP and security headers on all routes, session cookies hardened to SameSite=Strict. 30-04 complete: npm audit and dependency hygiene. 30-05 complete: Service worker caching audited (API excluded), env vars verified (no secrets exposed), Server Actions confirmed N/A. SEC-01 through SEC-05, SEC-08, SEC-09 satisfied.*
+*Phase 30 in progress. 30-01 complete: Next.js 16.1.6 patching CVE-2025-29927, CVE-2025-55183, CVE-2025-55184. 30-02 complete: CSP and security headers on all routes, session cookies hardened to SameSite=Strict. 30-03 complete: Upstash rate limiting on all 13 auth endpoints (10 req/60s per IP). 30-04 complete: npm audit and dependency hygiene. 30-05 complete: Service worker caching audited (API excluded), env vars verified (no secrets exposed), Server Actions confirmed N/A. SEC-01 through SEC-06, SEC-08, SEC-09 satisfied.*
