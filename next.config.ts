@@ -17,9 +17,48 @@ const nextConfig: NextConfig = {
     parallelServerBuildTraces: false,
   },
 
-  // Service worker cache control headers
+  // Security and cache control headers
   async headers() {
     return [
+      // Security headers for all routes
+      {
+        source: '/(.*)',
+        headers: [
+          {
+            key: 'Content-Security-Policy',
+            value: [
+              "default-src 'self'",
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+              "style-src 'self' 'unsafe-inline'",
+              "img-src 'self' blob: data: https://*.supabase.co",
+              "font-src 'self'",
+              "connect-src 'self' https://*.supabase.co wss://*.supabase.co",
+              "object-src 'none'",
+              "base-uri 'self'",
+              "form-action 'self'",
+              "frame-ancestors 'none'",
+              "upgrade-insecure-requests",
+            ].join('; '),
+          },
+          {
+            key: 'X-Frame-Options',
+            value: 'DENY',
+          },
+          {
+            key: 'X-Content-Type-Options',
+            value: 'nosniff',
+          },
+          {
+            key: 'Referrer-Policy',
+            value: 'strict-origin-when-cross-origin',
+          },
+          {
+            key: 'Permissions-Policy',
+            value: 'camera=(), microphone=(), geolocation=()',
+          },
+        ],
+      },
+      // Service worker cache control headers
       {
         source: '/sw.js',
         headers: [
