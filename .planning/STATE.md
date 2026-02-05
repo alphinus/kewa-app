@@ -73,11 +73,16 @@ From v3.0-MILESTONE-AUDIT.md:
 - useInstallPrompt timer cleanup missing (warning severity)
 - Emergency contact schema extension needed (info severity)
 
+### v3.1 Phase 30 Decisions
+
+- Pinned Next.js to exact 16.1.6 (no caret prefix) for deterministic security patches
+- CSP and security headers on all routes, session cookies hardened to SameSite=Strict
+
 ## Session Continuity
 
 Last session: 2026-02-05
-Stopped at: Completed 30-02-PLAN.md (Security Headers)
+Stopped at: Completed 30-01-PLAN.md (Next.js CVE Patching) and 30-02-PLAN.md (Security Headers)
 Resume file: None
 
 ---
-*Phase 30 in progress. 30-02 complete: CSP and security headers on all routes, session cookies hardened to SameSite=Strict. SEC-03 and SEC-04 satisfied.*
+*Phase 30 in progress. 30-01 complete: Next.js 16.1.6 patching CVE-2025-29927, CVE-2025-55183, CVE-2025-55184. 30-02 complete: CSP and security headers on all routes, session cookies hardened to SameSite=Strict. SEC-01 through SEC-04 satisfied.*
