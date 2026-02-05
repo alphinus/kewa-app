@@ -133,8 +133,8 @@ Plans:
 **Plans:** 2 plans
 
 Plans:
-- [ ] 32-01-PLAN.md — Query profiling and performance indexes
-- [ ] 32-02-PLAN.md — N+1 elimination with React cache()
+- [x] 32-01-PLAN.md — Query profiling and performance indexes
+- [x] 32-02-PLAN.md — N+1 elimination with React cache()
 
 ---
 
@@ -196,12 +196,12 @@ Phase 34 can run in parallel with 31-33 after 30 completes.
 | 25-29 | v3.0 | 17/17 | Complete | 2026-02-03 |
 | 30. Security Audit | v3.1 | 5/5 | Complete | 2026-02-05 |
 | 31. Performance Profiling | v3.1 | 3/3 | Complete | 2026-02-05 |
-| 32. Database Optimization | v3.1 | 0/2 | Not started | - |
+| 32. Database Optimization | v3.1 | 2/2 | Complete | 2026-02-05 |
 | 33. Bundle & Rendering | v3.1 | 0/TBD | Not started | - |
 | 34. German Umlauts | v3.1 | 0/TBD | Not started | - |
 
-**Total:** 31 phases complete, 3 phases planned
+**Total:** 32 phases complete, 2 phases planned
 
 ---
 
-*Last updated: 2026-02-05 — Phase 31 complete*
+*Last updated: 2026-02-05 — Phase 32 complete*

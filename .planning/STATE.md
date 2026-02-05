@@ -5,7 +5,7 @@
 See: .planning/PROJECT.md (updated 2026-02-04)
 
 **Core value:** KEWA AG hat volle Transparenz und Kontrolle uber alle Renovationen -- mit standardisierten Workflows, externer Handwerker-Integration, Kostenuebersicht und automatischer Zustandshistorie.
-**Current focus:** Milestone v3.1 Production Hardening — Phase 32 In Progress
+**Current focus:** Milestone v3.1 Production Hardening — Phase 32 Complete
 
 ## Current Position
 
@@ -32,7 +32,7 @@ Progress: [██████░░░░] 60% (3/5 phases v3.1)
 - Phase 30: 5 plans, ~30min total
 - Phase 31: 3 plans, ~38min total
 - Phase 32: 2 plans, ~17min total
-- Commits: 23
+- Commits: 25
 
 **v3.0 Milestone:**
 - Total plans completed: 17
@@ -71,13 +71,13 @@ Key v3.1 decisions (Phase 32):
 **5 phases derived from 19 requirements:**
 - Phase 30: Security Audit & CVE Patching (SEC-01 to SEC-09) — COMPLETE
 - Phase 31: Performance Profiling & Baseline (PERF-01, PERF-02) — COMPLETE
-- Phase 32: Database Optimization (PERF-03, PERF-04)
+- Phase 32: Database Optimization (PERF-03, PERF-04) — COMPLETE
 - Phase 33: Bundle & Rendering Optimization (PERF-05, PERF-06, PERF-07)
 - Phase 34: German Umlaut Correction (I18N-01, I18N-02, I18N-03)
 
-**Coverage:** 11/19 requirements complete (58%)
+**Coverage:** 13/19 requirements complete (68%)
 
-**Execution order:** 32 → 33 → 34
+**Execution order:** 33 → 34
 
 ### Performance Baseline (from Phase 31)
 
