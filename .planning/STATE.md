@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-02-04)
 ## Current Position
 
 Phase: 30 of 34 (Security Audit & CVE Patching)
-Plan: 02 of N (Security Headers & Cookie Hardening complete)
+Plan: 05 of N (Security Audit - SW, Env Vars, Server Actions complete)
 Status: In progress
-Last activity: 2026-02-05 — Completed 30-02-PLAN.md (Security Headers)
+Last activity: 2026-02-05 — Completed 30-05-PLAN.md (Security Audit)
 
-Progress: [██░░░░░░░░] ~10% (2 plans complete in Phase 30)
+Progress: [████░░░░░░] ~20% (4 plans complete in Phase 30)
 
 ## Milestones Completed
 
@@ -81,8 +81,8 @@ From v3.0-MILESTONE-AUDIT.md:
 ## Session Continuity
 
 Last session: 2026-02-05
-Stopped at: Completed 30-01-PLAN.md (Next.js CVE Patching) and 30-02-PLAN.md (Security Headers)
+Stopped at: Completed 30-05-PLAN.md (Security Audit - SW, Env Vars, Server Actions)
 Resume file: None
 
 ---
-*Phase 30 in progress. 30-01 complete: Next.js 16.1.6 patching CVE-2025-29927, CVE-2025-55183, CVE-2025-55184. 30-02 complete: CSP and security headers on all routes, session cookies hardened to SameSite=Strict. SEC-01 through SEC-04 satisfied.*
+*Phase 30 in progress. 30-01 complete: Next.js 16.1.6 patching CVE-2025-29927, CVE-2025-55183, CVE-2025-55184. 30-02 complete: CSP and security headers on all routes, session cookies hardened to SameSite=Strict. 30-04 complete: npm audit and dependency hygiene. 30-05 complete: Service worker caching audited (API excluded), env vars verified (no secrets exposed), Server Actions confirmed N/A. SEC-01 through SEC-05, SEC-08, SEC-09 satisfied.*
