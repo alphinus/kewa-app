@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-02-04)
 
 **Core value:** KEWA AG hat volle Transparenz und Kontrolle uber alle Renovationen -- mit standardisierten Workflows, externer Handwerker-Integration, Kostenuebersicht und automatischer Zustandshistorie.
-**Current focus:** Milestone v3.1 Production Hardening — Phase 31 Complete
+**Current focus:** Milestone v3.1 Production Hardening — Phase 32 In Progress
 
 ## Current Position
 
-Phase: 31 of 34 (Performance Profiling & Baseline)
-Plan: 3 of 3 complete
-Status: Phase complete
-Last activity: 2026-02-05 — Completed 31-03-PLAN.md (Baseline Metrics Collection)
+Phase: 32 of 34 (Database Optimization)
+Plan: 1 of 2 complete
+Status: In progress
+Last activity: 2026-02-05 — Completed 32-01-PLAN.md (Query Profiling & Performance Indexes)
 
-Progress: [████░░░░░░] 40% (2/5 phases v3.1)
+Progress: [█████░░░░░] 50% (2.5/5 phases v3.1)
 
 ## Milestones Completed
 
@@ -31,7 +31,8 @@ Progress: [████░░░░░░] 40% (2/5 phases v3.1)
 **v3.1 Milestone (in progress):**
 - Phase 30: 5 plans, ~30min total
 - Phase 31: 3 plans, ~38min total
-- Commits: 17
+- Phase 32: 1 plan, ~12min (in progress)
+- Commits: 20
 
 **v3.0 Milestone:**
 - Total plans completed: 17
@@ -57,6 +58,11 @@ Key v3.1 decisions (Phase 31):
 - openAnalyzer: false for CI environments
 - Median of 3 runs for stable Lighthouse baseline
 - TBT as INP proxy in synthetic testing
+
+Key v3.1 decisions (Phase 32):
+- Composite indexes over single-column for multi-filter queries
+- CONCURRENTLY for production-safe index creation
+- Static query profiling when Docker unavailable
 
 ### v3.1 Roadmap Structure
 
@@ -111,8 +117,8 @@ From v3.0-MILESTONE-AUDIT.md:
 ## Session Continuity
 
 Last session: 2026-02-05
-Stopped at: Completed 31-03-PLAN.md (Phase 31 complete)
+Stopped at: Completed 32-01-PLAN.md
 Resume file: None
 
 ---
-*Phase 31 complete. Performance baseline captured. Next: Phase 32 (Database Optimization)*
+*Phase 32 plan 1 complete. Performance indexes ready. Next: 32-02 (View Materialization)*
