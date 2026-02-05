@@ -19,7 +19,7 @@ export const SESSION_EXPIRATION_SECONDS = 60 * 60 * 24 * 7
 export const SESSION_COOKIE_OPTIONS = {
   httpOnly: true,
   secure: process.env.NODE_ENV === 'production',
-  sameSite: 'lax' as const,
+  sameSite: 'strict' as const,
   maxAge: SESSION_EXPIRATION_SECONDS,
   path: '/'
 }
