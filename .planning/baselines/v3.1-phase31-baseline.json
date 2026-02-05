@@ -1,0 +1,58 @@
+{
+  "version": "v3.1-phase31",
+  "date": "2026-02-05",
+  "environment": {
+    "node": "24.11.1",
+    "nextjs": "16.1.6",
+    "react": "19.2.3",
+    "bundler": "turbopack (analysis via webpack)"
+  },
+  "lighthouse": {
+    "runs": 3,
+    "tool": "lighthouse 12.6.1",
+    "pages": {
+      "/login": {
+        "performance": 83,
+        "lcp": 3204,
+        "fcp": 1354,
+        "tbt": 338,
+        "cls": 0.000,
+        "tti": 3204,
+        "si": 4022
+      }
+    },
+    "notes": "Median values from 3 runs. INP requires real user interaction; TBT used as proxy in synthetic testing. Authenticated pages require scripts/lighthouse-auth.js."
+  },
+  "bundle": {
+    "totalClientJS": 2321,
+    "unit": "KB",
+    "topChunks": [
+      { "name": "7300-*.js", "size": 337, "contains": ["recharts", "d3", "lucide-icons"] },
+      { "name": "4bd1b696-*.js", "size": 194, "contains": ["react-dom", "lucide-icons"] },
+      { "name": "6011-*.js", "size": 192, "contains": ["prosemirror", "tiptap-deps"] },
+      { "name": "framework-*.js", "size": 185, "contains": ["react", "react-dom"] },
+      { "name": "9826-*.js", "size": 184, "contains": ["shared-modules"] },
+      { "name": "3242-*.js", "size": 177, "contains": ["supabase"] },
+      { "name": "main-*.js", "size": 126, "contains": ["next-runtime"] },
+      { "name": "polyfills-*.js", "size": 110, "contains": ["polyfills"] }
+    ],
+    "topDependencies": [
+      { "name": "recharts", "estimatedBundleKB": 337, "reason": "Charts and analytics dashboards" },
+      { "name": "react-dom", "estimatedBundleKB": 200, "reason": "React rendering engine" },
+      { "name": "prosemirror/*", "estimatedBundleKB": 192, "reason": "TipTap editor foundation" },
+      { "name": "@supabase/*", "estimatedBundleKB": 177, "reason": "Database client and auth" },
+      { "name": "lucide-react", "estimatedBundleKB": 150, "reason": "Icon library (tree-shaken)" },
+      { "name": "@tiptap/*", "estimatedBundleKB": 100, "reason": "Rich text editor" },
+      { "name": "date-fns", "estimatedBundleKB": 50, "reason": "Date formatting utilities" },
+      { "name": "dexie", "estimatedBundleKB": 45, "reason": "IndexedDB for offline support" },
+      { "name": "@react-pdf/renderer", "estimatedBundleKB": 40, "reason": "PDF generation (lazy loaded)" },
+      { "name": "qrcode.react", "estimatedBundleKB": 20, "reason": "QR code generation" }
+    ]
+  },
+  "thresholds": {
+    "performance": { "target": 75, "actual": 83, "status": "pass" },
+    "lcp": { "target": 4000, "actual": 3204, "status": "pass" },
+    "cls": { "target": 0.1, "actual": 0.000, "status": "pass" },
+    "tti": { "target": 7000, "actual": 3204, "status": "pass" }
+  }
+}
