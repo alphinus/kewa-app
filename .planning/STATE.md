@@ -10,9 +10,9 @@ See: .planning/PROJECT.md (updated 2026-02-04)
 ## Current Position
 
 Phase: 31 of 34 (Performance Profiling & Baseline)
-Plan: 2 of 3 complete
+Plan: 1 of 3 complete
 Status: In progress
-Last activity: 2026-02-05 — Completed 31-02-PLAN.md (Lighthouse CI)
+Last activity: 2026-02-05 — Completed 31-01-PLAN.md (Performance Tooling)
 
 Progress: [██░░░░░░░░] 20% (1/5 phases v3.1)
 
@@ -30,8 +30,8 @@ Progress: [██░░░░░░░░] 20% (1/5 phases v3.1)
 
 **v3.1 Milestone (in progress):**
 - Phase 30: 5 plans, ~30min total
-- Phase 31: 2 plans complete, ~10min total
-- Commits: 15
+- Phase 31: 1 plan complete, ~5min total
+- Commits: 13
 
 **v3.0 Milestone:**
 - Total plans completed: 17
@@ -53,16 +53,14 @@ Key v3.1 decisions (Phase 30):
 - German error messages in error boundaries
 
 Key v3.1 decisions (Phase 31):
-- Performance >= 75 score threshold with warn (not blocking)
-- LCP < 4000ms threshold (appropriate for B2B authenticated pages)
-- treosh/lighthouse-ci-action for CI integration
-- temporary-public-storage for Lighthouse reports
+- cross-env for Windows-compatible ANALYZE=true script
+- openAnalyzer: false for CI environments
 
 ### v3.1 Roadmap Structure
 
 **5 phases derived from 19 requirements:**
 - Phase 30: Security Audit & CVE Patching (SEC-01 to SEC-09) — COMPLETE
-- Phase 31: Performance Profiling & Baseline (PERF-01, PERF-02) — IN PROGRESS (2/3)
+- Phase 31: Performance Profiling & Baseline (PERF-01, PERF-02) — IN PROGRESS (1/3)
 - Phase 32: Database Optimization (PERF-03, PERF-04)
 - Phase 33: Bundle & Rendering Optimization (PERF-05, PERF-06, PERF-07)
 - Phase 34: German Umlaut Correction (I18N-01, I18N-02, I18N-03)
@@ -77,9 +75,9 @@ Key v3.1 decisions (Phase 31):
 - UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN in .env.local
 - Get from: console.upstash.com → Create Database
 
-**For Phase 31 (Lighthouse Auth Script):**
-- Install puppeteer: `npm install puppeteer --save-dev`
-- Set LIGHTHOUSE_TEST_PIN env var with valid PIN
+**For Phase 31 (Performance Testing):**
+- Puppeteer already installed with performance tooling
+- Set LIGHTHOUSE_TEST_PIN env var with valid PIN for auth testing
 
 ### Blockers/Concerns
 
@@ -97,8 +95,8 @@ From v3.0-MILESTONE-AUDIT.md:
 ## Session Continuity
 
 Last session: 2026-02-05
-Stopped at: Completed 31-02-PLAN.md
+Stopped at: Completed 31-01-PLAN.md
 Resume file: None
 
 ---
-*Phase 31 in progress. Lighthouse CI configured with GitHub Actions workflows. Next: 31-03 (baseline capture)*
+*Phase 31 in progress. Performance tooling installed (speed-insights, bundle-analyzer, lhci, puppeteer). Next: 31-02 (Lighthouse baseline)*
