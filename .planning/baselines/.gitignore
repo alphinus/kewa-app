@@ -1,0 +1,5 @@
+# Exclude raw Lighthouse reports (large HTML/JSON files)
+*.lighthouse.json
+*.lighthouse.html
+lhr-*.json
+.lighthouseci/
