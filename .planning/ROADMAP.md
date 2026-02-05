@@ -87,11 +87,11 @@ Production-ready enterprise hardening across security (CVE patching, auth harden
 **Plans:** 5 plans
 
 Plans:
-- [ ] 30-01-PLAN.md — CVE patching: Next.js 16.1.6 upgrade, npm audit fix
-- [ ] 30-02-PLAN.md — Security headers: CSP, X-Frame-Options, cookie hardening
-- [ ] 30-03-PLAN.md — Rate limiting: Upstash ratelimit on 13 auth endpoints
-- [ ] 30-04-PLAN.md — Error boundaries: global-error.tsx and error.tsx
-- [ ] 30-05-PLAN.md — Security audit: Service worker, env vars, Server Actions
+- [x] 30-01-PLAN.md — CVE patching: Next.js 16.1.6 upgrade, npm audit fix
+- [x] 30-02-PLAN.md — Security headers: CSP, X-Frame-Options, cookie hardening
+- [x] 30-03-PLAN.md — Rate limiting: Upstash ratelimit on 13 auth endpoints
+- [x] 30-04-PLAN.md — Error boundaries: global-error.tsx and error.tsx
+- [x] 30-05-PLAN.md — Security audit: Service worker, env vars, Server Actions
 
 ---
 
@@ -191,14 +191,14 @@ Phase 34 can run in parallel with 31-33 after 30 completes.
 | 13-17 | v2.1 | 24/24 | Complete | 2026-01-25 |
 | 18-24 | v2.2 | 25/25 | Complete | 2026-01-29 |
 | 25-29 | v3.0 | 17/17 | Complete | 2026-02-03 |
-| 30. Security Audit | v3.1 | 0/TBD | Not started | - |
+| 30. Security Audit | v3.1 | 5/5 | Complete | 2026-02-05 |
 | 31. Performance Profiling | v3.1 | 0/TBD | Not started | - |
 | 32. Database Optimization | v3.1 | 0/TBD | Not started | - |
 | 33. Bundle & Rendering | v3.1 | 0/TBD | Not started | - |
 | 34. German Umlauts | v3.1 | 0/TBD | Not started | - |
 
-**Total:** 29 phases complete, 5 phases planned
+**Total:** 30 phases complete, 4 phases planned
 
 ---
 
-*Last updated: 2026-02-04 — v3.1 roadmap created*
+*Last updated: 2026-02-05 — Phase 30 complete*

@@ -16,15 +16,15 @@
 
 ## Security (SEC)
 
-- [ ] **SEC-01**: Next.js upgraded to latest patch (CVE-2025-29927 and other critical fixes)
-- [ ] **SEC-02**: npm audit shows 0 critical and 0 high severity vulnerabilities
-- [ ] **SEC-03**: CSP headers configured in next.config.ts (prevent XSS)
-- [ ] **SEC-04**: JWT cookies use HttpOnly and SameSite=Strict flags
-- [ ] **SEC-05**: Server Actions have authorization checks (no bypass vulnerabilities)
-- [ ] **SEC-06**: Rate limiting implemented on auth endpoints (/api/auth/*)
-- [ ] **SEC-07**: Error boundaries prevent white screen of death (global-error.tsx)
-- [ ] **SEC-08**: Service worker scope and caching strategy reviewed for security
-- [ ] **SEC-09**: Environment variables audited (no secrets in NEXT_PUBLIC_*)
+- [x] **SEC-01**: Next.js upgraded to latest patch (CVE-2025-29927 and other critical fixes)
+- [x] **SEC-02**: npm audit shows 0 critical and 0 high severity vulnerabilities
+- [x] **SEC-03**: CSP headers configured in next.config.ts (prevent XSS)
+- [x] **SEC-04**: JWT cookies use HttpOnly and SameSite=Strict flags
+- [x] **SEC-05**: Server Actions have authorization checks (N/A - no Server Actions exist)
+- [x] **SEC-06**: Rate limiting implemented on auth endpoints (/api/auth/*)
+- [x] **SEC-07**: Error boundaries prevent white screen of death (global-error.tsx)
+- [x] **SEC-08**: Service worker scope and caching strategy reviewed for security
+- [x] **SEC-09**: Environment variables audited (no secrets in NEXT_PUBLIC_*)
 
 ## Rechtschreibung (I18N)
 
@@ -63,15 +63,15 @@
 | PERF-05 | Phase 33 | Pending |
 | PERF-06 | Phase 33 | Pending |
 | PERF-07 | Phase 33 | Pending |
-| SEC-01 | Phase 30 | Pending |
-| SEC-02 | Phase 30 | Pending |
-| SEC-03 | Phase 30 | Pending |
-| SEC-04 | Phase 30 | Pending |
-| SEC-05 | Phase 30 | Pending |
-| SEC-06 | Phase 30 | Pending |
-| SEC-07 | Phase 30 | Pending |
-| SEC-08 | Phase 30 | Pending |
-| SEC-09 | Phase 30 | Pending |
+| SEC-01 | Phase 30 | Complete |
+| SEC-02 | Phase 30 | Complete |
+| SEC-03 | Phase 30 | Complete |
+| SEC-04 | Phase 30 | Complete |
+| SEC-05 | Phase 30 | N/A |
+| SEC-06 | Phase 30 | Complete |
+| SEC-07 | Phase 30 | Complete |
+| SEC-08 | Phase 30 | Complete |
+| SEC-09 | Phase 30 | Complete |
 | I18N-01 | Phase 34 | Pending |
 | I18N-02 | Phase 34 | Pending |
 | I18N-03 | Phase 34 | Pending |
