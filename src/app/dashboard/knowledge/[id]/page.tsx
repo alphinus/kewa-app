@@ -2,12 +2,27 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { useParams, useRouter } from 'next/navigation'
+import dynamic from 'next/dynamic'
 import { Pin, PinOff } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { ArticleViewer } from '@/components/knowledge/ArticleViewer'
 import { VersionHistory } from '@/components/knowledge/VersionHistory'
 import { RelatedArticles } from '@/components/knowledge/RelatedArticles'
+
+const ArticleViewer = dynamic(
+  () => import('@/components/knowledge/ArticleViewer').then(mod => mod.ArticleViewer),
+  {
+    loading: () => (
+      <div className="prose max-w-none animate-pulse">
+        <div className="h-6 bg-gray-200 rounded w-3/4 mb-4" />
+        <div className="h-4 bg-gray-200 rounded w-full mb-2" />
+        <div className="h-4 bg-gray-200 rounded w-5/6 mb-2" />
+        <div className="h-4 bg-gray-200 rounded w-4/5" />
+      </div>
+    ),
+    ssr: false
+  }
+)
 import type { KBArticleWithMeta, KBArticleResponse } from '@/types/knowledge-base'
 
 /**

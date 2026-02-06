@@ -2,10 +2,23 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { useParams, useRouter } from 'next/navigation'
+import dynamic from 'next/dynamic'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { ArticleEditor } from '@/components/knowledge/ArticleEditor'
 import { getTemplateLabel } from '@/components/knowledge/TemplateSelector'
+
+const ArticleEditor = dynamic(
+  () => import('@/components/knowledge/ArticleEditor').then(mod => mod.ArticleEditor),
+  {
+    loading: () => (
+      <div className="border rounded-lg overflow-hidden">
+        <div className="h-12 bg-gray-50 border-b animate-pulse" />
+        <div className="min-h-[300px] p-4 bg-gray-100 animate-pulse" />
+      </div>
+    ),
+    ssr: false
+  }
+)
 import type {
   KBArticleWithMeta,
   KBArticleResponse,
