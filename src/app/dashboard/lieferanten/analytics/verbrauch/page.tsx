@@ -8,6 +8,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import dynamic from 'next/dynamic'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import {
@@ -20,8 +21,22 @@ import {
 import { Button } from '@/components/ui/button'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Loader2 } from 'lucide-react'
-import { ConsumptionPatternChart } from '@/components/suppliers'
 import type { SeasonalConsumption } from '@/types/suppliers'
+
+const ConsumptionPatternChart = dynamic(
+  () => import('@/components/suppliers/ConsumptionPatternChart').then(mod => mod.ConsumptionPatternChart),
+  {
+    loading: () => (
+      <div className="w-full h-[350px] flex items-center justify-center bg-gray-50 rounded-lg border animate-pulse">
+        <div className="text-center">
+          <div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto" />
+          <p className="text-gray-500 mt-2 text-sm">Diagramm wird geladen...</p>
+        </div>
+      </div>
+    ),
+    ssr: false
+  }
+)
 
 interface Property {
   id: string

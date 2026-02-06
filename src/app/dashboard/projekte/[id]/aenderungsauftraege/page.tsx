@@ -13,7 +13,7 @@ import { Suspense } from 'react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { BudgetSummaryCards } from '@/components/change-orders/BudgetSummaryCards'
-import { BudgetImpactChart } from '@/components/change-orders/BudgetImpactChart'
+import { LazyBudgetImpactChart } from '@/components/change-orders/LazyBudgetImpactChart'
 import { ChevronRight, Plus, FileText } from 'lucide-react'
 
 interface PageProps {
@@ -138,7 +138,7 @@ export default async function ProjectChangeOrdersPage({ params }: PageProps) {
       {/* Waterfall Chart */}
       <div className="bg-white rounded-lg border border-gray-200 p-6">
         <h2 className="text-lg font-semibold text-gray-900 mb-4">Budget-Entwicklung</h2>
-        <BudgetImpactChart
+        <LazyBudgetImpactChart
           originalBudget={data.original_budget}
           changeOrders={data.change_orders}
         />
