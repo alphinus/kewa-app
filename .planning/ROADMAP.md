@@ -174,10 +174,11 @@ Plans:
 3. German sort order works correctly (ä sorted after a, not after z)
 4. Existing database data displays correctly (no corruption from encoding mismatch)
 
-**Plans:** TBD
+**Plans:** 2 plans
 
 Plans:
-- [ ] 34-01: TBD
+- [ ] 34-01-PLAN.md — UTF-8 infrastructure: EditorConfig, git config, encoding verification script, database collation check
+- [ ] 34-02-PLAN.md — Umlaut corrections: Replace all ae/oe/ue substitutions with proper umlauts
 
 ---
 
@@ -198,10 +199,10 @@ Phase 34 can run in parallel with 31-33 after 30 completes.
 | 31. Performance Profiling | v3.1 | 3/3 | Complete | 2026-02-05 |
 | 32. Database Optimization | v3.1 | 2/2 | Complete | 2026-02-05 |
 | 33. Bundle & Rendering | v3.1 | 2/2 | Complete | 2026-02-06 |
-| 34. German Umlauts | v3.1 | 0/TBD | Not started | - |
+| 34. German Umlauts | v3.1 | 0/2 | Planned | - |
 
 **Total:** 33 phases complete, 1 phase planned
 
 ---
 
-*Last updated: 2026-02-06 — Phase 33 complete*
+*Last updated: 2026-02-06 — Phase 34 planned*
