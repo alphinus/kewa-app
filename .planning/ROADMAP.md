@@ -152,11 +152,11 @@ Plans:
 3. Heavy components lazy loaded (bundle reduced by 100+ KB)
 4. LCP improved by 20%+ compared to Phase 31 baseline
 
-**Plans:** TBD
+**Plans:** 2 plans
 
 Plans:
-- [ ] 33-01: TBD
-- [ ] 33-02: TBD
+- [ ] 33-01-PLAN.md — Lazy load heavy Recharts and TipTap components (100+ KB reduction)
+- [ ] 33-02-PLAN.md — Parallel fetch audit and build verification (metrics collection)
 
 ---
 
