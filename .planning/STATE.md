@@ -9,12 +9,12 @@ See: .planning/PROJECT.md (updated 2026-02-04)
 
 ## Current Position
 
-Phase: 32 of 34 (Database Optimization)
-Plan: 2 of 2 complete
-Status: Phase complete
-Last activity: 2026-02-05 — Completed 32-02-PLAN.md (N+1 Query Elimination)
+Phase: 33 of 34 (Bundle & Rendering Optimization)
+Plan: 1 of 2 complete
+Status: In progress
+Last activity: 2026-02-06 — Completed 33-01-PLAN.md (Component Lazy Loading)
 
-Progress: [██████░░░░] 60% (3/5 phases v3.1)
+Progress: [███████░░░] 70% (3.5/5 phases v3.1)
 
 ## Milestones Completed
 
@@ -65,6 +65,11 @@ Key v3.1 decisions (Phase 32):
 - Static query profiling when Docker unavailable
 - React cache() for request-level query deduplication
 - TypeScript aggregates to eliminate N+1 view queries
+
+Key v3.1 decisions (Phase 33):
+- Client wrapper components for lazy loading in server components
+- ssr: false for Recharts and TipTap (browser API dependencies)
+- Direct file imports over barrel imports for code splitting
 
 ### v3.1 Roadmap Structure
 
@@ -118,9 +123,9 @@ From v3.0-MILESTONE-AUDIT.md:
 
 ## Session Continuity
 
-Last session: 2026-02-05
-Stopped at: Completed 32-02-PLAN.md (Phase 32 complete)
+Last session: 2026-02-06
+Stopped at: Completed 33-01-PLAN.md (Component Lazy Loading)
 Resume file: None
 
 ---
-*Phase 32 complete. Database optimization done. Next: Phase 33 (Bundle & Rendering Optimization)*
+*Phase 33 in progress. Component lazy loading done. Next: 33-02-PLAN.md*
