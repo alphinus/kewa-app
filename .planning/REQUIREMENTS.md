@@ -10,9 +10,9 @@
 - [x] **PERF-02**: Bundle analysis identifies large dependencies and optimization opportunities
 - [x] **PERF-03**: Database indexes created for slow queries (p95 < 100ms target)
 - [x] **PERF-04**: N+1 query patterns eliminated from high-traffic pages
-- [ ] **PERF-05**: Dashboard pages use parallel data fetching (no request waterfalls)
-- [ ] **PERF-06**: Dynamic API usage audited and moved out of layouts where possible
-- [ ] **PERF-07**: Heavy components (editors, modals) use dynamic imports with lazy loading
+- [x] **PERF-05**: Dashboard pages use parallel data fetching (no request waterfalls)
+- [x] **PERF-06**: Dynamic API usage audited and moved out of layouts where possible
+- [x] **PERF-07**: Heavy components (editors, modals) use dynamic imports with lazy loading
 
 ## Security (SEC)
 
@@ -60,9 +60,9 @@
 | PERF-02 | Phase 31 | Complete |
 | PERF-03 | Phase 32 | Complete |
 | PERF-04 | Phase 32 | Complete |
-| PERF-05 | Phase 33 | Pending |
-| PERF-06 | Phase 33 | Pending |
-| PERF-07 | Phase 33 | Pending |
+| PERF-05 | Phase 33 | Complete |
+| PERF-06 | Phase 33 | Complete |
+| PERF-07 | Phase 33 | Complete |
 | SEC-01 | Phase 30 | Complete |
 | SEC-02 | Phase 30 | Complete |
 | SEC-03 | Phase 30 | Complete |
