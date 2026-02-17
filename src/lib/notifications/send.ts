@@ -26,12 +26,22 @@ import type {
 // SETUP
 // =============================================
 
-// Configure VAPID details for web-push
-webpush.setVapidDetails(
-  process.env.VAPID_SUBJECT || 'mailto:noreply@kewa.app',
-  process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || '',
-  process.env.VAPID_PRIVATE_KEY || ''
-)
+let vapidConfigured = false
+
+function ensureVapidConfigured() {
+  if (vapidConfigured) return
+  const publicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
+  const privateKey = process.env.VAPID_PRIVATE_KEY
+  if (!publicKey || !privateKey) {
+    throw new Error('VAPID keys not configured. Set NEXT_PUBLIC_VAPID_PUBLIC_KEY and VAPID_PRIVATE_KEY.')
+  }
+  webpush.setVapidDetails(
+    process.env.VAPID_SUBJECT || 'mailto:noreply@kewa.app',
+    publicKey,
+    privateKey
+  )
+  vapidConfigured = true
+}
 
 // =============================================
 // SEND NOTIFICATION
@@ -150,6 +160,8 @@ interface PushPayload {
  */
 async function sendPushToUser(userId: string, payload: PushPayload): Promise<boolean> {
   try {
+    ensureVapidConfigured()
+
     // Get user's push subscriptions
     const subscriptions = await getUserSubscriptions(userId)
 
@@ -215,6 +227,8 @@ export async function sendDigestNotification(
     if (subscriptions.length === 0) {
       return false // No devices subscribed
     }
+
+    ensureVapidConfigured()
 
     // Build digest payload
     const payload = JSON.stringify({
