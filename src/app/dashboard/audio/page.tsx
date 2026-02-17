@@ -5,13 +5,11 @@ import { useRouter } from 'next/navigation'
 import { Card, CardContent } from '@/components/ui/card'
 import { AudioGallery } from '@/components/audio/AudioGallery'
 import type { TaskAudioWithUrl, AudioType, AudiosResponse } from '@/types/database'
-import type { Role } from '@/types'
-
 type FilterType = 'all' | AudioType
 
 /**
- * Audio overview page (KEWA only)
- * Shows all audio recordings with filter tabs
+ * Audio overview page
+ * Shows all audio recordings with filter tabs for all internal users
  */
 export default function AudioPage() {
   const router = useRouter()
@@ -21,20 +19,19 @@ export default function AudioPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [filter, setFilter] = useState<FilterType>('all')
-  const [userRole, setUserRole] = useState<Role | null>(null)
+  const [isInternal, setIsInternal] = useState<boolean | null>(null)
 
   /**
-   * Check user role (KEWA only page)
+   * Check user access (internal users only)
    */
   const checkAccess = useCallback(async () => {
     try {
       const response = await fetch('/api/auth/session')
       if (response.ok) {
         const data = await response.json()
-        setUserRole(data.role || null)
+        setIsInternal(data.isInternal ?? false)
 
-        // Redirect if not KEWA
-        if (data.role !== 'kewa') {
+        if (!data.isInternal) {
           router.push('/dashboard')
         }
       } else {
@@ -82,16 +79,16 @@ export default function AudioPage() {
     checkAccess()
   }, [checkAccess])
 
-  // Fetch audios when role confirmed and filter changes
+  // Fetch audios when access confirmed and filter changes
   useEffect(() => {
-    if (userRole === 'kewa') {
+    if (isInternal) {
       if (filter === 'all') {
         fetchAudios()
       } else {
         fetchAudios(filter)
       }
     }
-  }, [userRole, filter, fetchAudios])
+  }, [isInternal, filter, fetchAudios])
 
   // Filter tabs
   const filterTabs: { value: FilterType; label: string }[] = [
@@ -106,7 +103,7 @@ export default function AudioPage() {
     : audios.filter((a) => a.audio_type === filter)
 
   // Don't render until access is confirmed
-  if (userRole !== 'kewa') {
+  if (!isInternal) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <LoadingSpinner />

@@ -4,7 +4,6 @@ import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { WeeklyReport, type WeeklyReportData } from '@/components/reports/WeeklyReport'
-import type { Role } from '@/types'
 
 // =============================================
 // HELPERS
@@ -69,7 +68,7 @@ export default function BerichtePage() {
   const router = useRouter()
 
   // State
-  const [userRole, setUserRole] = useState<Role | null>(null)
+  const [isInternal, setIsInternal] = useState<boolean | null>(null)
   const [roleLoading, setRoleLoading] = useState(true)
   const [weekStart, setWeekStart] = useState<Date>(() => getMonday(new Date()))
   const [weekEnd, setWeekEnd] = useState<Date>(() => getSunday(new Date()))
@@ -78,17 +77,16 @@ export default function BerichtePage() {
   const [error, setError] = useState<string | null>(null)
 
   /**
-   * Fetch current user role
+   * Fetch current user access
    */
   const fetchUserRole = useCallback(async () => {
     try {
       const response = await fetch('/api/auth/session')
       if (response.ok) {
         const data = await response.json()
-        setUserRole(data.role || null)
+        setIsInternal(data.isInternal ?? false)
 
-        // Redirect Imeri to dashboard
-        if (data.role === 'imeri') {
+        if (!data.isInternal) {
           router.push('/dashboard')
         }
       } else {
@@ -139,12 +137,12 @@ export default function BerichtePage() {
     fetchUserRole()
   }, [fetchUserRole])
 
-  // Fetch report when week changes (only if KEWA)
+  // Fetch report when week changes (only if internal)
   useEffect(() => {
-    if (userRole === 'kewa') {
+    if (isInternal) {
       fetchReportData()
     }
-  }, [userRole, fetchReportData])
+  }, [isInternal, fetchReportData])
 
   /**
    * Navigate to previous week
@@ -192,8 +190,8 @@ export default function BerichtePage() {
     )
   }
 
-  // Not KEWA - should have been redirected but show nothing
-  if (userRole !== 'kewa') {
+  // Not internal - should have been redirected but show nothing
+  if (!isInternal) {
     return null
   }
 

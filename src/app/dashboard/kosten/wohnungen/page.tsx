@@ -17,24 +17,8 @@ import {
   getAllUnitCosts,
   getBuildingsForFilter
 } from '@/lib/costs/unit-cost-queries'
-import { validateSession, SESSION_COOKIE_NAME } from '@/lib/session'
-import type { Role } from '@/types'
-
-/**
- * Check if user has permission to view cost data
- * Note: v2.0 will add more granular RBAC roles
- */
-function canViewCosts(role: Role): boolean {
-  return role === 'kewa'
-}
-
-/**
- * Check if user has permission to edit rent
- * Note: v2.0 will add more granular RBAC roles
- */
-function canEditRent(role: Role): boolean {
-  return role === 'kewa'
-}
+import { validateSessionWithRBAC, SESSION_COOKIE_NAME } from '@/lib/session'
+import { isInternalRole } from '@/lib/permissions'
 
 export default async function WohnungenInvestmentPage() {
   // Get user session from cookies
@@ -45,14 +29,14 @@ export default async function WohnungenInvestmentPage() {
     redirect('/login')
   }
 
-  // Validate session
-  const session = await validateSession(sessionCookie.value)
+  // Validate session with RBAC
+  const session = await validateSessionWithRBAC(sessionCookie.value)
   if (!session) {
     redirect('/login')
   }
 
-  // Check permission
-  if (!canViewCosts(session.role)) {
+  // Only internal users can view costs
+  if (!isInternalRole(session.roleName)) {
     redirect('/dashboard')
   }
 
@@ -62,7 +46,7 @@ export default async function WohnungenInvestmentPage() {
     getBuildingsForFilter()
   ])
 
-  const hasEditPermission = canEditRent(session.role)
+  const hasEditPermission = isInternalRole(session.roleName)
 
   return (
     <div className="space-y-6 pb-20">

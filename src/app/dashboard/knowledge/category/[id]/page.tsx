@@ -16,7 +16,7 @@ import { cookies } from 'next/headers'
 import Link from 'next/link'
 import { redirect, notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { validateSession, SESSION_COOKIE_NAME } from '@/lib/session'
+import { validateSessionWithRBAC, SESSION_COOKIE_NAME } from '@/lib/session'
 import { CategoryTree } from '@/components/knowledge/CategoryTree'
 import { SearchBar } from '@/components/knowledge/SearchBar'
 import { FileText, Calendar, User, Eye, ChevronRight } from 'lucide-react'
@@ -88,13 +88,13 @@ export default async function CategoryPage({ params }: PageProps) {
     redirect('/login')
   }
 
-  // Validate session
-  const session = await validateSession(sessionCookie.value)
+  // Validate session with RBAC
+  const session = await validateSessionWithRBAC(sessionCookie.value)
   if (!session) {
     redirect('/login')
   }
 
-  const isAdmin = session.role === 'kewa'
+  const isAdmin = session.roleName === 'admin'
 
   // Fetch category with articles
   const supabase = await createClient()

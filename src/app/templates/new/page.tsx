@@ -63,8 +63,8 @@ export default function TemplateNewPage() {
     try {
       const res = await fetch('/api/auth/session')
       const data = await res.json()
-      setIsAdmin(data.role === 'kewa')
-      if (data.role !== 'kewa') {
+      setIsAdmin(data.roleName === 'admin')
+      if (data.roleName !== 'admin') {
         router.push('/templates')
       }
     } catch {

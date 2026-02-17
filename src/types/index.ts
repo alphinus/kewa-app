@@ -9,10 +9,12 @@
 // Legacy user roles (kept for backward compatibility)
 export type Role = 'kewa' | 'imeri'
 
-// Legacy user representation
+// User representation with RBAC fields
 export interface User {
   id: string
   role: Role
+  roleName: string
+  isInternal: boolean
   displayName: string
 }
 
@@ -218,6 +220,9 @@ export interface SessionResponse {
   authenticated: boolean
   role?: Role
   userId?: string
+  roleName?: string
+  isInternal?: boolean
+  displayName?: string
 }
 
 // =============================================

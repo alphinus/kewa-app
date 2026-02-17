@@ -8,13 +8,11 @@ import {
   CheckSquare,
   FileText,
   Archive,
-  Mic,
   Settings,
   Landmark,
   Truck
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import type { Role } from '@/types'
 
 interface NavItem {
   href: string
@@ -22,8 +20,8 @@ interface NavItem {
   icon: typeof LayoutDashboard
 }
 
-// Navigation items for KEWA AG (admin role)
-const kewaNavItems: NavItem[] = [
+// Navigation items for all internal users (admin, property_manager, accounting)
+const internalNavItems: NavItem[] = [
   { href: '/dashboard', label: 'Uebersicht', icon: LayoutDashboard },
   { href: '/dashboard/liegenschaft', label: 'Liegenschaft', icon: Landmark },
   { href: '/dashboard/gebaude', label: 'Gebaeude', icon: Building2 },
@@ -34,32 +32,24 @@ const kewaNavItems: NavItem[] = [
   { href: '/dashboard/settings', label: 'Einstellungen', icon: Settings }
 ]
 
-// Navigation items for Imeri (worker role)
-const imeriNavItems: NavItem[] = [
-  { href: '/dashboard', label: 'Uebersicht', icon: LayoutDashboard },
-  { href: '/dashboard/tasks', label: 'Aufgaben', icon: CheckSquare },
-  { href: '/dashboard/audio', label: 'Audio', icon: Mic }
-]
-
 interface MobileNavProps {
-  role?: Role
+  isInternal?: boolean
 }
 
 /**
  * Bottom navigation bar for mobile devices
- * Role-based items: KEWA AG sees 7 items, Imeri sees 3
+ * All internal users see the full navigation with 8 items.
  * Touch targets: min 48px height per item
  */
-export function MobileNav({ role }: MobileNavProps) {
+export function MobileNav({ isInternal }: MobileNavProps) {
   const pathname = usePathname()
 
-  // Select navigation items based on role
-  const navItems = role === 'kewa' ? kewaNavItems : imeriNavItems
+  if (!isInternal) return null
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 safe-area-bottom">
       <div className="flex items-center justify-around h-16">
-        {navItems.map((item) => {
+        {internalNavItems.map((item) => {
           // Check if path matches exactly or starts with item.href for nested routes
           const isActive = item.href === '/dashboard'
             ? pathname === '/dashboard'

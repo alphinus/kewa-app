@@ -72,8 +72,8 @@ export default function GebaudePage() {
     )
   }
 
-  // Determine if current user is KEWA
-  const isKewa = session.authenticated && session.user?.role === 'kewa'
+  // Determine if current user is internal (can edit)
+  const isKewa = session.authenticated && (session.user?.isInternal ?? false)
 
   // Loading skeleton
   if (loading || sessionLoading) {

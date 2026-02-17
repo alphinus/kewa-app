@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { headers } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
-import { getSessionFromRequest } from '@/lib/auth'
+import { getSessionWithRBACFromRequest } from '@/lib/session'
+import { isInternalRole } from '@/lib/permissions'
 import { createAuthAuditLog } from '@/lib/audit'
 import { checkRateLimit } from '@/lib/rate-limit'
 
@@ -36,7 +37,7 @@ export async function POST(request: NextRequest) {
 
   try {
     // Verify admin/manager session
-    const session = await getSessionFromRequest(request)
+    const session = await getSessionWithRBACFromRequest(request)
     if (!session) {
       return NextResponse.json(
         { error: 'Nicht authentifiziert' },
@@ -44,8 +45,8 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Only admin and property_manager can send magic links
-    if (session.role !== 'kewa' && session.role !== 'imeri') {
+    // Only internal roles can send magic links
+    if (!isInternalRole(session.roleName)) {
       return NextResponse.json(
         { error: 'Keine Berechtigung' },
         { status: 403 }

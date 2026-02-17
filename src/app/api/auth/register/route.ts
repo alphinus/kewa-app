@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { headers } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
-import { hashPassword, getSessionFromRequest } from '@/lib/auth'
+import { hashPassword } from '@/lib/auth'
+import { getSessionWithRBACFromRequest } from '@/lib/session'
+import { isInternalRole } from '@/lib/permissions'
 import { createAuthAuditLog, createDataAuditLog } from '@/lib/audit'
 import { checkRateLimit } from '@/lib/rate-limit'
 
@@ -31,7 +33,7 @@ export async function POST(request: NextRequest) {
 
   try {
     // Verify admin/manager session
-    const session = await getSessionFromRequest(request)
+    const session = await getSessionWithRBACFromRequest(request)
     if (!session) {
       return NextResponse.json(
         { error: 'Nicht authentifiziert' },
@@ -39,8 +41,8 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Only admin and property_manager can create users
-    if (session.role !== 'kewa' && session.role !== 'imeri') {
+    // Only internal roles can create users
+    if (!isInternalRole(session.roleName)) {
       return NextResponse.json(
         { error: 'Keine Berechtigung' },
         { status: 403 }
@@ -173,7 +175,7 @@ export async function POST(request: NextRequest) {
       recordId: newUser.id,
       action: 'create',
       userId: session.userId,
-      userRole: session.role,
+      userRole: session.roleName,
       newValues: {
         email: newUser.email,
         display_name: newUser.display_name,

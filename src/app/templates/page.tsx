@@ -79,7 +79,7 @@ export default function TemplatesPage() {
     try {
       const res = await fetch('/api/auth/session')
       const data = await res.json()
-      setIsAdmin(data.role === 'kewa')
+      setIsAdmin(data.roleName === 'admin')
     } catch {
       setIsAdmin(false)
     }

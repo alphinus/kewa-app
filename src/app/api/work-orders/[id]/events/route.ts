@@ -10,7 +10,8 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
-import { validateSession, SESSION_COOKIE_NAME } from '@/lib/session'
+import { validateSessionWithRBAC, SESSION_COOKIE_NAME } from '@/lib/session'
+import { isInternalRole } from '@/lib/permissions'
 import { getWorkOrderEvents, type WorkOrderEventType } from '@/lib/work-orders/events'
 import { createClient } from '@/lib/supabase/server'
 
@@ -39,13 +40,13 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const session = await validateSession(sessionCookie.value)
+    const session = await validateSessionWithRBAC(sessionCookie.value)
     if (!session) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Only kewa role can view events (admin access)
-    if (session.role !== 'kewa') {
+    // Only internal roles can view events
+    if (!isInternalRole(session.roleName)) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 

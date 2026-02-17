@@ -4,8 +4,6 @@ import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { useInstallPrompt } from '@/hooks/useInstallPrompt'
-import type { Role } from '@/types'
-
 // =============================================
 // TYPES
 // =============================================
@@ -20,7 +18,7 @@ interface SystemSetting {
 interface UserInfo {
   id: string
   display_name: string
-  role: Role
+  roleName: string
 }
 
 // =============================================
@@ -59,8 +57,8 @@ export default function SettingsPage() {
       }
       const sessionData = await sessionRes.json()
 
-      // Only KEWA can access settings
-      if (sessionData.role !== 'kewa') {
+      // Only admin can access settings
+      if (sessionData.roleName !== 'admin') {
         router.push('/dashboard')
         return
       }
@@ -68,7 +66,7 @@ export default function SettingsPage() {
       setUserInfo({
         id: sessionData.userId,
         display_name: sessionData.displayName || 'KEWA AG',
-        role: sessionData.role
+        roleName: sessionData.roleName
       })
 
       // Fetch system settings
@@ -200,7 +198,7 @@ export default function SettingsPage() {
           <div className="flex justify-between items-center">
             <span className="text-gray-600 dark:text-gray-400">Rolle</span>
             <span className="font-medium text-gray-900 dark:text-gray-100 capitalize">
-              {userInfo?.role === 'kewa' ? 'Administrator' : userInfo?.role}
+              {userInfo?.roleName === 'admin' ? 'Administrator' : userInfo?.roleName}
             </span>
           </div>
         </div>

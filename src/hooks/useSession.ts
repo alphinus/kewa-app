@@ -1,25 +1,13 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import type { Session, SessionResponse, User, Role } from '@/types'
+import type { Session, SessionResponse, User } from '@/types'
 
 interface UseSessionReturn {
   session: Session
   loading: boolean
   error: Error | null
   refetch: () => Promise<void>
-}
-
-// Map role to display name
-function getDisplayName(role: Role): string {
-  switch (role) {
-    case 'kewa':
-      return 'KEWA AG'
-    case 'imeri':
-      return 'Imeri'
-    default:
-      return role
-  }
 }
 
 /**
@@ -48,7 +36,9 @@ export function useSession(): UseSessionReturn {
         const user: User = {
           id: data.userId,
           role: data.role,
-          displayName: getDisplayName(data.role)
+          roleName: data.roleName ?? (data.role === 'kewa' ? 'admin' : 'property_manager'),
+          isInternal: data.isInternal ?? (data.role === 'kewa' || data.role === 'imeri'),
+          displayName: data.displayName ?? (data.role === 'kewa' ? 'KEWA AG' : 'Imeri')
         }
         setSession({ authenticated: true, user })
       } else {

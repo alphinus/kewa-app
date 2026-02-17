@@ -37,8 +37,8 @@ function DashboardLayoutInner({
         {children}
       </main>
 
-      {/* Bottom navigation - role-based items */}
-      <MobileNav role={user?.role} />
+      {/* Bottom navigation - all internal users see full nav */}
+      <MobileNav isInternal={user?.isInternal} />
     </div>
   )
 }

@@ -60,8 +60,8 @@ export function Header({ user, selectedBuildingId, onBuildingSelect }: HeaderPro
           </span>
         </div>
 
-        {/* Property selector (only for KEWA role) */}
-        {user?.role === 'kewa' && (
+        {/* Property selector (for all internal users) */}
+        {user?.isInternal && (
           <div className="flex-shrink-0">
             <PropertySelector
               selectedBuildingId={selectedBuildingId}
