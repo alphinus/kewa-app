@@ -1,1127 +1,440 @@
-# Domain Pitfalls: Production Hardening
+# Pitfalls Research
 
-**Domain:** Next.js Production Application (110K LOC, active users)
-**Researched:** 2026-02-04
-**Context:** Performance optimization, security audit, character encoding fixes
-**Milestone:** v3.1 Production Hardening
+**Domain:** Retrofitting Multi-Tenancy (Supabase RLS) to Existing Property Management App
+**Researched:** 2026-02-18
+**Confidence:** HIGH
 
----
+## Critical Pitfalls
 
-## Priority Summary
+### Pitfall 1: Enabling RLS Without Policies (Empty Results)
 
-| # | Pitfall | Severity | Detection | Time to Fix |
-|---|---------|----------|-----------|-------------|
-| 1 | Breaking active user sessions during CVE patches | CRITICAL | Low | 4 hours |
-| 2 | Character encoding migration corrupting data | CRITICAL | Low | Planning: 8h, Exec: 16h |
-| 3 | Dynamic APIs in root layout destroying performance | CRITICAL | Low | 2 hours |
-| 4 | Server Actions without authorization checks | CRITICAL | Medium | 8 hours |
-| 5 | CVE-2025-29927 middleware authorization bypass | CRITICAL | Low | 2 hours |
-| 6 | Server/Client Component boundary confusion | HIGH | Medium | 12 hours |
-| 7 | Missing data caching for non-fetch requests | HIGH | High | 16 hours |
-| 8 | PWA cache strategy causing stale data | HIGH | High | 8 hours |
-| 9 | Bundle analysis skipped before optimization | HIGH | Low | 2 hours |
-| 10 | Large refactoring without incremental deployment | MODERATE | Low | Planning only |
-| 11 | Security dependency updates breaking build | MODERATE | Low | 4 hours |
-| 12 | Environment variables exposed to client | MODERATE | Low | 3 hours |
-| 13 | Custom auth CSRF vulnerability | MODERATE | Medium | 6 hours |
-| 14 | German collation breaking sort order | MINOR | Low | 2 hours |
-| 15 | Missing monitoring for performance regressions | MINOR | Low | 4 hours |
-
----
-
-## CRITICAL PITFALLS
-
-Mistakes causing production downtime, data loss, or security breaches.
-
-### 1. Breaking Active User Sessions During Security Patches
-
-**Severity:** CRITICAL
-**Phase Impact:** Security Audit (Phase 1)
-
-**What goes wrong:** Applying critical CVE patches (CVE-2025-66478, CVE-2025-55182) without session management strategy causes mass logouts, disrupting active users.
-
-**Why it happens:** React Server Components and Next.js received critical RCE vulnerability patches in December 2025 / January 2026 with CVSS 10.0 severity. These patches affect default framework configurations, requiring immediate updates. Teams rush to patch without considering session state.
-
-**Consequences:**
-- All users logged out simultaneously
-- Support tickets spike
-- User trust erodes
-- Business operations disrupted
-
-**Prevention:**
-1. Test patch on staging with active sessions first
-2. Implement graceful session migration if auth mechanism changes
-3. Add user notification before applying breaking patches
-4. Deploy during low-traffic windows
-5. Have rollback plan ready
-
-**Detection:**
-- Sudden spike in authentication failures in monitoring
-- Session validation errors in logs
-- User complaints about unexpected logouts
-
-**Phase to address:** Phase 1 (Security Audit) - before touching auth code
-
-**Sources:**
-- [Next.js Security Update December 2025](https://nextjs.org/blog/security-update-2025-12-11)
-- [CVE-2025-66478 Advisory](https://nextjs.org/blog/CVE-2025-66478)
-- [Critical RCE in React & Next.js](https://www.ox.security/blog/rce-in-react-server-components/)
-
----
-
-### 2. Character Encoding Migration Causing Data Corruption
-
-**Severity:** CRITICAL
-**Phase Impact:** Character Encoding Fixes (Dedicated Phase)
-
-**What goes wrong:** Fixing German umlaut encoding (ae→ä) without proper migration strategy corrupts existing data, breaks backups, or causes data loss.
+**What goes wrong:**
+You enable RLS on a production table but forget to create policies. Every query returns empty results. Your application appears completely broken, but there are no error messages because empty results are valid responses. Users panic, production is down, and debugging is difficult because the database is technically working.
 
 **Why it happens:**
-- Database claims UTF-8 but actually uses SQL_ASCII or Latin1
-- Column widths insufficient for multibyte characters
-- Conversion happens without validation scan
-- No rollback when partial corruption detected
+RLS enablement and policy creation are two separate operations. Developers test in the SQL Editor (which runs as postgres superuser and bypasses RLS), see expected results, deploy, and then real users through the Supabase client see nothing. The SQL Editor does not warn about missing policies.
 
-**Consequences:**
-- Permanent data corruption (ä becomes ���)
-- Backup restores fail due to encoding mismatch
-- Search/sorting breaks for German text
-- Cascading failures in related systems
+**How to avoid:**
+- ALWAYS pair `ALTER TABLE ... ENABLE ROW LEVEL SECURITY` with at least one policy in the same migration file
+- NEVER test RLS policies in the SQL Editor — always test through the Supabase client SDK with actual user authentication
+- Use role simulation technique: `SET LOCAL ROLE authenticated; SET LOCAL request.jwt.claims TO '{"sub":"user-id"}';` for SQL-level testing
+- Enforce migration template that requires policy creation before RLS enablement
+- Create "allow all authenticated" policies initially, then tighten them incrementally
 
-**Prevention:**
-1. **Before touching data:** Run PostgreSQL query to verify actual encoding:
-   ```sql
-   SELECT datname, pg_encoding_to_char(encoding) as encoding,
-          datcollate, datctype
-   FROM pg_database
-   WHERE datname = 'your_database';
-   ```
-2. Scan all text columns for length issues after conversion (multibyte expansion)
-3. Test on database copy first, verify all data
-4. Validate that client encoding matches database encoding
-5. Export backup before migration with explicit encoding
-6. Implement conversion in phases: read-only validation, then write
+**Warning signs:**
+- Migration file has `ALTER TABLE ... ENABLE ROW LEVEL SECURITY` without matching `CREATE POLICY` statements
+- Testing exclusively in SQL Editor instead of through API
+- "Works locally but not in production" reports
+- Queries returning `[]` with no error messages
 
-**Detection:**
-- Run data scanning query before migration:
-   ```sql
-   SELECT column_name, max(length(column_name)) as max_length,
-          max(octet_length(column_name)) as max_bytes
-   FROM your_table
-   GROUP BY column_name;
-   ```
-- Compare max_bytes to column width definitions
-- Test conversion on sample data, verify visual correctness
-
-**Phase to address:** Dedicated phase after security audit - high risk of data loss requires isolated focus
-
-**Sources:**
-- [MySQL UTF-8 to UTF8MB4 Migration Guide](https://saveriomiroddi.github.io/An-in-depth-dbas-guide-to-migrating-a-mysql-database-from-the-utf8-to-the-utf8mb4-charset/)
-- [PostgreSQL German Umlauts Best Practices](https://www.dbi-services.com/blog/dealing-with-german-umlaute-in-postgresqls-full-text-search/)
-- [Oracle Unicode Migration Overview](https://docs.oracle.com/database/121/DUMAG/ch1overview.htm)
+**Phase to address:**
+Phase 1 (Schema Migration) — RLS enablement and initial policies must be atomic
 
 ---
 
-### 3. Dynamic APIs in Root Layout Destroying Performance
+### Pitfall 2: Application-Layer Queries Breaking with RLS Context
 
-**Severity:** CRITICAL
-**Phase Impact:** Performance Audit (Phase 1)
-
-**What goes wrong:** Using `cookies()`, `searchParams`, or `headers()` in root layout opts **entire application** into dynamic rendering, eliminating all static optimization benefits.
-
-**Why it happens:** Team adds "just one small check" (auth verification, feature flag, analytics) to root layout without understanding it forces every page to render dynamically on every request.
-
-**Consequences:**
-- 10-50x slower page loads
-- Server costs spike (every page now SSR)
-- CDN edge caching completely bypassed
-- Cold start penalties on every request
-- Users experience the "general sluggishness" this milestone addresses
-
-**Prevention:**
-1. **Audit immediately:** Search codebase for Dynamic APIs in layout files:
-   ```bash
-   grep -r "cookies()" app/**/layout.tsx
-   grep -r "searchParams" app/**/layout.tsx
-   grep -r "headers()" app/**/layout.tsx
-   ```
-2. Move Dynamic API usage into Suspense boundaries:
-   ```typescript
-   // ❌ KILLS PERFORMANCE
-   export default function RootLayout({ children }) {
-     const user = cookies().get('user'); // ENTIRE APP NOW DYNAMIC
-     return <html>{children}</html>;
-   }
-
-   // ✅ PRESERVES STATIC OPTIMIZATION
-   export default function RootLayout({ children }) {
-     return (
-       <html>
-         <Suspense fallback={<Skeleton />}>
-           <UserProvider /> {/* Dynamic API isolated here */}
-         </Suspense>
-         {children}
-       </html>
-     );
-   }
-   ```
-3. Use middleware for auth checks instead of layout checks
-4. Enable verbose build output to see which routes are static vs dynamic
-
-**Detection:**
-- Build output shows all routes as ƒ (Dynamic) instead of ○ (Static)
-- Response headers show `Cache-Control: private, no-cache, no-store`
-- Vercel Analytics shows 0% edge cache hit rate
-- Lighthouse performance scores drop significantly
-
-**Phase to address:** Phase 1 (Performance Audit) - highest impact quick win
-
-**Sources:**
-- [Next.js Production Checklist](https://nextjs.org/docs/app/guides/production-checklist)
-- [Common App Router Mistakes - Vercel](https://vercel.com/blog/common-mistakes-with-the-next-js-app-router-and-how-to-fix-them)
-
----
-
-### 4. Server Actions Without Authorization Checks
-
-**Severity:** CRITICAL
-**Phase Impact:** Security Audit (Phase 1)
-
-**What goes wrong:** Custom auth doesn't automatically protect Server Actions. Users can invoke any Server Action with arbitrary arguments once they get the action's ID.
-
-**Consequences:**
-- Complete authorization bypass
-- Users delete/modify others' data
-- IDOR (Insecure Direct Object Reference) vulnerabilities
-- Regulatory compliance violations (GDPR, data protection)
-
-**Prevention:**
-1. **Establish pattern:** Every Server Action starts with auth check:
-   ```typescript
-   // ✅ REQUIRED PATTERN
-   'use server';
-
-   export async function deleteInspection(inspectionId: string) {
-     // ALWAYS CHECK FIRST
-     const session = await getSession();
-     if (!session) throw new Error('Unauthorized');
-
-     const inspection = await db.inspection.findUnique({
-       where: { id: inspectionId }
-     });
-
-     if (inspection.userId !== session.userId) {
-       throw new Error('Forbidden');
-     }
-
-     // Now safe to proceed
-     await db.inspection.delete({ where: { id: inspectionId } });
-   }
-   ```
-2. Audit all files matching `app/**/actions.ts` or containing `'use server'`
-3. Create shared auth utility to enforce pattern:
-   ```typescript
-   async function requireAuth() {
-     const session = await getSession();
-     if (!session) throw new Error('Unauthorized');
-     return session;
-   }
-   ```
-4. Add ESLint rule to flag Server Actions without auth calls
-
-**Detection:**
-- Grep for `'use server'` and verify auth check in function body
-- Manual audit of all Server Actions
-- Penetration testing with modified action IDs
-
-**Phase to address:** Phase 1 (Security Audit) - authorization is critical
-
-**Sources:**
-- [How to Think About Security in Next.js](https://nextjs.org/blog/security-nextjs-server-components-actions)
-- [Next.js Security Checklist](https://blog.arcjet.com/next-js-security-checklist/)
-- [Complete Next.js Security Guide 2025](https://www.turbostarter.dev/blog/complete-nextjs-security-guide-2025-authentication-api-protection-and-best-practices)
-
----
-
-### 5. CVE-2025-29927 Middleware Authorization Bypass
-
-**Severity:** CRITICAL
-**Phase Impact:** Security Audit (Phase 1)
-
-**What goes wrong:** Attackers bypass middleware authentication by manipulating `x-middleware-subrequest` header, gaining unauthorized access to protected routes.
-
-**Why it happens:** Next.js middleware vulnerability (CVSS 9.1) in versions before 12.3.5, 13.5.9, 14.2.25, or 15.2.3 when self-hosted with `output: standalone` and relying solely on middleware for auth without downstream validation.
-
-**Consequences:**
-- Complete authentication bypass
-- Access to protected routes/data
-- Admin functionality exposed to unauthenticated users
-
-**Prevention:**
-1. **Immediate:** Upgrade Next.js to patched version (check current version first)
-   ```bash
-   npm list next
-   # Upgrade to 14.2.25+ or 15.2.3+
-   npm install next@latest
-   ```
-2. Never rely solely on middleware for critical auth - always validate in:
-   - Server Components
-   - Server Actions
-   - API Route Handlers
-3. Implement defense in depth: auth checks at multiple layers
-
-**Detection:**
-- Check Next.js version: `grep "\"next\":" package.json`
-- Verify if using standalone output: `grep "output: 'standalone'" next.config.js`
-- Test auth routes with manipulated headers:
-   ```bash
-   curl -H "x-middleware-subrequest: 1" https://app.com/admin
-   ```
-
-**Phase to address:** Phase 1 (Security Audit) - before any other changes
-
-**Sources:**
-- [CVE-2025-29927 Analysis - Datadog](https://securitylabs.datadoghq.com/articles/nextjs-middleware-auth-bypass/)
-- [Next.js CVE-2025-29927 Attack Guide](https://pentest-tools.com/blog/cve-2025-29927-next-js-bypass)
-
----
-
-## HIGH SEVERITY PITFALLS
-
-Mistakes causing significant technical debt, performance degradation, or partial outages.
-
-### 6. Server/Client Component Boundary Confusion
-
-**Severity:** HIGH
-**Phase Impact:** Performance Optimization (Phase 2)
-
-**What goes wrong:** Refactoring to optimize Server/Client boundaries breaks serialization, causes hydration mismatches, or exposes sensitive server code to client bundles.
+**What goes wrong:**
+You have 750+ files with ~561 occurrences of Building/Property/Liegenschaft references. Many queries use direct database access through Server Components (`createClient()` from `@/lib/supabase/server`). When RLS is enabled, `auth.uid()` returns NULL in Server Components because the Supabase client doesn't have the user session context, breaking every query.
 
 **Why it happens:**
-- Team doesn't understand "use client" boundary rules
-- Passing functions/class instances across boundaries
-- Marking large component trees as client when only leaf needs interactivity
-- Moving code without testing serialization
+Server Components don't automatically pass authentication context to Supabase. The `createServerClient()` helper uses the `anon` key, and RLS policies with `auth.uid()` expect a valid JWT. Without explicit session forwarding, `auth.uid()` evaluates to NULL and all policies fail.
 
-**Consequences:**
-- "Functions cannot be passed directly to Client Components" errors in production
-- Sensitive API keys/secrets leaked to client bundle
-- JavaScript bundle size explodes (entire dependency trees marked client)
-- Hydration mismatches causing UI flicker/broken state
+**How to avoid:**
+- Audit ALL Server Components that call Supabase (currently minimal: 7 files with direct `.from()` calls)
+- Server Components MUST use session from cookies: `createClient()` helper already implements this via `@supabase/ssr`
+- For service-role access (admin operations), create separate client: `createServiceRoleClient()` with explicit bypass
+- Test every Server Component route with RLS enabled BEFORE production deployment
+- Create migration checklist: verify each Server Component query works with RLS
+- Consider moving complex queries to API routes with explicit session handling
 
-**Prevention:**
-1. **Before refactoring:** Document current boundaries
-   ```bash
-   # Map all client components
-   find app -type f -name "*.tsx" -exec grep -l "use client" {} \;
-   ```
-2. Test serialization explicitly:
-   ```typescript
-   // All props must be serializable
-   type SerializableProps = {
-     // ✅ OK
-     strings: string;
-     numbers: number;
-     arrays: string[];
-     objects: { key: string };
+**Warning signs:**
+- Server Component queries returning empty arrays after RLS enablement
+- `auth.uid()` debugging shows NULL in logs
+- Dashboard/heatmap components show no data
+- API routes work but Server Component pages break
 
-     // ❌ NOT SERIALIZABLE
-     functions?: () => void; // NO
-     dates?: Date; // Use string instead
-     classInstances?: MyClass; // NO
-   };
-   ```
-3. Add "use client" only to leaf components that need interactivity
-4. Use composition pattern for server/client separation:
-   ```typescript
-   // Server Component
-   export default async function Page() {
-     const data = await fetchData(); // Server-side
-     return <ClientButton data={data} />; // Pass serializable data
-   }
-
-   // Client Component (separate file)
-   'use client';
-   export function ClientButton({ data }) {
-     const [state, setState] = useState();
-     // Interactive logic here
-   }
-   ```
-5. Enable TypeScript strict mode to catch some serialization issues
-
-**Detection:**
-- Build warnings about large client bundles
-- Runtime errors: "Error: Functions cannot be passed..."
-- Bundle analyzer shows unexpected server-only code in client bundle
-- Check with: `npm run build -- --experimental-show-bundle-info`
-
-**Phase to address:** Phase 2 (Performance Optimization) - after security fixes, before major refactoring
-
-**Sources:**
-- [Next.js Server Components Broke Our App Twice](https://medium.com/lets-code-future/next-js-server-components-broke-our-app-twice-worth-it-e511335eed22)
-- [Common App Router Mistakes](https://vercel.com/blog/common-mistakes-with-the-next-js-app-router-and-how-to-fix-them)
-- [Server and Client Components Guide](https://nextjs.org/docs/app/getting-started/server-and-client-components)
+**Phase to address:**
+Phase 2 (RLS Context Validation) — After schema migration, before data migration
 
 ---
 
-### 7. Missing Data Caching for Non-Fetch Requests
+### Pitfall 3: Missing organization_id Indexes (Performance Cliff)
 
-**Severity:** HIGH
-**Phase Impact:** Performance Optimization (Phase 2)
-
-**What goes wrong:** Database queries, API calls using non-fetch libraries (Prisma, Supabase client, Axios) bypass Next.js caching, causing repeated expensive operations.
-
-**Why it happens:** Developers assume all data requests are cached like `fetch()`. Non-fetch requests require explicit caching with `unstable_cache()`.
-
-**Consequences:**
-- Database hammered with identical queries on every request
-- Expensive API calls repeated unnecessarily
-- Slow response times despite "caching enabled"
-- Database connection pool exhaustion
-
-**Prevention:**
-1. **Audit all data fetching:** Search for database/API calls
-   ```bash
-   # Find potential uncached calls
-   grep -r "prisma\." app/
-   grep -r "supabase\." app/
-   grep -r "axios\." app/
-   grep -r "db\." app/
-   ```
-2. Wrap with explicit caching:
-   ```typescript
-   import { unstable_cache } from 'next/cache';
-
-   // ❌ NOT CACHED
-   async function getInspections() {
-     return await db.inspection.findMany();
-   }
-
-   // ✅ CACHED
-   const getInspections = unstable_cache(
-     async () => db.inspection.findMany(),
-     ['inspections-list'], // Cache key
-     {
-       revalidate: 3600, // 1 hour
-       tags: ['inspections'] // For on-demand revalidation
-     }
-   );
-   ```
-3. Use React Cache for request-level deduplication:
-   ```typescript
-   import { cache } from 'react';
-
-   // Deduplicate within single request
-   export const getUser = cache(async (id: string) => {
-     return db.user.findUnique({ where: { id } });
-   });
-   ```
-4. Monitor query counts in production to detect cache misses
-
-**Detection:**
-- Database monitoring shows identical queries repeating
-- Response times don't improve despite "caching"
-- Connection pool exhaustion errors
-- Add logging to track cache hits/misses
-
-**Phase to address:** Phase 2 (Performance Optimization) - systematic data layer audit
-
-**Sources:**
-- [Next.js Production Checklist - Data Caching](https://nextjs.org/docs/app/guides/production-checklist)
-
----
-
-### 8. PWA Cache Strategy Causing Stale Data or Storage Overflow
-
-**Severity:** HIGH
-**Phase Impact:** Performance Optimization (Phase 2)
-
-**What goes wrong:** Aggressive PWA caching serves stale data to users or fills device storage, causing app crashes or data loss when browser evicts cache.
+**What goes wrong:**
+You add `organization_id` to all 68 tables and create RLS policies like `organization_id = current_setting('app.current_organization_id')`. On 10K rows, queries take 50ms instead of 2ms. On 100K+ rows (realistic for multi-tenant SaaS after 2 years), queries timeout. Every dashboard, every list view, every heatmap becomes unusable.
 
 **Why it happens:**
-- Cache-first strategy applied to dynamic data
-- No cache invalidation strategy
-- Caching everything including large assets
-- No storage quota monitoring
+A policy with `organization_id = X` triggers a sequential scan on the entire table if `organization_id` is not indexed. RLS policies execute on EVERY query, so a missing index becomes a critical performance bottleneck. Most tutorials focus on adding the column but forget the index.
 
-**Consequences:**
-- Users see outdated inspection data (safety risk)
-- Device storage fills up, browser evicts cache
-- App crashes when expected cached data missing
-- Offline functionality broken after cache eviction
+**How to avoid:**
+- Create composite indexes BEFORE enabling RLS: `CREATE INDEX idx_tablename_org_id ON tablename(organization_id)`
+- For multi-column filters (common in dashboards), create composite indexes: `CREATE INDEX idx_projects_org_status ON projects(organization_id, status)`
+- Use PostgreSQL's `EXPLAIN ANALYZE` with RLS policies to verify index usage
+- Measure query performance with realistic data volumes (>10K rows per tenant)
+- Add indexes in the SAME migration that adds `organization_id` columns
+- Monitor query performance in production with Supabase dashboard metrics
 
-**Prevention:**
-1. **Differentiate caching strategies by content type:**
-   ```javascript
-   // service-worker.js
+**Warning signs:**
+- `EXPLAIN ANALYZE` shows "Seq Scan" instead of "Index Scan" on RLS-filtered queries
+- Query times >100ms for simple list views
+- Dashboard heatmap loads slowly or times out
+- Database CPU usage spikes after RLS enablement
 
-   // Static assets: Cache-first
-   registerRoute(
-     /\.(js|css|png|jpg|svg)$/,
-     new CacheFirst({
-       cacheName: 'static-assets',
-       plugins: [
-         new ExpirationPlugin({
-           maxEntries: 100,
-           maxAgeSeconds: 30 * 24 * 60 * 60, // 30 days
-         }),
-       ],
-     })
-   );
-
-   // API data: Network-first with stale-while-revalidate
-   registerRoute(
-     /\/api\//,
-     new NetworkFirst({
-       cacheName: 'api-data',
-       plugins: [
-         new ExpirationPlugin({
-           maxEntries: 50,
-           maxAgeSeconds: 5 * 60, // 5 minutes
-         }),
-       ],
-     })
-   );
-
-   // Critical user data: Network-only (offline fallback)
-   registerRoute(
-     /\/api\/inspections\//,
-     new NetworkOnly()
-   );
-   ```
-2. Implement cache version management and migration:
-   ```javascript
-   const CACHE_VERSION = 'v2';
-
-   self.addEventListener('activate', (event) => {
-     event.waitUntil(
-       caches.keys().then((cacheNames) => {
-         return Promise.all(
-           cacheNames
-             .filter((name) => name !== CACHE_VERSION)
-             .map((name) => caches.delete(name))
-         );
-       })
-     );
-   });
-   ```
-3. Monitor storage quota:
-   ```typescript
-   if ('storage' in navigator && 'estimate' in navigator.storage) {
-     const { usage, quota } = await navigator.storage.estimate();
-     const percentUsed = (usage / quota) * 100;
-     if (percentUsed > 80) {
-       // Warn user, clear old caches
-     }
-   }
-   ```
-4. Test offline behavior with stale cache on staging
-
-**Detection:**
-- Users report seeing old data
-- Console errors: "QuotaExceededError"
-- Storage usage monitoring shows growth
-- Test: Disconnect network, clear cache, verify fallback
-
-**Phase to address:** Phase 2 (Performance Optimization) - after data caching audit
-
-**Sources:**
-- [PWA Offline Capabilities - Romexsoft](https://www.romexsoft.com/blog/what-is-pwa-progressive-web-apps-and-offline-capabilities/)
-- [Debugging Progressive Web Apps](https://blog.pixelfreestudio.com/debugging-progressive-web-apps-common-pitfalls/)
-- [PWA Service Worker Caching Strategies](https://www.magicbell.com/blog/offline-first-pwas-service-worker-caching-strategies)
+**Phase to address:**
+Phase 1 (Schema Migration) — Indexes must be created atomically with `organization_id` columns
 
 ---
 
-### 9. Bundle Analysis Skipped Before Optimization
+### Pitfall 4: Foreign Key Cascades Breaking Multi-Tenant Isolation
 
-**Severity:** HIGH
-**Phase Impact:** Performance Optimization (Phase 2)
-
-**What goes wrong:** Team optimizes "obvious" issues but ships massive unexpected dependencies, negating performance gains.
-
-**Why it happens:** No systematic approach to identifying what's actually bloating the bundle. Optimizing based on assumptions rather than data.
-
-**Consequences:**
-- 110K LOC app likely has significant dead code
-- Entire libraries imported when only small functions needed
-- Duplicate dependencies (React imported multiple times)
-- Optimization effort wasted on wrong targets
-
-**Prevention:**
-1. **Install and run bundle analyzer immediately:**
-   ```bash
-   npm install --save-dev @next/bundle-analyzer
-   ```
-   ```javascript
-   // next.config.js
-   const withBundleAnalyzer = require('@next/bundle-analyzer')({
-     enabled: process.env.ANALYZE === 'true',
-   });
-
-   module.exports = withBundleAnalyzer({
-     // your config
-   });
-   ```
-   ```bash
-   ANALYZE=true npm run build
-   ```
-2. Focus on these common large codebase issues:
-   - Chart libraries (recharts, chart.js) - often 100-500KB
-   - Date libraries (moment.js → date-fns or dayjs)
-   - Icon libraries (import all vs selective)
-   - UI component libraries (MUI, Ant Design - entire lib vs components)
-   - Lodash (import specific functions, not whole library)
-3. Use dynamic imports for heavy components:
-   ```typescript
-   // ❌ BAD: Always loads heavy chart library
-   import { LineChart } from 'recharts';
-
-   // ✅ GOOD: Only loads when needed
-   const LineChart = dynamic(() =>
-     import('recharts').then((mod) => mod.LineChart),
-     { ssr: false }
-   );
-   ```
-4. Check for duplicate dependencies:
-   ```bash
-   npm ls react
-   npm ls react-dom
-   # Should only show one version
-   ```
-
-**Detection:**
-- Build output shows large "First Load JS"
-- Lighthouse flags "Reduce unused JavaScript"
-- Bundle analyzer shows unexpected large modules
-- Slow page load despite "optimizations"
-
-**Phase to address:** Phase 2 (Performance Optimization) - first step before any optimization work
-
-**Sources:**
-- [Next.js Production Checklist](https://nextjs.org/docs/app/guides/production-checklist)
-- [10 Performance Mistakes in Next.js 16](https://medium.com/@sureshdotariya/10-performance-mistakes-in-next-js-16-that-are-killing-your-app-and-how-to-fix-them-2facfab26bea)
-
----
-
-## MODERATE PITFALLS
-
-Mistakes causing delays, technical debt, or user frustration but recoverable.
-
-### 10. Large Refactoring Without Incremental Deployment
-
-**Severity:** MODERATE
-**Phase Impact:** All Phases (Strategy)
-
-**What goes wrong:** Big-bang deployment of performance optimizations causes unexpected breakage across unrelated features. No way to isolate which change caused production issue.
-
-**Why it happens:** Pressure to "fix performance" leads to bundling multiple changes into one release. 110K LOC + 750 files = high complexity, many edge cases.
-
-**Consequences:**
-- Production issue, unclear which change caused it
-- Rollback loses all optimization work
-- Team loses confidence in optimization effort
-- Extended debugging sessions under production pressure
-
-**Prevention:**
-1. **Phase approach with feature flags:**
-   ```typescript
-   // lib/features.ts
-   export const features = {
-     optimizedInspectionList: process.env.NEXT_PUBLIC_FF_INSPECTION_OPT === 'true',
-     improvedCaching: process.env.NEXT_PUBLIC_FF_CACHING === 'true',
-     // ...
-   };
-   ```
-   ```typescript
-   // Gradual rollout
-   export default async function InspectionList() {
-     if (features.optimizedInspectionList) {
-       return <OptimizedInspectionList />;
-     }
-     return <LegacyInspectionList />; // Keep old version
-   }
-   ```
-2. Deploy optimizations in priority order:
-   - Week 1: Critical security patches only
-   - Week 2: High-impact performance win #1 (e.g., Dynamic API fixes)
-   - Week 3: High-impact performance win #2 (e.g., data caching)
-   - Week 4: Bundle optimization
-3. Use canary releases:
-   - Deploy to 5% of users first
-   - Monitor for 24-48 hours
-   - Gradually increase to 100%
-4. Maintain rollback capability for each phase
-5. Document what changed in each deployment for debugging
-
-**Detection:**
-- Test each change in isolation on staging
-- Monitor error rates after each deployment
-- Track performance metrics per deployment
-- A/B test optimized vs legacy versions
-
-**Phase to address:** Phase planning strategy - inform roadmap structure
-
-**Sources:**
-- [How to Refactor Complex Codebases](https://www.freecodecamp.org/news/how-to-refactor-complex-codebases/)
-- [Refactoring at Scale - Key Points](https://understandlegacycode.com/blog/key-points-of-refactoring-at-scale/)
-- [Mistakes in Large Established Codebases](https://www.seangoedecke.com/large-established-codebases/)
-
----
-
-### 11. Security Dependency Updates Breaking Build
-
-**Severity:** MODERATE
-**Phase Impact:** Security Audit (Phase 1)
-
-**What goes wrong:** Running `npm audit fix` to patch vulnerabilities breaks the build due to breaking changes in dependencies.
-
-**Consequences:**
-- Security updates blocked
-- Build failures in CI/CD
-- Team wastes time debugging dependency issues
-- Delayed security patches increase vulnerability window
-
-**Prevention:**
-1. **Never run `npm audit fix` blindly in production codebase:**
-   ```bash
-   # ❌ DON'T DO THIS
-   npm audit fix
-   git commit -m "fix vulnerabilities"
-
-   # ✅ DO THIS
-   # 1. Review audit report first
-   npm audit
-
-   # 2. Fix only high/critical, no breaking changes
-   npm audit fix --only=prod --audit-level=high
-
-   # 3. Test build
-   npm run build
-   npm run test
-
-   # 4. Review what changed
-   git diff package.json package-lock.json
-   ```
-2. Update dependencies incrementally with testing:
-   ```bash
-   # Update one at a time
-   npm update next
-   npm run build && npm test
-   git commit -m "chore: update next.js to X.Y.Z"
-
-   npm update react react-dom
-   npm run build && npm test
-   git commit -m "chore: update react to X.Y.Z"
-   ```
-3. Use tools like Dependabot with auto-merge only for patch versions:
-   ```yaml
-   # .github/dependabot.yml
-   version: 2
-   updates:
-     - package-ecosystem: "npm"
-       directory: "/"
-       schedule:
-         interval: "weekly"
-       open-pull-requests-limit: 5
-       # Auto-merge only patch updates
-       versioning-strategy: increase-if-necessary
-   ```
-4. Test in staging environment before merging
-5. Keep lockfile committed to ensure reproducible builds
-
-**Detection:**
-- CI build failures after dependency updates
-- Type errors after updates
-- Runtime errors with new dependency versions
-- Test failures pointing to dependency behavior changes
-
-**Phase to address:** Phase 1 (Security Audit) - systematic, tested approach
-
-**Sources:**
-- [Next.js Security Checklist](https://blog.arcjet.com/next-js-security-checklist/)
-- [Using Components with Known Vulnerabilities](https://www.cybersecuritydive.com/news/critical-vulnerabilities-found-in-react-and-nextjs/807016/)
-
----
-
-### 12. Environment Variables Exposed to Client Bundle
-
-**Severity:** MODERATE
-**Phase Impact:** Security Audit (Phase 1)
-
-**What goes wrong:** Sensitive configuration (database URLs, API keys, secrets) accidentally shipped to client JavaScript bundle, exposing credentials publicly.
+**What goes wrong:**
+You add `organization_id` to all tables but don't update foreign key constraints to include it. A cascade delete from `properties` bypasses RLS and deletes `units` across ALL organizations because the cascade operates at the postgres superuser level, not the application role level. Data loss across tenant boundaries.
 
 **Why it happens:**
-- Misunderstanding `NEXT_PUBLIC_` prefix meaning
-- Importing server-only config in Client Components
-- Not validating which env vars are actually public-safe
+PostgreSQL foreign key cascades (ON DELETE CASCADE) run with elevated privileges and bypass RLS policies. In multi-tenant schemas, foreign keys that include `organization_id` in both referencing and referenced tables add an extra layer of protection, preventing references from crossing tenants. Without this, cascades are dangerous.
 
-**Consequences:**
-- Database credentials exposed in browser DevTools
-- API keys stolen, abused (billing impact)
-- Security compliance violations
-- Credential rotation required (downtime)
+**How to avoid:**
+- Make primary keys compound: `PRIMARY KEY (id, organization_id)`
+- Update all foreign keys to include `organization_id`: `FOREIGN KEY (parent_id, organization_id) REFERENCES parent(id, organization_id)`
+- This REQUIRES modifying 68 tables — expensive but prevents cross-tenant data corruption
+- Consider using `ON DELETE NO ACTION` instead of `CASCADE` in multi-tenant context
+- Add database-level CHECK constraints: `CHECK (organization_id = parent_organization_id)` where applicable
+- Test cascade behavior with multi-organization test data BEFORE production
 
-**Prevention:**
-1. **Audit current environment variables:**
-   ```bash
-   # List all env vars in codebase
-   grep -r "process.env" app/ --include="*.ts" --include="*.tsx"
+**Warning signs:**
+- Foreign keys reference only `id`, not `(id, organization_id)`
+- Primary keys are single-column `id` instead of compound `(id, organization_id)`
+- No cross-tenant deletion tests in test suite
+- Cascade deletes happen faster than expected (bypassing RLS)
 
-   # Check .env files
-   cat .env.local .env.production
-   ```
-2. **Strict naming convention:**
-   ```bash
-   # ✅ PUBLIC (safe to expose)
-   NEXT_PUBLIC_API_URL=https://api.example.com
-   NEXT_PUBLIC_APP_VERSION=1.0.0
-
-   # ✅ PRIVATE (server-only)
-   DATABASE_URL=postgresql://...
-   SUPABASE_SERVICE_KEY=...
-   JWT_SECRET=...
-   STRIPE_SECRET_KEY=...
-   ```
-3. **Server-only access pattern:**
-   ```typescript
-   // lib/env.server.ts
-   // Mark as server-only
-   import 'server-only';
-
-   export const serverEnv = {
-     databaseUrl: process.env.DATABASE_URL!,
-     jwtSecret: process.env.JWT_SECRET!,
-   };
-
-   // This will cause build error if imported in Client Component
-   ```
-4. Add to `.gitignore`:
-   ```
-   .env.local
-   .env*.local
-   .env.production
-   ```
-5. Use Next.js built-in validation:
-   ```typescript
-   // next.config.js
-   module.exports = {
-     env: {
-       // Explicitly whitelist public vars
-       NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
-     },
-   };
-   ```
-
-**Detection:**
-- Inspect production bundle in browser DevTools > Sources
-- Search bundle for sensitive strings (database, api.key, secret)
-- Run build and check `.next/static/chunks` for leaked env vars
-- Use tool: `npx @next/bundle-analyzer` and search output
-
-**Phase to address:** Phase 1 (Security Audit) - immediate audit before other work
-
-**Sources:**
-- [Next.js Environment Variables Guide 2026](https://thelinuxcode.com/nextjs-environment-variables-2026-build-time-vs-runtime-security-and-production-patterns/)
-- [Next.js Data Security Guide](https://nextjs.org/docs/app/guides/data-security)
-- [Next.js Production Checklist](https://nextjs.org/docs/app/guides/production-checklist)
+**Phase to address:**
+Phase 1 (Schema Migration) — Foreign key structure must be updated atomically with `organization_id` addition
 
 ---
 
-### 13. Custom Auth CSRF Vulnerability in Route Handlers
+### Pitfall 5: Data Migration Without Zero-Downtime Strategy
 
-**Severity:** MODERATE
-**Phase Impact:** Security Audit (Phase 1)
+**What goes wrong:**
+You have existing production data (KEWA AG). You add `organization_id NOT NULL` to 68 tables in a single migration. The migration locks tables, fails on NOT NULL constraint (no default value), and production is down for 15+ minutes while you rollback and debug. Users lose trust.
 
-**What goes wrong:** Custom Route Handlers (`app/api/*/route.ts`) lack CSRF protection that Server Actions have built-in, allowing cross-site attacks to perform authenticated actions.
+**Why it happens:**
+Adding a NOT NULL column requires backfilling ALL existing rows. On large tables (projects, tasks, audit_logs with 10K+ rows), this takes time and acquires exclusive locks. Zero downtime migrations require phased approach: add nullable column, backfill data, add NOT NULL constraint.
 
-**Consequences:**
-- Attackers trigger state-changing operations (delete, update) via victim's authenticated session
-- Data manipulation/deletion
-- Account takeover scenarios
+**How to avoid:**
+- Phase 1: Add `organization_id UUID` (nullable) to all tables
+- Phase 2: Backfill existing data: `UPDATE table SET organization_id = 'kewa-org-id' WHERE organization_id IS NULL`
+- Phase 3: Add NOT NULL constraint: `ALTER TABLE table ALTER COLUMN organization_id SET NOT NULL`
+- Phase 4: Enable RLS with policies
+- Run backfill in small batches (1000 rows at a time) to avoid long-running transactions
+- Use snapshot plus CDC (Change Data Capture) for large tables
+- Test migration on production-sized dataset in staging environment
+- Have rollback scripts ready for each phase
 
-**Prevention:**
-1. **Identify vulnerable endpoints:**
-   ```bash
-   # Find all Route Handlers
-   find app -type f -path "*/api/*/route.ts"
+**Warning signs:**
+- Migration adds NOT NULL column in single operation
+- No batch processing for backfill operations
+- Migration locks tables for >30 seconds
+- No staging environment testing with realistic data volumes
+- No rollback plan documented
 
-   # Audit for state-changing operations without CSRF protection
-   # Look for POST, PUT, DELETE methods
-   ```
-2. **Implement CSRF token validation:**
-   ```typescript
-   // lib/csrf.ts
-   import { cookies, headers } from 'next/headers';
-
-   export async function validateCsrfToken() {
-     const token = headers().get('x-csrf-token');
-     const cookieToken = cookies().get('csrf-token')?.value;
-
-     if (!token || token !== cookieToken) {
-       throw new Error('CSRF validation failed');
-     }
-   }
-
-   // app/api/inspections/route.ts
-   export async function POST(request: Request) {
-     await validateCsrfToken(); // ADD THIS
-
-     // Rest of handler
-   }
-   ```
-3. **Alternative: Use Server Actions instead of Route Handlers**
-   - Server Actions have built-in CSRF protection
-   - Simpler security model
-   - Better for form submissions and mutations
-4. Add Origin/Referer header validation:
-   ```typescript
-   export async function POST(request: Request) {
-     const origin = headers().get('origin');
-     const allowedOrigins = [process.env.NEXT_PUBLIC_APP_URL];
-
-     if (!origin || !allowedOrigins.includes(origin)) {
-       return new Response('Forbidden', { status: 403 });
-     }
-
-     // Rest of handler
-   }
-   ```
-
-**Detection:**
-- Audit all Route Handlers for state-changing operations
-- Test with CSRF attack simulation:
-   ```html
-   <!-- Attacker's page -->
-   <form action="https://yourapp.com/api/delete" method="POST">
-     <input name="id" value="victim-data" />
-   </form>
-   <script>document.forms[0].submit();</script>
-   ```
-- Check if request succeeds without valid token
-
-**Phase to address:** Phase 1 (Security Audit) - custom auth requires extra scrutiny
-
-**Sources:**
-- [Next.js Security Checklist](https://blog.arcjet.com/next-js-security-checklist/)
-- [How to Think About Security in Next.js](https://nextjs.org/blog/security-nextjs-server-components-actions)
+**Phase to address:**
+Phase 3 (Data Migration) — Must use phased approach across multiple deployments
 
 ---
 
-## MINOR PITFALLS
+### Pitfall 6: Terminology Refactoring Breaks Generated Code
 
-Mistakes causing annoyance, minor performance issues, or cosmetic problems but easily fixable.
+**What goes wrong:**
+You have 561 occurrences of Liegenschaft/Gebäude/Building/Property across 81 files. You use find-and-replace to standardize terminology. This breaks: import statements when files are renamed, type definitions that reference old names, database column references in queries, generated TypeScript types from Supabase schema, and creates a slow, error-prone loop of fixing call sites.
 
-### 14. German Collation Breaking Sort Order
+**Why it happens:**
+Refactoring isn't just find-and-replace at scale — it's a graph traversal problem across your codebase's semantic structure. When you rename a function, changes cascade through every call site, type definitions, imports/exports, tests, and documentation. Simple text replacement breaks these relationships.
 
-**Severity:** MINOR
-**Phase Impact:** Character Encoding Fixes
+**How to avoid:**
+- Use AST-based refactoring tools (TypeScript Language Server, VSCode F2 rename)
+- Refactor types FIRST, then let TypeScript errors guide code changes
+- Update Supabase schema types: `npx supabase gen types typescript` after database changes
+- Create type aliases during transition: `type Liegenschaft = Property` for gradual migration
+- Update one component tree at a time (e.g., all dashboard components, then all forms)
+- Run full test suite after EACH refactoring step
+- Avoid bulk file renames — keep file names stable, change internal references
+- Use IDE "Find All References" before renaming
 
-**What goes wrong:** After fixing character encoding (ae→ä), sort order breaks because database collation doesn't respect German alphabetization rules.
+**Warning signs:**
+- Planning to use sed/awk/find-replace for refactoring
+- No TypeScript strict mode (catches broken references)
+- Renaming files before updating imports
+- Changing database columns and code types simultaneously
+- No test coverage to catch broken references
 
-**Why it happens:** Encoding (how characters are stored) ≠ Collation (how strings are sorted). UTF-8 encoding doesn't automatically mean German sorting rules.
-
-**Consequences:**
-- Names/addresses sorted incorrectly (ä sorted after z instead of near a)
-- User confusion
-- Search/filter results feel "broken"
-- Compliance issues if alphabetization required
-
-**Prevention:**
-1. **Check current collation:**
-   ```sql
-   SELECT datname, datcollate, datctype
-   FROM pg_database
-   WHERE datname = 'your_database';
-   ```
-2. **Set German locale when fixing encoding:**
-   ```sql
-   -- Option 1: Set at database creation (requires recreation)
-   CREATE DATABASE kewa_app
-     ENCODING = 'UTF8'
-     LC_COLLATE = 'de_DE.UTF8'
-     LC_CTYPE = 'de_DE.UTF8';
-
-   -- Option 2: Set for specific columns (non-destructive)
-   ALTER TABLE contacts
-     ALTER COLUMN name TYPE VARCHAR(255)
-     COLLATE "de_DE.UTF8";
-   ```
-3. **Application-level sorting if DB change not feasible:**
-   ```typescript
-   // Use Intl.Collator for German sorting
-   const germanCollator = new Intl.Collator('de-DE');
-
-   names.sort((a, b) => germanCollator.compare(a, b));
-   // Correctly sorts: "Müller" before "Neumann"
-   ```
-4. Test with German characters in staging:
-   ```sql
-   -- Test data
-   INSERT INTO contacts (name) VALUES
-     ('Müller'), ('Mueller'), ('Becker'), ('Äpfel'),
-     ('Apfel'), ('Öhler'), ('Zahner'), ('Über');
-
-   -- Verify sort order
-   SELECT name FROM contacts ORDER BY name COLLATE "de_DE.UTF8";
-   ```
-
-**Detection:**
-- User reports incorrect sorting
-- Automated test with German test data
-- Visual inspection of sorted lists in app
-
-**Phase to address:** Same phase as character encoding fixes - bundle together
-
-**Sources:**
-- [PostgreSQL German Umlauts Full Text Search](https://www.dbi-services.com/blog/dealing-with-german-umlaute-in-postgresqls-full-text-search/)
-- [PostgreSQL Order By with German Umlauts](https://bytes.com/topic/postgresql/answers/173467-order-does-wrong-unicode-chars-german-umlauts)
+**Phase to address:**
+Phase 4 (Terminology Cleanup) — After data model is stable, before navigation redesign
 
 ---
 
-### 15. Missing Monitoring for Performance Regressions
+### Pitfall 7: Navigation Redesign Breaks User Mental Models
 
-**Severity:** MINOR
-**Phase Impact:** Monitoring Setup (Phase 3)
+**What goes wrong:**
+You redesign the footer navigation (8 items → fewer with drill-down) without user testing. Users can't find previously top-level features (Lieferanten, Kosten, Einheiten). Support tickets spike. Users revert to old URLs, which now 404. Productivity drops because navigation requires 2+ clicks instead of 1.
 
-**What goes wrong:** Team optimizes performance, deploys, but has no way to detect if future changes regress performance. Sluggishness returns unnoticed.
+**Why it happens:**
+Navigation accounts for 30-40% of mobile usability problems. Users develop muscle memory for existing navigation. Drill-down navigation (replacing current menu with child items) minimizes scrolling but frustrates users who frequently move between levels. The Priority+ pattern (showing primary items directly, overflow in "more" menu) works better for existing apps with established user habits.
 
-**Consequences:**
-- Performance gains eroded over time
-- No alerts when regression occurs
-- Can't pinpoint which deployment caused regression
-- Users suffer degraded experience silently
+**How to avoid:**
+- Conduct navigation audit: which features are accessed most frequently by KEWA/Imeri?
+- Use analytics (if available) or user interviews to understand access patterns
+- Keep high-frequency features at top level (likely: Projekte, Aufgaben, Liegenschaft, Kosten)
+- Use drill-down ONLY for related feature groups (e.g., Admin → Properties, Partners, Templates)
+- Implement feature flags for gradual rollout: old nav → new nav → validate → commit
+- Preserve old URLs with redirects for bookmarked pages
+- Add "Favorites" or "Recent" section to reduce navigation depth
+- Test with actual users (KEWA AG, Imeri) before full deployment
 
-**Prevention:**
-1. **Implement Core Web Vitals tracking:**
-   ```typescript
-   // app/layout.tsx
-   import { Analytics } from '@vercel/analytics/react';
-   import { SpeedInsights } from '@vercel/speed-insights/next';
+**Warning signs:**
+- No user research on current navigation usage patterns
+- Drill-down used for unrelated features
+- No analytics on feature access frequency
+- Navigation redesign bundled with data model changes (too many variables)
+- No rollback plan if users reject new navigation
 
-   export default function RootLayout({ children }) {
-     return (
-       <html>
-         <body>
-           {children}
-           <Analytics />
-           <SpeedInsights />
-         </body>
-       </html>
-     );
-   }
-   ```
-2. **Custom performance monitoring:**
-   ```typescript
-   // lib/monitoring.ts
-   export function reportWebVitals(metric) {
-     // Send to your analytics
-     if (metric.label === 'web-vital') {
-       analytics.track('Web Vitals', {
-         name: metric.name, // LCP, FID, CLS, FCP, TTFB
-         value: metric.value,
-         page: window.location.pathname,
-       });
-     }
-   }
-
-   // app/layout.tsx
-   'use client';
-   import { useReportWebVitals } from 'next/web-vitals';
-
-   export function WebVitals() {
-     useReportWebVitals(reportWebVitals);
-     return null;
-   }
-   ```
-3. **Set performance budgets in CI:**
-   ```javascript
-   // lighthouse-ci.config.js
-   module.exports = {
-     ci: {
-       collect: {
-         url: ['http://localhost:3000/'],
-       },
-       assert: {
-         assertions: {
-           'first-contentful-paint': ['warn', { maxNumericValue: 2000 }],
-           'largest-contentful-paint': ['error', { maxNumericValue: 3000 }],
-           'cumulative-layout-shift': ['error', { maxNumericValue: 0.1 }],
-           'total-blocking-time': ['warn', { maxNumericValue: 300 }],
-         },
-       },
-     },
-   };
-   ```
-4. Monitor these key metrics:
-   - LCP (Largest Contentful Paint) - loading performance
-   - FID (First Input Delay) - interactivity
-   - CLS (Cumulative Layout Shift) - visual stability
-   - TTFB (Time to First Byte) - server response time
-   - Bundle sizes over time
-
-**Detection:**
-- Alerts when metrics exceed thresholds
-- Weekly performance reports
-- Compare before/after optimization metrics
-- Track trends over deployments
-
-**Phase to address:** Phase 3 (Monitoring Setup) - after optimizations implemented
-
-**Sources:**
-- [Best Practices for Monitoring PWAs](https://www.datadoghq.com/blog/progressive-web-application-monitoring/)
-- [Next.js Production Checklist](https://nextjs.org/docs/app/guides/production-checklist)
+**Phase to address:**
+Phase 5 (Navigation Redesign) — After data model and terminology are stable
 
 ---
 
-## PHASE-SPECIFIC WARNINGS
+### Pitfall 8: RLS Policy Testing With Service Role Client
 
-Guidance on which phases require extra caution or deeper research.
+**What goes wrong:**
+You create RLS policies and test them using a Supabase client with the service role key. Policies appear to work (queries return data). You deploy to production and users see empty results. The service role key ALWAYS bypasses RLS, so your tests were invalid.
 
-| Phase Topic | Likely Pitfall | Mitigation Strategy |
-|-------------|----------------|---------------------|
-| **Security Patching** | Breaking active sessions, CVE fixes causing build breaks | Phase 1: Test patches on staging with active sessions first. Have rollback plan. Update one CVE at a time. |
-| **Performance - Dynamic APIs** | Overzealous refactoring breaking functionality | Phase 1: Audit locations first, fix incrementally with testing between each change. |
-| **Authorization Audit** | Missing auth checks in Server Actions, middleware bypass | Phase 1: Systematic audit of all Server Actions, establish required pattern before making changes. |
-| **Character Encoding** | Data corruption, backup incompatibility, collation issues | Dedicated phase: Test on database copy first. Validate all text data. Include collation fix. |
-| **Server/Client Boundaries** | Serialization errors, hydration mismatches, secret exposure | Phase 2: Document current boundaries before changing. Test serialization explicitly. Move "use client" incrementally. |
-| **Data Caching** | Over-caching dynamic data (stale), under-caching (performance) | Phase 2: Categorize queries by staleness tolerance. Cache static/slow queries first, leave real-time queries uncached. |
-| **PWA Caching** | Stale data served offline, storage overflow, cache eviction | Phase 2: Differentiate strategies by content type. Network-first for user data, cache-first for static. Monitor storage quota. |
-| **Bundle Optimization** | Breaking dynamic imports, removing actually-used code | Phase 2: Run bundle analyzer FIRST before any optimization. Validate each optimization doesn't break functionality. |
-| **Large Refactoring** | Big-bang deployment causing unrelated breakage | All phases: Deploy incrementally with feature flags. Canary releases. Maintain rollback capability. |
-| **Dependency Updates** | Breaking changes in security patches | Phase 1: Update dependencies one at a time. Test build after each. Use Dependabot for patch-only auto-merge. |
-| **Environment Variables** | Secrets exposed to client bundle | Phase 1: Audit all process.env usage. Use server-only pattern. Verify bundle doesn't contain secrets. |
-| **CSRF Protection** | Custom Route Handlers vulnerable to cross-site attacks | Phase 1: Audit all Route Handlers. Add CSRF validation. Prefer Server Actions when possible. |
-| **German Collation** | Sort order breaks after encoding fix | Same phase as encoding: Test sort with German test data. Set de_DE collation alongside UTF-8. |
-| **Performance Monitoring** | Can't detect future regressions | Phase 3: Implement before declaring "done". Set performance budgets in CI. Track Core Web Vitals. |
+**Why it happens:**
+A Supabase client with the Authorization header set to the service role API key will ALWAYS bypass RLS. This is by design for admin operations. SSR clients share the user session from cookies, and the user session overrides the default API key. Testing with service role gives false confidence.
 
----
+**How to avoid:**
+- NEVER test RLS policies with service role client
+- Create separate test users for each role (kewa, imeri, tenant, contractor)
+- Test through actual authentication flow: login → get session → query with session
+- Use Supabase Auth helpers for Next.js to get proper user session
+- Create integration tests that authenticate as different users and verify data isolation
+- Test cross-tenant isolation: User A cannot see User B's data
+- Use role simulation in SQL for policy debugging: `SET LOCAL ROLE authenticated; SET LOCAL request.jwt.claims TO '{"sub":"user-id"}';`
 
-## SUMMARY: Critical Prevention Strategies
+**Warning signs:**
+- Test suite uses `SUPABASE_SERVICE_ROLE_KEY` for RLS policy tests
+- No multi-user authentication in test setup
+- Tests pass but production users see empty results
+- No cross-tenant isolation tests
 
-**Before starting any phase:**
-
-1. ✅ **Test on staging first** - Never test optimizations or security patches directly in production
-2. ✅ **One change at a time** - Isolate variables for easier debugging when issues occur
-3. ✅ **Measure before optimizing** - Bundle analysis, performance profiling, security scan to know current state
-4. ✅ **Maintain rollback capability** - Feature flags, database backups, deployment rollback plan
-5. ✅ **Deploy incrementally** - Canary releases, gradual rollouts, not big-bang deployments
-6. ✅ **Monitor actively** - Real-time alerts, performance tracking, error monitoring
-7. ✅ **Document changes** - What changed, why, expected impact for future debugging
-
-**Highest priority prevention actions for this project:**
-
-| Priority | Action | Why Critical | Time Required |
-|----------|--------|--------------|---------------|
-| 🔴 1 | Upgrade Next.js for CVE fixes | Multiple CVSS 9-10 vulnerabilities | 2 hours |
-| 🔴 2 | Audit Server Actions for missing auth | Authorization bypass risk | 4 hours |
-| 🔴 3 | Check for Dynamic APIs in layouts | Likely cause of "general sluggishness" | 1 hour |
-| 🟡 4 | Run bundle analyzer | Identify what's actually bloating the bundle | 1 hour |
-| 🟡 5 | Plan character encoding migration | High data corruption risk if done wrong | 8 hours (planning) |
-| 🟡 6 | Audit environment variables | Secret exposure risk | 2 hours |
-| 🟢 7 | Setup performance monitoring | Prevent future regressions | 3 hours |
+**Phase to address:**
+Phase 2 (RLS Context Validation) — Create proper test infrastructure before enabling RLS
 
 ---
 
-**Total confidence level:** HIGH for Next.js-specific pitfalls, MEDIUM for database migration specifics (requires project-specific validation)
+### Pitfall 9: STWE Field Addition Without Workflow Isolation
 
-**Research sources:** 28 sources across official Next.js docs, security advisories, production case studies, and database migration guides (2025-2026)
+**What goes wrong:**
+You add STWE fields (Wertquote, Eigentumsperiode) to the properties table. Rental-only workflows (existing KEWA properties) break because forms now require these fields. Validation errors appear on property edit forms. Users confused by irrelevant fields.
+
+**Why it happens:**
+STWE (Stockwerkeigentum - condominium ownership) is a different property management model than rental (Mietverwaltung). Adding fields for future STWE support without workflow isolation makes the UI confusing and breaks existing flows that shouldn't care about ownership quotas.
+
+**How to avoid:**
+- Add STWE fields as NULLABLE in database: `wertquote DECIMAL(5,2) NULL`, `eigentumsperiode DATERANGE NULL`
+- Add `property_type` enum: `'rental' | 'stwe'` to properties table
+- Hide STWE fields in UI when `property_type = 'rental'`
+- Create separate form variants: `PropertyFormRental` vs `PropertyFormSTWE`
+- Validation rules conditional on `property_type`
+- Seed existing properties as `property_type = 'rental'`
+- Document STWE fields in schema comments for future implementation
+
+**Warning signs:**
+- STWE fields added as NOT NULL
+- No `property_type` discriminator field
+- Single form component for all property types
+- No conditional validation based on property type
+- Users see irrelevant fields in rental workflows
+
+**Phase to address:**
+Phase 1 (Schema Migration) — Add fields with proper nullability and discriminators
+
+---
+
+### Pitfall 10: Inadequate WITH CHECK Clauses in RLS Policies
+
+**What goes wrong:**
+You create an INSERT policy for projects without `WITH CHECK (organization_id = current_setting('app.current_organization_id'))`. Users can insert projects with ANY `organization_id`, effectively creating data in other tenants. An UPDATE policy without WITH CHECK lets users change `organization_id`, stealing ownership of records.
+
+**Why it happens:**
+RLS has two separate checks: USING (for reads/updates on existing rows) and WITH CHECK (for inserts/updates of new values). Developers often focus on USING (preventing access to other tenants' data) and forget WITH CHECK (preventing creation/modification with wrong tenant ID).
+
+**How to avoid:**
+- ALWAYS include WITH CHECK on INSERT/UPDATE policies
+- WITH CHECK should mirror USING clause for consistency
+- Template for INSERT: `CREATE POLICY insert_policy ON table FOR INSERT WITH CHECK (organization_id = current_setting('app.current_organization_id'))`
+- Template for UPDATE: `CREATE POLICY update_policy ON table FOR UPDATE USING (organization_id = current_setting(...)) WITH CHECK (organization_id = current_setting(...))`
+- Test policy with malicious insert: try to insert row with different `organization_id`
+- Code review checklist: every INSERT/UPDATE policy has WITH CHECK
+
+**Warning signs:**
+- Policies have USING but no WITH CHECK
+- Can insert records with arbitrary `organization_id` values
+- UPDATE allows changing `organization_id` field
+- No tests for cross-tenant insertion attempts
+
+**Phase to address:**
+Phase 1 (Schema Migration) — All policies must have proper WITH CHECK clauses
+
+---
+
+## Technical Debt Patterns
+
+Shortcuts that seem reasonable but create long-term problems.
+
+| Shortcut | Immediate Benefit | Long-term Cost | When Acceptable |
+|----------|-------------------|----------------|-----------------|
+| Skip composite foreign keys | Faster migration, simpler schema | Cross-tenant cascade deletes, data corruption risk | NEVER in multi-tenant |
+| Add organization_id as nullable indefinitely | No immediate backfill required | Missing tenant isolation, inconsistent data | Only during phased migration (max 1 week) |
+| Single "allow all" RLS policy | Easier initial testing | No actual tenant isolation, security risk | Only in development, never production |
+| Test RLS in SQL Editor only | Fast iteration on policy syntax | Policies don't work in production (Editor bypasses RLS) | NEVER — always test via client |
+| Global `SET ROLE` for session context | Simpler than per-request context | Connection pool contamination, cross-user data leakage | NEVER — use `SET LOCAL` in transactions |
+| Skip zero-downtime migration | Single deployment, simpler plan | Production downtime, user trust loss | Only on pre-production environments |
+| Find-replace for terminology | Appears fast | Breaks imports, types, generated code | NEVER — use AST-based refactoring |
+| Bundle data model + navigation changes | Fewer deployments | Too many variables, harder debugging | NEVER — separate concerns |
+
+## Integration Gotchas
+
+Common mistakes when connecting to external services.
+
+| Integration | Common Mistake | Correct Approach |
+|-------------|----------------|------------------|
+| Supabase Auth in Server Components | Using `createBrowserClient()` in Server Components | Use `createServerClient()` from `@supabase/ssr` with cookie handling |
+| RLS with Next.js SSR | Not forwarding user session to Supabase client | Use `createServerClient()` with proper cookie helpers |
+| Service Role Access | Using service role key for regular queries | Reserve service role for admin operations only, create separate client |
+| Storage RLS Policies | Database RLS ≠ Storage RLS, must configure both | Create Storage policies matching database RLS structure |
+| Session Context Setting | Using `SET ROLE` globally in connection pool | Use `SET LOCAL` inside transactions to prevent leak |
+
+## Performance Traps
+
+Patterns that work at small scale but fail as usage grows.
+
+| Trap | Symptoms | Prevention | When It Breaks |
+|------|----------|------------|----------------|
+| Missing organization_id indexes | Slow queries, high CPU | Create indexes BEFORE enabling RLS | >10K rows per table |
+| Sequential scan on RLS policies | Query timeouts on dashboards | Use `EXPLAIN ANALYZE` to verify index usage | >50K rows per table |
+| N+1 queries with RLS overhead | Dashboard loads 20+ seconds | Batch queries, use joins, cache results | >5 properties with >100 units each |
+| Unbatched backfill migrations | Table locks, migration timeouts | Backfill in 1000-row batches with commits | >10K rows to migrate |
+| Cross-tenant eager loading | Loading all tenants' data in memory | Scope queries to current organization immediately | >10 organizations |
+
+## Security Mistakes
+
+Domain-specific security issues beyond general web security.
+
+| Mistake | Risk | Prevention |
+|---------|------|------------|
+| Missing WITH CHECK in RLS policies | Users can create data in other tenants | Every INSERT/UPDATE policy needs WITH CHECK clause |
+| Testing with service role key | RLS bypass, policies untested | Test with actual user sessions via auth flow |
+| Foreign keys without organization_id | Cascade deletes cross tenant boundaries | Use compound foreign keys including organization_id |
+| Global session context (`SET ROLE`) | Connection pool contamination, data leakage | Use `SET LOCAL` in transactions only |
+| No cross-tenant isolation tests | Silent multi-tenant data leakage | Test that User A cannot access User B's data |
+| RLS on database but not Storage | File uploads accessible across tenants | Configure Storage RLS policies matching database |
+
+## UX Pitfalls
+
+Common user experience mistakes in this domain.
+
+| Pitfall | User Impact | Better Approach |
+|---------|-------------|-----------------|
+| Drill-down navigation for unrelated features | Users lose context, navigation becomes tedious | Use drill-down only for parent-child relationships |
+| Removing top-level access to frequent features | Productivity drops, frustration increases | Keep high-frequency features (Projekte, Aufgaben) at top level |
+| STWE fields visible in rental workflows | Confusion, validation errors on irrelevant fields | Conditional UI based on property_type discriminator |
+| Navigation redesign without user testing | Users can't find features, support tickets spike | Test with actual users (KEWA, Imeri) before rollout |
+| Breaking existing URLs during refactoring | Bookmarks fail, 404 errors | Implement redirects for old URLs |
+| Empty results with no explanation (RLS failure) | Users think app is broken | Add explicit "no data" states, RLS error detection |
+
+## "Looks Done But Isn't" Checklist
+
+Things that appear complete but are missing critical pieces.
+
+- [ ] **RLS Enabled:** Often missing policies — verify at least one policy exists per table before enablement
+- [ ] **organization_id Column Added:** Often missing indexes — verify `CREATE INDEX idx_table_org_id` exists
+- [ ] **RLS Policies Created:** Often missing WITH CHECK — verify INSERT/UPDATE policies have WITH CHECK clause
+- [ ] **Server Component Updated:** Often missing session context — verify auth session forwarded to createClient()
+- [ ] **Foreign Keys Updated:** Often missing organization_id — verify compound foreign keys (id, organization_id)
+- [ ] **Data Backfilled:** Often incomplete — verify ALL rows have organization_id set (no NULLs)
+- [ ] **Terminology Refactored:** Often breaks types — verify `npx supabase gen types typescript` run after schema changes
+- [ ] **Navigation Redesigned:** Often missing redirects — verify old URLs redirect to new locations
+- [ ] **STWE Fields Added:** Often missing property_type discriminator — verify conditional UI based on property type
+- [ ] **Multi-Tenant Tests:** Often missing cross-tenant isolation — verify User A cannot access User B's data
+
+## Recovery Strategies
+
+When pitfalls occur despite prevention, how to recover.
+
+| Pitfall | Recovery Cost | Recovery Steps |
+|---------|---------------|----------------|
+| RLS enabled without policies | MEDIUM | 1. Disable RLS immediately: `ALTER TABLE ... DISABLE ROW LEVEL SECURITY` 2. Create policies 3. Test with client 4. Re-enable RLS |
+| Missing organization_id indexes | LOW | 1. Create indexes: `CREATE INDEX CONCURRENTLY` (no table lock) 2. Verify with EXPLAIN ANALYZE 3. Monitor performance |
+| Foreign key cascades cross tenant | HIGH | 1. Restore from backup (data loss) 2. Update FK constraints to compound 3. Add tests 4. Migrate again |
+| Backfill migration timeout | MEDIUM | 1. Rollback migration 2. Split into batched operations 3. Deploy in phases 4. Re-run |
+| Terminology refactor breaks types | LOW | 1. Run `npx supabase gen types typescript` 2. Fix TypeScript errors 3. Run tests 4. Deploy |
+| Navigation redesign rejected by users | MEDIUM | 1. Feature flag to old navigation 2. Gather feedback 3. Iterate design 4. Gradual rollout |
+| Service role RLS testing false confidence | MEDIUM | 1. Create proper test users 2. Rewrite tests with auth flow 3. Re-validate all policies |
+| Missing WITH CHECK in policies | HIGH | 1. Audit all policies 2. Add WITH CHECK clauses 3. Test malicious inserts 4. Verify no cross-tenant data created |
+
+## Pitfall-to-Phase Mapping
+
+How roadmap phases should address these pitfalls.
+
+| Pitfall | Prevention Phase | Verification |
+|---------|------------------|--------------|
+| Pitfall 1: RLS without policies | Phase 1: Schema Migration | Run test queries via client SDK, verify non-empty results |
+| Pitfall 2: Server Components without context | Phase 2: RLS Context Validation | Load each Server Component route, verify data appears |
+| Pitfall 3: Missing organization_id indexes | Phase 1: Schema Migration | Run EXPLAIN ANALYZE, verify Index Scan not Seq Scan |
+| Pitfall 4: Foreign key cascades | Phase 1: Schema Migration | Verify compound foreign keys exist, test cross-tenant delete |
+| Pitfall 5: Non-zero-downtime migration | Phase 3: Data Migration | Deploy to staging, measure lock duration < 30s |
+| Pitfall 6: Terminology refactor breaks code | Phase 4: Terminology Cleanup | Run TypeScript build, all tests pass |
+| Pitfall 7: Navigation redesign breaks UX | Phase 5: Navigation Redesign | User testing with KEWA/Imeri, feature flag rollout |
+| Pitfall 8: Service role RLS testing | Phase 2: RLS Context Validation | Tests use actual user sessions, no service role key |
+| Pitfall 9: STWE fields break rental workflows | Phase 1: Schema Migration | Verify property_type discriminator, conditional UI |
+| Pitfall 10: Missing WITH CHECK | Phase 1: Schema Migration | Test malicious insert with different organization_id |
+
+## Sources
+
+### Supabase RLS and Migration
+- [Supabase Row Level Security (RLS): Complete Guide (2026)](https://designrevision.com/blog/supabase-row-level-security)
+- [Best Practices for Supabase](https://www.leanware.co/insights/supabase-best-practices)
+- [Row Level Security | Supabase Docs](https://supabase.com/docs/guides/database/postgres/row-level-security)
+- [Hardening the Data API | Supabase Docs](https://supabase.com/docs/guides/database/hardening-data-api)
+- [Enable RLS by default on all new tables · supabase · Discussion #21747](https://github.com/orgs/supabase/discussions/21747)
+- [Use Supabase Auth with Next.js | Supabase Docs](https://supabase.com/docs/guides/auth/quickstarts/nextjs)
+- [Server-Side Issue: Row Level security auth.uid() check doesn't work · supabase · Discussion #6592](https://github.com/orgs/supabase/discussions/6592)
+
+### Multi-Tenant Architecture
+- [Multi-Tenant Database Architecture Patterns Explained](https://www.bytebase.com/blog/multi-tenant-database-architecture-patterns-explained/)
+- [Designing Your Postgres Database for Multi-tenancy | Crunchy Data Blog](https://www.crunchydata.com/blog/designing-your-postgres-database-for-multi-tenancy)
+- [Multi-Tenant Schema Migration — Citus Docs](https://docs.citusdata.com/en/v7.4/develop/migration_mt_schema.html)
+- [How to Implement PostgreSQL Row Level Security for Multi-Tenant SaaS](https://www.techbuddies.io/2026/01/01/how-to-implement-postgresql-row-level-security-for-multi-tenant-saas/)
+- [PostgreSQL Row-level Security (RLS) Limitations and Alternatives](https://www.bytebase.com/blog/postgres-row-level-security-limitations-and-alternatives/)
+
+### Zero-Downtime Migrations
+- [How do you plan zero-downtime data migrations and backfills?](https://www.designgurus.io/answers/detail/how-do-you-plan-zerodowntime-data-migrations-and-backfills)
+- [3 Best Practices For Zero-Downtime Database Migrations | LaunchDarkly](https://launchdarkly.com/blog/3-best-practices-for-zero-downtime-database-migrations/)
+- [Database Migration Strategies for Zero-Downtime Deployments](https://www.deployhq.com/blog/database-migration-strategies-for-zero-downtime-deployments-a-step-by-step-guide)
+- [Database Migrations at Scale: Zero-Downtime Strategies](https://medium.com/@sohail_saifii/database-migrations-at-scale-zero-downtime-strategies-b72be4833519)
+
+### Code Refactoring
+- [How to Refactor Complex Codebases – A Practical Guide for Devs](https://www.freecodecamp.org/news/how-to-refactor-complex-codebases)
+- [Code Refactoring: When to Refactor and How to Avoid Mistakes](https://www.tembo.io/blog/code-refactoring)
+- [Refactoring made right: how program analysis makes AI agents safe and reliable](https://kiro.dev/blog/refactoring-made-right/)
+- [Codebase Refactoring (with help from Go)](https://go.dev/talks/2016/refactor.article)
+
+### Navigation UX
+- [10 modern footer UX patterns for 2026](https://www.eleken.co/blog-posts/footer-ux)
+- [Mobile Navigation UX Best Practices, Patterns & Examples (2026)](https://www.designstudiouiux.com/blog/mobile-navigation-ux/)
+- [Mobile Navigation Patterns That Work in 2026](https://phone-simulator.com/blog/mobile-navigation-patterns-in-2026)
+- [Designing Navigation for Mobile: Design Patterns and Best Practices](https://www.smashingmagazine.com/2022/11/navigation-design-mobile-ux/)
+
+---
+*Pitfalls research for: Retrofitting Multi-Tenancy (Supabase RLS) to Existing Property Management App*
+*Researched: 2026-02-18*

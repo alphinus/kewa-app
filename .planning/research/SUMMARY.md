@@ -1,283 +1,183 @@
-# Production Hardening Research Summary
+# Project Research Summary
 
-**Project:** KeWa-App (Property Management SaaS)
-**Domain:** Next.js 16 Enterprise Application Hardening
-**Researched:** 2026-02-04
+**Project:** KeWa-App v4.0 Multi-Tenant Data Model & Navigation
+**Domain:** Retrofitting multi-tenancy into an existing Supabase/Next.js property management app
+**Researched:** 2026-02-18
 **Confidence:** HIGH
 
 ## Executive Summary
 
-Production hardening for 110K LOC Next.js 16 applications requires a systematic approach across three domains: performance optimization, security audit, and i18n cleanup. The app's "general sluggishness" complaint likely stems from Dynamic APIs in layouts forcing entire app into server-side rendering, N+1 database queries without caching, and bundle bloat from 750+ files. Critical security gaps exist in Server Actions (missing authorization checks), custom Route Handlers (CSRF vulnerability), and middleware (CVE-2025-29927 bypass). German umlaut fixes require careful encoding validation to prevent data corruption.
+KeWa-App is an existing Swiss property management application (Supabase + Next.js App Router) that needs multi-tenancy retrofitted into its data model. The standard approach for this domain is organization-scoped Row Level Security (RLS) with a denormalized `organization_id` column on every tenant table, enforced at the database level. No new packages are required -- the entire multi-tenant layer is built on existing Postgres RLS, Supabase client libraries, React Context, and TypeScript discriminated unions. The recommended data hierarchy follows Swiss property management standards: Verwaltung (organization) > Mandat > Eigentuemer > Liegenschaft > Gebaeude > Einheit.
 
-Recommended approach: Start with security (highest risk), then performance profiling before optimization (avoid premature fixes), finally i18n as isolated cosmetic changes. The biggest quick win is auditing for Dynamic APIs in root/nested layouts—a single `cookies()` call forces the entire app into dynamic rendering, eliminating all static optimization. Security requires immediate CVE patches (CVSS 9-10 vulnerabilities in React/Next.js) and systematic Server Action authorization audit. Database encoding migration needs dedicated phase with corruption prevention.
+The single most important architectural decision is how RLS gets its organization context. Because KeWa uses custom PIN-based authentication (NOT Supabase Auth JWT), `auth.uid()` and `auth.jwt()` return NULL for internal users. The solution is `set_config('app.current_organization_id', value, true)` called via an RPC function per request, with RLS policies reading `current_setting()` instead of `auth.jwt()`. This is a well-established Postgres multi-tenant pattern. When auth eventually migrates to Supabase Auth, only the implementation of `current_organization_id()` changes -- all RLS policies remain untouched.
 
-Key risks: Breaking active user sessions during security patches, corrupting data during character encoding migration, and over-optimizing without bundle analysis (wasting effort on wrong targets). Mitigation: incremental deployment with feature flags, test on database copy first, and profile with Lighthouse/bundle analyzer before changing code.
+The primary risks are: (1) enabling RLS without policies causes silent empty results in production, (2) missing indexes on `organization_id` columns create 100x performance degradation, (3) the phased migration of 68 tables requires zero-downtime strategy (nullable columns first, backfill, then NOT NULL), and (4) foreign key cascades bypass RLS and can corrupt data across tenant boundaries. All four are preventable with disciplined migration ordering. The navigation redesign (8-item footer to 5-item with breadcrumbs) should be a separate phase after the data model is stable to avoid debugging two major changes simultaneously.
 
 ## Key Findings
 
 ### Recommended Stack
 
-Research identifies zero-cost tooling for all three hardening domains, avoiding commercial APM solutions. Next.js 16.1 includes experimental Turbopack-native bundle analyzer, eliminating need for Webpack-based tools. Vercel Speed Insights provides real-time Web Vitals monitoring for free. Security scanning uses built-in npm audit plus Semgrep OSS (OWASP Top 10 coverage, 250% better true positive rate than commercial tools). German umlauts need simple UTF-8 find/replace, not full i18n framework overhead.
+No new packages needed. The multi-tenant layer uses Postgres native features (RLS, SECURITY DEFINER, indexes), existing Supabase client libraries (@supabase/ssr 0.8.0, @supabase/supabase-js 2.90.1), React Context for organization/mandate state, and TypeScript discriminated unions for STWE vs rental property types.
 
 **Core technologies:**
-- Next.js experimental bundle analyzer: Turbopack-native bundle visualization — identifies bloat before optimization
-- @vercel/speed-insights: Zero-config Web Vitals tracking — monitors LCP/INP/CLS from real users
-- Semgrep OSS: Static security analysis — catches OWASP Top 10 with 250% fewer false positives
-- Lighthouse CI: Performance regression testing — prevents future degradation in CI/CD
-- eslint-plugin-security: Lightweight security linting — integrates with existing ESLint setup
-- Custom Node.js script: German umlaut conversion — avoids runtime overhead of i18n frameworks
+- **Postgres RLS** -- database-level tenant isolation, prevents application-layer bypasses, 100x+ performance with proper indexes
+- **SECURITY DEFINER functions** -- cache `current_setting()` lookups per statement via initPlan optimization, avoid per-row function calls
+- **React Context API** -- organization and mandate selection state, sufficient for low-frequency tenant switching (no Zustand needed)
+- **TypeScript Discriminated Unions** -- compile-time exhaustiveness checking for rental vs STWE property types
+- **`set_config()` / `current_setting()`** -- application-layer RLS context that works with PIN auth, transaction-scoped via LOCAL flag
 
-**Critical compatibility note:** @next/bundle-analyzer is Webpack-only and incompatible with Turbopack. Use Next.js 16.1+ experimental analyzer instead.
+**Critical version note:** All packages already installed. Zero dependency changes.
 
 ### Expected Features
 
-Production-ready enterprise apps require two feature tiers: table stakes (missing = unprofessional) and differentiators (fast vs functional). The app currently lacks security headers (CSP, HSTS), has inconsistent input validation, and serves all routes dynamically despite mostly static content. Performance differentiators focus on eliminating request waterfalls, optimizing Server Components, and leveraging React Compiler (already enabled).
-
 **Must have (table stakes):**
-- Core Web Vitals compliance (LCP < 2.5s, INP < 200ms, CLS < 0.1) — Google ranking factor
-- Security headers (CSP, HSTS, X-Frame-Options) — OWASP A01:2025 mitigation
-- JWT token security (HttpOnly, SameSite=strict) — prevent XSS/CSRF
-- Database query indexes — fix N+1 causing sluggishness
-- Dependency vulnerability resolution — OWASP A03:2025 supply chain
-- Error boundaries — prevent white screen of death
-- Proper UTF-8 encoding — German umlauts display correctly
+- Organization/Verwaltung switcher -- cannot be multi-tenant without context switching
+- Mandate (Verwaltungsmandat) management -- core Swiss property mgmt concept, legal contract
+- Mandate-scoped data isolation -- security fundamental, organization_id on every table
+- Property hierarchy terminology fix -- Liegenschaft (property parcel) vs Gebaeude (building structure)
+- Role-based permissions per mandate -- user can be admin in Mandate A, viewer in Mandate B
+- Navigation redesign with breadcrumbs -- Verwaltung > Mandat > Liegenschaft > Gebaeude > Einheit
+- STWE basic fields -- expose existing condominium ownership fields (wertquote, eigentumsperiode)
 
-**Should have (competitive):**
-- Parallel data fetching — eliminate waterfalls (30-60% faster page loads)
-- Server Component optimization — 15-20% faster rendering, smaller bundles
-- Supabase index optimization — 100x speedup on filtered queries
-- Bundle size analysis — identify bloat from large dependencies
-- Lazy loading for heavy components — reduce initial bundle
-- Cache-first for static assets — instant offline load (already implemented)
+**Should have (differentiators):**
+- Unified renovation + STWE in one platform -- competitors separate these (Rimo R5, ImmoTop2, GARAIO REM)
+- Owner self-service portal with live updates -- most Swiss tools generate static reports
+- Cross-mandate portfolio view -- manage multiple mandates in single pane
+- External contractor magic-link portal -- already built, simpler than forced logins
 
 **Defer (v2+):**
-- Full i18n framework (next-intl) — app is German-only, no multi-language requirement
-- Advanced caching strategies — service worker already handles offline
-- WebAuthn/passkeys — two internal users with PINs, not needed
-- Complete rewrite — profile and fix specific bottlenecks instead
-
-**Anti-features to avoid:**
-- Replacing service worker with Serwist (Turbopack conflict documented)
-- Switching from JWT to sessions (custom PIN auth works for use case)
-- Over-engineered security (focus on OWASP Top 10, not every CVE)
-- Premature optimization (profile first, prioritize by impact)
+- Multi-language (French, Italian) -- not needed for initial Zurich-area mandates
+- STWE advanced (voting, assemblies) -- complex, low ROI until managing 5+ STWE properties
+- Custom roles beyond current RBAC -- current roles sufficient
+- Native mobile owner app -- PWA sufficient for now
 
 ### Architecture Approach
 
-Performance monitoring integrates at three architectural layers: middleware (request-level metrics), root layout (client Web Vitals), and instrumentation.ts (OpenTelemetry for server-side tracing). Security hardening uses defense in depth: next.config.ts headers, middleware CSRF validation, API route input validation, and dependency audit. German umlaut correction uses AST-based find/replace targeting string literals only, avoiding false positives in code identifiers.
+The architecture adds three new layers: (1) new tables (organizations, mandates, owners, tenancies, organization_members), (2) denormalized `organization_id` on all 68 existing tenant tables with RLS policies using `current_organization_id()` helper, and (3) nested React Context providers (OrganizationProvider > MandateProvider > BuildingProvider). The middleware resolves organization context from a cookie and sets an `x-organization-id` header. Every API route calls `set_org_context` RPC before querying, making all subsequent queries automatically organization-scoped through RLS.
 
 **Major components:**
-
-1. **Middleware layer (src/middleware.ts)** — Adds request timing wrapper, security headers injection, CSRF token validation for Route Handlers. Already handles session validation and route protection; extend with performance tracking and Origin header validation.
-
-2. **Root layout (src/app/layout.tsx)** — Integrates Web Vitals reporting via useReportWebVitals hook, initializes monitoring services. Critical: audit for Dynamic APIs (cookies(), headers(), searchParams) which force entire app into dynamic rendering.
-
-3. **Security headers (next.config.ts)** — Centralized CSP, HSTS, X-Frame-Options configuration. Currently only has service worker headers; needs expansion to all routes with Supabase domain whitelisting.
-
-4. **Data caching (throughout app)** — Audit 188 files with Supabase queries for missing unstable_cache() wrappers. Non-fetch requests bypass Next.js caching, causing repeated database queries.
-
-5. **Character encoding (codebase-wide)** — AST-based jscodeshift transform for ae/oe/ue → ä/ö/ü replacement in string literals. Requires manual review for URL paths (breaking), database identifiers (migration required), and variable names (case-by-case).
-
-**Key integration points:**
-- Middleware: Performance tracking, security validation (both modify same file)
-- API routes: Input validation audit (all /app/api/*/route.ts files)
-- Server Actions: Authorization check pattern (all files with 'use server')
-- Service worker: Cache strategy review (public/sw.js, public/sw-cache.js)
+1. **Data Model Layer** -- organizations, mandates, owners, tenancies tables + organization_id on 68 existing tables with indexes and triggers for FK sync
+2. **RLS Security Layer** -- `current_organization_id()` SECURITY DEFINER function reading `current_setting()`, uniform USING/WITH CHECK policies on every table
+3. **Application Context Layer** -- OrganizationProvider + MandateProvider React Contexts, middleware header injection, `createOrgClient()` helper for API routes
+4. **Navigation Layer** -- OrgSwitcher replacing PropertySelector, breadcrumbs from URL segments, 5-item footer with "Mehr" overflow
+5. **Storage Layer** -- bucket paths prefixed with organization_id, storage RLS policies matching database RLS
+6. **Migration Layer** -- phased zero-downtime approach: nullable columns > backfill > NOT NULL > RLS enablement
 
 ### Critical Pitfalls
 
-Top 5 pitfalls represent highest risk or highest impact for this project. Breaking active sessions during CVE patches causes business disruption. Dynamic APIs in layouts are the most likely cause of "general sluggishness" (10-50x slower). Server Actions without auth checks are authorization bypass vulnerabilities. Character encoding migration risks permanent data corruption if database encoding mismatches. Missing bundle analysis wastes optimization effort on wrong targets.
+1. **RLS enabled without policies = silent empty results** -- ALWAYS pair `ALTER TABLE ENABLE ROW LEVEL SECURITY` with at least one policy in the same migration. Test via client SDK, never SQL Editor (which bypasses RLS as superuser).
 
-1. **Dynamic APIs in root layout destroying performance** — Using cookies(), searchParams, or headers() in root layout opts entire app into dynamic rendering, eliminating all static optimization (10-50x slower). Prevention: Grep for Dynamic APIs in app/**/layout.tsx, move into Suspense boundaries, use middleware for auth checks instead. Detection: Build output shows all routes as ƒ (Dynamic), Cache-Control: private headers, 0% edge cache hit rate. Highest impact quick win.
+2. **Missing organization_id indexes = 100x performance cliff** -- Create indexes in the SAME migration that adds `organization_id` columns. Use `CREATE INDEX CONCURRENTLY` for zero-lock creation. Verify with `EXPLAIN ANALYZE`.
 
-2. **Server Actions without authorization checks** — Custom auth doesn't automatically protect Server Actions; users can invoke any action once they get the ID. Prevention: Establish pattern where every Server Action starts with getSession() + permission check, audit all 'use server' files, create requireAuth() utility. Detection: Grep for 'use server' and verify auth check in function body. Authorization bypass = regulatory compliance violations.
+3. **`set_config()` without LOCAL flag = connection pool contamination** -- ALWAYS use `set_config('app.current_organization_id', value, true)` where `true` means LOCAL (transaction-scoped). Global settings leak across requests on the same connection.
 
-3. **Breaking active user sessions during CVE patches** — React/Next.js received critical RCE patches (CVE-2025-66478, CVE-2025-55182) with CVSS 10.0 severity. Rushing to patch without session migration causes mass logouts. Prevention: Test patches on staging with active sessions, deploy during low-traffic windows, have rollback plan. Detection: Sudden spike in authentication failures.
+4. **Foreign key cascades bypass RLS** -- Cascades run with elevated privileges. Need triggers to validate organization_id consistency on parent-child relationships. Consider `ON DELETE NO ACTION` instead of CASCADE in multi-tenant context.
 
-4. **Character encoding migration corrupting data** — Fixing ae→ä without proper validation corrupts existing data if database claims UTF-8 but uses SQL_ASCII/Latin1. Prevention: Run pg_encoding query first, test on database copy, validate column widths for multibyte expansion, export backup with explicit encoding. Detection: Run data scanning query comparing max bytes to column widths. Requires dedicated phase.
-
-5. **Bundle analysis skipped before optimization** — Team optimizes "obvious" issues but ships massive unexpected dependencies. 110K LOC app likely has significant dead code, entire libraries imported for small functions, duplicate dependencies. Prevention: Install @next/bundle-analyzer, run ANALYZE=true npm run build, focus on chart libraries (100-500KB), date libraries (moment.js → date-fns), icon libraries (selective import). Detection: Build shows large "First Load JS", Lighthouse flags "Reduce unused JavaScript".
-
-**Additional high-severity pitfalls:**
-- CVE-2025-29927 middleware authorization bypass (upgrade Next.js immediately)
-- Server/Client component boundary confusion (functions/secrets leaked to client)
-- Missing data caching for non-fetch requests (database hammered)
-- PWA cache strategy serving stale data (safety risk for inspection data)
-- Environment variables exposed to client bundle (credential leaks)
-- Custom auth CSRF vulnerability in Route Handlers (prefer Server Actions)
+5. **Zero-downtime migration of 68 tables** -- Add nullable columns first, backfill in batches of 1000, then add NOT NULL constraint. Never add NOT NULL column in single operation on tables with existing data.
 
 ## Implications for Roadmap
 
-Based on research, suggested phase structure prioritizes security (immediate risk), then performance profiling (measure before optimizing), then targeted optimization (highest impact first), finally i18n (cosmetic, isolated).
+Based on research, suggested phase structure:
 
-### Phase 1: Security Audit & CVE Patching
-**Rationale:** Critical vulnerabilities (CVSS 9-10) require immediate attention before any refactoring. Security patches may cause breaking changes; isolating them prevents diagnosing whether security update or optimization broke production. Authorization gaps are regulatory compliance risks.
+### Phase 1: Schema Foundation
+**Rationale:** Everything depends on the data model. Organizations, mandates, owners tables must exist before any RLS, context, or navigation work.
+**Delivers:** New tables (organizations, organization_members, owners, mandates, tenancies), `organization_id` nullable column on all 68 existing tables, all indexes, STWE preparation fields (nullable), `current_organization_id()` and `set_org_context()` helper functions.
+**Addresses:** Mandate-scoped data isolation (foundation), STWE basic fields (schema only), property hierarchy terminology (schema comments)
+**Avoids:** Pitfall 3 (indexes created atomically with columns), Pitfall 5 (nullable columns first), Pitfall 9 (STWE fields nullable with property_type discriminator)
 
-**Delivers:** Next.js upgraded to 14.2.25+/15.2.3+, Server Actions with authorization pattern, CSRF protection for Route Handlers, security headers configured, dependency vulnerabilities resolved to 0 critical/high.
+### Phase 2: Data Migration & Backfill
+**Rationale:** Cannot enable RLS until all existing rows have organization_id. Must be separate from schema changes for zero-downtime.
+**Delivers:** KEWA AG organization seeded, all existing data backfilled with organization_id, NOT NULL constraints applied, organization_members created for existing users.
+**Addresses:** Mandate management (CRUD for existing data)
+**Avoids:** Pitfall 5 (phased migration, batch backfill), Pitfall 4 (FK validation triggers)
 
-**Addresses:**
-- Table stakes: Security headers, JWT token security, dependency vulnerabilities, error boundaries
-- Pitfalls: CVE-2025-29927 bypass, breaking sessions during patches, Server Actions without auth, CSRF in Route Handlers, env vars exposed to client
+### Phase 3: RLS Enablement & Context Wiring
+**Rationale:** RLS policies require backfilled data AND helper functions. Context wiring (middleware, API routes) must happen simultaneously to prevent broken queries.
+**Delivers:** RLS policies on all tables (USING + WITH CHECK), middleware x-organization-id header, `createOrgClient()` helper, updated API routes calling `set_org_context`.
+**Addresses:** Mandate-scoped data isolation (enforcement), role-based permissions per mandate
+**Avoids:** Pitfall 1 (policies created with RLS enablement), Pitfall 2 (Server Component context), Pitfall 8 (test with client SDK not service role), Pitfall 10 (WITH CHECK on all INSERT/UPDATE)
 
-**Avoids:** Testing security patches alongside performance changes (isolates failure cause), rushing CVE fixes without session testing (user disruption).
+### Phase 4: Application Context & Organization Switcher
+**Rationale:** UI layer depends on working RLS and context wiring from Phase 3. OrganizationProvider and MandateProvider can only be built after the data model and security layer are stable.
+**Delivers:** OrganizationContext, MandateContext, OrgSwitcher component, cookie-based org persistence, org switch clears mandate/building state.
+**Addresses:** Organization/Verwaltung switcher, role-based owner vs manager views (context layer)
+**Avoids:** Pitfall 7 (navigation changes isolated from data model changes)
 
-**Estimated effort:** 16-24 hours
-**Breaking changes:** Possible (test thoroughly, deploy during low-traffic window)
+### Phase 5: Navigation Redesign
+**Rationale:** Navigation depends on stable context providers, terminology, and URL structure. Must be last to avoid debugging data model + navigation simultaneously.
+**Delivers:** Breadcrumb component, 5-item footer with "Mehr" overflow, `/dashboard/objekte/` drill-down URL structure, old URL redirects.
+**Addresses:** Property hierarchy navigation, property-to-building drill-down, navigation redesign
+**Avoids:** Pitfall 6 (terminology changes before navigation), Pitfall 7 (test with users, feature flag rollout)
 
-### Phase 2: Performance Profiling & Baseline
-**Rationale:** Cannot optimize without knowing current state. Bundle analysis identifies what's actually bloating the bundle (not assumptions). Lighthouse establishes baseline metrics. Dynamic API audit likely reveals highest-impact quick win.
-
-**Delivers:** Bundle analysis report, Lighthouse baseline metrics, Dynamic API location audit, database query performance report, monitoring infrastructure (Web Vitals, OpenTelemetry).
-
-**Uses:**
-- Next.js experimental bundle analyzer
-- Lighthouse CI
-- @vercel/speed-insights
-- Supabase Query Performance Report
-
-**Addresses:**
-- Pitfalls: Bundle analysis skipped (wastes effort), missing monitoring (can't detect regressions), Dynamic APIs in layouts (10-50x slowdown)
-
-**Estimated effort:** 8-12 hours
-**Breaking changes:** None (observability only)
-
-### Phase 3: Performance Quick Wins
-**Rationale:** Fix highest-impact issues identified in Phase 2 profiling. Dynamic API removal, database index creation, and bundle pruning deliver measurable improvement with minimal risk. Deploying incrementally allows rollback if issues arise.
-
-**Delivers:** Dynamic APIs moved to Suspense boundaries, database indexes for slow queries, heavy dependencies lazy loaded, parallel data fetching for dashboard, measurable LCP/INP/CLS improvement.
-
-**Implements:**
-- Middleware request timing wrapper (architecture component)
-- Root layout Web Vitals reporting (architecture component)
-- unstable_cache() for Supabase queries (architecture component)
-
-**Addresses:**
-- Table stakes: Core Web Vitals compliance, database query indexes
-- Differentiators: Parallel data fetching, Server Component optimization, lazy loading, bundle size reduction
-- Pitfalls: Server/Client boundary confusion (test serialization), missing data caching (wrap Supabase calls)
-
-**Avoids:** Large refactoring without incremental deployment (use feature flags), premature optimization (based on profiling data).
-
-**Estimated effort:** 32-48 hours
-**Breaking changes:** Possible (test each change in isolation)
-
-### Phase 4: PWA Cache Strategy Review
-**Rationale:** Aggressive caching may serve stale inspection data (safety risk) or fill device storage. Requires review after performance optimizations complete, as cache strategy depends on which data is static vs dynamic.
-
-**Delivers:** Cache strategy differentiated by content type (static assets: cache-first, API data: network-first, critical user data: network-only), cache versioning, storage quota monitoring.
-
-**Addresses:**
-- Pitfalls: PWA cache causing stale data (safety risk), storage overflow (app crashes)
-
-**Estimated effort:** 8-12 hours
-**Breaking changes:** None (improves existing service worker)
-
-### Phase 5: German Umlaut Correction
-**Rationale:** Cosmetic changes isolated in dedicated phase to avoid merge conflicts with performance work. Character encoding requires careful validation but low technical risk if string literals only.
-
-**Delivers:** ae/oe/ue → ä/ö/ü replacement in all UI strings, UTF-8 encoding verification, German collation for sort order, database encoding audit.
-
-**Implements:**
-- AST-based jscodeshift transform (architecture approach)
-- Manual review of URL paths, database identifiers (architecture decision)
-
-**Addresses:**
-- Table stakes: Proper UTF-8 encoding
-- Pitfalls: Character encoding corruption (test on DB copy first), German collation breaking sort order (set de_DE.UTF8)
-
-**Avoids:** False positives in English words (AST targets string literals), database migration without validation (test first).
-
-**Estimated effort:** 16-24 hours (8h planning + 8-16h execution)
-**Breaking changes:** None if UI strings only; requires migration if database identifiers changed (recommend defer)
-
-### Phase 6: Input Validation & XSS Audit
-**Rationale:** Manual code review benefits from monitoring (identify hot paths). Lower urgency than authorization gaps (Phase 1) but completes security hardening. Can run in parallel with Phase 5.
-
-**Delivers:** Zod schemas for all API routes, dangerouslySetInnerHTML audit, malicious input testing.
-
-**Addresses:**
-- Differentiators: Security Misconfiguration audit (A02:2025), Injection prevention (A05:2025)
-
-**Estimated effort:** 8-16 hours
-**Breaking changes:** None (adds validation)
+### Phase 6: Storage Multi-Tenancy & Verification
+**Rationale:** Storage isolation is important but not blocking for core functionality. Verification pass ensures no cross-tenant leakage.
+**Delivers:** Storage bucket path convention ({org_id}/{property_id}/...), storage RLS policies, cross-tenant isolation tests, end-to-end verification.
+**Addresses:** Storage isolation, multi-tenant security verification
+**Avoids:** Pitfall 8 (comprehensive multi-user testing)
 
 ### Phase Ordering Rationale
 
-- **Security first (Phase 1):** Critical CVEs require immediate patching; isolating security changes prevents diagnosing whether security or optimization broke production. Authorization gaps are compliance risks.
-- **Profile before optimize (Phase 2):** Avoid premature optimization by identifying actual bottlenecks. Dynamic API audit likely reveals 10-50x performance gain with minimal code change.
-- **Quick wins (Phase 3):** Fix highest-impact issues identified in profiling. Incremental deployment with feature flags allows rollback.
-- **PWA review (Phase 4):** Depends on Phase 3 understanding which data is static vs dynamic.
-- **i18n isolated (Phase 5):** Cosmetic changes in dedicated phase avoid merge conflicts. Can run in parallel with Phase 6.
-- **Input validation (Phase 6):** Lower urgency than authorization (Phase 1); benefits from monitoring (Phase 2). Can run in parallel with Phase 5.
-
-**Parallel execution opportunities:**
-- Phase 5 (i18n) and Phase 6 (input validation) are independent
-- Phase 2 (profiling) can start immediately after Phase 1 security patches tested
+- **Schema before RLS:** RLS policies reference `organization_id` columns and helper functions that must exist first.
+- **Backfill before RLS:** RLS with `organization_id = current_organization_id()` returns empty results if `organization_id` is NULL on existing rows.
+- **RLS before UI:** The organization switcher is meaningless without data isolation enforcement.
+- **Context before navigation:** Breadcrumbs depend on OrganizationContext and MandateContext to display org/mandate names.
+- **Data model separate from navigation:** Pitfall 7 explicitly warns against bundling these changes. Debug one major system at a time.
 
 ### Research Flags
 
 Phases likely needing deeper research during planning:
-- **Phase 3 (Performance Quick Wins):** Database index creation may require Supabase-specific research for lock behavior, downtime mitigation. N+1 query patterns in 188 files need systematic identification approach.
-- **Phase 5 (German Umlaut Correction):** Database encoding validation specific to Supabase (PostgreSQL) collation settings. May need migration planning if existing data has encoding issues.
+- **Phase 3 (RLS Enablement):** The interaction between PIN-based auth, `set_config()`, and Supabase's connection pooler (PgBouncer) needs validation. `SET LOCAL` is transaction-scoped, but PgBouncer in transaction mode may reset settings between statements if not in an explicit transaction. Test this in staging.
+- **Phase 4 (Application Context):** The 119 API route files with 425 `.from()` calls all need the `set_org_context` call. Determine if a wrapper/middleware approach can automate this vs manual updates.
 
 Phases with standard patterns (skip research-phase):
-- **Phase 1 (Security Audit):** CVE patches follow standard npm update process, security headers well-documented in Next.js production checklist.
-- **Phase 2 (Performance Profiling):** Lighthouse and bundle analyzer have established workflows, no domain-specific challenges.
-- **Phase 4 (PWA Cache Strategy):** Service worker caching strategies well-documented, no novel patterns.
-- **Phase 6 (Input Validation):** Zod validation is standard practice, XSS audit follows OWASP checklist.
+- **Phase 1 (Schema Foundation):** Well-documented ALTER TABLE + CREATE INDEX patterns. Supabase migration CLI handles this.
+- **Phase 2 (Data Migration):** Standard backfill pattern. Small dataset (KEWA only has ~1000 rows per table max).
+- **Phase 5 (Navigation):** usePathname + breadcrumbs is a 20-LOC component. Standard Next.js App Router pattern.
 
 ## Confidence Assessment
 
 | Area | Confidence | Notes |
 |------|------------|-------|
-| Stack | HIGH | All tools have official Next.js 16 support, Vercel/OSS sources, 2025-2026 docs. Turbopack compatibility explicitly verified. |
-| Features | HIGH | Table stakes derived from OWASP Top 10 2025, Core Web Vitals standards, Next.js production checklist. Differentiators from performance case studies. |
-| Architecture | HIGH | Integration points match existing codebase structure (middleware.ts, layout.tsx confirmed). Multi-layer monitoring approach is industry standard. |
-| Pitfalls | HIGH | Critical pitfalls sourced from CVE advisories, Next.js security blog, production case studies. Character encoding risks from PostgreSQL migration guides. |
+| Stack | HIGH | No new dependencies. All recommendations verified against official Supabase docs and current package.json. |
+| Features | MEDIUM | Swiss property management domain verified via Fairwalter/Rimo R5/ImmoTop2 comparison. Some STWE details from general context, not Swiss-specific legal sources. |
+| Architecture | HIGH | `set_config()` + `current_setting()` pattern verified in official Postgres docs, Supabase community patterns, and multi-tenant architecture literature. Codebase analysis confirms 68 tables, 119 API routes, PIN-based auth. |
+| Pitfalls | HIGH | Every pitfall sourced from multiple references. RLS-without-policies and missing-indexes pitfalls are the most commonly reported Supabase issues in community forums. |
 
 **Overall confidence:** HIGH
 
-Research based on official Next.js docs (production checklist, security guide, OpenTelemetry), Vercel blog posts, OWASP Top 10 2025, CVE advisories (Datadog, Next.js security updates), and production case studies (2025-2026). All recommended tools have active maintenance and official Next.js 16 support.
-
 ### Gaps to Address
 
-- **Database encoding validation:** Research assumes PostgreSQL UTF-8, but Supabase-specific collation settings need verification. Run `SELECT datname, pg_encoding_to_char(encoding) as encoding, datcollate, datctype FROM pg_database` query during Phase 5 planning.
+- **PgBouncer + SET LOCAL interaction:** Supabase uses PgBouncer for connection pooling. `SET LOCAL` is transaction-scoped, but Supabase's PostgREST may not wrap each API call in an explicit transaction. Needs testing in staging with actual Supabase pooler. If `SET LOCAL` doesn't persist, the alternative is passing org_id as a function parameter to each RPC call instead of relying on session settings.
 
-- **Server Action authorization pattern:** Need to audit existing auth implementation to establish consistent pattern. Research recommends requireAuth() utility, but exact implementation depends on current session management approach.
+- **Compound foreign keys decision:** ARCHITECTURE.md recommends denormalized org_id with triggers. PITFALLS.md recommends compound PKs `(id, organization_id)` for cascade safety. These conflict. Compound PKs require modifying ALL 68 tables' primary keys and every FK reference -- extremely high migration cost. Recommendation: keep UUID PKs, use triggers for org_id sync, and replace CASCADE with NO ACTION + application-level cascading for critical paths. Validate this decision in Phase 1 planning.
 
-- **Bundle analysis results:** Cannot recommend specific optimizations until analyzer identifies actual bloat. Phase 3 plan will be refined based on Phase 2 profiling data.
+- **Existing RLS policies:** 7 tables already have RLS enabled (029_rls_policies.sql). These existing policies use `is_internal_user(auth.uid())` which returns NULL for PIN-auth users. Need to audit whether these are currently working or silently broken. If broken, they may be using service role client to bypass.
 
-- **Dynamic API locations:** Research flags this as likely cause of sluggishness, but cannot confirm until grep audit completes. If no Dynamic APIs found in layouts, investigate alternative causes (database queries, bundle size).
-
-- **Session migration strategy:** If CVE patches require auth mechanism changes, need to design graceful migration. Test on staging with active sessions to detect breaking changes.
+- **STWE legal requirements:** Feature research notes Swiss law requirements for transparent condominium accounting, but specific legal standards (e.g., required report formats) were not validated against official Swiss Code of Obligations. Defer to Phase 6+ when first STWE property is onboarded.
 
 ## Sources
 
 ### Primary (HIGH confidence)
-- [Next.js Production Checklist](https://nextjs.org/docs/app/guides/production-checklist) — Dynamic APIs, caching, security headers
-- [Next.js Security Blog - Server Components and Actions](https://nextjs.org/blog/security-nextjs-server-components-actions) — Authorization, CSRF protection
-- [OWASP Top 10 2025](https://owasp.org/Top10/2025/en/) — Security requirements, A01-A10 categories
-- [Next.js 16.1 Release Notes](https://nextjs.org/blog/next-16-1) — Experimental bundle analyzer, Turbopack compatibility
-- [Next.js Security Update December 2025](https://nextjs.org/blog/security-update-2025-12-11) — CVE-2025-66478, CVE-2025-55182 patches
-- [CVE-2025-29927 Analysis - Datadog](https://securitylabs.datadoghq.com/articles/nextjs-middleware-auth-bypass/) — Middleware bypass vulnerability
-- [Next.js OpenTelemetry Guide](https://nextjs.org/docs/app/guides/open-telemetry) — Performance monitoring integration
-- [Vercel Speed Insights Documentation](https://vercel.com/docs/speed-insights) — Web Vitals tracking
-- [Next.js Data Security Guide](https://nextjs.org/docs/app/guides/data-security) — Environment variables, sensitive data tainting
+- [Supabase RLS Performance Best Practices](https://supabase.com/docs/guides/troubleshooting/rls-performance-and-best-practices-Z5Jjwv) -- index requirements, SECURITY DEFINER patterns
+- [Supabase Row Level Security Docs](https://supabase.com/docs/guides/database/postgres/row-level-security) -- policy structure, USING vs WITH CHECK
+- [Custom Access Token Hook](https://supabase.com/docs/guides/auth/auth-hooks/custom-access-token-hook) -- future auth migration pattern
+- [Storage Access Control](https://supabase.com/docs/guides/storage/security/access-control) -- storage bucket RLS
+- [TypeScript Narrowing](https://www.typescriptlang.org/docs/handbook/2/narrowing.html) -- discriminated unions for property types
+- [Hardening the Data API](https://supabase.com/docs/guides/database/hardening-data-api) -- RLS enablement patterns
+- [Custom Claims & RBAC](https://supabase.com/docs/guides/database/postgres/custom-claims-and-role-based-access-control-rbac) -- auth hook patterns
 
 ### Secondary (MEDIUM confidence)
-- [Semgrep JavaScript/TypeScript Analysis (2025)](https://semgrep.dev/blog/2025/a-technical-deep-dive-into-semgreps-javascript-vulnerability-detection/) — SAST capabilities, OWASP coverage
-- [Vercel Blog - Common App Router Mistakes](https://vercel.com/blog/common-mistakes-with-the-next-js-app-router-and-how-to-fix-them) — Dynamic API pitfalls, Server/Client boundaries
-- [Complete Next.js Security Guide 2025](https://www.turbostarter.dev/blog/complete-nextjs-security-guide-2025-authentication-api-protection-and-best-practices) — JWT security, input validation
-- [PostgreSQL German Umlauts Full Text Search](https://www.dbi-services.com/blog/dealing-with-german-umlaute-in-postgresqls-full-text-search/) — Collation settings, encoding
-- [Supabase Query Optimization](https://supabase.com/docs/guides/database/query-optimization) — Index creation, performance
-- [Medium - Migrating to Next.js 16 Performance Guide](https://medium.com/@Adekola_Olawale/migrating-to-next-js-16-a-practical-performance-first-guide-e9680dd252b4) — Optimization strategies
-- [PWA Security Best Practices](https://www.zeepalm.com/blog/pwa-security-best-practices) — Cache security, scope restriction
+- [Supabase RLS Best Practices (MakerKit)](https://makerkit.dev/blog/tutorials/supabase-rls-best-practices) -- multi-tenant patterns, testing
+- [Multi-Tenant Database Architecture (Bytebase)](https://www.bytebase.com/blog/multi-tenant-database-architecture-patterns-explained/) -- denormalization rationale
+- [Designing Postgres for Multi-Tenancy (Crunchy Data)](https://www.crunchydata.com/blog/designing-your-postgres-database-for-multi-tenancy) -- organization_id patterns
+- [Zero-Downtime PostgreSQL Migrations (Xata)](https://xata.io/blog/zero-downtime-schema-migrations-postgresql) -- phased migration approach
+- [Swiss Property Management Software Comparison](https://emonitor.ch/5-immobilien-erp-systeme-die-sie-kennen-sollten/) -- feature landscape
+- [Next.js Multi-Tenant Guide](https://nextjs.org/docs/app/guides/multi-tenant) -- App Router multi-tenant patterns
 
-### Tertiary (LOW confidence, needs validation)
-- [Medium - Server Components Broke Our App Twice](https://medium.com/lets-code-future/next-js-server-components-broke-our-app-twice-worth-it-e511335eed22) — Anecdotal boundary confusion issues
-- [Medium - 10 Performance Mistakes in Next.js 16](https://medium.com/@sureshdotariya/10-performance-mistakes-in-next-js-16-that-are-killing-your-app-and-how-to-fix-them-2facfab26bea) — Community-identified pitfalls
-- [GitHub - ast-i18n](https://github.com/sibelius/ast-i18n) — AST-based string transformation approach
+### Tertiary (LOW confidence)
+- [Multi-Tenant RLS on Supabase (Antstack)](https://www.antstack.com/blog/multi-tenant-applications-with-rls-on-supabase-postgress/) -- general patterns, no version specifics
+- STWE legal requirements inferred from general Swiss property context, not verified against specific OR articles
 
 ---
-*Research completed: 2026-02-04*
+*Research completed: 2026-02-18*
 *Ready for roadmap: yes*

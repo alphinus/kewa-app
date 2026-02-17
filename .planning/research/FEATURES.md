@@ -1,205 +1,206 @@
-# Feature Landscape: Production Hardening
+# Feature Research: Multi-Tenant Property Management
 
-**Domain:** Next.js 16 + React 19 + Supabase Enterprise Application
-**Researched:** 2026-02-04
-**Project:** KEWA Renovation Operations System (110K LOC, 750+ files)
+**Domain:** Swiss Property Management SaaS (Multi-Tenant)
+**Researched:** 2026-02-18
+**Confidence:** MEDIUM
 
-## Table Stakes
+## Feature Landscape
 
-Features users expect from production-ready enterprise apps. Missing = app feels unprofessional or unsafe.
+### Table Stakes (Users Expect These)
 
-| Feature | Why Expected | Complexity | Measurable Target |
-|---------|--------------|------------|-------------------|
-| **Core Web Vitals compliance** | Google ranking factor, user experience baseline | Medium | LCP < 2.5s, INP < 200ms, CLS < 0.1 |
-| **Security headers (CSP)** | OWASP A01:2025 Broken Access Control mitigation | Low | CSP header configured, X-Frame-Options, HSTS |
-| **JWT token security** | Prevent XSS/CSRF attacks on auth system | Medium | HttpOnly cookies, SameSite=strict, 256-bit keys |
-| **Database query indexes** | N+1 queries causing sluggishness | High | Supabase Query Performance Report < 100ms p95 |
-| **Dependency vulnerability resolution** | OWASP A03:2025 Supply Chain Failures | Low | npm audit 0 critical/high vulnerabilities |
-| **Environment variable security** | Prevent credential leaks | Low | .env* in .gitignore, no NEXT_PUBLIC_ for secrets |
-| **Error boundaries** | Prevent white screen of death | Low | app/global-error.tsx exists, catches all errors |
-| **PWA service worker security** | Prevent cache poisoning attacks | Medium | HTTPS enforcement, scope restriction, CSP headers |
-| **Proper UTF-8 encoding** | German umlauts display correctly | Low | All ä/ö/ü characters render properly |
-| **Audit logging for changes** | Compliance, debugging, security | Low | All mutations logged (already exists) |
+Features users assume exist. Missing these = product feels incomplete.
 
-## Performance Differentiators
+| Feature | Why Expected | Complexity | Notes |
+|---------|--------------|------------|-------|
+| Organization/Verwaltung Switcher | Standard SaaS pattern - users manage multiple mandates/clients | MEDIUM | Dropdown in header with search, recent items. Token-based tenant isolation. See Clerk, WorkOS patterns. |
+| Mandate (Mandat) Management | Core Swiss property mgmt concept - each mandate = distinct client/property portfolio | MEDIUM | Verwaltungsmandat is legal contract (Swiss Code of Obligations). Track mandate dates, scope, billing terms. |
+| Property Hierarchy Navigation | Users expect: Verwaltung → Mandat → Eigentümer → Liegenschaft → Gebäude → Einheit → Mietverhältnis | HIGH | Current confusion: "Liegenschaft" vs "Gebäude" used interchangeably. Fix: Liegenschaft = property parcel, Gebäude = building structure. Breadcrumbs + drilldown menus essential. |
+| Role-Based Owner vs Manager Views | Owners see limited financial/strategic data; managers see operations | MEDIUM | Owner portal: occupancy, rental income, high-level maintenance. Manager: full CRUD, detailed workflows. Row-level security required. |
+| STWE (Stockwerkeigentum) Fields | Condominium ownership is common in Switzerland - unit owners, special assessments, voting | HIGH | Already prepared in data model (good!). Need: unit owner list, ownership %, assembly minutes, special assessment tracking, individual unit cost allocation. |
+| Multi-Property Dashboard | Mandate-level view aggregating all properties under that mandate | MEDIUM | Heatmap, occupancy %, cost rollup. Already exists at property level - extend to mandate level. |
+| Property → Building Drill-Down | Properties contain multiple buildings (Swiss context: large estates/complexes) | LOW | Fix terminology confusion first. Gebäude subordinate to Liegenschaft. |
+| Owner Financial Reporting | Separate P&L per Eigentümer, especially for STWE where each unit owner needs statements | MEDIUM | Swiss law requires transparent condominium accounting. Auto-generate owner statements quarterly/annually. |
+| Mandate-Scoped Data Isolation | All data (projects, tasks, invoices, media) scoped to mandate - zero leakage | HIGH | Critical for SaaS. tenant_id on every table. Middleware enforcement. Supabase RLS already in place - extend to mandate_id. |
+| Organization User Invites | Invite team members to specific mandates with role assignment | MEDIUM | Standard SaaS. Email invite, role picker, mandate assignment. |
 
-Features that make the app feel fast, not just functional. Directly address "träge" (sluggish) complaint.
+### Differentiators (Competitive Advantage)
 
-| Feature | Value Proposition | Complexity | Impact |
-|---------|-------------------|------------|--------|
-| **Server Component optimization** | 15-20% faster rendering, smaller JS bundles | Medium | Measurable LCP improvement |
-| **Parallel data fetching** | Eliminate request waterfalls (biggest perf killer) | High | Cut page load time by 30-60% |
-| **React Compiler optimization** | Auto-optimize re-renders, reduce useMemo/useCallback need | Low | Already enabled in next.config.ts |
-| **Turbopack build speed** | 2-5x faster builds, 10x faster Fast Refresh | Low | Already enabled (Next.js 16 default) |
-| **Database connection pooling** | Handle concurrent requests without bottleneck | Medium | Support 200+ concurrent users |
-| **Supabase index optimization** | 100x speedup on filtered queries | Medium | Use index_advisor extension |
-| **Image optimization audit** | Prevent layout shift, serve WebP | Low | Next.js Image component already used |
-| **Bundle size analysis** | Identify bloat from large dependencies | Low | @next/bundle-analyzer plugin |
-| **Lazy loading for heavy components** | Reduce initial bundle size | Medium | Dynamic imports for modals, editors |
-| **Cache-first for static assets** | Instant offline load for assets | Low | Already implemented in sw-cache.js |
+Features that set the product apart. Not required, but valuable.
 
-## Security Differentiators
+| Feature | Value Proposition | Complexity | Notes |
+|---------|-------------------|------------|-------|
+| Unified Renovation + STWE in One Platform | Competitors separate STWE admin from project management (Rimo R5, ImmoTop2, GARAIO REM focus on accounting; project tools are separate) | LOW | Already have renovation system built. Adding STWE layer = competitive edge. Market gap. |
+| Owner Self-Service Portal with Live Updates | Most Swiss tools generate static reports - live dashboard rare | MEDIUM | Owners login, see real-time renovation status, costs, unit conditions. Builds on existing digital twin. Reduces "status update" emails. |
+| Automatic Unit Condition Tracking (Digital Twin) | Few competitors auto-derive unit state from completed work | LOW | Already built (HIST-01 to HIST-05). Extend to STWE context: show which unit owners have which renovations done. |
+| Cross-Mandate Portfolio View | Manage multiple mandates in single pane - competitors often silo per mandate | MEDIUM | Dashboard showing all mandates with KPIs: total units, occupancy %, active projects. Switcher for drill-down. |
+| Transparent External Contractor Integration | Magic-link portal is simpler than forcing contractors into "another login" | LOW | Already built (EXT-01 to EXT-16). Competitors require contractor accounts or email-only workflows. |
+| Flexible Property Hierarchy | Support both single-building and complex multi-building estates without forcing structure | MEDIUM | Gebäude optional under Liegenschaft. Competitors force one model. Swiss market has both (single villa vs large complex). |
+| Mobile-First Owner Portal | Owners check status on phone - most Swiss tools desktop-only | LOW | PWA already built. Extend owner view. |
+| Multi-Language Support (German, French, Italian) | Swiss market requirement - Fairwalter, Rimo R5 offer this | MEDIUM | Currently German-only. Add i18n for CH-FR, CH-IT. Umlaut handling already fixed (Phase 34). |
 
-Features that protect against OWASP Top 10 2025 threats. Beyond basic auth.
+### Anti-Features (Commonly Requested, Often Problematic)
 
-| Feature | OWASP Category | Complexity | Mitigation |
-|---------|----------------|------------|------------|
-| **Security Misconfiguration audit** | A02:2025 (2nd most critical) | Medium | Review Next.js headers, CORS, API exposure |
-| **Cryptographic Failures audit** | A04:2025 | Low | Verify bcrypt rounds, JWT algorithm (HS256 min) |
-| **Injection prevention** | A05:2025 | Low | Parameterized queries (Supabase client already safe) |
-| **Insecure Design review** | A06:2025 | High | Magic-link expiry, contractor token validation |
-| **Authentication failure hardening** | A08:2025 | Medium | Rate limiting, session timeout enforcement |
-| **Logging & alerting audit** | A09:2025 | Low | Verify audit_log captures security events |
-| **Exceptional condition handling** | A10:2025 (NEW) | Low | Error boundaries, fail closed on auth errors |
-| **Service worker scope restriction** | PWA-specific | Low | Service-Worker-Allowed header already set |
-| **Sensitive data tainting** | Next.js 16 feature | Medium | Prevent DB secrets from reaching client |
-| **RBAC permission verification** | Application-layer security | Low | Already implemented in middleware.ts |
+Features that seem good but create problems.
 
-## i18n Strategy
-
-Features for fixing German umlauts and preparing for potential i18n future.
-
-| Feature | Approach | Complexity | Why |
-|---------|----------|------------|-----|
-| **UTF-8 encoding verification** | Audit all hardcoded strings | Low | Ensure source files are UTF-8, meta tags correct |
-| **Umlaut replacement (ae→ä, etc.)** | Global find/replace in codebase | Low | User complaint: umlauts incorrectly spelled out |
-| **German-only string externalization** | Create de.json locale file | Medium | Prepares for future i18n, centralizes strings |
-| **Database UTF-8 collation** | Verify Supabase uses UTF8 | Low | Postgres default UTF8, verify with psql \l |
-| **File upload encoding** | Server action form data fix | Medium | Next.js Issue #70147 - German filenames encode wrong |
-
-## Anti-Features
-
-Features to explicitly NOT build. Avoid over-engineering during hardening.
-
-| Anti-Feature | Why Avoid | What to Do Instead |
-|--------------|-----------|-------------------|
-| **Full i18n framework (next-intl)** | App is German-only, no multi-language requirement | Fix umlauts, externalize strings to de.json for future |
-| **Complete rewrite to fix performance** | Lava Flow anti-pattern - code around issues | Profile with Lighthouse, fix specific bottlenecks |
-| **Hardening Sprint mentality** | Treats tech debt as separate phase | Integrate hardening into regular workflow |
-| **Premature optimization** | Optimizing without profiling wastes time | Run Lighthouse first, prioritize by impact |
-| **Over-engineered security** | Resume-driven development, not solving real problems | Focus on OWASP Top 10, not every CVE |
-| **Replacing service worker with Serwist** | Turbopack conflict already documented | Keep manual sw.js approach |
-| **Database migration to different provider** | Supabase is fine, performance issue is queries not DB | Optimize queries, add indexes |
-| **Switching from JWT to sessions** | Custom JWT auth with PIN works for use case | Harden JWT implementation, don't replace |
-| **Adding WebAuthn/passkeys** | Two internal users with PINs, not needed | Focus on contractor/tenant auth security |
-| **Building custom bundler** | Turbopack already optimized | Use existing tooling |
+| Feature | Why Requested | Why Problematic | Alternative |
+|---------|---------------|-----------------|-------------|
+| Global Search Across All Mandates | "Find anything fast" | Privacy violation - user shouldn't see data from mandates they don't access. Mandate switching is intentional context boundary. | Mandate-scoped search only. Fuzzy search within active mandate context. |
+| Automatic Mandate Switching Based on URL | "Deep links should auto-switch" | Confusing - user clicks link, suddenly in different mandate without realizing. Security risk. | Interstitial: "This link is for Mandate X. Switch to view?" |
+| Owner-Editable Project Data | "Empower owners to update directly" | Breaks audit trail. Owners lack context for internal workflows. Creates version conflicts. | Owner comments/questions only. Manager updates data, owner sees live read-only view. |
+| Flat "All Properties" List | "Simpler than hierarchy" | Doesn't match Swiss legal structure. Mandates are distinct legal entities. Mixing = accounting/compliance nightmare. | Always mandate-scoped. Clear hierarchy enforced. |
+| Shared Templates Across Mandates | "Reuse work order templates everywhere" | Template customization per mandate is common (different contractors, standards, pricing). Shared = version chaos. | Templates library per mandate. Option to copy template to another mandate (not share). |
+| Real-Time Collaboration (Google Docs style) | "Multiple users editing same record" | Low ROI for property mgmt use case. Rare that 2+ users edit same task simultaneously. Adds conflict resolution complexity. | Optimistic locking with "last save wins" warning. Audit log shows who changed what. |
 
 ## Feature Dependencies
 
 ```
-Performance Optimization Flow:
-1. Lighthouse audit → identify bottlenecks
-2. Database indexes → fix N+1 queries
-3. Parallel fetching → eliminate waterfalls
-4. Bundle analysis → lazy load heavy components
+[Organization/Verwaltung Switcher]
+    └──requires──> [Mandate-Scoped Data Isolation]
+                       └──requires──> [Role-Based Permissions per Mandate]
 
-Security Hardening Flow:
-1. npm audit → resolve critical vulnerabilities
-2. CSP headers → prevent XSS
-3. JWT hardening → httpOnly, SameSite
-4. Service worker scope → prevent cache poisoning
+[STWE Features]
+    └──requires──> [Property Hierarchy (Liegenschaft → Gebäude → Einheit)]
+    └──requires──> [Owner Financial Reporting]
+    └──enhances──> [Unit Condition Tracking] (show per owner)
 
-i18n Flow:
-1. UTF-8 verification → ensure encoding correct
-2. Umlaut replacement → fix ae/oe/ue
-3. String externalization → prepare de.json
+[Cross-Mandate Portfolio View]
+    └──requires──> [Organization/Verwaltung Switcher]
+    └──requires──> [Multi-Property Dashboard]
+
+[Owner Self-Service Portal]
+    └──requires──> [Role-Based Owner vs Manager Views]
+    └──requires──> [Owner Financial Reporting]
+    └──enhances──> [Digital Twin/Unit Condition Tracking]
+
+[Multi-Language Support]
+    └──enhances──> [Owner Portal] (required for Romandie, Ticino)
+    └──conflicts──> [AI Voice Transcription] (already out-of-scope for Swiss-German dialect)
+
+[Property → Building Drill-Down]
+    └──requires──> [Terminology Fix: Liegenschaft vs Gebäude]
 ```
 
-## MVP Recommendation
+### Dependency Notes
 
-For production hardening milestone (v3.1), prioritize by impact:
+- **Organization Switcher requires Mandate-Scoped Data Isolation:** Cannot switch contexts if data isn't properly isolated. Security-critical dependency.
+- **STWE requires Property Hierarchy:** Condominium ownership is unit-level. Must have Liegenschaft → Gebäude → Einheit structure clear.
+- **Owner Portal enhances Digital Twin:** Existing unit condition tracking becomes powerful when owners can see their units live.
+- **Multi-Language conflicts with Dialect Transcription:** Already decided against Swiss-German voice-to-text (v2.0 REQUIREMENTS.md line 196). Don't add standard German if expectation is dialect support.
 
-**Phase 1: Quick Wins (1-2 days)**
-1. npm audit fix (dependency vulnerabilities)
-2. Umlaut find/replace (ae→ä, ue→ü, oe→ö)
-3. CSP headers in next.config.ts
-4. Lighthouse audit baseline
+## MVP Definition (v3.0 Multi-Tenant Foundation)
 
-**Phase 2: Performance Bottlenecks (3-5 days)**
-1. Supabase Query Performance Report analysis
-2. Add database indexes for slow queries
-3. Identify N+1 patterns (188 files with .select/.from)
-4. Parallel fetching for dashboard pages
-5. Bundle analysis with @next/bundle-analyzer
+### Launch With (v3.0)
 
-**Phase 3: Security Hardening (2-3 days)**
-1. JWT cookie security audit (httpOnly, SameSite)
-2. Service worker security review
-3. Sensitive data tainting for DB secrets
-4. Rate limiting on auth endpoints
-5. Error boundary audit
+Minimum viable SaaS multi-tenant product — what's needed to support multiple clients/mandates.
 
-**Phase 4: String Externalization (2-3 days)**
-1. Create de.json locale file
-2. Extract hardcoded German strings
-3. Replace with locale references
-4. Verify UTF-8 encoding throughout
+- [x] **Organization/Verwaltung Switcher** — Cannot be multi-tenant without it. Blocks all mandate features.
+- [x] **Mandate Management (CRUD)** — Create, archive mandates. Assign properties to mandates.
+- [x] **Mandate-Scoped Data Isolation** — Security fundamental. All existing data (projects, tasks, invoices) scoped to mandate.
+- [x] **Property Hierarchy Terminology Fix** — Clarify Liegenschaft (property parcel) vs Gebäude (building). Fix UI labels, schema comments.
+- [x] **Role-Based Permissions per Mandate** — User can be admin in Mandate A, viewer in Mandate B.
+- [ ] **Navigation Redesign** — Breadcrumbs: Verwaltung → Mandat → Liegenschaft → Gebäude → Einheit. Remove footer redundancy.
+- [ ] **STWE Basic Fields (UI)** — Expose existing STWE fields: unit owner name, ownership %, special assessments. No voting/assembly features yet.
 
-Defer to post-MVP:
-- Full i18n framework: App is German-only, no requirement
-- Advanced caching strategies: Service worker already handles offline
-- Monitoring/observability: Focus on fixing, not monitoring first
+### Add After Validation (v3.1)
 
-## Complexity Estimation
+Features to add once core multi-tenant is working and validated with 2-3 mandates.
 
-| Category | Total Effort | Risk Level |
-|----------|--------------|------------|
-| Quick Wins | 16 hours | Low |
-| Performance | 32-40 hours | Medium-High (requires profiling) |
-| Security | 16-24 hours | Medium (requires testing) |
-| i18n Prep | 16-24 hours | Low |
-| **Total** | **80-104 hours** | **Medium** |
+- [ ] **Cross-Mandate Portfolio Dashboard** — Aggregate view for users managing multiple mandates. Useful once >3 mandates.
+- [ ] **Owner Self-Service Portal** — Owners login, see their units/costs read-only. Validation trigger: KEWA has owners asking "what's the status?"
+- [ ] **Organization User Invites** — Invite colleagues to specific mandates. Needed when KEWA hires second property manager.
+- [ ] **Mandate-Level Templates** — Copy template libraries per mandate (not shared). Trigger: KEWA managing mandates with different contractors.
+- [ ] **Owner Financial Reporting (Basic)** — Auto-generate PDF statement per owner: costs incurred, unit condition. Trigger: first STWE property.
 
-## Known Risks
+### Future Consideration (v3.2+)
 
-### High Risk
-- **Database indexes may require migration downtime**: Supabase index creation locks tables
-- **N+1 query fixes may break existing logic**: 188 files use Supabase queries, refactoring risk
-- **CSP headers may block legitimate scripts**: Service worker, inline scripts, third-party CDNs
+Features to defer until product-market fit with multiple clients.
 
-### Medium Risk
-- **Bundle analysis may reveal deep dependency issues**: Removing large deps requires refactoring
-- **String externalization may break formatted strings**: Template literals with variables
-- **UTF-8 encoding issues in file uploads**: Next.js Issue #70147 still open
+- [ ] **Multi-Language (French, Italian)** — Required for Romandie/Ticino expansion. Not needed for initial Zurich-area mandates. Trigger: first French-speaking client.
+- [ ] **STWE Advanced (Voting, Assemblies)** — Assembly minutes, vote tracking, quorum. Complex, low ROI until managing multiple STWE properties. Trigger: >5 STWE properties.
+- [ ] **Mobile Owner App (Native)** — PWA sufficient for now. Native app = higher perceived legitimacy but 3x dev cost. Trigger: owner feedback "PWA feels wrong."
+- [ ] **Advanced RBAC (Custom Roles)** — Current roles (admin, manager, accounting, tenant, contractor) sufficient. Custom roles = complexity. Trigger: client needs unusual permission combo.
+- [ ] **Audit Log Viewer (UI)** — Logs exist (NFR-01), no UI to browse. Trigger: compliance audit or dispute requiring timeline reconstruction.
 
-### Low Risk
-- **npm audit fixes may cause version conflicts**: Test after upgrading
-- **Umlaut replacement may miss template literals**: Requires thorough search
-- **JWT hardening may break existing sessions**: Requires re-login for users
+## Feature Prioritization Matrix
 
-## Measurement Criteria
+| Feature | User Value | Implementation Cost | Priority | Depends On |
+|---------|------------|---------------------|----------|------------|
+| Mandate-Scoped Data Isolation | HIGH | HIGH | P1 | - |
+| Organization/Verwaltung Switcher | HIGH | MEDIUM | P1 | Data Isolation |
+| Mandate Management (CRUD) | HIGH | LOW | P1 | - |
+| Property Hierarchy Terminology Fix | HIGH | LOW | P1 | - |
+| Role-Based Permissions per Mandate | HIGH | MEDIUM | P1 | Data Isolation |
+| Navigation Redesign (Breadcrumbs) | MEDIUM | MEDIUM | P1 | Terminology Fix |
+| STWE Basic Fields (UI) | MEDIUM | LOW | P1 | Property Hierarchy |
+| Cross-Mandate Portfolio Dashboard | MEDIUM | MEDIUM | P2 | Mandate Switcher |
+| Owner Self-Service Portal | HIGH | MEDIUM | P2 | RBAC, STWE |
+| Organization User Invites | MEDIUM | MEDIUM | P2 | RBAC |
+| Mandate-Level Templates | LOW | LOW | P2 | Mandate CRUD |
+| Owner Financial Reporting (Basic) | MEDIUM | MEDIUM | P2 | STWE, Owner Portal |
+| Multi-Language (FR, IT) | MEDIUM | HIGH | P3 | i18n framework |
+| STWE Advanced (Voting) | LOW | HIGH | P3 | STWE Basic |
+| Mobile Owner App (Native) | LOW | HIGH | P3 | Owner Portal |
+| Custom Roles (Advanced RBAC) | LOW | HIGH | P3 | RBAC |
+| Audit Log Viewer (UI) | LOW | LOW | P3 | - |
 
-| Metric | Baseline (Unknown) | Target |
-|--------|-------------------|--------|
-| LCP (Largest Contentful Paint) | TBD | < 2.5s (< 2.0s ideal) |
-| INP (Interaction to Next Paint) | TBD | < 200ms (< 100ms ideal) |
-| CLS (Cumulative Layout Shift) | TBD | < 0.1 (< 0.05 ideal) |
-| Lighthouse Performance Score | TBD | > 90 |
-| Bundle Size (gzipped) | TBD | Reduce by 20% |
-| Query p95 latency | TBD | < 100ms |
-| npm audit vulnerabilities | TBD | 0 critical/high |
-| German umlauts correct | 0% (ae/oe/ue) | 100% (ä/ö/ü) |
+**Priority key:**
+- P1: Must have for v3.0 launch (multi-tenant foundation)
+- P2: Should have for v3.1 (validation/polish)
+- P3: Nice to have for v3.2+ (future consideration)
+
+## Competitor Feature Analysis
+
+| Feature | Fairwalter | Rimo R5 / ImmoTop2 | GARAIO REM | KeWa Approach |
+|---------|------------|-------------------|------------|---------------|
+| Multi-Tenant Architecture | Yes (SaaS, per-client instances implied) | Yes (enterprise, flexible deployment) | Yes (online help, multi-property) | Yes - mandate = tenant boundary |
+| Mandate Management | Property master data sync via API | Integrated ecosystem, comprehensive mgmt tasks | Condominium ownership support | Verwaltungsmandat = first-class entity |
+| Property Hierarchy | Centralized property/lease management | Not detailed in sources | Not detailed in sources | Verwaltung → Mandat → Eigentümer → Liegenschaft → Gebäude → Einheit |
+| STWE Support | Not mentioned | ImmoTop2: integrated accounting for STWE | Comprehensive functions for STWE | Fields exist, need UI for unit owners, special assessments |
+| Owner Portal | Not mentioned | Not mentioned | Not mentioned | **Differentiator:** Live read-only dashboard for owners |
+| Renovation/Project Mgmt | Inventory tracking (condition/repairs) | Not primary focus (accounting-centric) | Not mentioned | **Differentiator:** Full renovation ops integrated with STWE |
+| External Contractor Integration | Assign tasks to service providers | Not detailed | Not mentioned | **Differentiator:** Magic-link portal, no login required |
+| Financial Reporting | Automated debtor/creditor, chart of accounts | Integrated accounting | Not detailed | CSV export (current), owner statements (planned P2) |
+| Document Management | AI-powered tagging, search | Digital storage, automated workflows | Instructional videos, help center | Media entity, audit log (current) |
+| Mobile Support | Not mentioned | Not mentioned | Not mentioned | **Differentiator:** PWA with offline sync |
+
+**Our Competitive Position:**
+- **Strength:** Renovation operations + STWE in one platform (competitors separate these)
+- **Strength:** External contractor magic-link portal (simpler than forced logins)
+- **Strength:** Digital twin / auto condition tracking
+- **Gap:** Multi-language (competitors serve all CH language regions)
+- **Gap:** Integrated accounting (we export CSV; they have full GL)
+- **Parity:** Multi-tenant, mandate management, property hierarchy
 
 ## Sources
 
-**Performance:**
-- [Next.js 16 Production Checklist](https://nextjs.org/docs/app/guides/production-checklist)
-- [Next.js Performance Optimization 2026](https://medium.com/@Adekola_Olawale/migrating-to-next-js-16-a-practical-performance-first-guide-e9680dd252b4)
-- [N+1 Query Optimization](https://strapi.io/blog/performance-mistakes-strapi-nextjs-apps)
-- [React Server Components Performance](https://www.patterns.dev/react/react-2026/)
-- [Core Web Vitals Targets](https://developers.google.com/search/docs/appearance/core-web-vitals)
-- [Supabase Query Optimization](https://supabase.com/docs/guides/database/query-optimization)
+**SaaS Multi-Tenancy & UI Patterns:**
+- [Multi-Tenant Architecture - SaaS App Design Best Practices](https://relevant.software/blog/multi-tenant-architecture/)
+- [SaaS and Multitenant Solution Architecture - Azure](https://learn.microsoft.com/en-us/azure/architecture/guide/saas-multitenant-solution-architecture/)
+- [Building Multi-Tenant Apps Using Clerk's Organization - ZenStack](https://zenstack.dev/blog/clerk-multitenancy)
+- [Designing a layout structure for SaaS products - Medium](https://medium.com/design-bootcamp/designing-a-layout-structure-for-saas-products-best-practices-d370211fb0d1)
 
-**Security:**
-- [OWASP Top 10 2025](https://owasp.org/Top10/2025/en/)
-- [Next.js Security Guide 2025](https://www.turbostarter.dev/blog/complete-nextjs-security-guide-2025-authentication-api-protection-and-best-practices)
-- [JWT Best Practices 2026](https://leapcell.medium.com/implementing-jwt-middleware-in-next-js-a-complete-guide-to-auth-300d9c7fcae2)
-- [PWA Security Best Practices](https://www.zeepalm.com/blog/pwa-security-best-practices)
+**Swiss Property Management:**
+- [Immobiliensoftware Schweiz – ImmoTop2, Rimo R5 & Fairwalter](https://www.wwimmo.ch/produkte/)
+- [5 Immobilien ERP-Systeme, die Sie kennen sollten - emonitor](https://emonitor.ch/5-immobilien-erp-systeme-die-sie-kennen-sollten/)
+- [The property management contract (rental management) - Esther Lauber](https://www.esther-lauber.ch/index.php/en/leases-for-flats/39-useful-information-on-real-estate-in-geneva/253-the-property-management-contract-rental-management)
 
-**i18n:**
-- [Next.js Internationalization](https://nextjs.org/docs/app/guides/internationalization)
-- [German Umlauts UTF-8 Issue](https://github.com/vercel/next.js/issues/70147)
+**STWE (Stockwerkeigentum):**
+- [Neowise / Verwaltung von Stockwerkeigentum](https://neowise.ch/einblicke/news/verwaltung-von-stockwerkeigentum-entdecken-sie-die-neue-funktion/)
+- [Special Assessments in Florida Condominium Associations - Ferrer Law Group](https://www.ferrerlawgroup.com/special-assessments-in-florida-condominium-associations-legal-requirements-and-owner-challenges/)
+- [HOA Special Assessment Rules - Community Associations Law](https://communityassociations.law/article/budgets-reserves-and-the-ohio-requirement-for-an-annual-ownership-vote-if-reserve-funding-is-to-be-waived-the-special-assessment-problem/)
 
-**Anti-Patterns:**
-- [Platform Engineering Anti-Patterns](https://jellyfish.co/library/platform-engineering/anti-patterns/)
-- [Software Anti-Patterns to Avoid](https://www.bairesdev.com/blog/software-anti-patterns/)
+**Navigation & UX:**
+- [Navigation UX: Pattern Types and Tips - Userpilot](https://userpilot.com/blog/navigation-ux/)
+- [PatternFly Navigation Design Guidelines](https://www.patternfly.org/components/navigation/design-guidelines/)
+- [Hierarchy drill-down – amCharts 5](https://www.amcharts.com/docs/v5/charts/hierarchy/hierarchy-drill-down/)
+- [Feature Update | New Breadcrumb Options - Rentec Direct](https://www.rentecdirect.com/blog/feature-update-breadcrumb-options/)
+
+**Owner vs Manager Views:**
+- [Hostfully - Owner Portal](https://www.hostfully.com/pmp-features/owner-portal/)
+- [Top Property Management Dashboards for 2025 - Second Nature](https://www.secondnature.com/blog/property-management-dashboard)
+- [Property Management Dashboard Power BI - Global Data 365](https://globaldata365.com/property-management-dashboard/)
+
+---
+*Feature research for: KeWa App v3.0 Multi-Tenant Property Management*
+*Researched: 2026-02-18*
+*Confidence: MEDIUM (verified with multiple sources, some Swiss-specific details from general context)*

@@ -1,341 +1,362 @@
-# Technology Stack: Production Hardening
+# Stack Research
 
-**Project:** KeWa-App (Property Management SaaS)
-**Researched:** 2026-02-04
-**Context:** 110K LOC Next.js 16 app requiring performance, security, and i18n cleanup
+**Domain:** Multi-Tenant Property Management Data Model with RLS
+**Researched:** 2026-02-18
+**Confidence:** HIGH
 
 ## Recommended Stack
 
-### 1. Performance Profiling & Monitoring
+### Core Technologies
 
-| Technology | Version | Purpose | Why | Confidence |
-|------------|---------|---------|-----|------------|
-| Next.js Bundle Analyzer (experimental) | Built-in 16.1+ | Bundle size analysis with Turbopack | Native Turbopack integration, module graph awareness, shows import stack | HIGH |
-| @vercel/speed-insights | Latest | Real-time Web Vitals monitoring | Zero-config Vercel integration, tracks LCP/FID/CLS from real users | HIGH |
-| Lighthouse CI | Latest | CI/CD performance regression testing | Industry standard, prevents regressions, GitHub Actions integration | HIGH |
-| bundle-phobia-cli | Latest | Pre-installation package size checking | Prevents bloat before it enters codebase, CLI automation | MEDIUM |
+| Technology | Version | Purpose | Why Recommended |
+|------------|---------|---------|-----------------|
+| @supabase/ssr | 0.8.0 (current) | Server-side Supabase client for Next.js 16 | Industry standard for SSR with Next.js App Router, handles cookie-based sessions, automatic token refresh |
+| @supabase/supabase-js | 2.90.1 (current) | Client-side Supabase SDK | Core library for database queries, auth, storage - already validated in v1-v3 |
+| Postgres RLS | Built-in | Multi-tenant data isolation | Database-level security, prevents application-layer bypasses, [100x+ performance with proper indexes](https://supabase.com/docs/guides/troubleshooting/rls-performance-and-best-practices-Z5Jjwv) |
+| TypeScript Discriminated Unions | Built-in (TS 5.x) | Property/STWE type safety | [Natural fit for variant modeling](https://www.typescriptlang.org/docs/handbook/2/narrowing.html), compile-time exhaustiveness checking for property types |
 
-**Installation:**
-```bash
-npm install -D @lhci/cli
-npm install @vercel/speed-insights
-npm install -g bundle-phobia-cli
-```
+### Supporting Libraries
 
-**Setup Notes:**
-- **Next.js Bundle Analyzer**: Use `next build --experimental-turbopack-bundle-analyzer` (built-in, no package needed)
-- **Speed Insights**: Add `<SpeedInsights />` component to root layout
-- **Lighthouse CI**: Requires `.lighthouserc.js` config for Next.js server startup
-- **BundlePhobia**: Use before `npm install` to check package impact
+| Library | Version | Purpose | When to Use |
+|---------|---------|---------|-------------|
+| React Context API | Built-in (React 19) | Organization-scoped navigation state | Low-frequency tenant configuration, avoid for high-churn state ([Context triggers all children re-renders](https://medium.com/@sparklewebhelp/redux-vs-zustand-vs-context-api-in-2026-7f90a2dc3839)) |
+| `usePathname` hook | Built-in (Next.js 16) | Dynamic breadcrumb generation | [Standard pattern for hierarchical navigation](https://medium.com/@kcabading/creating-a-breadcrumb-component-in-a-next-js-app-router-a0ea24cdb91a) (Verwaltung→Mandat→Liegenschaft→Gebäude) |
+| SECURITY DEFINER functions | Built-in (Postgres) | RLS performance optimization | [Avoid N+1 RLS penalties on joins](https://github.com/orgs/supabase/discussions/14576), cache JWT claim lookups per statement |
 
-### 2. Security Auditing
+### Development Tools
 
-| Technology | Version | Purpose | Why | Confidence |
-|------------|---------|---------|-----|------------|
-| npm audit | Built-in | Dependency vulnerability scanning | Zero-config, catches CVE/NVD issues, free | HIGH |
-| Semgrep OSS | Latest | Static security analysis (SAST) | OWASP Top 10 detection, 250% better true positive rate, Express/NestJS support | HIGH |
-| eslint-plugin-security | Latest | ESLint security rules | Lightweight, catches common patterns (eval, SQL injection), integrates with existing ESLint | HIGH |
-| OWASP ZAP | Latest | Dynamic security testing (DAST) | Industry standard penetration testing, CI/CD integration, API security testing | MEDIUM |
-| Snyk OSS (optional) | Latest | Enhanced dependency scanning | Better coverage than npm audit, automated fixes, free for open source | MEDIUM |
+| Tool | Purpose | Notes |
+|------|---------|-------|
+| Supabase CLI | Local development, migrations | Already in use, no changes needed |
+| pg (PostgreSQL client) | Migration testing | Already in devDependencies (8.17.1) |
+| TypeScript 5.x | Type safety | Already in use, discriminated unions native support |
 
-**Installation:**
-```bash
-# Core security tools
-npm install -D eslint-plugin-security
-npm install -g @semgrep/cli
+## Installation
 
-# Optional: Snyk for enhanced dependency scanning
-npm install -g snyk
-```
+**NO NEW PACKAGES REQUIRED**
 
-**Setup Notes:**
-- **npm audit**: Run `npm audit --production` to exclude dev dependencies
-- **Semgrep**: Use `semgrep --config=auto` for OWASP rule set, supports JavaScript/TypeScript
-- **eslint-plugin-security**: Add to `.eslintrc` extends array
-- **OWASP ZAP**: Docker container for CI/CD, may report false positives on Next.js eval usage
-- **Snyk**: Alternative to npm audit with 25% fewer false positives
-
-### 3. i18n (German Umlaut Cleanup)
-
-| Technology | Version | Purpose | Why | Confidence |
-|------------|---------|---------|-----|------------|
-| Node.js Script (custom) | N/A | One-time ae/oe/ue → ä/ö/ü conversion | Simple find/replace, no runtime overhead | HIGH |
-| VS Code Find/Replace | Built-in | Manual verification | No dependencies, precise control | HIGH |
-
-**Recommended Approach: Zero-Dependency Script**
-
-For a German-only app with existing hardcoded strings, a simple Node.js script is sufficient:
-
-```javascript
-// scripts/convert-umlauts.js
-const fs = require('fs');
-const path = require('path');
-const glob = require('glob');
-
-const replacements = [
-  { from: /\bae\b/g, to: 'ä' },     // Word boundary to avoid "maestro" → "mästro"
-  { from: /\bAe\b/g, to: 'Ä' },
-  { from: /\boe\b/g, to: 'ö' },
-  { from: /\bOe\b/g, to: 'Ö' },
-  { from: /\bue\b/g, to: 'ü' },
-  { from: /\bUe\b/g, to: 'Ü' },
-  { from: /\bss\b/g, to: 'ß' },
-];
-
-const files = glob.sync('**/*.{ts,tsx,js,jsx}', {
-  ignore: ['node_modules/**', '.next/**', 'build/**']
-});
-
-files.forEach(file => {
-  let content = fs.readFileSync(file, 'utf8');
-  let modified = false;
-
-  replacements.forEach(({ from, to }) => {
-    if (content.match(from)) {
-      content = content.replace(from, to);
-      modified = true;
-    }
-  });
-
-  if (modified) {
-    fs.writeFileSync(file, content, 'utf8');
-    console.log(`Updated: ${file}`);
-  }
-});
-```
-
-**Why NOT react-i18next or next-intl:**
-- German-only UI (no multi-language requirement)
-- Existing strings are hardcoded (not in translation files)
-- Adding i18n framework creates runtime overhead for zero benefit
-- Simple UTF-8 encoding fixes suffice
-
-**If Future Multi-Language Required:**
-- **next-intl**: 2.1M weekly downloads, Next.js App Router native support
-- **react-i18next**: Most popular (9M+ downloads), but overkill for single language
-
-### 4. Supporting Tools
-
-| Tool | Purpose | When to Use |
-|------|---------|-------------|
-| size-limit | Package size enforcement | CI/CD check to prevent bundle bloat |
-| webpack-bundle-analyzer | Webpack fallback | If reverting from Turbopack |
-| dotenv-vault | Secrets management | If .env needs versioning/encryption |
-| TruffleHog | Secrets scanning | CI/CD check for committed credentials |
-
-**Not Recommended:**
-```bash
-# Don't install these for this project:
-npm install react-i18next next-intl  # Overkill for German-only
-npm install @next/bundle-analyzer     # Incompatible with Turbopack dev mode
-```
+All necessary libraries are already installed in package.json. The multi-tenant data model relies on:
+- Existing @supabase/ssr 0.8.0
+- Existing @supabase/supabase-js 2.90.1
+- Postgres native features (RLS, SECURITY DEFINER, indexes)
+- TypeScript native features (discriminated unions)
+- React/Next.js native features (Context, usePathname)
 
 ## Alternatives Considered
 
-| Category | Recommended | Alternative | Why Not |
-|----------|-------------|-------------|---------|
-| Bundle Analysis | Next.js experimental analyzer | @next/bundle-analyzer | Webpack-only, incompatible with Turbopack |
-| Bundle Analysis | Next.js experimental analyzer | webpack-bundle-analyzer | Turbopack doesn't use Webpack |
-| Dependency Scanning | npm audit + Semgrep | Snyk Pro | Costs $99/mo, overkill for single dev |
-| Dependency Scanning | npm audit + Semgrep | Socket.dev | Commercial, unnecessary for this scale |
-| DAST | OWASP ZAP | Burp Suite Pro | $499/year, ZAP is free and sufficient |
-| i18n | Custom script | react-i18next | Runtime overhead for zero benefit |
-| i18n | Custom script | next-intl | Requires translation file refactor |
-| Performance Monitoring | @vercel/speed-insights | Sentry Performance | $26/mo, Vercel integration is free |
-| Performance Monitoring | @vercel/speed-insights | New Relic | Enterprise pricing, overkill |
+| Recommended | Alternative | When to Use Alternative |
+|-------------|-------------|-------------------------|
+| Postgres RLS | Application-layer filtering | Never for multi-tenant SaaS ([RLS prevents app bypasses](https://makerkit.dev/blog/tutorials/supabase-rls-best-practices)) |
+| React Context | Zustand | Only if organization state changes frequently ([Zustand has fine-grained reactivity](https://medium.com/@codenova/react-context-api-vs-zustand-vs-redux-472d05afb6ee)) - not needed for tenant selection |
+| Single DB + RLS | Separate DB per tenant | Only if compliance requires physical data separation (not typical for Swiss Immo-Software) |
+| Custom JWT claims | Database lookups in RLS | Never - [JWT claims are cached, DB lookups kill performance](https://designrevision.com/blog/supabase-row-level-security) |
+| SECURITY DEFINER functions | Inline RLS policies | Use SECURITY DEFINER for complex joins ([10x+ improvement](https://supaexplorer.com/best-practices/supabase-postgres/security-rls-performance/)) |
 
-## Installation Command
+## What NOT to Use
 
-```bash
-# Performance
-npm install @vercel/speed-insights
-npm install -D @lhci/cli
+| Avoid | Why | Use Instead |
+|-------|-----|-------------|
+| Separate Supabase projects per tenant | Operational nightmare, exponential cost scaling | Single DB with RLS + organization_id column |
+| Client-side tenant filtering | Security risk, bypassable via browser DevTools | Postgres RLS policies enforced at database level |
+| Service role key on client | Bypasses ALL RLS policies ([massive security hole](https://supabase.com/docs/guides/api/securing-your-api)) | Use anon key, let RLS handle isolation |
+| Complex joins in RLS policies | [Performance killer on large tables](https://supabase.com/docs/guides/troubleshooting/rls-performance-and-best-practices-Z5Jjwv) | Move joins to SECURITY DEFINER functions |
+| Unindexed RLS columns | 100x+ performance penalty | CREATE INDEX on organization_id, mandate_id, property_id |
+| Zustand for tenant selection | Over-engineering for low-frequency state | React Context sufficient for tenant config |
+| Third-party breadcrumb libraries | Unnecessary dependency for simple path splitting | usePathname + split('/') pattern |
 
-# Security
-npm install -D eslint-plugin-security
-npm install -g @semgrep/cli bundle-phobia-cli
+## Stack Patterns for Multi-Tenant RLS
 
-# Optional: Enhanced dependency scanning
-npm install -g snyk
+### Pattern 1: Organization-Scoped Queries
+
+**Context:** Every tenant query must filter by organization_id
+
+**Implementation:**
+```typescript
+// BAD: Application-layer filtering (bypassable)
+const { data } = await supabase
+  .from('properties')
+  .select('*')
+  .eq('organization_id', orgId) // Client can modify orgId
+
+// GOOD: RLS enforces at database level
+CREATE POLICY org_isolation ON properties
+  USING (organization_id = auth.jwt() ->> 'organization_id');
+// Client cannot bypass this
 ```
 
-## Configuration Requirements
+### Pattern 2: Custom JWT Claims via Auth Hook
 
-### 1. Lighthouse CI (`.lighthouserc.js`)
+**Context:** RLS needs organization_id from JWT, not database lookups
 
-```javascript
-module.exports = {
-  ci: {
-    collect: {
-      startServerCommand: 'npm run start',
-      startServerReadyPattern: 'ready on',
-      url: ['http://localhost:3000'],
-      numberOfRuns: 3,
-    },
-    assert: {
-      preset: 'lighthouse:recommended',
-      assertions: {
-        'categories:performance': ['error', { minScore: 0.9 }],
-        'categories:accessibility': ['error', { minScore: 0.9 }],
-      },
-    },
-    upload: {
-      target: 'temporary-public-storage',
-    },
-  },
+**Implementation:**
+```typescript
+// Supabase Auth Hook (Edge Function)
+export const customAccessTokenHook = async (event: AuthHookEvent) => {
+  const { user_id } = event.user;
+  const org = await getOrganizationForUser(user_id); // Single lookup
+
+  return {
+    claims: {
+      organization_id: org.id,
+      mandate_ids: org.mandate_ids, // For mandate-scoped RLS
+    }
+  };
 };
 ```
 
-### 2. ESLint Security Plugin (`.eslintrc.json`)
+**Source:** [Custom Access Token Hook](https://supabase.com/docs/guides/auth/auth-hooks/custom-access-token-hook)
 
-```json
-{
-  "extends": [
-    "next/core-web-vitals",
-    "plugin:security/recommended"
-  ],
-  "plugins": ["security"],
-  "rules": {
-    "security/detect-object-injection": "warn",
-    "security/detect-non-literal-regexp": "warn"
+### Pattern 3: Hierarchical RLS Policies
+
+**Context:** Property → Building → Unit hierarchy needs cascading isolation
+
+**Implementation:**
+```sql
+-- Properties: Direct organization check
+CREATE POLICY org_properties ON properties
+  USING (organization_id = (auth.jwt() ->> 'organization_id')::uuid);
+
+-- Buildings: Inherit from property
+CREATE POLICY org_buildings ON buildings
+  USING (
+    property_id IN (
+      SELECT id FROM properties
+      WHERE organization_id = (auth.jwt() ->> 'organization_id')::uuid
+    )
+  );
+
+-- PERFORMANCE: Use SECURITY DEFINER function to avoid N+1
+CREATE FUNCTION user_organization_id() RETURNS uuid AS $$
+  SELECT (auth.jwt() ->> 'organization_id')::uuid;
+$$ LANGUAGE SQL SECURITY DEFINER STABLE;
+
+-- Optimized policy
+CREATE POLICY org_buildings_fast ON buildings
+  USING (
+    property_id IN (
+      SELECT id FROM properties
+      WHERE organization_id = user_organization_id()
+    )
+  );
+```
+
+### Pattern 4: Storage Bucket RLS for Multi-Tenancy
+
+**Context:** Media uploads must be isolated by organization
+
+**Implementation:**
+```sql
+-- Storage bucket policy
+CREATE POLICY org_media_upload ON storage.objects FOR INSERT
+  WITH CHECK (
+    bucket_id = 'property-media' AND
+    (storage.foldername(name))[1] = (auth.jwt() ->> 'organization_id')
+  );
+
+-- Path structure: {org_id}/{property_id}/{filename}
+```
+
+**Source:** [Storage Access Control](https://supabase.com/docs/guides/storage/security/access-control)
+
+### Pattern 5: TypeScript Discriminated Unions for Property Types
+
+**Context:** STWE (condominium) properties have different fields than rental properties
+
+**Implementation:**
+```typescript
+// BAD: Optional fields everywhere, no type safety
+type Property = {
+  id: string;
+  organization_id: string;
+  property_type: 'rental' | 'stwe';
+  // Rental fields (sometimes undefined)
+  owner_id?: string;
+  // STWE fields (sometimes undefined)
+  ownership_fraction?: number;
+  ownership_period?: [Date, Date];
+};
+
+// GOOD: Discriminated union, compile-time exhaustiveness
+type RentalProperty = {
+  property_type: 'rental';
+  owner_id: string;
+};
+
+type STWEProperty = {
+  property_type: 'stwe';
+  ownership_fraction: number;
+  ownership_period: [Date, Date];
+};
+
+type Property = {
+  id: string;
+  organization_id: string;
+} & (RentalProperty | STWEProperty);
+
+// TypeScript narrows type automatically
+function getOwnerInfo(prop: Property) {
+  if (prop.property_type === 'rental') {
+    return prop.owner_id; // TypeScript knows this exists
+  } else {
+    return prop.ownership_fraction; // TypeScript knows this exists
   }
 }
 ```
 
-### 3. Vercel Speed Insights (`app/layout.tsx`)
+**Source:** [TypeScript Narrowing](https://www.typescriptlang.org/docs/handbook/2/narrowing.html)
+
+## Version Compatibility
+
+| Package | Compatible With | Notes |
+|---------|-----------------|-------|
+| @supabase/ssr@0.8.0 | Next.js 16.1.6 | ✓ Validated, no breaking changes |
+| @supabase/supabase-js@2.90.1 | Postgres 15+ | ✓ RLS fully supported |
+| React 19.2.3 | Context API | ✓ Built-in, no version issues |
+| TypeScript 5.x | Discriminated unions | ✓ Native support since TS 2.0 |
+
+## Migration Complexity
+
+| Change | Complexity | Rationale |
+|--------|-----------|-----------|
+| Add organization_id to tables | Low | Single ALTER TABLE per entity |
+| Create RLS policies | Medium | One policy per table per role, well-documented patterns |
+| Auth hook for JWT claims | Medium | Single Edge Function, [official Supabase pattern](https://supabase.com/docs/guides/auth/auth-hooks/custom-access-token-hook) |
+| Index organization_id columns | Low | Standard CREATE INDEX, critical for performance |
+| Update Supabase client calls | None | RLS is transparent to application code |
+| Storage bucket policies | Low | Similar syntax to table RLS |
+| Breadcrumb navigation | Low | usePathname + split pattern, [20 LOC component](https://medium.com/@kcabading/creating-a-breadcrumb-component-in-a-next-js-app-router-a0ea24cdb91a) |
+
+## Performance Considerations
+
+### Critical Indexes (Required)
+
+```sql
+-- Primary tenant isolation (100x+ improvement)
+CREATE INDEX idx_properties_org ON properties(organization_id);
+CREATE INDEX idx_mandates_org ON mandates(organization_id);
+CREATE INDEX idx_buildings_property ON buildings(property_id);
+CREATE INDEX idx_units_building ON units(building_id);
+
+-- Composite indexes for filtered queries
+CREATE INDEX idx_properties_org_active ON properties(organization_id, is_active);
+CREATE INDEX idx_units_building_type ON units(building_id, unit_type);
+```
+
+**Source:** [RLS Performance Best Practices](https://supabase.com/docs/guides/troubleshooting/rls-performance-and-best-practices-Z5Jjwv)
+
+### SECURITY DEFINER Function Pattern
+
+```sql
+-- Cache JWT lookups (avoid per-row function calls)
+CREATE FUNCTION user_organization_id() RETURNS uuid AS $$
+  SELECT (auth.jwt() ->> 'organization_id')::uuid;
+$$ LANGUAGE SQL SECURITY DEFINER STABLE;
+
+-- Use in policies
+CREATE POLICY org_check ON properties
+  USING (organization_id = user_organization_id());
+```
+
+**Why:** [initPlan optimization caches function per statement](https://github.com/orgs/supabase/discussions/14576), not per row.
+
+## Integration Points
+
+### Existing BuildingContext → OrganizationContext
+
+**Current:** BuildingContext stores selected building, filters all queries
+**New:** OrganizationContext stores selected organization (for multi-org admins)
 
 ```typescript
-import { SpeedInsights } from '@vercel/speed-insights/next';
+// Extend existing pattern
+type OrganizationContextType = {
+  selectedOrganization: Organization | null;
+  setSelectedOrganization: (org: Organization) => void;
+  availableOrganizations: Organization[];
+};
 
-export default function RootLayout({ children }) {
-  return (
-    <html>
-      <body>
-        {children}
-        <SpeedInsights />
-      </body>
-    </html>
+// BuildingContext becomes child of OrganizationContext
+// Filters buildings by selected organization
+```
+
+**Why:** Reuses proven Context pattern from v2.1 (PROP-02), extends to organization level.
+
+### Existing RLS Policies → Organization-Scoped
+
+**Current:** `is_internal_user()` helper allows all internal users to see all data
+**New:** `is_internal_user() AND belongs_to_organization()` dual check
+
+```sql
+-- Before (v3.1)
+CREATE POLICY internal_full_access ON units
+  USING (is_internal_user(auth.uid()));
+
+-- After (v4.0)
+CREATE POLICY org_scoped_access ON units
+  USING (
+    is_internal_user(auth.uid()) AND
+    building_id IN (
+      SELECT b.id FROM buildings b
+      JOIN properties p ON b.property_id = p.id
+      WHERE p.organization_id = user_organization_id()
+    )
+  );
+```
+
+### Existing Supabase Client → No Changes Required
+
+**Current:** `createClient()` in lib/supabase/server.ts
+**New:** Same client, RLS enforced transparently
+
+```typescript
+// NO CHANGES NEEDED
+export async function createClient() {
+  const cookieStore = await cookies();
+  return createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, // RLS enforced with anon key
+    { cookies: { getAll: () => cookieStore.getAll(), ... } }
   );
 }
 ```
 
-### 4. GitHub Actions: Lighthouse CI
+**Why:** RLS is database-level, application code remains unchanged ([by design](https://makerkit.dev/blog/tutorials/supabase-rls-best-practices)).
 
-```yaml
-# .github/workflows/lighthouse.yml
-name: Lighthouse CI
-on: [pull_request]
+## Testing Strategy
 
-jobs:
-  lighthouse:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-      - run: npm ci
-      - run: npm run build
-      - run: npm install -g @lhci/cli
-      - run: lhci autorun
+### RLS Policy Testing
+
+```sql
+-- Test as different users (NOT from SQL Editor - it bypasses RLS)
+SET LOCAL ROLE authenticated;
+SET LOCAL request.jwt.claims TO '{"sub": "user-id", "organization_id": "org-1"}';
+
+-- Should return only org-1 properties
+SELECT * FROM properties;
+
+-- Should fail (different org)
+INSERT INTO properties (organization_id, name) VALUES ('org-2', 'Test');
 ```
 
-### 5. GitHub Actions: Security Scanning
-
-```yaml
-# .github/workflows/security.yml
-name: Security Scan
-on: [push, pull_request]
-
-jobs:
-  security:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Run npm audit
-        run: npm audit --audit-level=moderate
-
-      - name: Run Semgrep
-        uses: semgrep/semgrep-action@v1
-        with:
-          config: auto
-
-      - name: Run ESLint Security
-        run: npx eslint . --ext .ts,.tsx,.js,.jsx
-```
-
-## Tool Confidence Assessment
-
-| Tool | Confidence | Reasoning |
-|------|------------|-----------|
-| Next.js Bundle Analyzer | HIGH | Official Next.js 16.1 feature, Turbopack-native |
-| @vercel/speed-insights | HIGH | Zero-config Vercel integration, production-proven |
-| Lighthouse CI | HIGH | Industry standard since 2019, extensive Next.js usage |
-| npm audit | HIGH | Built-in, catches known CVEs, no setup required |
-| Semgrep | HIGH | OWASP Top 10 coverage, 250% better detection (2025 improvements) |
-| eslint-plugin-security | HIGH | 5M+ downloads/week, catches common patterns |
-| OWASP ZAP | MEDIUM | May produce Next.js false positives (eval usage in framework) |
-| bundle-phobia-cli | MEDIUM | Community tool, less critical than core monitoring |
-| Snyk | MEDIUM | Commercial tool, free tier limited, optional enhancement |
-| Custom umlaut script | HIGH | Simple UTF-8 replacement, no dependencies, verified approach |
-
-## Turbopack Compatibility Notes
-
-**Compatible:**
-- Next.js experimental bundle analyzer (`next build --experimental-turbopack-bundle-analyzer`)
-- Lighthouse CI (tests production build)
-- Semgrep (static analysis, bundler-agnostic)
-- ESLint plugins (runtime-agnostic)
-- Speed Insights (runtime monitoring)
-
-**Incompatible:**
-- `@next/bundle-analyzer` (Webpack-only, throws warning with `next dev --turbopack`)
-- `webpack-bundle-analyzer` (Webpack-only)
-
-**Workaround for Legacy Tools:**
-Build with Turbopack, analyze with Next.js experimental analyzer. For Webpack-based tools, temporarily build without `--turbo` flag, though this is not recommended for Next.js 16+.
-
-## Cost Analysis
-
-| Tool | Pricing | Recommendation |
-|------|---------|----------------|
-| Next.js Bundle Analyzer | Free (built-in) | Use always |
-| Speed Insights | Free (Vercel) | Use always |
-| Lighthouse CI | Free (open source) | Use in CI/CD |
-| npm audit | Free (built-in) | Use always |
-| Semgrep OSS | Free (open source) | Use always |
-| eslint-plugin-security | Free (open source) | Use always |
-| OWASP ZAP | Free (open source) | Use for pentesting |
-| BundlePhobia CLI | Free (open source) | Use pre-install checks |
-| Snyk Free | Free (limited) | Optional, 200 tests/month |
-| Snyk Pro | $99/mo | Skip (npm audit + Semgrep sufficient) |
-
-**Total Cost:** $0 (all recommended tools are free)
+**Source:** [Test RLS from client SDK, not SQL Editor](https://makerkit.dev/blog/tutorials/supabase-rls-best-practices)
 
 ## Sources
 
-### Performance Profiling
-- [Next.js 16.1 Release Notes](https://nextjs.org/blog/next-16-1) - Experimental Bundle Analyzer
-- [Next.js Bundle Analyzer Demo](https://turbopack-bundle-analyzer-demo.vercel.sh/)
-- [Vercel Speed Insights Documentation](https://vercel.com/docs/speed-insights)
-- [Lighthouse CI Performance Monitoring](https://web.dev/articles/lighthouse-ci)
-- [Next.js Speed Insights Guide](https://nextjs.org/learn/seo/monitor/nextjs-speed-insights)
-- [BundlePhobia Package Size Tool](https://bundlephobia.com)
+**HIGH Confidence (Official Documentation):**
+- [Supabase RLS Performance Best Practices](https://supabase.com/docs/guides/troubleshooting/rls-performance-and-best-practices-Z5Jjwv) — Index recommendations, SECURITY DEFINER patterns
+- [Custom Access Token Hook](https://supabase.com/docs/guides/auth/auth-hooks/custom-access-token-hook) — JWT claim injection
+- [Storage Access Control](https://supabase.com/docs/guides/storage/security/access-control) — Storage bucket RLS
+- [TypeScript Narrowing](https://www.typescriptlang.org/docs/handbook/2/narrowing.html) — Discriminated union patterns
 
-### Security Auditing
-- [Semgrep JavaScript/TypeScript Analysis (2025)](https://semgrep.dev/blog/2025/a-technical-deep-dive-into-semgreps-javascript-vulnerability-detection/)
-- [Top NPM Vulnerability Scanners](https://spectralops.io/blog/best-npm-vulnerability-scanners/)
-- [OWASP ZAP API Security Testing (2026)](https://oneuptime.com/blog/post/2026-01-25-owasp-zap-api-security/view)
-- [eslint-plugin-security NPM Package](https://www.npmjs.com/package/eslint-plugin-security)
-- [Snyk vs npm audit Comparison](https://nearform.com/insights/comparing-npm-audit-with-snyk/)
+**MEDIUM Confidence (Verified Community Patterns):**
+- [Supabase RLS Best Practices](https://makerkit.dev/blog/tutorials/supabase-rls-best-practices) — Multi-tenant patterns, testing recommendations
+- [Supabase Row Level Security Guide 2026](https://designrevision.com/blog/supabase-row-level-security) — JWT claims, performance optimization
+- [Dynamic Breadcrumb Component in Next.js](https://medium.com/@kcabading/creating-a-breadcrumb-component-in-a-next-js-app-router-a0ea24cdb91a) — usePathname pattern
+- [Redux vs Zustand vs Context API in 2026](https://medium.com/@sparklewebhelp/redux-vs-zustand-vs-context-api-in-2026-7f90a2dc3839) — State management tradeoffs
 
-### i18n (German Umlauts)
-- [GitHub: betterletter - German Umlaut Conversion Tool](https://github.com/alexpovel/betterletter)
-- [German Umlaut Alternative Spellings Guide](https://blogs.transparent.com/german/writing-the-letters-%E2%80%9Ca%E2%80%9D-%E2%80%9Co%E2%80%9D-and-%E2%80%9Cu%E2%80%9D-without-a-german-keyboard/)
-- [next-intl Documentation](https://next-intl.dev/)
-- [React i18n Best Libraries](https://phrase.com/blog/posts/react-i18n-best-libraries/)
+**LOW Confidence (Cross-reference only):**
+- [Multi-Tenant Applications with RLS on Supabase](https://www.antstack.com/blog/multi-tenant-applications-with-rls-on-supabase-postgress/) — General patterns (no version specifics)
 
-### Bundle Analysis
-- [Next.js Turbopack Bundle Analyzer Discussion](https://github.com/vercel/next.js/discussions/86731)
-- [@next/bundle-analyzer Turbopack Incompatibility Issue](https://github.com/vercel/next.js/issues/77482)
-- [Next.js 16.1 Bundle Analyzer Review](https://staticmania.com/blog/next.js-16.1-review)
+---
+*Stack research for: Multi-tenant property management data model with RLS*
+*Researched: 2026-02-18*
+*Confidence: HIGH — All recommendations verified against official Supabase docs and current package.json*
