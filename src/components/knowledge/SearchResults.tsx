@@ -93,12 +93,12 @@ export function SearchResults({
           Keine Ergebnisse gefunden
         </h2>
         <p className="text-gray-500 dark:text-gray-400 mb-4">
-          Fuer &quot;{query}&quot; wurden keine Artikel gefunden.
+          Für &quot;{query}&quot; wurden keine Artikel gefunden.
         </p>
         <div className="text-sm text-gray-500 dark:text-gray-400">
           <p className="font-medium mb-2">Vorschlaege:</p>
           <ul className="list-disc list-inside text-left max-w-xs mx-auto space-y-1">
-            <li>Ueberpruefen Sie die Schreibweise</li>
+            <li>Überprüfen Sie die Schreibweise</li>
             <li>Verwenden Sie weniger Suchbegriffe</li>
             <li>Versuchen Sie allgemeinere Begriffe</li>
             <li>Durchsuchen Sie die Kategorien</li>
@@ -112,7 +112,7 @@ export function SearchResults({
     <div className={cn('space-y-4', className)}>
       {/* Results count */}
       <p className="text-sm text-gray-500 dark:text-gray-400">
-        {results.length} {results.length === 1 ? 'Ergebnis' : 'Ergebnisse'} fuer
+        {results.length} {results.length === 1 ? 'Ergebnis' : 'Ergebnisse'} für
         &quot;{query}&quot;
       </p>
 

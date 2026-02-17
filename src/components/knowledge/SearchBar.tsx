@@ -183,7 +183,7 @@ export function SearchBar({
                 type="button"
                 onClick={handleClear}
                 className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
-                aria-label="Suche loeschen"
+                aria-label="Suche löschen"
               >
                 <X className="w-4 h-4" />
               </button>

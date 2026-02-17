@@ -229,7 +229,7 @@ export default function BerichtePage() {
           disabled={isNextWeekFuture}
           className="min-w-[100px]"
         >
-          Naechste
+          Nächste
           <ChevronRightIcon className="w-5 h-5 ml-1" />
         </Button>
       </div>

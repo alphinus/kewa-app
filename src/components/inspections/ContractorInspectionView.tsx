@@ -124,7 +124,7 @@ export function ContractorInspectionView({
       {/* Defects */}
       {inspection.defects?.length > 0 && (
         <div className="border-t pt-4">
-          <h3 className="font-semibold mb-3">Maengel ({inspection.defects.length})</h3>
+          <h3 className="font-semibold mb-3">Mängel ({inspection.defects.length})</h3>
           <div className="space-y-2">
             {inspection.defects.map((defect) => (
               <div key={defect.id} className="bg-gray-50 rounded-lg p-3">
@@ -180,12 +180,12 @@ export function ContractorInspectionView({
             onClick={() => setConfirming(true)}
             className="w-full py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700"
           >
-            Kenntnisnahme bestaetigen
+            Kenntnisnahme bestätigen
           </button>
         ) : (
           <div className="space-y-3">
             <p className="text-sm text-gray-600 text-center">
-              Mit der Bestaetigung erklaeren Sie, dass Sie das Abnahmeprotokoll
+              Mit der Bestätigung erklären Sie, dass Sie das Abnahmeprotokoll
               erhalten und zur Kenntnis genommen haben.
             </p>
             <div className="flex gap-3">

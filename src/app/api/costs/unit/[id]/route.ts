@@ -73,7 +73,7 @@ export async function GET(
     // Note: v2.0 will add more granular RBAC with admin, manager, accounting roles
     if (userRole !== 'kewa') {
       return NextResponse.json(
-        { error: 'Keine Berechtigung fuer Kostendaten' },
+        { error: 'Keine Berechtigung für Kostendaten' },
         { status: 403 }
       )
     }

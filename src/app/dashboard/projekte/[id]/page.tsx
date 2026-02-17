@@ -90,7 +90,7 @@ function getUnitTypeLabel(type: string): string {
     case 'common_area':
       return 'Gemeinschaftsraum'
     case 'building':
-      return 'Gebaeude'
+      return 'Gebäude'
     default:
       return type
   }
@@ -361,7 +361,7 @@ export default async function ProjectDetailPage({ params }: PageProps) {
               d="M10 19l-7-7m0 0l7-7m-7 7h18"
             />
           </svg>
-          Zurueck zur Projektliste
+          Zurück zur Projektliste
         </Link>
       </div>
     </div>

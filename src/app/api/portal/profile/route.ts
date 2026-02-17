@@ -153,7 +153,7 @@ export async function PATCH(request: NextRequest) {
     if (body.phone !== undefined && body.phone !== null && body.phone !== '') {
       if (!PHONE_REGEX.test(body.phone)) {
         return NextResponse.json(
-          { error: 'Ungueltige Telefonnummer' },
+          { error: 'Ungültige Telefonnummer' },
           { status: 400 }
         )
       }
@@ -167,7 +167,7 @@ export async function PATCH(request: NextRequest) {
     ) {
       if (!PHONE_REGEX.test(body.emergency_contact_phone)) {
         return NextResponse.json(
-          { error: 'Ungueltige Notfall-Telefonnummer' },
+          { error: 'Ungültige Notfall-Telefonnummer' },
           { status: 400 }
         )
       }
@@ -185,7 +185,7 @@ export async function PATCH(request: NextRequest) {
 
     if (Object.keys(updateData).length === 0) {
       return NextResponse.json(
-        { error: 'Keine gueltigen Felder zum Aktualisieren' },
+        { error: 'Keine gültigen Felder zum Aktualisieren' },
         { status: 400 }
       )
     }

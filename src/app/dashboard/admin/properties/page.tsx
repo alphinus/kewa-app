@@ -73,7 +73,7 @@ export default function PropertiesPage() {
         <div className="mb-6">
           <Button variant="secondary" onClick={handleBackToList}>
             <ArrowLeft className="h-5 w-5 mr-2" />
-            Zurueck zu Liegenschaften
+            Zurück zu Liegenschaften
           </Button>
         </div>
         <PropertyBuilder
@@ -133,7 +133,7 @@ export default function PropertiesPage() {
           </Button>
         </div>
         <p className="text-gray-600 dark:text-gray-400">
-          Liegenschaften und Gebaeude verwalten
+          Liegenschaften und Gebäude verwalten
         </p>
       </div>
 
@@ -286,7 +286,7 @@ function CreatePropertyForm({ onClose, onCreated }: CreatePropertyFormProps) {
 
             <div className="pt-2 border-t border-gray-200 dark:border-gray-700">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Erstes Gebaeude (optional)
+                Erstes Gebäude (optional)
               </label>
               <input
                 type="text"
@@ -296,7 +296,7 @@ function CreatePropertyForm({ onClose, onCreated }: CreatePropertyFormProps) {
                 placeholder="z.B. Haus A"
               />
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                Sie koennen spaeter weitere Gebaeude hinzufuegen
+                Sie können später weitere Gebäude hinzufügen
               </p>
             </div>
 
@@ -353,7 +353,7 @@ function PropertyCard({ property, onBuildingClick, onRefresh }: PropertyCardProp
       onRefresh()
     } catch (error) {
       console.error('Error creating building:', error)
-      toast.error('Fehler beim Erstellen des Gebaeudes')
+      toast.error('Fehler beim Erstellen des Gebäudes')
     } finally {
       setAddingBuilding(false)
     }
@@ -385,10 +385,10 @@ function PropertyCard({ property, onBuildingClick, onRefresh }: PropertyCardProp
             <Building2 className="h-4 w-4" />
             <span>
               {buildingCount === 0
-                ? 'Keine Gebaeude'
+                ? 'Keine Gebäude'
                 : buildingCount === 1
-                ? '1 Gebaeude'
-                : `${buildingCount} Gebaeude`}
+                ? '1 Gebäude'
+                : `${buildingCount} Gebäude`}
             </span>
           </div>
         </div>
@@ -420,12 +420,12 @@ function PropertyCard({ property, onBuildingClick, onRefresh }: PropertyCardProp
               value={newBuildingName}
               onChange={e => setNewBuildingName(e.target.value)}
               className="w-full px-2 py-1.5 mb-2 rounded border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-sm text-gray-900 dark:text-gray-100"
-              placeholder="Gebaeudenahme"
+              placeholder="Gebäudename"
               autoFocus
             />
             <div className="flex gap-2">
               <Button type="submit" size="sm" fullWidth loading={addingBuilding}>
-                Hinzufuegen
+                Hinzufügen
               </Button>
               <Button type="button" variant="secondary" size="sm" onClick={() => setShowAddBuilding(false)}>
                 Abbrechen
@@ -441,7 +441,7 @@ function PropertyCard({ property, onBuildingClick, onRefresh }: PropertyCardProp
             onClick={() => setShowAddBuilding(true)}
           >
             <Plus className="h-4 w-4 mr-1" />
-            Gebaeude hinzufuegen
+            Gebäude hinzufügen
           </Button>
         )}
 

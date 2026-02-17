@@ -65,7 +65,7 @@ export function QualityGateEditor({
       return
     }
     if (!selectedParent) {
-      setError('Bitte eine Phase oder ein Paket waehlen')
+      setError('Bitte eine Phase oder ein Paket wählen')
       return
     }
 
@@ -125,7 +125,7 @@ export function QualityGateEditor({
   }
 
   const handleDelete = async (gateId: string) => {
-    if (!confirm('Quality Gate wirklich loeschen?')) return
+    if (!confirm('Quality Gate wirklich löschen?')) return
 
     setSaving(true)
     setError(null)
@@ -135,7 +135,7 @@ export function QualityGateEditor({
         resetForm()
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Fehler beim Loeschen')
+      setError(err instanceof Error ? err.message : 'Fehler beim Löschen')
     } finally {
       setSaving(false)
     }
@@ -186,7 +186,7 @@ export function QualityGateEditor({
                   disabled={saving}
                   className="px-3 py-1 text-sm bg-red-100 text-red-700 rounded hover:bg-red-200 disabled:opacity-50 min-h-[32px]"
                 >
-                  Loeschen
+                  Löschen
                 </button>
               </div>
             </div>
@@ -229,7 +229,7 @@ export function QualityGateEditor({
               disabled={saving}
               className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 min-h-[44px]"
             >
-              <option value="">Waehlen...</option>
+              <option value="">Wählen...</option>
               {parentOptions.map(opt => (
                 <option key={opt.id} value={opt.id}>
                   {opt.wbs_code} - {opt.name}
@@ -309,7 +309,7 @@ export function QualityGateEditor({
               disabled={saving}
               className="text-sm text-blue-600 hover:text-blue-700 disabled:opacity-50"
             >
-              + Checkpunkt hinzufuegen
+              + Checkpunkt hinzufügen
             </button>
           </div>
         </div>
@@ -360,7 +360,7 @@ export function QualityGateEditor({
             disabled={!name.trim() || !selectedParent || saving}
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 min-h-[44px]"
           >
-            {saving ? 'Speichern...' : editingGate ? 'Aktualisieren' : 'Hinzufuegen'}
+            {saving ? 'Speichern...' : editingGate ? 'Aktualisieren' : 'Hinzufügen'}
           </button>
           {editingGate && (
             <button

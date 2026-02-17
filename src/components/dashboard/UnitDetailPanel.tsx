@@ -125,7 +125,7 @@ export function UnitDetailPanel({ unit, onClose }: UnitDetailPanelProps) {
                   {unit.renovation_percentage ?? 0}% renoviert
                 </span>
                 <span className="text-xs text-gray-500">
-                  {unit.new_rooms}/{unit.total_rooms} Raeume
+                  {unit.new_rooms}/{unit.total_rooms} Räume
                 </span>
               </div>
               <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
@@ -140,7 +140,7 @@ export function UnitDetailPanel({ unit, onClose }: UnitDetailPanelProps) {
           {/* Room Grid */}
           <section>
             <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-              Raeume
+              Räume
             </h3>
             <div className="grid grid-cols-2 gap-2">
               {unit.rooms.map((room) => (

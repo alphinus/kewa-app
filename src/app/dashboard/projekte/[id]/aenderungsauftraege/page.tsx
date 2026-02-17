@@ -41,7 +41,7 @@ function getStatusLabel(status: string): string {
   const labels: Record<string, string> = {
     draft: 'Entwurf',
     submitted: 'Eingereicht',
-    under_review: 'In Pruefung',
+    under_review: 'In Prüfung',
     approved: 'Genehmigt',
     rejected: 'Abgelehnt',
     cancelled: 'Storniert',
@@ -109,13 +109,13 @@ export default async function ProjectChangeOrdersPage({ params }: PageProps) {
           {data.project_name}
         </Link>
         <ChevronRight className="w-4 h-4 mx-2" />
-        <span className="text-gray-900">Aenderungsauftraege</span>
+        <span className="text-gray-900">Änderungsaufträge</span>
       </div>
 
       {/* Page Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Aenderungsauftraege</h1>
+          <h1 className="text-3xl font-bold text-gray-900">Änderungsaufträge</h1>
           <p className="text-gray-600 mt-1">{data.project_name}</p>
         </div>
         <Link
@@ -123,7 +123,7 @@ export default async function ProjectChangeOrdersPage({ params }: PageProps) {
           className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
         >
           <Plus className="w-4 h-4" />
-          Neuer Aenderungsauftrag
+          Neuer Änderungsauftrag
         </Link>
       </div>
 
@@ -148,13 +148,13 @@ export default async function ProjectChangeOrdersPage({ params }: PageProps) {
       <div className="bg-white rounded-lg border border-gray-200">
         <div className="px-6 py-4 border-b border-gray-200">
           <h2 className="text-lg font-semibold text-gray-900">
-            Alle Aenderungsauftraege ({data.all_change_orders.length})
+            Alle Änderungsaufträge ({data.all_change_orders.length})
           </h2>
         </div>
         <div className="overflow-x-auto">
           {data.all_change_orders.length === 0 ? (
             <div className="p-8 text-center text-gray-500">
-              Noch keine Aenderungsauftraege vorhanden
+              Noch keine Änderungsaufträge vorhanden
             </div>
           ) : (
             <table className="w-full">

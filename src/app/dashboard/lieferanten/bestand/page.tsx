@@ -104,7 +104,7 @@ export default function InventoryOverviewPage() {
   if (loading) {
     return (
       <div className="p-6">
-        <h1 className="text-2xl font-bold mb-6">Bestandsuebersicht</h1>
+        <h1 className="text-2xl font-bold mb-6">Bestandsübersicht</h1>
         <p className="text-gray-600 dark:text-gray-400">Laden...</p>
       </div>
     )
@@ -113,7 +113,7 @@ export default function InventoryOverviewPage() {
   if (error) {
     return (
       <div className="p-6">
-        <h1 className="text-2xl font-bold mb-6">Bestandsuebersicht</h1>
+        <h1 className="text-2xl font-bold mb-6">Bestandsübersicht</h1>
         <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3 rounded">
           {error}
         </div>
@@ -126,14 +126,14 @@ export default function InventoryOverviewPage() {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold">Bestandsuebersicht</h1>
+          <h1 className="text-2xl font-bold">Bestandsübersicht</h1>
           <p className="text-gray-600 dark:text-gray-400 mt-1">
             Aktueller Pelletbestand und Nachbestellwarnungen
           </p>
         </div>
         <div className="flex gap-2">
           <Link href="/dashboard/lieferanten">
-            <Button variant="secondary">Zurueck</Button>
+            <Button variant="secondary">Zurück</Button>
           </Link>
           <Button
             onClick={() => setShowForm(!showForm)}

@@ -60,7 +60,7 @@ export function parseSwissDate(dateStr: string): Date {
  */
 const INVOICE_STATUS_TRANSLATIONS: Record<string, string> = {
   received: 'erhalten',
-  under_review: 'in Pruefung',
+  under_review: 'in Prüfung',
   approved: 'freigegeben',
   disputed: 'beanstandet',
   partially_paid: 'teilweise bezahlt',

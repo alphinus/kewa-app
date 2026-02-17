@@ -141,7 +141,7 @@ export default function SettingsPage() {
             href="/dashboard/admin/properties"
             icon={<BuildingIcon className="w-6 h-6" />}
             label="Liegenschaften"
-            description="Gebaeude & Einheiten"
+            description="Gebäude & Einheiten"
           />
           <AdminLink
             href="/dashboard/partner"
@@ -158,7 +158,7 @@ export default function SettingsPage() {
           <AdminLink
             href="/dashboard/auftraege"
             icon={<OrderIcon className="w-6 h-6" />}
-            label="Auftraege"
+            label="Aufträge"
             description="Work Orders"
           />
           <AdminLink
@@ -279,7 +279,7 @@ export default function SettingsPage() {
             App Installation
           </h2>
           <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-            Installieren Sie KEWA als App fuer schnelleren Zugriff.
+            Installieren Sie KEWA als App für schnelleren Zugriff.
           </p>
           <Button variant="primary" onClick={promptInstall}>
             App installieren
@@ -312,7 +312,7 @@ export default function SettingsPage() {
 function formatSettingLabel(key: string): string {
   const labels: Record<string, string> = {
     audit_log_retention_days: 'Audit-Log Aufbewahrung',
-    magic_link_expiry_hours: 'Magic-Link Gueltigkeit',
+    magic_link_expiry_hours: 'Magic-Link Gültigkeit',
     magic_link_cleanup_days: 'Magic-Link Bereinigung',
     media_retention_days: 'Medien Aufbewahrung',
     session_timeout_hours: 'Session Timeout'

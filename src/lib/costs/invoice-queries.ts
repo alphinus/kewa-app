@@ -242,7 +242,7 @@ export function formatSwissDate(date: string | Date | null): string {
 export function getInvoiceStatusLabel(status: string): string {
   const labels: Record<string, string> = {
     received: 'Erhalten',
-    under_review: 'In Pruefung',
+    under_review: 'In Prüfung',
     approved: 'Freigegeben',
     disputed: 'Beanstandet',
     partially_paid: 'Teilweise bezahlt',

@@ -60,7 +60,7 @@ export function getStatusLabel(status: ChangeOrderStatus): string {
   const labels: Record<ChangeOrderStatus, string> = {
     draft: 'Entwurf',
     submitted: 'Eingereicht',
-    under_review: 'In Pruefung',
+    under_review: 'In Prüfung',
     approved: 'Genehmigt',
     rejected: 'Abgelehnt',
     cancelled: 'Storniert',
@@ -126,7 +126,7 @@ export const CHANGE_ORDER_STATUS_OPTIONS: readonly ChangeOrderStatusOption[] = [
   { value: '', label: 'Alle Status' },
   { value: 'draft', label: 'Entwurf' },
   { value: 'submitted', label: 'Eingereicht' },
-  { value: 'under_review', label: 'In Pruefung' },
+  { value: 'under_review', label: 'In Prüfung' },
   { value: 'approved', label: 'Genehmigt' },
   { value: 'rejected', label: 'Abgelehnt' },
   { value: 'cancelled', label: 'Storniert' },

@@ -99,7 +99,7 @@ export function UnitForm({
     if (tenantEmail.trim()) {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
       if (!emailRegex.test(tenantEmail.trim())) {
-        newErrors.tenantEmail = 'Ungueltiges E-Mail-Format'
+        newErrors.tenantEmail = 'Ungültiges E-Mail-Format'
       }
     }
 
@@ -229,7 +229,7 @@ export function UnitForm({
                     onChange={(e) => setFloor(e.target.value === '' ? null : Number(e.target.value))}
                     className="w-full h-12 px-4 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
-                    <option value="">Waehlen...</option>
+                    <option value="">Wählen...</option>
                     {FLOOR_OPTIONS.map((opt) => (
                       <option key={opt.value} value={opt.value}>
                         {opt.label}
@@ -241,14 +241,14 @@ export function UnitForm({
                 {/* Size Class */}
                 <div className="w-full">
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Groesse
+                    Größe
                   </label>
                   <select
                     value={sizeClass}
                     onChange={(e) => setSizeClass(e.target.value)}
                     className="w-full h-12 px-4 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
-                    <option value="">Waehlen...</option>
+                    <option value="">Wählen...</option>
                     {SIZE_OPTIONS.map((opt) => (
                       <option key={opt} value={opt}>
                         {opt}

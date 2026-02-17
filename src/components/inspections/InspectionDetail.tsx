@@ -236,12 +236,12 @@ export function InspectionDetail({ inspection, defects, onComplete, showHistory 
       {inspection.acknowledged_at && (
         <div className="p-4 border border-green-200 dark:border-green-800 rounded-lg bg-green-50 dark:bg-green-900/20">
           <h4 className="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-2">
-            Handwerker-Bestaetigung
+            Handwerker-Bestätigung
           </h4>
           <div className="flex items-center gap-2 text-green-800 dark:text-green-200">
             <span className="text-lg">&#10003;</span>
             <div>
-              <p className="font-medium">Kenntnisnahme bestaetigt</p>
+              <p className="font-medium">Kenntnisnahme bestätigt</p>
               <p className="text-sm text-green-600 dark:text-green-400">
                 {new Date(inspection.acknowledged_at).toLocaleString('de-CH')}
                 {inspection.acknowledged_by_email && ` von ${inspection.acknowledged_by_email}`}
@@ -268,7 +268,7 @@ export function InspectionDetail({ inspection, defects, onComplete, showHistory 
 
         {inspection.status === 'completed' && (
           <>
-            <Link href={`/dashboard/abnahmen/${inspection.id}/maengel`}>
+            <Link href={`/dashboard/abnahmen/${inspection.id}/mängel`}>
               <Button className="min-h-[48px]">Mängel prüfen</Button>
             </Link>
             <Link href={`/dashboard/abnahmen/${inspection.id}/unterschrift`}>

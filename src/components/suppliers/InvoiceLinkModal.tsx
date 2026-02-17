@@ -154,7 +154,7 @@ export function InvoiceLinkModal({
               {searchQuery.trim() ? (
                 <p>Keine Rechnungen gefunden mit "{searchQuery}"</p>
               ) : (
-                <p>Keine Rechnungen fuer diesen Lieferanten</p>
+                <p>Keine Rechnungen für diesen Lieferanten</p>
               )}
             </div>
           )}

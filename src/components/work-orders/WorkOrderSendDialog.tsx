@@ -175,7 +175,7 @@ export function WorkOrderSendDialog({
                     Link erstellt!
                   </p>
                   <p className="text-sm text-green-700 dark:text-green-300 mt-1">
-                    Gueltig bis: {formatDateTime(sendResult.expiresAt)}
+                    Gültig bis: {formatDateTime(sendResult.expiresAt)}
                   </p>
                 </div>
               </div>
@@ -267,7 +267,7 @@ export function WorkOrderSendDialog({
 
               <div className="p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
                 <p className="text-sm text-blue-800 dark:text-blue-200">
-                  <strong>Tipp:</strong> Wenn Sie die PDF anhaengen moechten, laden Sie sie zuerst herunter und fuegen Sie sie dann manuell zur Email hinzu.
+                  <strong>Tipp:</strong> Wenn Sie die PDF anhaengen möchten, laden Sie sie zuerst herunter und fügen Sie sie dann manuell zur Email hinzu.
                 </p>
               </div>
             </div>
@@ -277,11 +277,11 @@ export function WorkOrderSendDialog({
           {!sendResult && (
             <div className="p-3 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg">
               <h4 className="font-medium text-gray-900 dark:text-gray-100 mb-2">
-                Naechste Schritte:
+                Nächste Schritte:
               </h4>
               <ol className="list-decimal list-inside text-sm text-gray-600 dark:text-gray-400 space-y-1">
                 <li>Klicken Sie auf &quot;Link erstellen &amp; senden&quot;</li>
-                <li>Ein Magic-Link wird fuer den Auftragnehmer erstellt</li>
+                <li>Ein Magic-Link wird für den Auftragnehmer erstellt</li>
                 <li>Laden Sie optional die PDF herunter</li>
                 <li>Oeffnen Sie die Email und senden Sie sie ab</li>
               </ol>

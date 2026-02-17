@@ -137,7 +137,7 @@ export function InvoiceForm({
         }
       } catch (err) {
         console.error('Error fetching work orders:', err)
-        setError('Arbeitsauftraege konnten nicht geladen werden')
+        setError('Arbeitsaufträge konnten nicht geladen werden')
       } finally {
         setLoadingWorkOrders(false)
       }
@@ -339,13 +339,13 @@ export function InvoiceForm({
     try {
       // Validate required fields
       if (!selectedWorkOrderId) {
-        throw new Error('Bitte waehlen Sie einen Arbeitsauftrag aus')
+        throw new Error('Bitte wählen Sie einen Arbeitsauftrag aus')
       }
       if (!invoiceNumber.trim()) {
         throw new Error('Rechnungsnummer ist erforderlich')
       }
       if (netAmountNum <= 0) {
-        throw new Error('Bitte geben Sie einen gueltigen Betrag ein')
+        throw new Error('Bitte geben Sie einen gültigen Betrag ein')
       }
       if (!invoiceDate) {
         throw new Error('Rechnungsdatum ist erforderlich')
@@ -556,7 +556,7 @@ export function InvoiceForm({
                 required
                 className="w-full h-12 px-4 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
-                <option value="">Arbeitsauftrag waehlen...</option>
+                <option value="">Arbeitsauftrag wählen...</option>
                 {workOrders.map(wo => (
                   <option key={wo.id} value={wo.id}>
                     {wo.title} {wo.partner ? `(${wo.partner.company_name})` : ''}
@@ -566,7 +566,7 @@ export function InvoiceForm({
             )}
             {workOrders.length === 0 && !loadingWorkOrders && (
               <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                Keine berechtigten Arbeitsauftraege vorhanden (Status: done/accepted, ohne Rechnung)
+                Keine berechtigten Arbeitsaufträge vorhanden (Status: done/accepted, ohne Rechnung)
               </p>
             )}
           </div>
@@ -706,7 +706,7 @@ export function InvoiceForm({
                   onClick={addLineItem}
                   className="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400"
                 >
-                  + Zeile hinzufuegen
+                  + Zeile hinzufügen
                 </button>
               </div>
 
@@ -893,7 +893,7 @@ export function InvoiceForm({
               )}
             </div>
             <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-              Hinweis: Fuer Entwuerfe ist kein Dokument erforderlich
+              Hinweis: Für Entwürfe ist kein Dokument erforderlich
             </p>
           </div>
 

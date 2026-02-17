@@ -125,7 +125,7 @@ export function PropertySelector({ selectedBuildingId, onSelect }: PropertySelec
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-        aria-label="Liegenschaft auswaehlen"
+        aria-label="Liegenschaft auswählen"
       >
         {isAllSelected ? (
           <>
@@ -150,7 +150,7 @@ export function PropertySelector({ selectedBuildingId, onSelect }: PropertySelec
           <>
             <Building2 className="h-4 w-4 text-gray-600 dark:text-gray-400" />
             <span className="text-sm text-gray-900 dark:text-gray-100">
-              Liegenschaft waehlen
+              Liegenschaft wählen
             </span>
           </>
         )}
@@ -184,7 +184,7 @@ export function PropertySelector({ selectedBuildingId, onSelect }: PropertySelec
                   <span className="text-sm font-semibold">Alle Liegenschaften</span>
                 </div>
                 <div className="text-xs text-gray-500 dark:text-gray-400 ml-6 mt-1">
-                  Alle Gebaeude anzeigen
+                  Alle Gebäude anzeigen
                 </div>
               </button>
             </div>
@@ -200,7 +200,7 @@ export function PropertySelector({ selectedBuildingId, onSelect }: PropertySelec
                 {/* Buildings list */}
                 {property.buildings.length === 0 ? (
                   <div className="px-2 py-2 text-sm text-gray-400 dark:text-gray-500 italic">
-                    Keine Gebaeude
+                    Keine Gebäude
                   </div>
                 ) : (
                   property.buildings.map(building => (

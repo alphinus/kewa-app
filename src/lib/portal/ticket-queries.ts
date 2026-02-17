@@ -182,7 +182,7 @@ export async function cancelTicket(userId: string, ticketId: string): Promise<Ti
   const ticket = await verifyTicketOwnership(userId, ticketId)
 
   if (ticket.status !== 'offen') {
-    throw new Error('Nur offene Tickets koennen storniert werden')
+    throw new Error('Nur offene Tickets können storniert werden')
   }
 
   const supabase = await createClient()

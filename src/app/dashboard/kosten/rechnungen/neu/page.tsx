@@ -53,7 +53,7 @@ export default function NeueRechnungPage() {
           Rechnung erfassen
         </h1>
         <p className="text-gray-600 dark:text-gray-400 mt-1">
-          Erstellen Sie eine Rechnung fuer einen abgeschlossenen Arbeitsauftrag
+          Erstellen Sie eine Rechnung für einen abgeschlossenen Arbeitsauftrag
         </p>
       </div>
 
@@ -71,13 +71,13 @@ export default function NeueRechnungPage() {
       {/* Help text */}
       <div className="text-sm text-gray-500 dark:text-gray-400 space-y-2">
         <p>
-          <strong>Hinweis:</strong> Rechnungen werden als Entwurf gespeichert und koennen
-          spaeter bearbeitet werden.
+          <strong>Hinweis:</strong> Rechnungen werden als Entwurf gespeichert und können
+          später bearbeitet werden.
         </p>
         <p>
-          Waehlen Sie einen abgeschlossenen Arbeitsauftrag (Status: done oder accepted)
+          Wählen Sie einen abgeschlossenen Arbeitsauftrag (Status: done oder accepted)
           aus, um die Rechnung zu erstellen. Alle relevanten Daten werden automatisch
-          uebernommen.
+          übernommen.
         </p>
       </div>
     </div>

@@ -24,7 +24,7 @@ export async function POST(
     const validation = await validateInspectionPortalToken(token)
     if (!validation.valid || !validation.inspectionId) {
       return NextResponse.json(
-        { error: 'Token ungueltig oder abgelaufen' },
+        { error: 'Token ungültig oder abgelaufen' },
         { status: 401 }
       )
     }

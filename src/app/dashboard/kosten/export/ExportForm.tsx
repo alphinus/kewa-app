@@ -168,7 +168,7 @@ export function ExportForm({ projects }: ExportFormProps) {
       {/* Export Type */}
       <div>
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          Was moechten Sie exportieren?
+          Was möchten Sie exportieren?
         </label>
         <div className="flex gap-3">
           <TypeButton
@@ -207,7 +207,7 @@ export function ExportForm({ projects }: ExportFormProps) {
               onClick={clearFilters}
               className="text-sm text-blue-600 dark:text-blue-400 hover:underline"
             >
-              Filter zuruecksetzen
+              Filter zurücksetzen
             </button>
           )}
         </div>
@@ -367,7 +367,7 @@ export function ExportForm({ projects }: ExportFormProps) {
               </div>
             ) : (
               <div className="text-sm text-gray-500">
-                Keine Daten verfuegbar
+                Keine Daten verfügbar
               </div>
             )}
           </div>

@@ -16,7 +16,7 @@ export function TemplateSelector({ value, onChange, disabled }: TemplateSelector
   return (
     <div className="space-y-3">
       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-        Artikeltyp waehlen
+        Artikeltyp wählen
       </label>
       <div className="grid gap-3 sm:grid-cols-3">
         {TEMPLATES.map((template) => (
@@ -86,22 +86,22 @@ const TEMPLATES: Template[] = [
     type: 'faq',
     label: 'FAQ',
     icon: '?',
-    description: 'Frage-Antwort-Format fuer haeufig gestellte Fragen',
+    description: 'Frage-Antwort-Format für häufig gestellte Fragen',
     sections: ['Frage', 'Antwort', 'Verwandte Themen'],
   },
   {
     type: 'howto',
     label: 'Anleitung',
     icon: '#',
-    description: 'Schritt-fuer-Schritt-Anleitung fuer Prozesse',
-    sections: ['Ueberblick', 'Schritte', 'Tipps & Hinweise'],
+    description: 'Schritt-für-Schritt-Anleitung für Prozesse',
+    sections: ['Überblick', 'Schritte', 'Tipps & Hinweise'],
   },
   {
     type: 'policy',
     label: 'Richtlinie',
     icon: '!',
     description: 'Offizielle Richtlinien und Regelungen',
-    sections: ['Grundsatz', 'Geltungsbereich', 'Verantwortlichkeiten', 'Gueltig ab'],
+    sections: ['Grundsatz', 'Geltungsbereich', 'Verantwortlichkeiten', 'Gültig ab'],
   },
 ]
 
@@ -122,7 +122,7 @@ export function getTemplateContent(template: KBArticleTemplate): Record<string, 
           },
           {
             type: 'paragraph',
-            content: [{ type: 'text', text: 'Die haeufig gestellte Frage hier eingeben...' }],
+            content: [{ type: 'text', text: 'Die häufig gestellte Frage hier eingeben...' }],
           },
           {
             type: 'heading',
@@ -162,7 +162,7 @@ export function getTemplateContent(template: KBArticleTemplate): Record<string, 
           {
             type: 'heading',
             attrs: { level: 2 },
-            content: [{ type: 'text', text: 'Ueberblick' }],
+            content: [{ type: 'text', text: 'Überblick' }],
           },
           {
             type: 'paragraph',
@@ -212,7 +212,7 @@ export function getTemplateContent(template: KBArticleTemplate): Record<string, 
           },
           {
             type: 'paragraph',
-            content: [{ type: 'text', text: 'Wichtige Tipps oder Warnungen hier einfuegen...' }],
+            content: [{ type: 'text', text: 'Wichtige Tipps oder Warnungen hier einfügen...' }],
           },
         ],
       }
@@ -237,7 +237,7 @@ export function getTemplateContent(template: KBArticleTemplate): Record<string, 
           },
           {
             type: 'paragraph',
-            content: [{ type: 'text', text: 'Fuer wen und wann diese Richtlinie gilt...' }],
+            content: [{ type: 'text', text: 'Für wen und wann diese Richtlinie gilt...' }],
           },
           {
             type: 'heading',
@@ -261,11 +261,11 @@ export function getTemplateContent(template: KBArticleTemplate): Record<string, 
           {
             type: 'heading',
             attrs: { level: 3 },
-            content: [{ type: 'text', text: 'Gueltig ab' }],
+            content: [{ type: 'text', text: 'Gültig ab' }],
           },
           {
             type: 'paragraph',
-            content: [{ type: 'text', text: 'Datum hier einfuegen...' }],
+            content: [{ type: 'text', text: 'Datum hier einfügen...' }],
           },
         ],
       }

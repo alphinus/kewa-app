@@ -106,7 +106,7 @@ export default function PriceAnalyticsPage() {
       <div>
         <h1 className="text-3xl font-bold">Preisentwicklung</h1>
         <p className="text-gray-600 mt-1">
-          Analyse der Preisentwicklung ueber die Zeit basierend auf Lieferungen
+          Analyse der Preisentwicklung über die Zeit basierend auf Lieferungen
         </p>
       </div>
 
@@ -181,7 +181,7 @@ export default function PriceAnalyticsPage() {
           <CardDescription>
             {priceData.length > 0
               ? `${priceData.length} Lieferungen gefunden`
-              : 'Keine Daten verfuegbar'}
+              : 'Keine Daten verfügbar'}
           </CardDescription>
         </CardHeader>
         <CardContent>

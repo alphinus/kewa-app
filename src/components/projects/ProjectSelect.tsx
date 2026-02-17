@@ -197,7 +197,7 @@ export function ProjectSelect({
         )}
       >
         <option value="">
-          {loading ? 'Laden...' : 'Projekt waehlen...'}
+          {loading ? 'Laden...' : 'Projekt wählen...'}
         </option>
 
         {/* Create new option */}
@@ -255,7 +255,7 @@ export function ProjectSelect({
               onChange={(e) => setNewProjectUnitId(e.target.value)}
               className="w-full h-12 min-h-[48px] px-4 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              <option value="">Einheit waehlen...</option>
+              <option value="">Einheit wählen...</option>
               {units.map((unit) => (
                 <option key={unit.id} value={unit.id}>
                   {unit.name}
@@ -269,7 +269,7 @@ export function ProjectSelect({
             label="Projektname"
             value={newProjectName}
             onChange={(e) => setNewProjectName(e.target.value)}
-            placeholder="z.B. Badezimmer, Kueche, Renovation..."
+            placeholder="z.B. Badezimmer, Küche, Renovation..."
           />
 
           {/* Actions */}

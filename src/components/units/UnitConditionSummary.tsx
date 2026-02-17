@@ -63,7 +63,7 @@ export async function UnitConditionSummary({ unitId, className }: UnitConditionS
         'text-center text-gray-500 dark:text-gray-400',
         className
       )}>
-        <p>Keine Raeume erfasst - Renovationsstatus nicht verfuegbar.</p>
+        <p>Keine Räume erfasst - Renovationsstatus nicht verfügbar.</p>
       </div>
     )
   }

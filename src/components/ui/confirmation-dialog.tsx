@@ -18,9 +18,9 @@ import { Button } from '@/components/ui/button'
  * <ConfirmationDialog
  *   open={showDelete}
  *   onOpenChange={setShowDelete}
- *   title="Liegenschaft loeschen?"
- *   description="Diese Aktion kann nicht rueckgaengig gemacht werden."
- *   confirmLabel="Loeschen"
+ *   title="Liegenschaft löschen?"
+ *   description="Diese Aktion kann nicht rückgängig gemacht werden."
+ *   confirmLabel="Löschen"
  *   variant="danger"
  *   onConfirm={handleDelete}
  * />

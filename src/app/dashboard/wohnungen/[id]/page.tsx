@@ -59,7 +59,7 @@ function getRoomTypeLabel(roomType: string): string {
   const labels: Record<string, string> = {
     living_room: 'Wohnzimmer',
     bedroom: 'Schlafzimmer',
-    kitchen: 'Kueche',
+    kitchen: 'Küche',
     bathroom: 'Badezimmer',
     toilet: 'WC',
     hallway: 'Flur',
@@ -80,7 +80,7 @@ function getUnitTypeLabel(type: string): string {
     case 'common_area':
       return 'Gemeinschaftsraum'
     case 'building':
-      return 'Gebaeude'
+      return 'Gebäude'
     default:
       return type
   }
@@ -233,7 +233,7 @@ export default async function UnitDetailPage({ params }: PageProps) {
 
             {/* Room counts */}
             <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-              <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Raeume</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Räume</p>
               <p className="text-xl font-bold text-gray-900 dark:text-gray-100">
                 {summary.total_rooms}
               </p>
@@ -282,7 +282,7 @@ export default async function UnitDetailPage({ params }: PageProps) {
       {rooms.length > 0 && (
         <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-4 sm:p-6">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
-            Raeume
+            Räume
           </h2>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -318,7 +318,7 @@ export default async function UnitDetailPage({ params }: PageProps) {
       <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-4 sm:p-6">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-            Letzte Zustandsaenderungen
+            Letzte Zustandsänderungen
           </h2>
           <a
             href="#timeline"
@@ -425,10 +425,10 @@ export default async function UnitDetailPage({ params }: PageProps) {
               />
             </svg>
             <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
-              Keine Zustandsaenderungen vorhanden
+              Keine Zustandsänderungen vorhanden
             </p>
             <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">
-              Zustandsaenderungen werden automatisch erfasst wenn Projekte abgenommen werden.
+              Zustandsänderungen werden automatisch erfasst wenn Projekte abgenommen werden.
             </p>
           </div>
         )}
@@ -459,7 +459,7 @@ export default async function UnitDetailPage({ params }: PageProps) {
           </h2>
         </div>
         <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-          Alle Aktivitaeten dieser Wohnung: Projekte, Auftraege, Zustandsaenderungen und Kosten.
+          Alle Aktivitäten dieser Wohnung: Projekte, Aufträge, Zustandsänderungen und Kosten.
         </p>
         <UnitTimeline unitId={id} />
       </div>

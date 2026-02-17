@@ -288,7 +288,7 @@ export async function DELETE(
     // Only allow deletion of draft orders
     if (existing.status !== 'draft') {
       return NextResponse.json(
-        { error: 'Nur Bestellungen im Entwurf-Status koennen geloescht werden' },
+        { error: 'Nur Bestellungen im Entwurf-Status können gelöscht werden' },
         { status: 400 }
       )
     }

@@ -26,7 +26,7 @@ export async function GET(_request: Request, { params }: RouteParams) {
 
   const session = await validateSessionWithRBAC(sessionCookie.value)
   if (!session) {
-    return NextResponse.json({ error: 'Ungueltige Session' }, { status: 401 })
+    return NextResponse.json({ error: 'Ungültige Session' }, { status: 401 })
   }
 
   if (!isInternalRole(session.roleName)) {
@@ -62,7 +62,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
 
   const session = await validateSessionWithRBAC(sessionCookie.value)
   if (!session) {
-    return NextResponse.json({ error: 'Ungueltige Session' }, { status: 401 })
+    return NextResponse.json({ error: 'Ungültige Session' }, { status: 401 })
   }
 
   if (!isInternalRole(session.roleName)) {
@@ -79,7 +79,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
   // Validate status
   if (!status || !['free', 'occupied', 'maintenance'].includes(status)) {
     return NextResponse.json(
-      { error: 'Ungueltiger Status' },
+      { error: 'Ungültiger Status' },
       { status: 400 }
     )
   }
@@ -87,7 +87,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
   // Require tenant name when setting to occupied
   if (status === 'occupied' && !tenant_name) {
     return NextResponse.json(
-      { error: 'Mietername erforderlich fuer belegten Parkplatz' },
+      { error: 'Mietername erforderlich für belegten Parkplatz' },
       { status: 400 }
     )
   }

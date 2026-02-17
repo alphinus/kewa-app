@@ -30,7 +30,7 @@ export default function DashboardSection({
   count,
   variant,
   collapsed = false,
-  emptyMessage = 'Keine Auftraege',
+  emptyMessage = 'Keine Aufträge',
   children,
 }: DashboardSectionProps) {
   const [isOpen, setIsOpen] = useState(!collapsed)

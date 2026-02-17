@@ -48,7 +48,7 @@ export interface InvoiceStatusOption {
 export const INVOICE_STATUS_OPTIONS: readonly InvoiceStatusOption[] = [
   { value: 'draft', label: 'Entwurf' },
   { value: 'received', label: 'Erhalten' },
-  { value: 'under_review', label: 'In Pruefung' },
+  { value: 'under_review', label: 'In Prüfung' },
   { value: 'approved', label: 'Freigegeben' },
   { value: 'disputed', label: 'Beanstandet' },
   { value: 'partially_paid', label: 'Teilweise bezahlt' },
@@ -91,7 +91,7 @@ export function getInvoiceStatusLabel(status: string): string {
   const labels: Record<string, string> = {
     draft: 'Entwurf',
     received: 'Erhalten',
-    under_review: 'In Pruefung',
+    under_review: 'In Prüfung',
     approved: 'Freigegeben',
     disputed: 'Beanstandet',
     partially_paid: 'Teilweise bezahlt',

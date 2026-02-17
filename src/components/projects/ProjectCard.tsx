@@ -200,7 +200,7 @@ export function ProjectCard({
                 Projekt archivieren?
               </h3>
               <p className="text-gray-600 dark:text-gray-400">
-                Moechten Sie &quot;{project.name}&quot; archivieren?
+                Möchten Sie &quot;{project.name}&quot; archivieren?
                 Archivierte Projekte werden standardmaessig ausgeblendet.
               </p>
               <div className="flex gap-3">

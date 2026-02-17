@@ -79,7 +79,7 @@ export function InventoryMovementForm({
     }
 
     if (tankCapacityNum !== undefined && tankLevelNum > tankCapacityNum) {
-      setError('Tankstand kann nicht groesser als Kapazitaet sein')
+      setError('Tankstand kann nicht größer als Kapazität sein')
       return
     }
 
@@ -130,7 +130,7 @@ export function InventoryMovementForm({
           className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800"
           disabled={loading}
         >
-          <option value="">Liegenschaft waehlen...</option>
+          <option value="">Liegenschaft wählen...</option>
           {properties.map((property) => (
             <option key={property.id} value={property.id}>
               {property.name}

@@ -137,7 +137,7 @@ export default function PropertyInventoryDetailPage({
           {error}
         </div>
         <Link href="/dashboard/lieferanten/bestand" className="mt-4 inline-block">
-          <Button variant="secondary">Zurueck</Button>
+          <Button variant="secondary">Zurück</Button>
         </Link>
       </div>
     )
@@ -149,7 +149,7 @@ export default function PropertyInventoryDetailPage({
         <h1 className="text-2xl font-bold mb-6">Bestandsverlauf</h1>
         <p className="text-gray-600 dark:text-gray-400">Liegenschaft nicht gefunden</p>
         <Link href="/dashboard/lieferanten/bestand" className="mt-4 inline-block">
-          <Button variant="secondary">Zurueck</Button>
+          <Button variant="secondary">Zurück</Button>
         </Link>
       </div>
     )
@@ -167,7 +167,7 @@ export default function PropertyInventoryDetailPage({
         </div>
         <div className="flex gap-2">
           <Link href="/dashboard/lieferanten/bestand">
-            <Button variant="secondary">Zurueck</Button>
+            <Button variant="secondary">Zurück</Button>
           </Link>
           <Button
             onClick={() => setShowForm(!showForm)}
@@ -211,7 +211,7 @@ export default function PropertyInventoryDetailPage({
           </p>
         ) : movements.length < 2 ? (
           <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-400 px-4 py-3 rounded mb-4">
-            Mindestens 2 Ablesungen erforderlich fuer Verbrauchsberechnung.
+            Mindestens 2 Ablesungen erforderlich für Verbrauchsberechnung.
           </div>
         ) : null}
 

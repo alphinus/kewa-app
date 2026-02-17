@@ -66,7 +66,7 @@ export function validateAttachment(
 ): ValidationResult {
   // Check file exists
   if (!file || file.size === 0) {
-    return { valid: false, error: 'Keine Datei ausgewaehlt' }
+    return { valid: false, error: 'Keine Datei ausgewählt' }
   }
 
   // Check file size

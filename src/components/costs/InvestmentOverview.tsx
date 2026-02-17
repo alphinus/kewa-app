@@ -7,7 +7,7 @@
  * Includes summary row, building filter, and sort options.
  *
  * Phase 10-06: Unit Investment View and Rent Entry
- * Requirement: RENT-03 - Investment-Uebersicht pro Unit
+ * Requirement: RENT-03 - Investment-Übersicht pro Unit
  */
 
 import { useState, useMemo, useCallback } from 'react'
@@ -213,7 +213,7 @@ export function InvestmentOverview({
           </div>
           {summary.avgPayback === null && (
             <div className="text-xs text-gray-400 dark:text-gray-500">
-              Mietzinse erfassen fuer Berechnung
+              Mietzinse erfassen für Berechnung
             </div>
           )}
         </div>
@@ -227,7 +227,7 @@ export function InvestmentOverview({
             htmlFor="building-filter"
             className="text-sm font-medium text-gray-700 dark:text-gray-300"
           >
-            Gebaeude:
+            Gebäude:
           </label>
           <select
             id="building-filter"
@@ -235,7 +235,7 @@ export function InvestmentOverview({
             onChange={(e) => setSelectedBuildingId(e.target.value)}
             className="rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-1.5 text-sm text-gray-900 dark:text-gray-100 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
           >
-            <option value="">Alle Gebaeude</option>
+            <option value="">Alle Gebäude</option>
             {buildings.map((b) => (
               <option key={b.id} value={b.id}>
                 {b.name}
@@ -286,13 +286,13 @@ export function InvestmentOverview({
       {displayedUnits.length === 0 && (
         <div className="text-center py-8 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
           <p className="text-gray-500 dark:text-gray-400">
-            Keine Einheiten in diesem Gebaeude gefunden.
+            Keine Einheiten in diesem Gebäude gefunden.
           </p>
           <button
             onClick={() => setSelectedBuildingId('')}
             className="mt-2 text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
           >
-            Filter zuruecksetzen
+            Filter zurücksetzen
           </button>
         </div>
       )}

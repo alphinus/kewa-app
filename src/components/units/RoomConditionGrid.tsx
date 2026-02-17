@@ -5,7 +5,7 @@
  * Each room displays name, type, condition badge, and last updated date.
  *
  * Phase 11-02: Room Condition Grid
- * Requirements: HIST-02 (Unit-Uebersicht zeigt Renovations-Fortschritt pro Raum)
+ * Requirements: HIST-02 (Unit-Übersicht zeigt Renovations-Fortschritt pro Raum)
  */
 
 import { cn } from '@/lib/utils'
@@ -35,7 +35,7 @@ const ROOM_TYPE_ICONS: Record<RoomType, string> = {
  */
 const ROOM_TYPE_LABELS: Record<RoomType, string> = {
   bathroom: 'Bad',
-  kitchen: 'Kueche',
+  kitchen: 'Küche',
   bedroom: 'Schlafzimmer',
   living_room: 'Wohnzimmer',
   hallway: 'Flur',
@@ -93,7 +93,7 @@ export async function RoomConditionGrid({ unitId, className }: RoomConditionGrid
         'bg-gray-50 dark:bg-gray-800/50 rounded-lg',
         className
       )}>
-        <p>Keine Raeume fuer diese Einheit erfasst.</p>
+        <p>Keine Räume für diese Einheit erfasst.</p>
       </div>
     )
   }

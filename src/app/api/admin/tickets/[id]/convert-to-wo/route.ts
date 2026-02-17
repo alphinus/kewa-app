@@ -45,7 +45,7 @@ export async function POST(
   // Validate role - must be admin or property_manager
   if (!userRole || !['admin', 'property_manager'].includes(userRole)) {
     return NextResponse.json(
-      { error: 'Keine Berechtigung fuer diese Aktion' },
+      { error: 'Keine Berechtigung für diese Aktion' },
       { status: 403 }
     )
   }
@@ -73,7 +73,7 @@ export async function POST(
 
     if (!uuidPattern.test(body.partner_id)) {
       return NextResponse.json(
-        { error: 'Ungueltige Partner-ID' },
+        { error: 'Ungültige Partner-ID' },
         { status: 400 }
       )
     }

@@ -214,7 +214,7 @@ export default function ImeriTasksPage() {
           {groupedTasks.overdue.length > 0 && (
             <section>
               <SectionHeader
-                title="Ueberfaellig"
+                title="Überfaellig"
                 count={groupedTasks.overdue.length}
                 variant="danger"
               />
@@ -262,7 +262,7 @@ export default function ImeriTasksPage() {
           {groupedTasks.later.length > 0 && (
             <section>
               <SectionHeader
-                title="Spaeter"
+                title="Später"
                 count={groupedTasks.later.length}
                 variant="default"
               />

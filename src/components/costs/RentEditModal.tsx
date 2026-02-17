@@ -105,7 +105,7 @@ export function RentEditModal({
       parsedRent = parseFloat(rentAmount)
 
       if (isNaN(parsedRent)) {
-        setError('Bitte geben Sie eine gueltige Zahl ein')
+        setError('Bitte geben Sie eine gültige Zahl ein')
         return
       }
 

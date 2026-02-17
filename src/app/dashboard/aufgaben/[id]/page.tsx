@@ -311,7 +311,7 @@ export default function TaskDetailPage() {
               onClick={() => router.push('/dashboard/aufgaben')}
               className="mt-4 text-blue-500 underline"
             >
-              Zurueck zur Uebersicht
+              Zurück zur Übersicht
             </button>
           </CardContent>
         </Card>
@@ -333,7 +333,7 @@ export default function TaskDetailPage() {
         className="inline-flex items-center text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 min-h-[48px]"
       >
         <ChevronLeftIcon className="w-5 h-5 mr-1" />
-        Zurueck
+        Zurück
       </button>
 
       {/* Task header */}
@@ -438,10 +438,10 @@ export default function TaskDetailPage() {
                     <div className="space-y-3">
                       <div className="flex items-center justify-between">
                         <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                          Erklaerungsfotos
+                          Erklärungsfotos
                         </h3>
                         <span className="text-xs text-gray-500 dark:text-gray-400">
-                          fuer Imeri sichtbar
+                          für Imeri sichtbar
                         </span>
                       </div>
                       <PhotoUpload
@@ -459,7 +459,7 @@ export default function TaskDetailPage() {
                   {isImeri && (
                     <div className="space-y-3">
                       <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                        Erklaerungsfotos von KEWA AG
+                        Erklärungsfotos von KEWA AG
                       </h3>
                       {explanationPhotos.length > 0 ? (
                         <div className="grid grid-cols-2 gap-3">
@@ -477,7 +477,7 @@ export default function TaskDetailPage() {
                       ) : (
                         <div className="py-6 text-center bg-gray-50 dark:bg-gray-800/50 rounded-lg">
                           <p className="text-sm text-gray-500 dark:text-gray-400">
-                            Keine Erklaerungsfotos vorhanden
+                            Keine Erklärungsfotos vorhanden
                           </p>
                         </div>
                       )}
@@ -516,7 +516,7 @@ export default function TaskDetailPage() {
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 bg-blue-500 rounded-full" />
                   <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Erklaerung von KEWA AG
+                    Erklärung von KEWA AG
                   </h3>
                 </div>
 
@@ -545,7 +545,7 @@ export default function TaskDetailPage() {
                 {!explanationAudio && (isImeri || (isKewa && isCompleted)) && (
                   <div className="py-4 text-center bg-gray-50 dark:bg-gray-800/50 rounded-lg">
                     <p className="text-sm text-gray-500 dark:text-gray-400">
-                      Keine Erklaerung vorhanden
+                      Keine Erklärung vorhanden
                     </p>
                   </div>
                 )}

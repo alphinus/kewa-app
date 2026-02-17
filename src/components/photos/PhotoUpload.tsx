@@ -224,14 +224,14 @@ export function PhotoUpload({
 
       if (!response.ok) {
         const data = await response.json()
-        throw new Error(data.error || 'Loeschen fehlgeschlagen')
+        throw new Error(data.error || 'Löschen fehlgeschlagen')
       }
 
       setDeleteConfirmId(null)
       onDelete?.(photoId)
     } catch (err) {
       console.error('Delete error:', err)
-      setErrorMessage(err instanceof Error ? err.message : 'Loeschen fehlgeschlagen')
+      setErrorMessage(err instanceof Error ? err.message : 'Löschen fehlgeschlagen')
     } finally {
       setDeleting(false)
     }
@@ -287,7 +287,7 @@ export function PhotoUpload({
                 <>
                   {deleteConfirmId === photo.id ? (
                     <div className="absolute inset-0 bg-black/80 flex flex-col items-center justify-center gap-3 p-3">
-                      <p className="text-white text-sm font-medium text-center">Foto loeschen?</p>
+                      <p className="text-white text-sm font-medium text-center">Foto löschen?</p>
                       <div className="flex gap-3">
                         <button
                           onClick={() => handleDelete(photo.id)}
@@ -309,7 +309,7 @@ export function PhotoUpload({
                     <button
                       onClick={() => setDeleteConfirmId(photo.id)}
                       className="absolute top-2 right-2 p-2 bg-black/60 rounded-full text-white hover:bg-black/80 transition-colors min-w-[36px] min-h-[36px] flex items-center justify-center"
-                      aria-label="Foto loeschen"
+                      aria-label="Foto löschen"
                     >
                       <TrashIcon className="w-4 h-4" />
                     </button>
@@ -329,7 +329,7 @@ export function PhotoUpload({
           </p>
           {photosCount < maxPhotos && (
             <span className="text-xs text-green-600 dark:text-green-400">
-              + {maxPhotos - photosCount} moeglich
+              + {maxPhotos - photosCount} möglich
             </span>
           )}
         </div>
@@ -365,7 +365,7 @@ export function PhotoUpload({
             className="sm:flex-1"
           >
             <GalleryIcon className="w-5 h-5 mr-2" />
-            Foto auswaehlen
+            Foto auswählen
           </Button>
         </div>
       )}

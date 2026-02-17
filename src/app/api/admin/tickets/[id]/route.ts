@@ -189,7 +189,7 @@ export async function PATCH(
 
     if (Object.keys(updateData).length === 0) {
       return NextResponse.json(
-        { error: 'Keine gueltigen Felder zum Aktualisieren' },
+        { error: 'Keine gültigen Felder zum Aktualisieren' },
         { status: 400 }
       )
     }

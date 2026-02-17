@@ -119,7 +119,7 @@ export default async function ContractorKnowledgePage({
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
         <h2 className="text-lg font-semibold text-gray-900">Wissensdatenbank</h2>
         <p className="text-sm text-gray-600 mt-1">
-          FAQs und Anleitungen fuer Handwerker
+          FAQs und Anleitungen für Handwerker
         </p>
       </div>
 
@@ -183,12 +183,12 @@ export default async function ContractorKnowledgePage({
       {/* Search results indicator */}
       {searchQuery && (
         <div className="text-sm text-gray-600">
-          Suchergebnisse fuer &quot;{searchQuery}&quot;
+          Suchergebnisse für &quot;{searchQuery}&quot;
           <Link
             href={`/contractor/${token}/knowledge${categoryFilter ? `?category=${categoryFilter}` : ''}`}
             className="ml-2 text-blue-600 underline"
           >
-            Suche loeschen
+            Suche löschen
           </Link>
         </div>
       )}
@@ -259,7 +259,7 @@ export default async function ContractorKnowledgePage({
               d="M10 19l-7-7m0 0l7-7m-7 7h18"
             />
           </svg>
-          Zurueck zu meinen Auftraegen
+          Zurück zu meinen Aufträgen
         </Link>
       </div>
     </div>

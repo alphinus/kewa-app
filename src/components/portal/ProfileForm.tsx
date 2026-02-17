@@ -77,7 +77,7 @@ export function ProfileForm({ initialData, onSave }: ProfileFormProps) {
     }
 
     if (!PHONE_REGEX.test(value)) {
-      return 'Ungueltige Telefonnummer'
+      return 'Ungültige Telefonnummer'
     }
 
     return undefined

@@ -21,13 +21,13 @@ const scopeOptions: { value: TemplateScope; label: string }[] = [
 
 const roomTypeOptions: { value: RoomType; label: string }[] = [
   { value: 'bathroom', label: 'Bad' },
-  { value: 'kitchen', label: 'Kueche' },
+  { value: 'kitchen', label: 'Küche' },
   { value: 'bedroom', label: 'Schlafzimmer' },
   { value: 'living_room', label: 'Wohnzimmer' },
   { value: 'hallway', label: 'Flur' },
   { value: 'balcony', label: 'Balkon' },
   { value: 'storage', label: 'Abstellraum' },
-  { value: 'laundry', label: 'Waschkueche' },
+  { value: 'laundry', label: 'Waschküche' },
   { value: 'garage', label: 'Garage' },
   { value: 'office', label: 'Buero' },
   { value: 'other', label: 'Andere' }
@@ -108,7 +108,7 @@ export default function TemplateEditPage({ params }: PageProps) {
     }
 
     if (formData.scope === 'room' && !formData.target_room_type) {
-      setError('Raumtyp ist erforderlich fuer raum-spezifische Templates')
+      setError('Raumtyp ist erforderlich für raum-spezifische Templates')
       return
     }
 
@@ -151,9 +151,9 @@ export default function TemplateEditPage({ params }: PageProps) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <p className="text-gray-600">Nur Administratoren koennen Templates bearbeiten.</p>
+          <p className="text-gray-600">Nur Administratoren können Templates bearbeiten.</p>
           <Link href={`/templates/${id}`} className="mt-4 inline-block text-blue-600 hover:text-blue-700">
-            Zurueck zum Template
+            Zurück zum Template
           </Link>
         </div>
       </div>
@@ -168,7 +168,7 @@ export default function TemplateEditPage({ params }: PageProps) {
             {error}
           </div>
           <Link href="/templates" className="mt-4 inline-block text-blue-600 hover:text-blue-700">
-            Zurueck zur Bibliothek
+            Zurück zur Bibliothek
           </Link>
         </div>
       </div>
@@ -247,7 +247,7 @@ export default function TemplateEditPage({ params }: PageProps) {
                 onChange={e => setFormData(f => ({ ...f, category: e.target.value as TemplateCategory }))}
                 className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               >
-                <option value="">-- Kategorie waehlen --</option>
+                <option value="">-- Kategorie wählen --</option>
                 {categoryOptions.map(opt => (
                   <option key={opt.value} value={opt.value}>{opt.label}</option>
                 ))}
@@ -261,7 +261,7 @@ export default function TemplateEditPage({ params }: PageProps) {
                 onChange={e => setFormData(f => ({ ...f, scope: e.target.value as TemplateScope }))}
                 className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               >
-                <option value="">-- Scope waehlen --</option>
+                <option value="">-- Scope wählen --</option>
                 {scopeOptions.map(opt => (
                   <option key={opt.value} value={opt.value}>{opt.label}</option>
                 ))}
@@ -276,7 +276,7 @@ export default function TemplateEditPage({ params }: PageProps) {
                   onChange={e => setFormData(f => ({ ...f, target_room_type: e.target.value as RoomType }))}
                   className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 >
-                  <option value="">-- Raumtyp waehlen --</option>
+                  <option value="">-- Raumtyp wählen --</option>
                   {roomTypeOptions.map(opt => (
                     <option key={opt.value} value={opt.value}>{opt.label}</option>
                   ))}

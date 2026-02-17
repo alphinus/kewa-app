@@ -30,13 +30,13 @@ export default function LieferantDetailPage({ params }: PageProps) {
             Fehler
           </h2>
           <p className="text-red-600 dark:text-red-400">
-            Ungueltiges ID-Format
+            Ungültiges ID-Format
           </p>
           <Link
             href="/dashboard/lieferanten"
             className="inline-block mt-4 text-sm text-red-700 dark:text-red-300 underline"
           >
-            Zurueck zur Liste
+            Zurück zur Liste
           </Link>
         </div>
       </div>

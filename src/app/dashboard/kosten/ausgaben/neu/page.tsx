@@ -73,12 +73,12 @@ export default function NeueAusgabePage() {
       {/* Help text */}
       <div className="text-sm text-gray-500 dark:text-gray-400 space-y-2">
         <p>
-          <strong>Hinweis:</strong> Alle Ausgaben muessen mit einem Beleg (Foto oder PDF)
+          <strong>Hinweis:</strong> Alle Ausgaben müssen mit einem Beleg (Foto oder PDF)
           dokumentiert werden.
         </p>
         <p>
           Die Ausgabe wird automatisch einem Projekt oder einer Einheit zugeordnet.
-          Waehlen Sie die passende Zuordnung aus.
+          Wählen Sie die passende Zuordnung aus.
         </p>
       </div>
     </div>

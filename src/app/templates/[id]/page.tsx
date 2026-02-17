@@ -27,13 +27,13 @@ const scopeLabels: Record<string, string> = {
 
 const roomTypeLabels: Record<string, string> = {
   bathroom: 'Bad',
-  kitchen: 'Kueche',
+  kitchen: 'Küche',
   bedroom: 'Schlafzimmer',
   living_room: 'Wohnzimmer',
   hallway: 'Flur',
   balcony: 'Balkon',
   storage: 'Abstellraum',
-  laundry: 'Waschkueche',
+  laundry: 'Waschküche',
   garage: 'Garage',
   office: 'Buero',
   other: 'Andere'
@@ -90,13 +90,13 @@ export default function TemplateDetailPage({ params }: PageProps) {
 
   async function handleDelete() {
     if (!template) return
-    if (!confirm('Template wirklich loeschen? Diese Aktion kann nicht rueckgaengig gemacht werden.')) return
+    if (!confirm('Template wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.')) return
 
     try {
       await deleteTemplate(template.id)
       router.push('/templates')
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Fehler beim Loeschen')
+      setError(err instanceof Error ? err.message : 'Fehler beim Löschen')
     }
   }
 
@@ -134,7 +134,7 @@ export default function TemplateDetailPage({ params }: PageProps) {
             {error || 'Template nicht gefunden'}
           </div>
           <Link href="/templates" className="mt-4 inline-block text-blue-600 hover:text-blue-700">
-            Zurueck zur Bibliothek
+            Zurück zur Bibliothek
           </Link>
         </div>
       </div>
@@ -197,7 +197,7 @@ export default function TemplateDetailPage({ params }: PageProps) {
                     onClick={handleDelete}
                     className="px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 min-h-[44px]"
                   >
-                    Loeschen
+                    Löschen
                   </button>
                 </>
               )}
@@ -372,12 +372,12 @@ export default function TemplateDetailPage({ params }: PageProps) {
             {/* Dependencies summary */}
             {template.dependencies && template.dependencies.length > 0 && (
               <div className="bg-white rounded-lg border p-4">
-                <h3 className="font-semibold text-gray-900 mb-3">Abhaengigkeiten</h3>
+                <h3 className="font-semibold text-gray-900 mb-3">Abhängigkeiten</h3>
                 <p className="text-sm text-gray-600">
-                  {template.dependencies.length} Abhaengigkeit(en) definiert
+                  {template.dependencies.length} Abhängigkeit(en) definiert
                 </p>
                 <p className="text-xs text-gray-500 mt-1">
-                  Detaillierte Ansicht im Gantt-Diagramm verfuegbar
+                  Detaillierte Ansicht im Gantt-Diagramm verfügbar
                 </p>
               </div>
             )}

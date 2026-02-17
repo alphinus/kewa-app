@@ -71,7 +71,7 @@ export async function PATCH(
     // Validate UUID format
     if (!ticketId.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {
       return NextResponse.json(
-        { error: 'Ungueltige Ticket-ID' },
+        { error: 'Ungültige Ticket-ID' },
         { status: 400 }
       )
     }
@@ -92,7 +92,7 @@ export async function PATCH(
     const validStatuses: TicketStatus[] = ['offen', 'in_bearbeitung', 'geschlossen', 'storniert']
     if (!validStatuses.includes(newStatus)) {
       return NextResponse.json(
-        { error: 'Ungueltiger Status' },
+        { error: 'Ungültiger Status' },
         { status: 400 }
       )
     }
@@ -119,7 +119,7 @@ export async function PATCH(
     const allowedTransitions = VALID_TRANSITIONS[oldStatus]
     if (!allowedTransitions.includes(newStatus)) {
       return NextResponse.json(
-        { error: `Ungueltige Statusaenderung: ${oldStatus} -> ${newStatus}` },
+        { error: `Ungültige Statusänderung: ${oldStatus} -> ${newStatus}` },
         { status: 400 }
       )
     }

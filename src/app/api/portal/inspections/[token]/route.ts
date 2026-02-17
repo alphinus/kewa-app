@@ -21,7 +21,7 @@ export async function GET(
     const validation = await validateInspectionPortalToken(token)
     if (!validation.valid || !validation.inspectionId) {
       return NextResponse.json(
-        { valid: false, error: 'Token ungueltig oder abgelaufen' },
+        { valid: false, error: 'Token ungültig oder abgelaufen' },
         { status: 200 }
       )
     }

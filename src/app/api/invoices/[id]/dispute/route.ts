@@ -99,7 +99,7 @@ export async function POST(
 
     if (existing.status !== 'under_review') {
       return NextResponse.json(
-        { error: 'Rechnung muss im Status "In Pruefung" sein, um beanstandet zu werden' },
+        { error: 'Rechnung muss im Status "In Prüfung" sein, um beanstandet zu werden' },
         { status: 400 }
       )
     }

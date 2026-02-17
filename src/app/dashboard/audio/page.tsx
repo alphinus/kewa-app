@@ -93,7 +93,7 @@ export default function AudioPage() {
   // Filter tabs
   const filterTabs: { value: FilterType; label: string }[] = [
     { value: 'all', label: 'Alle' },
-    { value: 'explanation', label: 'Erklaerungen' },
+    { value: 'explanation', label: 'Erklärungen' },
     { value: 'emergency', label: 'Notfaelle' },
   ]
 
@@ -120,7 +120,7 @@ export default function AudioPage() {
           className="inline-flex items-center text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 min-h-[48px]"
         >
           <ChevronLeftIcon className="w-5 h-5 mr-1" />
-          Zurueck
+          Zurück
         </button>
         <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">
           Sprachnotizen
@@ -178,7 +178,7 @@ export default function AudioPage() {
       {!loading && !error && (
         <div className="text-center text-sm text-gray-500 dark:text-gray-400">
           {filteredAudios.length} {filteredAudios.length === 1 ? 'Aufnahme' : 'Aufnahmen'}
-          {filter !== 'all' && ` (${filter === 'explanation' ? 'Erklaerungen' : 'Notfaelle'})`}
+          {filter !== 'all' && ` (${filter === 'explanation' ? 'Erklärungen' : 'Notfaelle'})`}
         </div>
       )}
     </div>

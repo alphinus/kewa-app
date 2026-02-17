@@ -59,7 +59,7 @@ function getDueDateDisplay(dueDate: string | null): {
 
   if (diffDays < 0) {
     return {
-      label: `Ueberfaellig (${due.toLocaleDateString('de-CH')})`,
+      label: `Überfaellig (${due.toLocaleDateString('de-CH')})`,
       isOverdue: true,
       isToday: false,
     }

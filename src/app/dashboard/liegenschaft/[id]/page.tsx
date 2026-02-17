@@ -81,9 +81,9 @@ export default function LiegenschaftDetailPage({ params }: PageProps) {
 
         if (!response.ok) {
           if (response.status === 404) {
-            throw new Error('Gebaeude nicht gefunden')
+            throw new Error('Gebäude nicht gefunden')
           }
-          throw new Error('Fehler beim Laden der Gebaeudedaten')
+          throw new Error('Fehler beim Laden der Gebäudedaten')
         }
 
         const data = await response.json()
@@ -123,12 +123,12 @@ export default function LiegenschaftDetailPage({ params }: PageProps) {
           <h2 className="text-lg font-medium text-red-800 dark:text-red-200 mb-2">
             Fehler
           </h2>
-          <p className="text-red-600 dark:text-red-400">Ungueltiges ID-Format</p>
+          <p className="text-red-600 dark:text-red-400">Ungültiges ID-Format</p>
           <Link
             href="/dashboard/liegenschaft"
             className="inline-block mt-4 text-sm text-red-700 dark:text-red-300 underline"
           >
-            Zurueck zur Uebersicht
+            Zurück zur Übersicht
           </Link>
         </div>
       </div>
@@ -153,13 +153,13 @@ export default function LiegenschaftDetailPage({ params }: PageProps) {
             Fehler
           </h2>
           <p className="text-red-600 dark:text-red-400">
-            {error || 'Gebaeude nicht gefunden'}
+            {error || 'Gebäude nicht gefunden'}
           </p>
           <Link
             href="/dashboard/liegenschaft"
             className="inline-block mt-4 text-sm text-red-700 dark:text-red-300 underline"
           >
-            Zurueck zur Uebersicht
+            Zurück zur Übersicht
           </Link>
         </div>
       </div>
@@ -201,7 +201,7 @@ export default function LiegenschaftDetailPage({ params }: PageProps) {
       <Card>
         <CardHeader>
           <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-            Gebaeudeinformationen
+            Gebäudeinformationen
           </h2>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -251,7 +251,7 @@ export default function LiegenschaftDetailPage({ params }: PageProps) {
               d="M10 19l-7-7m0 0l7-7m-7 7h18"
             />
           </svg>
-          Zurueck zur Uebersicht
+          Zurück zur Übersicht
         </Link>
       </div>
     </div>

@@ -136,7 +136,7 @@ export function MultiPropertyOrderForm({
 
       // Validate all allocations have property selected
       if (allocations.some((a) => !a.property_id)) {
-        throw new Error('Alle Liegenschaften muessen ausgewaehlt werden')
+        throw new Error('Alle Liegenschaften müssen ausgewählt werden')
       }
 
       // Save each allocation
@@ -183,7 +183,7 @@ export function MultiPropertyOrderForm({
         <h3 className="text-lg font-semibold mb-2">Verteilung auf Liegenschaften</h3>
         <p className="text-sm text-gray-600">
           Verteilen Sie die Bestellung auf mehrere Liegenschaften. Der Gesamtbetrag darf{' '}
-          <span className="font-semibold">CHF {totalAmount.toFixed(2)}</span> nicht ueberschreiten.
+          <span className="font-semibold">CHF {totalAmount.toFixed(2)}</span> nicht überschreiten.
         </p>
       </div>
 
@@ -237,7 +237,7 @@ export function MultiPropertyOrderForm({
                 onValueChange={(value) => updateAllocation(allocation.id, 'property_id', value)}
               >
                 <SelectTrigger id={`property-${allocation.id}`}>
-                  <SelectValue placeholder="Liegenschaft waehlen..." />
+                  <SelectValue placeholder="Liegenschaft wählen..." />
                 </SelectTrigger>
                 <SelectContent>
                   {properties.map((property) => (
@@ -293,7 +293,7 @@ export function MultiPropertyOrderForm({
       {/* Add allocation button */}
       <Button type="button" variant="secondary" onClick={addAllocation}>
         <Plus className="h-4 w-4 mr-2" />
-        Liegenschaft hinzufuegen
+        Liegenschaft hinzufügen
       </Button>
 
       {/* Summary section */}
@@ -301,7 +301,7 @@ export function MultiPropertyOrderForm({
         <h4 className="font-medium text-sm text-blue-900">Zusammenfassung</h4>
         <div className="grid grid-cols-2 gap-4 text-sm">
           <div>
-            <div className="text-gray-600">Gesamt verfuegbar:</div>
+            <div className="text-gray-600">Gesamt verfügbar:</div>
             <div className="font-semibold">
               {totalQuantity.toFixed(2)} t / CHF {totalAmount.toFixed(2)}
             </div>
@@ -338,7 +338,7 @@ export function MultiPropertyOrderForm({
       {isOverAllocated && (
         <Alert variant="destructive">
           <AlertDescription>
-            Die Gesamtverteilung ueberschreitet die verfuegbare Menge oder den Betrag.
+            Die Gesamtverteilung überschreitet die verfügbare Menge oder den Betrag.
           </AlertDescription>
         </Alert>
       )}

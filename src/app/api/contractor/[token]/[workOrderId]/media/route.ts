@@ -57,7 +57,7 @@ export async function GET(
     const validation = await validateContractorAccess(token)
     if (!validation.valid || !validation.email) {
       return NextResponse.json(
-        { error: 'Ungueltiger oder abgelaufener Token' },
+        { error: 'Ungültiger oder abgelaufener Token' },
         { status: 401 }
       )
     }
@@ -149,7 +149,7 @@ export async function DELETE(
     const validation = await validateContractorAccess(token)
     if (!validation.valid || !validation.email) {
       return NextResponse.json(
-        { error: 'Ungueltiger oder abgelaufener Token' },
+        { error: 'Ungültiger oder abgelaufener Token' },
         { status: 401 }
       )
     }
@@ -190,7 +190,7 @@ export async function DELETE(
     if (!DELETE_ALLOWED_STATUSES.includes(workOrder.status)) {
       return NextResponse.json(
         {
-          error: `Loeschen nicht erlaubt im Status '${workOrder.status}'. Nur erlaubt bei: akzeptiert, in Bearbeitung.`,
+          error: `Löschen nicht erlaubt im Status '${workOrder.status}'. Nur erlaubt bei: akzeptiert, in Bearbeitung.`,
         },
         { status: 403 }
       )
@@ -231,7 +231,7 @@ export async function DELETE(
     if (deleteError) {
       console.error('Failed to delete media record:', deleteError)
       return NextResponse.json(
-        { error: 'Fehler beim Loeschen der Datei' },
+        { error: 'Fehler beim Löschen der Datei' },
         { status: 500 }
       )
     }

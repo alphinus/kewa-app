@@ -41,7 +41,7 @@ export async function POST(
     const inviteData = await verifyInviteToken(token)
     if (!inviteData) {
       return NextResponse.json(
-        { error: 'Token ungueltig oder abgelaufen' },
+        { error: 'Token ungültig oder abgelaufen' },
         { status: 400 }
       )
     }

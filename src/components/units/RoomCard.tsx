@@ -9,13 +9,13 @@ import type { Room } from '@/types/database'
 const ROOM_TYPE_LABELS: Record<string, string> = {
   living_room: 'Wohnzimmer',
   bedroom: 'Schlafzimmer',
-  kitchen: 'Kueche',
+  kitchen: 'Küche',
   bathroom: 'Badezimmer',
   toilet: 'WC',
   hallway: 'Flur',
   storage: 'Abstellraum',
   balcony: 'Balkon',
-  laundry: 'Waschkueche',
+  laundry: 'Waschküche',
   garage: 'Garage',
   office: 'Buero',
   other: 'Sonstiges'

@@ -66,7 +66,7 @@ export async function GET(
     // Validate UUID format
     if (!ticketId.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {
       return NextResponse.json(
-        { error: 'Ungueltige Ticket-ID' },
+        { error: 'Ungültige Ticket-ID' },
         { status: 400 }
       )
     }
@@ -179,7 +179,7 @@ export async function POST(
     // Validate UUID format
     if (!ticketId.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {
       return NextResponse.json(
-        { error: 'Ungueltige Ticket-ID' },
+        { error: 'Ungültige Ticket-ID' },
         { status: 400 }
       )
     }
@@ -220,7 +220,7 @@ export async function POST(
     // Don't allow messages on closed/cancelled tickets
     if (ticket.status === 'geschlossen' || ticket.status === 'storniert') {
       return NextResponse.json(
-        { error: 'Keine Nachrichten an geschlossene Tickets moeglich' },
+        { error: 'Keine Nachrichten an geschlossene Tickets möglich' },
         { status: 400 }
       )
     }

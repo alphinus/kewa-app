@@ -57,7 +57,7 @@ export default function InspectionPortalPage() {
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
         <div className="bg-white rounded-lg shadow-lg p-8 max-w-md text-center">
           <div className="text-red-500 text-4xl mb-4">!</div>
-          <h1 className="text-xl font-semibold mb-2">Link ungueltig</h1>
+          <h1 className="text-xl font-semibold mb-2">Link ungültig</h1>
           <p className="text-gray-600">
             {data?.error || 'Dieser Link ist abgelaufen oder wurde bereits verwendet.'}
           </p>
@@ -71,9 +71,9 @@ export default function InspectionPortalPage() {
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
         <div className="bg-white rounded-lg shadow-lg p-8 max-w-md text-center">
           <div className="text-green-500 text-4xl mb-4">&#10003;</div>
-          <h1 className="text-xl font-semibold mb-2">Bestaetigt</h1>
+          <h1 className="text-xl font-semibold mb-2">Bestätigt</h1>
           <p className="text-gray-600">
-            Vielen Dank. Die Bestaetigung wurde erfolgreich uebermittelt.
+            Vielen Dank. Die Bestätigung wurde erfolgreich übermittelt.
           </p>
         </div>
       </div>

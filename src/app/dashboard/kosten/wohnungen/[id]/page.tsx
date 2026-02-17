@@ -261,7 +261,7 @@ export default async function UnitInvestmentDetailPage({ params }: PageProps) {
           </div>
         ) : (
           <div className="p-8 text-center text-gray-500 dark:text-gray-400">
-            Keine Renovationsprojekte fuer diese Einheit.
+            Keine Renovationsprojekte für diese Einheit.
           </div>
         )}
       </section>
@@ -349,7 +349,7 @@ export default async function UnitInvestmentDetailPage({ params }: PageProps) {
         ) : (
           <div className="p-8 text-center">
             <p className="text-gray-500 dark:text-gray-400">
-              Keine direkten Ausgaben fuer diese Einheit.
+              Keine direkten Ausgaben für diese Einheit.
             </p>
             <Link
               href={`/dashboard/kosten/ausgaben/neu?unit_id=${id}`}

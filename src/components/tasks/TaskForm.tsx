@@ -87,7 +87,7 @@ export function TaskForm({
     const newErrors: Record<string, string> = {}
 
     if (!projectId) {
-      newErrors.projectId = 'Bitte waehlen Sie ein Projekt'
+      newErrors.projectId = 'Bitte wählen Sie ein Projekt'
     }
     if (!title.trim()) {
       newErrors.title = 'Bitte geben Sie einen Titel ein'
@@ -177,13 +177,13 @@ export function TaskForm({
       })
 
       if (!response.ok) {
-        throw new Error('Fehler beim Loeschen')
+        throw new Error('Fehler beim Löschen')
       }
 
       onDelete?.()
     } catch (err) {
       setErrors({
-        submit: err instanceof Error ? err.message : 'Fehler beim Loeschen',
+        submit: err instanceof Error ? err.message : 'Fehler beim Löschen',
       })
     } finally {
       setDeleting(false)
@@ -363,7 +363,7 @@ export function TaskForm({
                 onClick={() => setShowDeleteConfirm(true)}
                 disabled={saving || deleting}
               >
-                Loeschen
+                Löschen
               </Button>
             )}
 
@@ -393,10 +393,10 @@ export function TaskForm({
           <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-2xl">
             <div className="bg-white dark:bg-gray-900 p-6 rounded-xl m-4 space-y-4 max-w-sm">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-                Aufgabe loeschen?
+                Aufgabe löschen?
               </h3>
               <p className="text-gray-600 dark:text-gray-400">
-                Diese Aktion kann nicht rueckgaengig gemacht werden.
+                Diese Aktion kann nicht rückgängig gemacht werden.
               </p>
               <div className="flex gap-3">
                 <Button
@@ -413,7 +413,7 @@ export function TaskForm({
                   loading={deleting}
                   fullWidth
                 >
-                  Loeschen
+                  Löschen
                 </Button>
               </div>
             </div>

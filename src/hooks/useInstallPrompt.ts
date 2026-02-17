@@ -57,7 +57,7 @@ export function useInstallPrompt() {
 
   const showInstallToast = () => {
     toast('KEWA als App installieren', {
-      description: 'Fuer schnelleren Zugriff auf dem Startbildschirm hinzufuegen',
+      description: 'Für schnelleren Zugriff auf dem Startbildschirm hinzufügen',
       duration: 4000,
       action: {
         label: 'Installieren',

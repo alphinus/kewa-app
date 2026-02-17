@@ -159,7 +159,7 @@ export async function POST(
     // Validate invoice status
     if (!VALID_INVOICE_STATUSES.includes(invoice.status)) {
       return NextResponse.json(
-        { error: `Rechnung kann nicht verknuepft werden. Status "${invoice.status}" ist ungueltig. Erlaubt: ${VALID_INVOICE_STATUSES.join(', ')}` },
+        { error: `Rechnung kann nicht verknüpft werden. Status "${invoice.status}" ist ungültig. Erlaubt: ${VALID_INVOICE_STATUSES.join(', ')}` },
         { status: 400 }
       )
     }
@@ -200,7 +200,7 @@ export async function POST(
 
     return NextResponse.json({
       delivery: updatedDelivery,
-      message: `Rechnung ${invoice.invoice_number} erfolgreich verknuepft`,
+      message: `Rechnung ${invoice.invoice_number} erfolgreich verknüpft`,
     })
   } catch (error) {
     console.error('Unexpected error in POST /api/deliveries/[id]/link-invoice:', error)

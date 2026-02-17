@@ -27,11 +27,11 @@ export function RoomList({ rooms, onEdit, onAdd }: RoomListProps) {
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-            Raeume
+            Räume
           </h3>
           <Button size="sm" onClick={onAdd}>
             <Plus className="w-4 h-4 mr-1" />
-            Hinzufuegen
+            Hinzufügen
           </Button>
         </div>
 
@@ -53,10 +53,10 @@ export function RoomList({ rooms, onEdit, onAdd }: RoomListProps) {
               />
             </svg>
             <p className="text-gray-500 dark:text-gray-400">
-              Keine Raeume vorhanden
+              Keine Räume vorhanden
             </p>
             <p className="mt-1 text-sm text-gray-400 dark:text-gray-500">
-              Fuegen Sie Raeume hinzu, um den Zustand zu verfolgen.
+              Fügen Sie Räume hinzu, um den Zustand zu verfolgen.
             </p>
           </div>
         ) : (

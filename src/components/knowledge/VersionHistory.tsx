@@ -52,7 +52,7 @@ export function VersionHistory({ articleId }: VersionHistoryProps) {
       </h3>
 
       {history.length === 0 ? (
-        <p className="text-sm text-gray-500 dark:text-gray-400">Keine Aenderungen</p>
+        <p className="text-sm text-gray-500 dark:text-gray-400">Keine Änderungen</p>
       ) : (
         <ul className="space-y-1">
           {history.map(entry => (
@@ -121,7 +121,7 @@ function formatDate(dateString: string): string {
 function getStatusLabel(status: string): string {
   const labels: Record<string, string> = {
     draft: 'Entwurf',
-    review: 'Pruefung',
+    review: 'Prüfung',
     published: 'Veroeffentlicht',
     archived: 'Archiviert',
   }

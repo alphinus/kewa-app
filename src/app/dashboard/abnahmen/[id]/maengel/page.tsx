@@ -4,7 +4,7 @@
  * Defect Review and Action Page
  *
  * Review all defects and take action on each.
- * Path: /dashboard/abnahmen/[id]/maengel
+ * Path: /dashboard/abnahmen/[id]/mängel
  * Phase: 22-inspection-core Plan 03
  */
 

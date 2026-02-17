@@ -96,7 +96,7 @@ export default async function AdminDashboardPage() {
             Admin Dashboard
           </h1>
           <p className="text-gray-600 dark:text-gray-400">
-            Uebersicht aller Stammdaten und Systemstatus
+            Übersicht aller Stammdaten und Systemstatus
           </p>
         </div>
 

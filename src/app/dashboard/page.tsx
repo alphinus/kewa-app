@@ -123,7 +123,7 @@ export default function DashboardPage() {
         Willkommen bei KEWA
       </h1>
       <p className="text-gray-600 dark:text-gray-400">
-        Uebersicht aller Projekte und Aufgaben
+        Übersicht aller Projekte und Aufgaben
       </p>
 
       {/* Stats cards */}
@@ -154,7 +154,7 @@ export default function DashboardPage() {
       <Card>
         <CardHeader>
           <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-            Letzte Aktivitaeten
+            Letzte Aktivitäten
           </h2>
         </CardHeader>
         <CardContent>

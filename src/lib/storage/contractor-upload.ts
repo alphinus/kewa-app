@@ -81,7 +81,7 @@ export function validateContractorUpload(
 ): ValidationResult {
   // Check file exists
   if (!file || file.size === 0) {
-    return { valid: false, error: 'Keine Datei ausgewaehlt' }
+    return { valid: false, error: 'Keine Datei ausgewählt' }
   }
 
   // Check file size
@@ -134,7 +134,7 @@ export function validateBatchUpload(
   maxFiles = 10
 ): ValidationResult {
   if (files.length === 0) {
-    return { valid: false, error: 'Keine Dateien ausgewaehlt' }
+    return { valid: false, error: 'Keine Dateien ausgewählt' }
   }
 
   if (files.length > maxFiles) {

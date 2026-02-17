@@ -303,14 +303,14 @@ export function AudioRecorder({
 
       if (!response.ok) {
         const data = await response.json()
-        throw new Error(data.error || 'Loeschen fehlgeschlagen')
+        throw new Error(data.error || 'Löschen fehlgeschlagen')
       }
 
       setDeleteConfirm(false)
       onDelete?.(existingAudio.id)
     } catch (err) {
       console.error('Delete error:', err)
-      setErrorMessage(err instanceof Error ? err.message : 'Loeschen fehlgeschlagen')
+      setErrorMessage(err instanceof Error ? err.message : 'Löschen fehlgeschlagen')
     } finally {
       setDeleting(false)
     }
@@ -325,7 +325,7 @@ export function AudioRecorder({
           <div className="flex items-center justify-end">
             {deleteConfirm ? (
               <div className="flex items-center gap-3">
-                <span className="text-sm text-gray-600 dark:text-gray-400">Loeschen?</span>
+                <span className="text-sm text-gray-600 dark:text-gray-400">Löschen?</span>
                 <button
                   onClick={handleDelete}
                   disabled={deleting}
@@ -347,7 +347,7 @@ export function AudioRecorder({
                 className="inline-flex items-center gap-2 px-3 py-2 text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 min-h-[40px]"
               >
                 <TrashIcon className="w-4 h-4" />
-                <span className="text-sm">Loeschen</span>
+                <span className="text-sm">Löschen</span>
               </button>
             )}
           </div>
@@ -501,7 +501,7 @@ export function AudioRecorder({
       {/* Disabled state message */}
       {disabled && (
         <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-4">
-          Aufnahme nicht verfuegbar
+          Aufnahme nicht verfügbar
         </p>
       )}
     </div>

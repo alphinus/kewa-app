@@ -230,7 +230,7 @@ export function ExportModal({ projects, onClose }: ExportModalProps) {
           CSV Export
         </h2>
         <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-          Exportieren Sie Rechnungen und Ausgaben als CSV-Datei fuer Excel.
+          Exportieren Sie Rechnungen und Ausgaben als CSV-Datei für Excel.
         </p>
 
         {/* Form */}
@@ -411,7 +411,7 @@ export function ExportModal({ projects, onClose }: ExportModalProps) {
             </div>
           ) : (
             <div className="text-sm text-gray-500">
-              Keine Daten verfuegbar
+              Keine Daten verfügbar
             </div>
           )}
         </div>
@@ -420,7 +420,7 @@ export function ExportModal({ projects, onClose }: ExportModalProps) {
         <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 rounded-lg">
           <p className="text-xs text-blue-700 dark:text-blue-300">
             <strong>Format:</strong> CSV mit Semikolon-Trennung, UTF-8 Kodierung.
-            Optimiert fuer Excel (Schweiz/Deutschland). Datumsformat: TT.MM.JJJJ
+            Optimiert für Excel (Schweiz/Deutschland). Datumsformat: TT.MM.JJJJ
           </p>
         </div>
 

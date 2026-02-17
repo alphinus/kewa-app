@@ -31,8 +31,8 @@ function buildMailtoLink(
     `Auftrag: ${workOrderTitle}\n\n` +
     `Bitte klicken Sie auf den folgenden Link, um den Auftrag anzusehen und zu beantworten:\n` +
     `${magicLinkUrl}\n\n` +
-    `Der Link ist gueltig bis: ${expiresAt.toLocaleDateString('de-CH')} ${expiresAt.toLocaleTimeString('de-CH')}\n\n` +
-    `Sie koennen den Auftrag annehmen, ablehnen oder einen Gegenvorschlag machen.\n\n` +
+    `Der Link ist gültig bis: ${expiresAt.toLocaleDateString('de-CH')} ${expiresAt.toLocaleTimeString('de-CH')}\n\n` +
+    `Sie können den Auftrag annehmen, ablehnen oder einen Gegenvorschlag machen.\n\n` +
     `Bei Fragen stehen wir Ihnen gerne zur Verfuegung.\n\n` +
     `Mit freundlichen Gruessen\n` +
     `KEWA AG`

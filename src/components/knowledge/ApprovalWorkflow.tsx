@@ -45,13 +45,13 @@ export function ApprovalWorkflow({
       })
       if (!res.ok) {
         const data = await res.json()
-        throw new Error(data.error || 'Statusaenderung fehlgeschlagen')
+        throw new Error(data.error || 'Statusänderung fehlgeschlagen')
       }
       onStatusChange?.(newStatus)
       setShowRejectInput(false)
       setRejectComment('')
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Statusaenderung fehlgeschlagen')
+      setError(err instanceof Error ? err.message : 'Statusänderung fehlgeschlagen')
     } finally {
       setLoading(false)
     }
@@ -80,7 +80,7 @@ export function ApprovalWorkflow({
             loading={loading}
           >
             <SendIcon className="w-4 h-4 mr-2" />
-            Zur Pruefung einreichen
+            Zur Prüfung einreichen
           </Button>
         )}
 
@@ -147,7 +147,7 @@ export function ApprovalWorkflow({
             <textarea
               value={rejectComment}
               onChange={(e) => setRejectComment(e.target.value)}
-              placeholder="Bitte geben Sie einen Grund fuer die Ablehnung an..."
+              placeholder="Bitte geben Sie einen Grund für die Ablehnung an..."
               className="mt-1 w-full p-3 border rounded-lg resize-none dark:bg-gray-900 dark:border-gray-700"
               rows={3}
               disabled={loading}
@@ -161,7 +161,7 @@ export function ApprovalWorkflow({
               disabled={loading || !rejectComment.trim()}
               loading={loading}
             >
-              Ablehnung bestaetigen
+              Ablehnung bestätigen
             </Button>
             <Button
               variant="ghost"
@@ -201,7 +201,7 @@ export function StatusBadge({ status }: { status: KBArticleStatus }) {
   }
   const labels: Record<KBArticleStatus, string> = {
     draft: 'Entwurf',
-    review: 'In Pruefung',
+    review: 'In Prüfung',
     published: 'Veroeffentlicht',
     archived: 'Archiviert',
   }

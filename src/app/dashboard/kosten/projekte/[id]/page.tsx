@@ -76,7 +76,7 @@ export default async function ProjectCostPage({ params }: Props) {
               d="M15 19l-7-7 7-7"
             />
           </svg>
-          Zurueck zur Uebersicht
+          Zurück zur Übersicht
         </Link>
 
         <Link

@@ -54,7 +54,7 @@ function getUnitTypeLabel(type: string): string {
     case 'common_area':
       return 'Gemeinschaftsraum'
     case 'building':
-      return 'Gebaeude'
+      return 'Gebäude'
     default:
       return type
   }
@@ -148,7 +148,7 @@ export default function UnitDetailPage({ params }: PageProps) {
       }
 
       if (!roomsRes.ok) {
-        throw new Error('Fehler beim Laden der Raeume')
+        throw new Error('Fehler beim Laden der Räume')
       }
 
       const [unitData, roomsData] = await Promise.all([
@@ -273,7 +273,7 @@ export default function UnitDetailPage({ params }: PageProps) {
               {error || 'Einheit nicht gefunden'}
             </p>
             <Button variant="secondary" onClick={() => router.push('/dashboard/einheiten')}>
-              Zurueck zur Liste
+              Zurück zur Liste
             </Button>
           </CardContent>
         </Card>
@@ -316,7 +316,7 @@ export default function UnitDetailPage({ params }: PageProps) {
               <button
                 onClick={() => router.push('/dashboard/einheiten')}
                 className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800"
-                title="Zurueck"
+                title="Zurück"
               >
                 <ArrowLeft className="w-5 h-5" />
               </button>
@@ -368,7 +368,7 @@ export default function UnitDetailPage({ params }: PageProps) {
 
             {rooms.length === 0 ? (
               <p className="text-sm text-gray-500 dark:text-gray-400">
-                Keine Raeume vorhanden
+                Keine Räume vorhanden
               </p>
             ) : (
               <div className="space-y-3">
@@ -386,7 +386,7 @@ export default function UnitDetailPage({ params }: PageProps) {
                 <div>
                   <div className="flex justify-between text-xs text-gray-500 mb-1">
                     <span>{conditionSummary.renovation_percentage}% renoviert</span>
-                    <span>{conditionSummary.total} Raeume</span>
+                    <span>{conditionSummary.total} Räume</span>
                   </div>
                   <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden flex">
                     {conditionSummary.new_rooms > 0 && (

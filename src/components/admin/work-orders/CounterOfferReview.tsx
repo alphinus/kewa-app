@@ -269,7 +269,7 @@ export default function CounterOfferReview({
               {action === 'approve'
                 ? 'Nachricht an Handwerker (optional)'
                 : action === 'reject'
-                ? 'Grund fuer Ablehnung (optional)'
+                ? 'Grund für Ablehnung (optional)'
                 : 'Begruendung (optional)'}
             </label>
             <textarea
@@ -283,7 +283,7 @@ export default function CounterOfferReview({
                 action === 'approve'
                   ? 'Z.B. Preis akzeptiert, bitte starten Sie am...'
                   : action === 'reject'
-                  ? 'Z.B. Budget kann nicht erhoeht werden...'
+                  ? 'Z.B. Budget kann nicht erhöht werden...'
                   : ''
               }
             />

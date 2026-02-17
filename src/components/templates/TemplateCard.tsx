@@ -18,13 +18,13 @@ const categoryLabels: Record<string, string> = {
 
 const roomTypeLabels: Record<string, string> = {
   bathroom: 'Bad',
-  kitchen: 'Kueche',
+  kitchen: 'Küche',
   bedroom: 'Schlafzimmer',
   living_room: 'Wohnzimmer',
   hallway: 'Flur',
   balcony: 'Balkon',
   storage: 'Abstellraum',
-  laundry: 'Waschkueche',
+  laundry: 'Waschküche',
   garage: 'Garage',
   office: 'Buero',
   other: 'Andere'
@@ -38,7 +38,7 @@ const roomTypeLabels: Record<string, string> = {
  */
 export function TemplateCard({ template, onDelete, onDuplicate, isAdmin }: TemplateCardProps) {
   const handleDelete = () => {
-    if (onDelete && confirm('Template wirklich loeschen?')) {
+    if (onDelete && confirm('Template wirklich löschen?')) {
       onDelete(template.id)
     }
   }
@@ -130,7 +130,7 @@ export function TemplateCard({ template, onDelete, onDuplicate, isAdmin }: Templ
               onClick={handleDelete}
               className="py-2 px-3 bg-red-100 hover:bg-red-200 rounded text-sm font-medium text-red-700 transition-colors min-h-[44px] flex items-center justify-center"
             >
-              Loeschen
+              Löschen
             </button>
           </>
         )}

@@ -160,7 +160,7 @@ export default function AdminTicketDetailPage({ params }: PageProps) {
             href="/dashboard/tickets"
             className="inline-block mt-4 text-sm text-red-700 dark:text-red-300 underline"
           >
-            Zurueck zur Liste
+            Zurück zur Liste
           </Link>
         </div>
       </div>
@@ -399,7 +399,7 @@ export default function AdminTicketDetailPage({ params }: PageProps) {
           className="inline-flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
         >
           <ArrowLeft className="w-4 h-4" />
-          Zurueck zur Liste
+          Zurück zur Liste
         </Link>
       </div>
 

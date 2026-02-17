@@ -130,7 +130,7 @@ export default function ArticleViewPage() {
               onClick={() => router.push('/dashboard/knowledge')}
               className="mt-4 text-blue-500 underline"
             >
-              Zurueck zur Uebersicht
+              Zurück zur Übersicht
             </button>
           </CardContent>
         </Card>
@@ -147,14 +147,14 @@ export default function ArticleViewPage() {
           className="inline-flex items-center text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 min-h-[48px]"
         >
           <ChevronLeftIcon className="w-5 h-5 mr-1" />
-          Zurueck
+          Zurück
         </button>
 
         <button
           onClick={togglePin}
           disabled={pinLoading}
           className="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium rounded-lg transition-colors min-h-[48px] border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-50"
-          aria-label={isPinned ? 'Vom Dashboard entfernen' : 'Zum Dashboard hinzufuegen'}
+          aria-label={isPinned ? 'Vom Dashboard entfernen' : 'Zum Dashboard hinzufügen'}
         >
           {isPinned ? (
             <>
@@ -206,7 +206,7 @@ export default function ArticleViewPage() {
             fullWidth
             onClick={() => router.push('/dashboard/knowledge')}
           >
-            Zur Uebersicht
+            Zur Übersicht
           </Button>
         </div>
       </div>

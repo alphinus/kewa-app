@@ -22,8 +22,8 @@ export interface RejectionReason {
 export const REJECTION_REASONS: readonly RejectionReason[] = [
   {
     id: 'capacity',
-    label: 'Kapazitaet',
-    description: 'Keine freie Kapazitaet im Zeitraum',
+    label: 'Kapazität',
+    description: 'Keine freie Kapazität im Zeitraum',
   },
   {
     id: 'location',

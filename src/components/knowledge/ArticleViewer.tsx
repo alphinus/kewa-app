@@ -173,7 +173,7 @@ function StatusBadge({ status }: StatusBadgeProps) {
 
   const labels = {
     draft: 'Entwurf',
-    review: 'Pruefung',
+    review: 'Prüfung',
     published: 'Veroeffentlicht',
     archived: 'Archiviert',
   }
@@ -204,8 +204,8 @@ function VisibilityIcon({ visibility }: { visibility: string }) {
 function getVisibilityLabel(visibility: string): string {
   const labels = {
     internal: 'Nur intern sichtbar',
-    contractors: 'Nur fuer Handwerker sichtbar',
-    both: 'Fuer alle sichtbar',
+    contractors: 'Nur für Handwerker sichtbar',
+    both: 'Für alle sichtbar',
   }
   return labels[visibility as keyof typeof labels] || visibility
 }

@@ -160,7 +160,7 @@ export function ExpenseForm({
 
       const amountNum = parseFloat(amount)
       if (isNaN(amountNum) || amountNum < 0) {
-        throw new Error('Bitte geben Sie einen gueltigen Betrag ein')
+        throw new Error('Bitte geben Sie einen gültigen Betrag ein')
       }
 
       // Validate entity link
@@ -168,7 +168,7 @@ export function ExpenseForm({
       const entityUnitId = linkType === 'unit' ? selectedUnitId : null
 
       if (!entityProjectId && !entityUnitId) {
-        throw new Error('Bitte waehlen Sie ein Projekt oder eine Einheit aus')
+        throw new Error('Bitte wählen Sie ein Projekt oder eine Einheit aus')
       }
 
       // Upload receipt if new file selected
@@ -375,7 +375,7 @@ export function ExpenseForm({
             required
             className="w-full h-12 px-4 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
-            <option value="">Projekt waehlen...</option>
+            <option value="">Projekt wählen...</option>
             {projects.map((project) => (
               <option key={project.id} value={project.id}>
                 {project.name}
@@ -392,7 +392,7 @@ export function ExpenseForm({
             required
             className="w-full h-12 px-4 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
-            <option value="">Einheit waehlen...</option>
+            <option value="">Einheit wählen...</option>
             {units.map((unit) => (
               <option key={unit.id} value={unit.id}>
                 {unit.name}

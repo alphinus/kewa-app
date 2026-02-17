@@ -70,7 +70,7 @@ export async function POST(request: NextRequest) {
       })
 
       const errorMessages: Record<string, string> = {
-        'Token not found': 'Link ungueltig oder nicht gefunden',
+        'Token not found': 'Link ungültig oder nicht gefunden',
         'Token already used': 'Link wurde bereits verwendet',
         'Token revoked': 'Link wurde widerrufen',
         'Token expired': 'Link ist abgelaufen'

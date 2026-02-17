@@ -84,7 +84,7 @@ export async function POST(
 
     if (existing.status !== 'under_review') {
       return NextResponse.json(
-        { error: 'Rechnung muss im Status "In Pruefung" sein, um freigegeben zu werden' },
+        { error: 'Rechnung muss im Status "In Prüfung" sein, um freigegeben zu werden' },
         { status: 400 }
       )
     }

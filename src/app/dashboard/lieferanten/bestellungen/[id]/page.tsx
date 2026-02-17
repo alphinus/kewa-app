@@ -47,11 +47,11 @@ function getStatusActionConfig(status: PurchaseOrderStatus): {
       case 'ordered':
         return { nextStatus, label: 'Als bestellt markieren', variant: 'primary' as const }
       case 'confirmed':
-        return { nextStatus, label: 'Bestaetigung erfassen', variant: 'primary' as const }
+        return { nextStatus, label: 'Bestätigung erfassen', variant: 'primary' as const }
       case 'delivered':
         return { nextStatus, label: 'Als geliefert markieren', variant: 'primary' as const }
       case 'invoiced':
-        return { nextStatus, label: 'Rechnung verknuepft', variant: 'primary' as const }
+        return { nextStatus, label: 'Rechnung verknüpft', variant: 'primary' as const }
       case 'cancelled':
         return { nextStatus, label: 'Stornieren', variant: 'secondary' as const }
       default:
@@ -142,7 +142,7 @@ export default function BestellungDetailPage({ params }: PageProps) {
 
       if (!response.ok) {
         const data = await response.json()
-        throw new Error(data.error || 'Statusaenderung fehlgeschlagen')
+        throw new Error(data.error || 'Statusänderung fehlgeschlagen')
       }
 
       const data = await response.json()
@@ -210,12 +210,12 @@ export default function BestellungDetailPage({ params }: PageProps) {
           <h2 className="text-lg font-medium text-red-800 dark:text-red-200 mb-2">
             Fehler
           </h2>
-          <p className="text-red-600 dark:text-red-400">Ungueltiges ID-Format</p>
+          <p className="text-red-600 dark:text-red-400">Ungültiges ID-Format</p>
           <Link
             href="/dashboard/lieferanten/bestellungen"
             className="inline-block mt-4 text-sm text-red-700 dark:text-red-300 underline"
           >
-            Zurueck zur Liste
+            Zurück zur Liste
           </Link>
         </div>
       </div>
@@ -246,7 +246,7 @@ export default function BestellungDetailPage({ params }: PageProps) {
             href="/dashboard/lieferanten/bestellungen"
             className="inline-block mt-4 text-sm text-red-700 dark:text-red-300 underline"
           >
-            Zurueck zur Liste
+            Zurück zur Liste
           </Link>
         </div>
       </div>
@@ -482,7 +482,7 @@ export default function BestellungDetailPage({ params }: PageProps) {
             {purchaseOrder.confirmed_at && (
               <div className="flex items-center gap-3">
                 <div className="w-2 h-2 rounded-full bg-purple-500" />
-                <span className="text-gray-600 dark:text-gray-400">Bestaetigt:</span>
+                <span className="text-gray-600 dark:text-gray-400">Bestätigt:</span>
                 <span className="font-medium text-gray-900 dark:text-gray-100">
                   {formatSwissDate(purchaseOrder.confirmed_at)}
                 </span>
@@ -538,7 +538,7 @@ export default function BestellungDetailPage({ params }: PageProps) {
               d="M10 19l-7-7m0 0l7-7m-7 7h18"
             />
           </svg>
-          Zurueck zur Liste
+          Zurück zur Liste
         </Link>
       </div>
 

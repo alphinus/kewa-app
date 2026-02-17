@@ -78,7 +78,7 @@ export default function RejectModal({
         </div>
 
         <p className="text-gray-600 text-sm mb-4">
-          Bitte waehlen Sie einen Grund fuer die Ablehnung:
+          Bitte wählen Sie einen Grund für die Ablehnung:
         </p>
 
         {/* Reason Selection */}

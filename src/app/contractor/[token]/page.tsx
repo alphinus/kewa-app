@@ -68,10 +68,10 @@ export default async function ContractorDashboard({ params }: ContractorPageProp
       {/* Welcome Header */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
         <h2 className="text-lg font-semibold text-gray-900">
-          Willkommen zurueck
+          Willkommen zurück
         </h2>
         <p className="text-sm text-gray-600 mt-1">
-          Hier sehen Sie alle Ihre Arbeitsauftraege von KEWA AG.
+          Hier sehen Sie alle Ihre Arbeitsaufträge von KEWA AG.
         </p>
       </div>
 
@@ -80,7 +80,7 @@ export default async function ContractorDashboard({ params }: ContractorPageProp
         title="Handlungsbedarf"
         count={sortedNeedsAction.length}
         variant="action"
-        emptyMessage="Keine offenen Auftraege"
+        emptyMessage="Keine offenen Aufträge"
       >
         {sortedNeedsAction.map((wo) => (
           <WorkOrderCard
@@ -98,7 +98,7 @@ export default async function ContractorDashboard({ params }: ContractorPageProp
         title="In Arbeit"
         count={grouped.inProgress.length}
         variant="progress"
-        emptyMessage="Keine laufenden Auftraege"
+        emptyMessage="Keine laufenden Aufträge"
       >
         {grouped.inProgress.map((wo) => (
           <WorkOrderCard
@@ -116,7 +116,7 @@ export default async function ContractorDashboard({ params }: ContractorPageProp
         count={grouped.completed.length}
         variant="completed"
         collapsed
-        emptyMessage="Keine abgeschlossenen Auftraege"
+        emptyMessage="Keine abgeschlossenen Aufträge"
       >
         {grouped.completed.map((wo) => (
           <WorkOrderCard
@@ -146,10 +146,10 @@ export default async function ContractorDashboard({ params }: ContractorPageProp
             />
           </svg>
           <p className="text-gray-500 text-lg">
-            Keine Arbeitsauftraege vorhanden
+            Keine Arbeitsaufträge vorhanden
           </p>
           <p className="text-gray-400 text-sm mt-1">
-            Neue Auftraege werden hier angezeigt.
+            Neue Aufträge werden hier angezeigt.
           </p>
         </div>
       )}

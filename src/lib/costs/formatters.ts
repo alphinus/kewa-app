@@ -137,7 +137,7 @@ export function translateWorkOrderStatus(status: string): string {
     counter_offer: 'Gegenofferte',
     in_progress: 'In Arbeit',
     done: 'Abgeschlossen',
-    verified: 'Geprueft',
+    verified: 'Geprüft',
     cancelled: 'Storniert',
   }
   return translations[status] ?? status
@@ -149,7 +149,7 @@ export function translateWorkOrderStatus(status: string): string {
 export function translateInvoiceStatus(status: string): string {
   const translations: Record<string, string> = {
     received: 'Erhalten',
-    under_review: 'In Pruefung',
+    under_review: 'In Prüfung',
     approved: 'Freigegeben',
     disputed: 'Beanstandet',
     partially_paid: 'Teilweise bezahlt',

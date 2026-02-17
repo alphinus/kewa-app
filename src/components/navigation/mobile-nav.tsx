@@ -22,9 +22,9 @@ interface NavItem {
 
 // Navigation items for all internal users (admin, property_manager, accounting)
 const internalNavItems: NavItem[] = [
-  { href: '/dashboard', label: 'Uebersicht', icon: LayoutDashboard },
+  { href: '/dashboard', label: 'Übersicht', icon: LayoutDashboard },
   { href: '/dashboard/liegenschaft', label: 'Liegenschaft', icon: Landmark },
-  { href: '/dashboard/gebaude', label: 'Gebaeude', icon: Building2 },
+  { href: '/dashboard/gebaude', label: 'Gebäude', icon: Building2 },
   { href: '/dashboard/aufgaben', label: 'Aufgaben', icon: CheckSquare },
   { href: '/dashboard/projekte', label: 'Projekte', icon: Archive },
   { href: '/dashboard/lieferanten', label: 'Lieferanten', icon: Truck },

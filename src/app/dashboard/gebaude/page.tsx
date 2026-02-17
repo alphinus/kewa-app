@@ -9,7 +9,7 @@ import { UnitDetailModal } from '@/components/building/UnitDetailModal'
 import type { UnitWithStats, UnitsResponse } from '@/types/database'
 
 /**
- * Gebaeudeuebersicht page
+ * Gebäudeübersicht page
  *
  * Displays:
  * - Building grid with floor-based apartment layout
@@ -80,7 +80,7 @@ export default function GebaudePage() {
     return (
       <div className="space-y-6">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-          Gebaeudeuebersicht
+          Gebäudeübersicht
         </h1>
 
         {/* Building grid skeleton */}
@@ -127,7 +127,7 @@ export default function GebaudePage() {
     return (
       <div className="space-y-6">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-          Gebaeudeuebersicht
+          Gebäudeübersicht
         </h1>
         <Card>
           <CardContent className="p-6 text-center space-y-4">
@@ -149,7 +149,7 @@ export default function GebaudePage() {
     return (
       <div className="space-y-6">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-          Gebaeudeuebersicht
+          Gebäudeübersicht
         </h1>
         <Card>
           <CardContent className="p-6 text-center">
@@ -165,7 +165,7 @@ export default function GebaudePage() {
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-        Gebaeudeuebersicht
+        Gebäudeübersicht
       </h1>
 
       {/* Building Grid - centered with max-width */}

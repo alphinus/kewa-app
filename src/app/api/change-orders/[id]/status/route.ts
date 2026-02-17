@@ -165,13 +165,13 @@ export async function PATCH(
 
       return NextResponse.json(
         {
-          error: `Ungueltiger Statusuebergang: ${getStatusLabel(currentStatus)} -> ${getStatusLabel(targetStatus)}`,
+          error: `Ungültiger Statusuebergang: ${getStatusLabel(currentStatus)} -> ${getStatusLabel(targetStatus)}`,
           current_status: currentStatus,
           target_status: targetStatus,
           valid_transitions: validNext,
           message: validNext.length > 0
-            ? `Erlaubte Uebergaenge: ${validLabels}`
-            : 'Keine weiteren Statusaenderungen moeglich',
+            ? `Erlaubte Übergaenge: ${validLabels}`
+            : 'Keine weiteren Statusänderungen möglich',
         },
         { status: 400 }
       )

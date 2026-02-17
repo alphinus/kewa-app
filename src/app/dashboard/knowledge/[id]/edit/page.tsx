@@ -181,7 +181,7 @@ export default function EditArticlePage() {
               onClick={() => router.push('/dashboard/knowledge')}
               className="mt-4 text-blue-500 underline"
             >
-              Zurueck zur Uebersicht
+              Zurück zur Übersicht
             </button>
           </CardContent>
         </Card>
@@ -195,11 +195,11 @@ export default function EditArticlePage() {
 
     switch (article.status) {
       case 'draft':
-        actions.push({ label: 'Zur Pruefung einreichen', status: 'review', variant: 'primary' })
+        actions.push({ label: 'Zur Prüfung einreichen', status: 'review', variant: 'primary' })
         break
       case 'review':
         actions.push({ label: 'Veroeffentlichen', status: 'published', variant: 'primary' })
-        actions.push({ label: 'Zurueck zu Entwurf', status: 'draft', variant: 'secondary' })
+        actions.push({ label: 'Zurück zu Entwurf', status: 'draft', variant: 'secondary' })
         break
       case 'published':
         actions.push({ label: 'Archivieren', status: 'archived', variant: 'danger' })
@@ -221,7 +221,7 @@ export default function EditArticlePage() {
             className="inline-flex items-center text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 min-h-[48px] mb-2"
           >
             <ChevronLeftIcon className="w-5 h-5 mr-1" />
-            Zurueck
+            Zurück
           </button>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
             Artikel bearbeiten
@@ -359,7 +359,7 @@ export default function EditArticlePage() {
             loading={saving}
             disabled={saving || !title.trim()}
           >
-            Aenderungen speichern
+            Änderungen speichern
           </Button>
 
           {/* Status transition buttons */}
@@ -395,7 +395,7 @@ function StatusBadge({ status }: { status: string }) {
 
   const labels = {
     draft: 'Entwurf',
-    review: 'Pruefung',
+    review: 'Prüfung',
     published: 'Veroeffentlicht',
     archived: 'Archiviert',
   }

@@ -289,7 +289,7 @@ function ChangeOrderPDFDocument({ data }: ChangeOrderPDFProps) {
         <View style={styles.header}>
           <View style={styles.headerTop}>
             <Text style={styles.logo}>KEWA AG</Text>
-            <Text style={styles.documentType}>Aenderungsauftrag</Text>
+            <Text style={styles.documentType}>Änderungsauftrag</Text>
           </View>
           <View style={styles.headerMeta}>
             <Text style={styles.headerMetaItem}>Nr: {data.co_number}</Text>
@@ -470,7 +470,7 @@ function getStatusLabel(status: string): string {
   const labels: Record<string, string> = {
     draft: 'Entwurf',
     submitted: 'Eingereicht',
-    under_review: 'In Pruefung',
+    under_review: 'In Prüfung',
     approved: 'Genehmigt',
     rejected: 'Abgelehnt',
     cancelled: 'Storniert',

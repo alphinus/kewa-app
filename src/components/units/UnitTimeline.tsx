@@ -247,7 +247,7 @@ export default function UnitTimeline({ unitId, className = '' }: UnitTimelinePro
     // Condition change
     if (metadata.old_condition && metadata.condition) {
       details.push({
-        label: 'Aenderung',
+        label: 'Änderung',
         value: `${CONDITION_LABELS[metadata.old_condition] || metadata.old_condition} -> ${CONDITION_LABELS[metadata.condition] || metadata.condition}`
       })
     } else if (metadata.condition) {
@@ -360,7 +360,7 @@ export default function UnitTimeline({ unitId, className = '' }: UnitTimelinePro
           />
         </svg>
         <p className="mt-2 text-gray-500 dark:text-gray-400 text-sm">
-          Keine Aktivitaeten fuer diese Wohnung
+          Keine Aktivitäten für diese Wohnung
         </p>
       </div>
     )

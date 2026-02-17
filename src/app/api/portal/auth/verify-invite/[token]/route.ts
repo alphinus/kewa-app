@@ -24,7 +24,7 @@ export async function GET(
     if (!inviteData) {
       return NextResponse.json({
         valid: false,
-        error: 'Token ungueltig oder abgelaufen'
+        error: 'Token ungültig oder abgelaufen'
       })
     }
 

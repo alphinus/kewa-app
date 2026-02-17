@@ -58,10 +58,10 @@ export function ProjectCostDashboard({ data }: ProjectCostDashboardProps) {
         <CardHeader className="border-b border-gray-200 dark:border-gray-800">
           <div className="flex items-center justify-between">
             <h3 className="font-semibold text-gray-900 dark:text-gray-100">
-              Arbeitsauftraege
+              Arbeitsaufträge
             </h3>
             <span className="text-sm text-gray-500 dark:text-gray-400">
-              {workOrders.length} Auftraege
+              {workOrders.length} Aufträge
             </span>
           </div>
         </CardHeader>
@@ -106,7 +106,7 @@ export function ProjectCostDashboard({ data }: ProjectCostDashboardProps) {
               <tfoot>
                 <tr className="bg-gray-50 dark:bg-gray-800/50 font-semibold">
                   <td colSpan={2} className="py-3 px-4 text-gray-900 dark:text-gray-100">
-                    Total Arbeitsauftraege
+                    Total Arbeitsaufträge
                   </td>
                   <td className="py-3 px-4 text-right text-gray-900 dark:text-gray-100">
                     {formatCHF(totals.totalOffers)}

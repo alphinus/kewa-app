@@ -124,7 +124,7 @@ function DisputeModal({
           Rechnung beanstanden
         </h3>
         <p className="text-gray-600 dark:text-gray-400 mb-4">
-          Bitte geben Sie den Grund fuer die Beanstandung an.
+          Bitte geben Sie den Grund für die Beanstandung an.
         </p>
 
         <textarea
@@ -268,7 +268,7 @@ export function InvoiceApprovalActions({
       {showApproveConfirm && (
         <ConfirmDialog
           title="Rechnung freigeben"
-          message={`Moechten Sie die Rechnung ${invoice.invoice_number} wirklich freigeben? Die Rechnung wird dann zur Zahlung bereitgestellt.`}
+          message={`Möchten Sie die Rechnung ${invoice.invoice_number} wirklich freigeben? Die Rechnung wird dann zur Zahlung bereitgestellt.`}
           confirmLabel="Freigeben"
           confirmVariant="primary"
           onConfirm={handleApprove}

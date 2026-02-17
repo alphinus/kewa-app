@@ -139,7 +139,7 @@ export default function WorkOrderCard({
     in_progress: { bg: 'bg-purple-100', text: 'text-purple-700', label: 'In Arbeit' },
     blocked: { bg: 'bg-orange-100', text: 'text-orange-700', label: 'Blockiert' },
     done: { bg: 'bg-teal-100', text: 'text-teal-700', label: 'Erledigt' },
-    inspected: { bg: 'bg-indigo-100', text: 'text-indigo-700', label: 'Geprueft' },
+    inspected: { bg: 'bg-indigo-100', text: 'text-indigo-700', label: 'Geprüft' },
     closed: { bg: 'bg-gray-100', text: 'text-gray-700', label: 'Geschlossen' },
   }
 
@@ -451,7 +451,7 @@ function CompletionSection({
               Auftrag abschliessen?
             </h3>
             <p className="text-gray-600 text-sm mb-4">
-              Moechten Sie den Auftrag als erledigt markieren? Stellen Sie sicher, dass Sie alle relevanten Fotos hochgeladen haben.
+              Möchten Sie den Auftrag als erledigt markieren? Stellen Sie sicher, dass Sie alle relevanten Fotos hochgeladen haben.
             </p>
 
             {/* Actions */}

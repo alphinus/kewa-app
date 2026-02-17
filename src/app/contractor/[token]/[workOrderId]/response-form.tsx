@@ -148,10 +148,10 @@ export default function ResponseForm({ workOrder, token }: ResponseFormProps) {
             </div>
             <div>
               <h4 className="font-semibold text-blue-900">
-                Gegenangebot wird geprueft
+                Gegenangebot wird geprüft
               </h4>
               <p className="text-sm text-blue-700 mt-1">
-                Ihr Gegenangebot wurde an KEWA gesendet und wird geprueft.
+                Ihr Gegenangebot wurde an KEWA gesendet und wird geprüft.
                 Sie werden benachrichtigt, sobald eine Entscheidung vorliegt.
               </p>
 
@@ -239,7 +239,7 @@ export default function ResponseForm({ workOrder, token }: ResponseFormProps) {
             placeholder="0.00"
           />
           <p className="text-xs text-gray-500 mt-1">
-            Leer lassen oder gleichen Betrag eingeben fuer direkte Annahme
+            Leer lassen oder gleichen Betrag eingeben für direkte Annahme
           </p>
         </div>
 

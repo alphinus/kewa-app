@@ -190,18 +190,18 @@ export default function LiegenschaftPage() {
         />
 
         <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-          Liegenschaftsuebersicht
+          Liegenschaftsübersicht
         </h1>
 
         <Card>
           <CardContent className="p-8 text-center">
             <Building2 className="h-12 w-12 mx-auto mb-4 text-gray-400" />
             <h2 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
-              Bitte waehlen Sie ein Gebaeude
+              Bitte wählen Sie ein Gebäude
             </h2>
             <p className="text-gray-500 dark:text-gray-400">
-              Die Heatmap-Ansicht zeigt die Details eines einzelnen Gebaeudes.
-              Waehlen Sie oben ein Gebaeude aus, um die Uebersicht zu sehen.
+              Die Heatmap-Ansicht zeigt die Details eines einzelnen Gebäudes.
+              Wählen Sie oben ein Gebäude aus, um die Übersicht zu sehen.
             </p>
           </CardContent>
         </Card>
@@ -221,7 +221,7 @@ export default function LiegenschaftPage() {
         />
 
         <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-          Liegenschaftsuebersicht
+          Liegenschaftsübersicht
         </h1>
 
         <div className="animate-pulse space-y-4">
@@ -248,7 +248,7 @@ export default function LiegenschaftPage() {
         />
 
         <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-          Liegenschaftsuebersicht
+          Liegenschaftsübersicht
         </h1>
 
         <Card>
@@ -271,7 +271,7 @@ export default function LiegenschaftPage() {
       />
 
       <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-        {buildingName || 'Liegenschaftsuebersicht'}
+        {buildingName || 'Liegenschaftsübersicht'}
       </h1>
 
       {/* Summary Stats */}
@@ -289,7 +289,7 @@ export default function LiegenschaftPage() {
             color="blue"
           />
           <StatCard
-            label="Raeume renoviert"
+            label="Räume renoviert"
             value={`${summary.renovatedRooms}/${summary.totalRooms}`}
           />
         </div>
@@ -300,7 +300,7 @@ export default function LiegenschaftPage() {
         {/* Building Heatmap */}
         <div className="flex-1">
           <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-            Gebaeude
+            Gebäude
           </h3>
           <div className="space-y-1">
             {FLOOR_CONFIG.map(({ label, floor, cols }) => (

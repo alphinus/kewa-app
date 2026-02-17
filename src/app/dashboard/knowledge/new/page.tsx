@@ -142,7 +142,7 @@ export default function NewArticlePage() {
             className="inline-flex items-center text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 min-h-[48px] mb-2"
           >
             <ChevronLeftIcon className="w-5 h-5 mr-1" />
-            Zurueck
+            Zurück
           </button>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
             Neuer Artikel
@@ -299,7 +299,7 @@ export default function NewArticlePage() {
                 loading={saving}
                 disabled={saving || !title.trim()}
               >
-                Zur Pruefung einreichen
+                Zur Prüfung einreichen
               </Button>
             </div>
           </div>

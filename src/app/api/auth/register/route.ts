@@ -85,7 +85,7 @@ export async function POST(request: NextRequest) {
     // Tenants must have a unit assigned
     if (roleName === 'tenant' && !unitId) {
       return NextResponse.json(
-        { error: 'Wohnungseinheit ist fuer Mieter erforderlich' },
+        { error: 'Wohnungseinheit ist für Mieter erforderlich' },
         { status: 400 }
       )
     }

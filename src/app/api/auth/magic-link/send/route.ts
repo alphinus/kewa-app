@@ -174,7 +174,7 @@ function buildMailtoLink(
     `Sie haben einen neuen Arbeitsauftrag erhalten.\n\n` +
     `Bitte klicken Sie auf den folgenden Link, um den Auftrag anzusehen:\n` +
     `${magicLinkUrl}\n\n` +
-    `Der Link ist gueltig bis: ${expiresAt.toLocaleDateString('de-CH')} ${expiresAt.toLocaleTimeString('de-CH')}\n\n` +
+    `Der Link ist gültig bis: ${expiresAt.toLocaleDateString('de-CH')} ${expiresAt.toLocaleTimeString('de-CH')}\n\n` +
     `Mit freundlichen Gruessen\n` +
     `KEWA AG`
   )

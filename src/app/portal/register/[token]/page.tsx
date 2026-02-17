@@ -40,7 +40,7 @@ export default function PortalRegisterPage({
           setDisplayName(data.displayName)
         } else {
           setIsValid(false)
-          setError(data.error || 'Token ungueltig')
+          setError(data.error || 'Token ungültig')
         }
       } catch (err) {
         console.error('Token verification error:', err)
@@ -63,7 +63,7 @@ export default function PortalRegisterPage({
     }
 
     if (password !== confirmPassword) {
-      toast.error('Passwoerter stimmen nicht ueberein')
+      toast.error('Passwoerter stimmen nicht überein')
       return
     }
 
@@ -101,7 +101,7 @@ export default function PortalRegisterPage({
       <div className="min-h-screen flex items-center justify-center px-4">
         <div className="text-center">
           <div className="inline-block animate-spin h-8 w-8 border-4 border-blue-600 border-t-transparent rounded-full mb-4" />
-          <p className="text-gray-600">Einladung wird geprueft...</p>
+          <p className="text-gray-600">Einladung wird geprüft...</p>
         </div>
       </div>
     )
@@ -114,7 +114,7 @@ export default function PortalRegisterPage({
         <div className="w-full max-w-sm">
           <div className="bg-white shadow-md rounded-lg p-6 text-center">
             <div className="text-red-500 text-5xl mb-4">⚠</div>
-            <h2 className="text-xl font-semibold text-gray-900 mb-2">Ungueltige Einladung</h2>
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">Ungültige Einladung</h2>
             <p className="text-gray-600 mb-4">{error}</p>
             <Link
               href="/portal/login"
@@ -187,7 +187,7 @@ export default function PortalRegisterPage({
           {/* Confirm Password Input */}
           <div>
             <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
-              Passwort bestaetigen
+              Passwort bestätigen
             </label>
             <input
               id="confirmPassword"

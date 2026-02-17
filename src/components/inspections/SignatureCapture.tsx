@@ -57,7 +57,7 @@ export function SignatureCapture({ onSave, onRefused }: SignatureCaptureProps) {
 
   const handleRefuse = async () => {
     if (!refusalReason.trim()) {
-      toast.warning('Bitte geben Sie einen Grund fuer die Verweigerung an')
+      toast.warning('Bitte geben Sie einen Grund für die Verweigerung an')
       return
     }
 

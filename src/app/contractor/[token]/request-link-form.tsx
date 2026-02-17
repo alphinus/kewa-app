@@ -177,7 +177,7 @@ export default function RequestLinkForm({ error }: RequestLinkFormProps) {
         </form>
 
         <p className="text-xs text-gray-500 mt-4">
-          KEWA AG wird Ihren Antrag pruefen und Ihnen einen neuen Zugangslink
+          KEWA AG wird Ihren Antrag prüfen und Ihnen einen neuen Zugangslink
           zusenden.
         </p>
       </div>

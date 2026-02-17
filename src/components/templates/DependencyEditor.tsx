@@ -120,7 +120,7 @@ export function DependencyEditor({
   // Handle add
   const handleAdd = async () => {
     if (!predecessorId || !successorId) {
-      setError('Bitte waehlen Sie Vorgaenger und Nachfolger')
+      setError('Bitte wählen Sie Vorgaenger und Nachfolger')
       return
     }
 
@@ -130,7 +130,7 @@ export function DependencyEditor({
     }
 
     if (wouldCreateCycle) {
-      setError('Diese Abhaengigkeit wuerde einen Zyklus erzeugen')
+      setError('Diese Abhängigkeit wuerde einen Zyklus erzeugen')
       return
     }
 
@@ -141,7 +141,7 @@ export function DependencyEditor({
       await onAddDependency(predecessorId, successorId, dependencyType, lagDays)
       resetForm()
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Fehler beim Hinzufuegen')
+      setError(err instanceof Error ? err.message : 'Fehler beim Hinzufügen')
     } finally {
       setLoading(false)
     }
@@ -149,13 +149,13 @@ export function DependencyEditor({
 
   // Handle delete
   const handleDelete = async (depId: string) => {
-    if (!confirm('Abhaengigkeit loeschen?')) return
+    if (!confirm('Abhängigkeit löschen?')) return
 
     setLoading(true)
     try {
       await onDeleteDependency(depId)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Fehler beim Loeschen')
+      setError(err instanceof Error ? err.message : 'Fehler beim Löschen')
     } finally {
       setLoading(false)
     }
@@ -177,11 +177,11 @@ export function DependencyEditor({
           disabled={loading || allTasks.length < 2}
           className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 min-h-[44px]"
         >
-          + Abhaengigkeit hinzufuegen
+          + Abhängigkeit hinzufügen
         </button>
       ) : (
         <div className="p-4 bg-gray-50 rounded-lg border space-y-4">
-          <h4 className="font-medium text-gray-900">Neue Abhaengigkeit</h4>
+          <h4 className="font-medium text-gray-900">Neue Abhängigkeit</h4>
 
           <div className="grid grid-cols-2 gap-4">
             {/* Predecessor */}
@@ -194,7 +194,7 @@ export function DependencyEditor({
                 onChange={e => setPredecessorId(e.target.value)}
                 className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               >
-                <option value="">-- Aufgabe waehlen --</option>
+                <option value="">-- Aufgabe wählen --</option>
                 {allTasks.map(task => (
                   <option key={task.id} value={task.id} disabled={task.id === successorId}>
                     {task.wbs_code} - {task.name}
@@ -213,7 +213,7 @@ export function DependencyEditor({
                 onChange={e => setSuccessorId(e.target.value)}
                 className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               >
-                <option value="">-- Aufgabe waehlen --</option>
+                <option value="">-- Aufgabe wählen --</option>
                 {allTasks.map(task => (
                   <option key={task.id} value={task.id} disabled={task.id === predecessorId}>
                     {task.wbs_code} - {task.name}
@@ -227,7 +227,7 @@ export function DependencyEditor({
             {/* Dependency Type */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Abhaengigkeitstyp
+                Abhängigkeitstyp
               </label>
               <select
                 value={dependencyType}
@@ -263,7 +263,7 @@ export function DependencyEditor({
           {/* Circular dependency warning */}
           {wouldCreateCycle && (
             <div className="p-3 bg-yellow-50 border border-yellow-200 text-yellow-800 rounded-lg text-sm">
-              <strong>Warnung:</strong> Diese Abhaengigkeit wuerde einen Zyklus erzeugen und kann nicht hinzugefuegt werden.
+              <strong>Warnung:</strong> Diese Abhängigkeit wuerde einen Zyklus erzeugen und kann nicht hinzugefuegt werden.
             </div>
           )}
 
@@ -280,7 +280,7 @@ export function DependencyEditor({
               disabled={loading || !predecessorId || !successorId || wouldCreateCycle}
               className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 min-h-[44px]"
             >
-              {loading ? 'Speichern...' : 'Hinzufuegen'}
+              {loading ? 'Speichern...' : 'Hinzufügen'}
             </button>
           </div>
         </div>
@@ -302,7 +302,7 @@ export function DependencyEditor({
             {template.dependencies.length === 0 ? (
               <tr>
                 <td colSpan={5} className="px-4 py-6 text-center text-gray-500 text-sm">
-                  Keine Abhaengigkeiten definiert
+                  Keine Abhängigkeiten definiert
                 </td>
               </tr>
             ) : (
@@ -356,7 +356,7 @@ export function DependencyEditor({
                         onClick={() => handleDelete(dep.id)}
                         disabled={loading}
                         className="p-1.5 text-red-600 hover:bg-red-50 rounded disabled:opacity-50"
-                        title="Loeschen"
+                        title="Löschen"
                       >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />

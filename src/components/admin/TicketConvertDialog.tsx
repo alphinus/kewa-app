@@ -110,11 +110,11 @@ export function TicketConvertDialog({
   async function handleSubmit() {
     // Validate required fields
     if (!workOrderType) {
-      setError('Bitte waehlen Sie einen Arbeitsauftragstyp aus')
+      setError('Bitte wählen Sie einen Arbeitsauftragstyp aus')
       return
     }
     if (!partnerId) {
-      setError('Bitte waehlen Sie einen Partner aus')
+      setError('Bitte wählen Sie einen Partner aus')
       return
     }
 
@@ -154,7 +154,7 @@ export function TicketConvertDialog({
             </label>
             <Select value={workOrderType} onValueChange={setWorkOrderType}>
               <SelectTrigger>
-                <SelectValue placeholder="Typ auswaehlen..." />
+                <SelectValue placeholder="Typ auswählen..." />
               </SelectTrigger>
               <SelectContent>
                 {WORK_ORDER_TYPES.map((type) => (
@@ -179,7 +179,7 @@ export function TicketConvertDialog({
               <SelectTrigger>
                 <SelectValue
                   placeholder={
-                    loadingPartners ? 'Laden...' : 'Partner auswaehlen...'
+                    loadingPartners ? 'Laden...' : 'Partner auswählen...'
                   }
                 />
               </SelectTrigger>
@@ -191,7 +191,7 @@ export function TicketConvertDialog({
                 ))}
                 {partners.length === 0 && !loadingPartners && (
                   <SelectItem value="" disabled>
-                    Keine Partner verfuegbar
+                    Keine Partner verfügbar
                   </SelectItem>
                 )}
               </SelectContent>
@@ -203,7 +203,7 @@ export function TicketConvertDialog({
             label="Beschreibung"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            placeholder="Beschreibung fuer den Arbeitsauftrag..."
+            placeholder="Beschreibung für den Arbeitsauftrag..."
             rows={4}
           />
 

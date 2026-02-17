@@ -95,7 +95,7 @@ export function SendPortalDialog({
             </label>
             <p className="text-sm text-gray-500 mb-4">
               Der Handwerker erhaelt einen Link zum Ansehen und Bestaetigen des
-              Abnahmeprotokolls. Der Link ist 7 Tage gueltig.
+              Abnahmeprotokolls. Der Link ist 7 Tage gültig.
             </p>
             {error && (
               <p className="text-sm text-red-600 mb-4">{error}</p>

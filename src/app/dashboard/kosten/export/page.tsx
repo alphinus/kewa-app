@@ -32,7 +32,7 @@ export default async function KostenExportPage() {
           Export
         </h1>
         <p className="text-gray-600 dark:text-gray-400 mt-1">
-          Exportieren Sie Kostendaten als CSV fuer Excel und Buchhaltung
+          Exportieren Sie Kostendaten als CSV für Excel und Buchhaltung
         </p>
       </div>
 
@@ -57,8 +57,8 @@ export default async function KostenExportPage() {
               </h3>
               <ul className="list-disc list-inside space-y-1 ml-2">
                 <li>Semikolon (;) als Trennzeichen</li>
-                <li>UTF-8 Kodierung mit BOM fuer Excel</li>
-                <li>Anpassungsfaehig fuer Schweizer/Deutsche Buchhaltung</li>
+                <li>UTF-8 Kodierung mit BOM für Excel</li>
+                <li>Anpassungsfähig für Schweizer/Deutsche Buchhaltung</li>
               </ul>
             </div>
 
@@ -140,8 +140,8 @@ export default async function KostenExportPage() {
               </h3>
               <p className="text-blue-700 dark:text-blue-400 text-xs">
                 Die Datei kann direkt in Microsoft Excel geoeffnet werden.
-                Das Format ist fuer Schweizer/Deutsche Regionaleinstellungen optimiert.
-                Falls Umlaute nicht korrekt angezeigt werden, waehlen Sie beim Import
+                Das Format ist für Schweizer/Deutsche Regionaleinstellungen optimiert.
+                Falls Umlaute nicht korrekt angezeigt werden, wählen Sie beim Import
                 UTF-8 als Zeichenkodierung.
               </p>
             </div>

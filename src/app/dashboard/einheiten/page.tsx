@@ -142,11 +142,11 @@ export default function EinheitenPage() {
           <CardContent className="p-8 text-center">
             <Building2 className="h-12 w-12 mx-auto mb-4 text-gray-400" />
             <h2 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
-              Bitte waehlen Sie eine Liegenschaft aus
+              Bitte wählen Sie eine Liegenschaft aus
             </h2>
             <p className="text-gray-500 dark:text-gray-400">
-              Die Einheiten-Ansicht zeigt die Wohnungen eines einzelnen Gebaeudes.
-              Waehlen Sie oben eine Liegenschaft aus, um die Einheiten zu sehen.
+              Die Einheiten-Ansicht zeigt die Wohnungen eines einzelnen Gebäudes.
+              Wählen Sie oben eine Liegenschaft aus, um die Einheiten zu sehen.
             </p>
           </CardContent>
         </Card>

@@ -52,7 +52,7 @@ export function PhotoGallery({ photos, changeOrderId, onDelete }: PhotoGalleryPr
 
       onDelete?.(photoId)
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Loeschen fehlgeschlagen')
+      toast.error(err instanceof Error ? err.message : 'Löschen fehlgeschlagen')
     } finally {
       setDeleting(null)
     }

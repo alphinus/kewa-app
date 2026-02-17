@@ -4,17 +4,17 @@
 
 See: .planning/PROJECT.md (updated 2026-02-04)
 
-**Core value:** KEWA AG hat volle Transparenz und Kontrolle uber alle Renovationen -- mit standardisierten Workflows, externer Handwerker-Integration, Kostenuebersicht und automatischer Zustandshistorie.
-**Current focus:** Milestone v3.1 Production Hardening — Phase 33 Complete
+**Core value:** KEWA AG hat volle Transparenz und Kontrolle über alle Renovationen -- mit standardisierten Workflows, externer Handwerker-Integration, Kostenübersicht und automatischer Zustandshistorie.
+**Current focus:** Milestone v3.1 Production Hardening — Phase 34 Complete — MILESTONE COMPLETE
 
 ## Current Position
 
-Phase: 33 of 34 (Bundle & Rendering Optimization)
+Phase: 34 of 34 (German Umlaut Correction)
 Plan: 2 of 2 complete
-Status: Phase complete
-Last activity: 2026-02-06 — Completed 33-02-PLAN.md (Performance Verification)
+Status: Phase complete — Milestone v3.1 complete
+Last activity: 2026-02-17 — Completed 34-02-PLAN.md (Umlaut Corrections)
 
-Progress: [████████░░] 80% (4/5 phases v3.1)
+Progress: [██████████] 100% (5/5 phases v3.1)
 
 ## Milestones Completed
 
@@ -23,17 +23,19 @@ Progress: [████████░░] 80% (4/5 phases v3.1)
 - v2.1 Master Data Management (2026-01-25) — Phases 13-17
 - v2.2 Extensions (2026-01-29) — Phases 18-24
 - v3.0 Tenant & Offline (2026-02-03) — Phases 25-29
+- v3.1 Production Hardening (2026-02-17) — Phases 30-34
 
-**Total:** 33 phases, 126 plans shipped
+**Total:** 34 phases, 130 plans shipped
 
 ## Performance Metrics
 
-**v3.1 Milestone (in progress):**
+**v3.1 Milestone (complete):**
 - Phase 30: 5 plans, ~30min total
 - Phase 31: 3 plans, ~38min total
 - Phase 32: 2 plans, ~17min total
 - Phase 33: 2 plans, ~30min total
-- Commits: 28
+- Phase 34: 2 plans, ~20min total
+- Commits: 28+
 
 **v3.0 Milestone:**
 - Total plans completed: 17
@@ -74,6 +76,13 @@ Key v3.1 decisions (Phase 33):
 - Accept 18.7% LCP improvement as success (close to 20% target)
 - Bundle reduction of 629KB exceeds 100KB requirement by 6x
 
+Key v3.1 decisions (Phase 34):
+- Dictionary-based replacement over regex (avoid false positives)
+- Preserve URL route segments without umlauts (Next.js file-system routing)
+- Preserve function/variable names without umlauts (code identifiers)
+- chardet with byte-level ASCII check (avoid false positives on pure-ASCII files)
+- New SQL migration for database text (don't modify applied migrations)
+
 ### v3.1 Roadmap Structure
 
 **5 phases derived from 19 requirements:**
@@ -81,24 +90,9 @@ Key v3.1 decisions (Phase 33):
 - Phase 31: Performance Profiling & Baseline (PERF-01, PERF-02) — COMPLETE
 - Phase 32: Database Optimization (PERF-03, PERF-04) — COMPLETE
 - Phase 33: Bundle & Rendering Optimization (PERF-05, PERF-06, PERF-07) — COMPLETE
-- Phase 34: German Umlaut Correction (I18N-01, I18N-02, I18N-03)
+- Phase 34: German Umlaut Correction (I18N-01, I18N-02, I18N-03) — COMPLETE
 
-**Coverage:** 16/19 requirements complete (84%)
-
-**Execution order:** 34
-
-### Performance Metrics (Phase 33 Complete)
-
-Login page Core Web Vitals (after optimization):
-- Performance: 86 (was 83) - IMPROVED
-- LCP: 2605ms (was 3204ms) - 18.7% IMPROVEMENT
-- TBT: 446ms (was 338ms) - INCREASED (lazy load overhead)
-- CLS: 0.000 (unchanged) - PASS
-
-Bundle optimization:
-- Recharts: 337KB now lazy loaded
-- TipTap/ProseMirror: 292KB now lazy loaded
-- Total reduction from initial load: 629KB
+**Coverage:** 19/19 requirements complete (100%)
 
 ### User Setup Required
 
@@ -113,7 +107,7 @@ Bundle optimization:
 ### Blockers/Concerns
 
 **Environment setup needed for production:**
-- Upstash Redis credentials for rate limiting (NEW - Phase 30)
+- Upstash Redis credentials for rate limiting (Phase 30)
 - Resend API key required for email notifications (RESEND_API_KEY)
 - Push notification VAPID keys in environment secrets
 
@@ -125,9 +119,9 @@ From v3.0-MILESTONE-AUDIT.md:
 
 ## Session Continuity
 
-Last session: 2026-02-06
-Stopped at: Completed 33-02-PLAN.md (Performance Verification)
+Last session: 2026-02-17
+Stopped at: Completed Phase 34 — v3.1 milestone complete
 Resume file: None
 
 ---
-*Phase 33 complete. Next: Phase 34 (German Umlaut Correction)*
+*v3.1 Production Hardening milestone complete. All 19 requirements shipped.*

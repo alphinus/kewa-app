@@ -94,7 +94,7 @@ export default async function KostenOverviewPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-            Kostenuebersicht
+            Kostenübersicht
           </h1>
           <p className="text-gray-600 dark:text-gray-400 mt-1">
             Finanzen und Kosten aller Projekte
@@ -275,7 +275,7 @@ export default async function KostenOverviewPage() {
                   Rechnungen verwalten
                 </div>
                 <div className="text-sm text-gray-500 dark:text-gray-400">
-                  Pruefen, freigeben und bezahlen
+                  Prüfen, freigeben und bezahlen
                 </div>
               </div>
             </CardContent>

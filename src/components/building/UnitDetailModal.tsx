@@ -29,7 +29,7 @@ function getUnitTypeLabel(type: string): string {
     case 'common_area':
       return 'Gemeinschaftsraum'
     case 'building':
-      return 'Gebaeude'
+      return 'Gebäude'
     default:
       return type
   }
@@ -279,7 +279,7 @@ export function UnitDetailModal({
                     className="w-5 h-5 rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500 cursor-pointer"
                   />
                   <span className="text-sm text-gray-700 dark:text-gray-300">
-                    Sichtbar fuer Imeri
+                    Sichtbar für Imeri
                   </span>
                 </label>
               </div>

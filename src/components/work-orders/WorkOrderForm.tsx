@@ -190,10 +190,10 @@ export function WorkOrderForm({
     const newErrors: Record<string, string> = {}
 
     if (!projectId && !taskId) {
-      newErrors.project = 'Bitte waehlen Sie ein Projekt oder eine Aufgabe'
+      newErrors.project = 'Bitte wählen Sie ein Projekt oder eine Aufgabe'
     }
     if (!partnerId) {
-      newErrors.partner = 'Bitte waehlen Sie einen Auftragnehmer'
+      newErrors.partner = 'Bitte wählen Sie einen Auftragnehmer'
     }
     if (!title.trim()) {
       newErrors.title = 'Bitte geben Sie einen Titel ein'
@@ -202,7 +202,7 @@ export function WorkOrderForm({
       newErrors.scopeOfWork = 'Bitte beschreiben Sie den Arbeitsumfang'
     }
     if (estimatedCost && isNaN(parseFloat(estimatedCost))) {
-      newErrors.estimatedCost = 'Bitte geben Sie eine gueltige Zahl ein'
+      newErrors.estimatedCost = 'Bitte geben Sie eine gültige Zahl ein'
     }
 
     setErrors(newErrors)
@@ -323,7 +323,7 @@ export function WorkOrderForm({
                 className="w-full h-12 min-h-[48px] px-4 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 disabled={mode === 'edit'}
               >
-                <option value="">Projekt waehlen...</option>
+                <option value="">Projekt wählen...</option>
                 {projects.map((project) => (
                   <option key={project.id} value={project.id}>
                     {project.name}
@@ -375,7 +375,7 @@ export function WorkOrderForm({
                   errors.partner ? 'border-red-500' : 'border-gray-300 dark:border-gray-700'
                 } bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500`}
               >
-                <option value="">Auftragnehmer waehlen...</option>
+                <option value="">Auftragnehmer wählen...</option>
                 {filteredPartners.map((partner) => (
                   <option key={partner.id} value={partner.id}>
                     {partner.company_name}
@@ -502,12 +502,12 @@ export function WorkOrderForm({
               <textarea
                 value={internalNotes}
                 onChange={(e) => setInternalNotes(e.target.value)}
-                placeholder="Notizen fuer interne Verwendung (nicht sichtbar fuer Auftragnehmer)..."
+                placeholder="Notizen für interne Verwendung (nicht sichtbar für Auftragnehmer)..."
                 rows={2}
                 className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
               />
               <p className="mt-1 text-xs text-gray-500">
-                Diese Notizen sind nur fuer KEWA sichtbar
+                Diese Notizen sind nur für KEWA sichtbar
               </p>
             </div>
           </CardContent>

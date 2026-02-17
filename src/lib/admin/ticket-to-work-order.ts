@@ -98,7 +98,7 @@ export async function convertTicketToWorkOrder(
 
   // Step 3: Verify ticket status allows conversion
   if (!['offen', 'in_bearbeitung'].includes(ticket.status)) {
-    throw new Error('Nur offene oder in Bearbeitung befindliche Tickets koennen umgewandelt werden')
+    throw new Error('Nur offene oder in Bearbeitung befindliche Tickets können umgewandelt werden')
   }
 
   // Get a room ID from the unit (first room or null)

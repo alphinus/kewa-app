@@ -79,7 +79,7 @@ export function InventoryLevelCard({ level, propertyName }: InventoryLevelCardPr
           {level.tank_capacity && (
             <div className="flex justify-between items-baseline">
               <span className="text-sm text-gray-600 dark:text-gray-400">
-                Kapazitaet:
+                Kapazität:
               </span>
               <span className="text-sm">{level.tank_capacity.toFixed(2)} t</span>
             </div>

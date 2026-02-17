@@ -145,7 +145,7 @@ function TaskCard({ task, onClick, onDelete, buildingName }: TaskCardProps) {
                     : 'text-gray-500 dark:text-gray-400'
                 }`}
               >
-                {overdue ? 'Ueberfaellig: ' : 'Faellig: '}
+                {overdue ? 'Überfaellig: ' : 'Faellig: '}
                 {dueDate}
               </p>
             )}
@@ -175,7 +175,7 @@ function TaskCard({ task, onClick, onDelete, buildingName }: TaskCardProps) {
                 onDelete()
               }}
               className="p-2 text-gray-400 hover:text-red-500 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
-              aria-label="Aufgabe loeschen"
+              aria-label="Aufgabe löschen"
             >
               <svg
                 className="w-5 h-5"

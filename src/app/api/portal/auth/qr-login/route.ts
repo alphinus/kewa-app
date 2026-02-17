@@ -51,13 +51,13 @@ export async function POST(request: NextRequest) {
 
       if (payload.type !== 'qr_login') {
         return NextResponse.json(
-          { error: 'Ungueltiger Token-Typ' },
+          { error: 'Ungültiger Token-Typ' },
           { status: 400 }
         )
       }
     } catch {
       return NextResponse.json(
-        { error: 'Token ungueltig oder abgelaufen' },
+        { error: 'Token ungültig oder abgelaufen' },
         { status: 401 }
       )
     }

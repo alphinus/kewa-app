@@ -232,7 +232,7 @@ export interface SessionResponse {
 // Template categorization
 export type TemplateCategory =
   | 'complete_renovation'    // Komplett-Renovation
-  | 'room_specific'          // Raum-spezifisch (Bad, Kueche, etc.)
+  | 'room_specific'          // Raum-spezifisch (Bad, Küche, etc.)
   | 'trade_specific'         // Gewerk-spezifisch (Malerarbeiten, etc.)
 
 // Template scope

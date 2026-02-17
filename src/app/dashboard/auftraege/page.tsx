@@ -176,10 +176,10 @@ export default async function AuftraegePage({ searchParams }: PageProps) {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-            Arbeitsauftraege
+            Arbeitsaufträge
           </h1>
           <p className="text-gray-600 dark:text-gray-400 mt-1">
-            {orders.length} Auftraege insgesamt
+            {orders.length} Aufträge insgesamt
           </p>
         </div>
 
@@ -229,10 +229,10 @@ export default async function AuftraegePage({ searchParams }: PageProps) {
             <FileText className="h-12 w-12" />
           </div>
           <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-1">
-            Keine Arbeitsauftraege
+            Keine Arbeitsaufträge
           </h3>
           <p className="text-gray-600 dark:text-gray-400 mb-4 max-w-sm">
-            Erstellen Sie Ihren ersten Arbeitsauftrag fuer einen externen Handwerker.
+            Erstellen Sie Ihren ersten Arbeitsauftrag für einen externen Handwerker.
           </p>
           <Link href="/dashboard/auftraege/neu">
             <Button>
@@ -304,7 +304,7 @@ export default async function AuftraegePage({ searchParams }: PageProps) {
                         <span className={isOverdue ? 'text-red-600 dark:text-red-400 font-medium' : 'text-gray-600 dark:text-gray-400'}>
                           {formatDate(order.acceptance_deadline)}
                           {isOverdue && (
-                            <span className="ml-1 text-xs">(ueberfaellig)</span>
+                            <span className="ml-1 text-xs">(überfaellig)</span>
                           )}
                         </span>
                       </td>
@@ -350,7 +350,7 @@ export default async function AuftraegePage({ searchParams }: PageProps) {
                   <div className="flex items-center gap-4 mt-2 text-sm text-gray-500 dark:text-gray-400">
                     <span className={isOverdue ? 'text-red-600 dark:text-red-400' : ''}>
                       {formatDate(order.acceptance_deadline)}
-                      {isOverdue && ' (ueberfaellig)'}
+                      {isOverdue && ' (überfaellig)'}
                     </span>
                     <span>{formatCost(order.estimated_cost)}</span>
                   </div>
@@ -380,7 +380,7 @@ export default async function AuftraegePage({ searchParams }: PageProps) {
               d="M10 19l-7-7m0 0l7-7m-7 7h18"
             />
           </svg>
-          Zurueck zum Dashboard
+          Zurück zum Dashboard
         </Link>
       </div>
     </div>

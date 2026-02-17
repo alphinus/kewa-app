@@ -229,7 +229,7 @@ async function handleEmailAuth(
     })
 
     return NextResponse.json(
-      { error: 'Ungueltige Anmeldedaten' },
+      { error: 'Ungültige Anmeldedaten' },
       { status: 401 }
     )
   }
@@ -245,7 +245,7 @@ async function handleEmailAuth(
     })
 
     return NextResponse.json(
-      { error: 'Passwort nicht gesetzt. Bitte Passwort zuruecksetzen.' },
+      { error: 'Passwort nicht gesetzt. Bitte Passwort zurücksetzen.' },
       { status: 401 }
     )
   }
@@ -261,7 +261,7 @@ async function handleEmailAuth(
     })
 
     return NextResponse.json(
-      { error: 'Ungueltige Anmeldedaten' },
+      { error: 'Ungültige Anmeldedaten' },
       { status: 401 }
     )
   }

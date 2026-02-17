@@ -18,7 +18,7 @@ import type { InvoiceWithRelations } from '@/lib/costs/invoice-queries'
 const STATUS_OPTIONS = [
   { value: '', label: 'Alle Status' },
   { value: 'received', label: 'Erhalten' },
-  { value: 'under_review', label: 'In Pruefung' },
+  { value: 'under_review', label: 'In Prüfung' },
   { value: 'approved', label: 'Freigegeben' },
   { value: 'disputed', label: 'Beanstandet' },
   { value: 'paid', label: 'Bezahlt' }
@@ -328,7 +328,7 @@ export function InvoiceList({
                 disabled={offset === 0}
                 className="px-3 py-1 text-sm rounded border border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
               >
-                Zurueck
+                Zurück
               </button>
               <span className="px-3 py-1 text-sm text-gray-700">
                 Seite {currentPage} von {totalPages}

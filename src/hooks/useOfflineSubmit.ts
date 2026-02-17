@@ -67,14 +67,14 @@ export function useOfflineSubmit() {
       })
 
       toast.info(
-        'Aenderung wird synchronisiert, sobald die Verbindung wiederhergestellt ist',
+        'Änderung wird synchronisiert, sobald die Verbindung wiederhergestellt ist',
         { duration: 4000 }
       )
 
       return { queued: true, id }
     } catch (error) {
       console.error('Failed to enqueue sync item:', error)
-      toast.error('Fehler beim Speichern der Aenderung')
+      toast.error('Fehler beim Speichern der Änderung')
       throw error
     }
   }

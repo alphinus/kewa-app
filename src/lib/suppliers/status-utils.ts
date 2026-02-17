@@ -30,7 +30,7 @@ export function getPurchaseOrderStatusLabel(status: PurchaseOrderStatus): string
   const labels: Record<PurchaseOrderStatus, string> = {
     draft: 'Entwurf',
     ordered: 'Bestellt',
-    confirmed: 'Bestaetigt',
+    confirmed: 'Bestätigt',
     delivered: 'Geliefert',
     invoiced: 'Verrechnet',
     cancelled: 'Storniert',
@@ -113,7 +113,7 @@ export const PURCHASE_ORDER_STATUS_OPTIONS: readonly PurchaseOrderStatusOption[]
   { value: '', label: 'Alle Status' },
   { value: 'draft', label: 'Entwurf' },
   { value: 'ordered', label: 'Bestellt' },
-  { value: 'confirmed', label: 'Bestaetigt' },
+  { value: 'confirmed', label: 'Bestätigt' },
   { value: 'delivered', label: 'Geliefert' },
   { value: 'invoiced', label: 'Verrechnet' },
   { value: 'cancelled', label: 'Storniert' },

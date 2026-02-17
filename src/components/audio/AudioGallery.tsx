@@ -31,7 +31,7 @@ function getAudioTypeBadge(audioType: AudioType): { label: string; className: st
   switch (audioType) {
     case 'explanation':
       return {
-        label: 'Erklaerung',
+        label: 'Erklärung',
         className: 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300',
       }
     case 'emergency':

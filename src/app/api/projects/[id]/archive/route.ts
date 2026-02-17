@@ -79,14 +79,14 @@ export async function POST(
       if (tasksError) {
         console.error('Error checking tasks:', tasksError)
         return NextResponse.json(
-          { error: 'Fehler beim Pruefen der Aufgaben' },
+          { error: 'Fehler beim Prüfen der Aufgaben' },
           { status: 500 }
         )
       }
 
       if (openTasks && openTasks.length > 0) {
         return NextResponse.json(
-          { error: 'Alle Aufgaben muessen erledigt sein' },
+          { error: 'Alle Aufgaben müssen erledigt sein' },
           { status: 400 }
         )
       }

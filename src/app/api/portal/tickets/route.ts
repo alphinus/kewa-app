@@ -66,7 +66,7 @@ export async function POST(request: NextRequest) {
       /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
     if (!uuidPattern.test(category_id)) {
       return NextResponse.json(
-        { error: 'Ungueltige Kategorie-ID' },
+        { error: 'Ungültige Kategorie-ID' },
         { status: 400 }
       )
     }
@@ -90,7 +90,7 @@ export async function POST(request: NextRequest) {
     // Validate urgency if provided
     if (urgency && !['notfall', 'dringend', 'normal'].includes(urgency)) {
       return NextResponse.json(
-        { error: 'Ungueltige Dringlichkeit' },
+        { error: 'Ungültige Dringlichkeit' },
         { status: 400 }
       )
     }

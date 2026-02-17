@@ -100,7 +100,7 @@ export default async function ContractorArticlePage({
             d="M10 19l-7-7m0 0l7-7m-7 7h18"
           />
         </svg>
-        Zurueck zur Wissensdatenbank
+        Zurück zur Wissensdatenbank
       </Link>
 
       {/* Article card */}
@@ -201,7 +201,7 @@ export default async function ContractorArticlePage({
                       <p className="font-medium text-gray-900 truncate">
                         {attachment.file_name}
                       </p>
-                      <p className="text-xs text-gray-400">Nicht verfuegbar</p>
+                      <p className="text-xs text-gray-400">Nicht verfügbar</p>
                     </div>
                   </div>
                 )}
@@ -225,7 +225,7 @@ export default async function ContractorArticlePage({
               d="M10 19l-7-7m0 0l7-7m-7 7h18"
             />
           </svg>
-          Zurueck zu meinen Auftraegen
+          Zurück zu meinen Aufträgen
         </Link>
       </div>
     </div>

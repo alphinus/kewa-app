@@ -104,7 +104,7 @@ export function PurchaseOrderForm({
   // Validate form
   const validateForm = useCallback((): string | null => {
     if (!supplierId) {
-      return 'Bitte waehlen Sie einen Lieferanten aus'
+      return 'Bitte wählen Sie einen Lieferanten aus'
     }
 
     if (lineItems.length === 0) {
@@ -115,12 +115,12 @@ export function PurchaseOrderForm({
       (item) => !item.description.trim()
     )
     if (hasEmptyDescription) {
-      return 'Alle Positionen muessen eine Beschreibung haben'
+      return 'Alle Positionen müssen eine Beschreibung haben'
     }
 
     const hasInvalidQuantity = lineItems.some((item) => item.quantity <= 0)
     if (hasInvalidQuantity) {
-      return 'Alle Positionen muessen eine gueltige Menge haben'
+      return 'Alle Positionen müssen eine gültige Menge haben'
     }
 
     const hasInvalidPrice = lineItems.some((item) => item.unit_price < 0)
@@ -181,7 +181,7 @@ export function PurchaseOrderForm({
             Neue Bestellung
           </h2>
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-            Erstellen Sie eine neue Bestellung fuer einen Lieferanten
+            Erstellen Sie eine neue Bestellung für einen Lieferanten
           </p>
         </CardHeader>
 
@@ -207,7 +207,7 @@ export function PurchaseOrderForm({
                 required
                 className="w-full h-12 px-4 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
-                <option value="">Lieferant waehlen...</option>
+                <option value="">Lieferant wählen...</option>
                 {suppliers.map((supplier) => (
                   <option key={supplier.id} value={supplier.id}>
                     {supplier.company_name}

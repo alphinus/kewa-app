@@ -52,7 +52,7 @@ export function AttachmentList({
 
   // Handle delete
   const handleDelete = async (attachmentId: string) => {
-    if (!confirm('Anhang wirklich loeschen?')) return
+    if (!confirm('Anhang wirklich löschen?')) return
 
     try {
       setDeletingId(attachmentId)
@@ -63,13 +63,13 @@ export function AttachmentList({
 
       if (!res.ok) {
         const data = await res.json()
-        throw new Error(data.error || 'Loeschen fehlgeschlagen')
+        throw new Error(data.error || 'Löschen fehlgeschlagen')
       }
 
       // Remove from local state
       setAttachments(prev => prev.filter(a => a.id !== attachmentId))
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Loeschen fehlgeschlagen')
+      toast.error(err instanceof Error ? err.message : 'Löschen fehlgeschlagen')
     } finally {
       setDeletingId(null)
     }
@@ -191,7 +191,7 @@ function AttachmentItem({ attachment, canDelete, onDelete, deleting }: Attachmen
             onClick={onDelete}
             disabled={deleting}
             className="p-2 text-gray-500 hover:text-red-600 dark:hover:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700"
-            title="Loeschen"
+            title="Löschen"
           >
             {deleting ? (
               <LoadingSpinner className="w-5 h-5" />

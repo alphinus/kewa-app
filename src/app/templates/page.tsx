@@ -90,13 +90,13 @@ export default function TemplatesPage() {
       await deleteTemplate(id)
       setTemplates(templates.filter(t => t.id !== id))
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Fehler beim Loeschen')
+      setError(err instanceof Error ? err.message : 'Fehler beim Löschen')
     }
   }
 
   async function handleDuplicate(id: string) {
     const template = templates.find(t => t.id === id)
-    const newName = prompt('Name fuer die Kopie:', template ? `${template.name} (Kopie)` : 'Kopie')
+    const newName = prompt('Name für die Kopie:', template ? `${template.name} (Kopie)` : 'Kopie')
     if (!newName) return
 
     try {
@@ -132,7 +132,7 @@ export default function TemplatesPage() {
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Template-Bibliothek</h1>
             <p className="text-gray-600 text-sm mt-1">
-              Vorlagen fuer Renovationsprojekte mit WBS-Struktur
+              Vorlagen für Renovationsprojekte mit WBS-Struktur
             </p>
           </div>
           {isAdmin && (

@@ -100,13 +100,13 @@ export function PaymentModal({ invoice, onClose, onSuccess }: PaymentModalProps)
     // Validate amount
     const parsedAmount = parseFloat(amount)
     if (isNaN(parsedAmount)) {
-      setError('Bitte geben Sie einen gueltigen Betrag ein')
+      setError('Bitte geben Sie einen gültigen Betrag ein')
       return
     }
 
     const validation = validatePaymentAmount(parsedAmount, outstanding)
     if (!validation.valid) {
-      setError(validation.error ?? 'Ungueltiger Betrag')
+      setError(validation.error ?? 'Ungültiger Betrag')
       return
     }
 

@@ -107,8 +107,8 @@ export default function CounterOfferForm({
           Gegenangebot erstellen
         </h3>
         <p className="text-sm text-gray-600 mt-1">
-          Sie koennen einen anderen Preis oder andere Termine vorschlagen.
-          KEWA wird Ihr Angebot pruefen.
+          Sie können einen anderen Preis oder andere Termine vorschlagen.
+          KEWA wird Ihr Angebot prüfen.
         </p>
       </div>
 
@@ -241,7 +241,7 @@ export default function CounterOfferForm({
           rows={3}
           disabled={isLoading}
           className="w-full px-3 py-3 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50"
-          placeholder="Warum schlagen Sie diese Aenderungen vor? Haben Sie Fragen?"
+          placeholder="Warum schlagen Sie diese Änderungen vor? Haben Sie Fragen?"
         />
         <p className="text-xs text-gray-500 mt-1">
           Optional, aber hilft KEWA bei der Entscheidung

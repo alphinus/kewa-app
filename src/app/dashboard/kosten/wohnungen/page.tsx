@@ -65,7 +65,7 @@ export default async function WohnungenInvestmentPage() {
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-          Investment-Uebersicht
+          Investment-Übersicht
         </h1>
         <p className="text-gray-600 dark:text-gray-400 mt-1">
           Miete vs. Renovationskosten pro Wohnung mit Amortisationsberechnung
@@ -89,7 +89,7 @@ export default async function WohnungenInvestmentPage() {
             Die Amortisation berechnet sich aus: Investment / Jaehrl. Mieteinnahmen
           </li>
           <li>
-            Gruen: unter 10 Jahre, Gelb: 10-20 Jahre, Rot: ueber 20 Jahre
+            Gruen: unter 10 Jahre, Gelb: 10-20 Jahre, Rot: über 20 Jahre
           </li>
           <li>
             Klicken Sie auf das Stift-Symbol, um den Mietzins zu erfassen oder zu aendern

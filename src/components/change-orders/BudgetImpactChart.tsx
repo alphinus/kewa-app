@@ -126,7 +126,7 @@ export function BudgetImpactChart({ originalBudget, changeOrders }: BudgetImpact
     return (
       <div className="w-full h-[400px] flex items-center justify-center border border-gray-200 rounded-lg bg-gray-50">
         <div className="text-center">
-          <p className="text-gray-500 font-medium">Keine genehmigten Aenderungsauftraege</p>
+          <p className="text-gray-500 font-medium">Keine genehmigten Änderungsaufträge</p>
           <p className="text-sm text-gray-400 mt-1">
             Aktuelles Budget: {formatCHF(originalBudget)}
           </p>

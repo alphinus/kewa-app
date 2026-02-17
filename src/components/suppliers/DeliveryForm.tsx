@@ -147,7 +147,7 @@ export function DeliveryForm({
     }
 
     if (!propertyId) {
-      return 'Bitte waehlen Sie eine Liegenschaft aus'
+      return 'Bitte wählen Sie eine Liegenschaft aus'
     }
 
     if (hasVariance && !varianceNote.trim()) {
@@ -360,7 +360,7 @@ export function DeliveryForm({
                   required
                   className="w-full h-10 px-3 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
-                  <option value="">Liegenschaft waehlen...</option>
+                  <option value="">Liegenschaft wählen...</option>
                   {properties.map((property) => (
                     <option key={property.id} value={property.id}>
                       {property.name}
@@ -374,7 +374,7 @@ export function DeliveryForm({
             {propertyId && buildings.length > 0 && (
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Gebaeude
+                  Gebäude
                 </label>
                 {loadingBuildings ? (
                   <div className="w-full h-10 bg-gray-100 dark:bg-gray-800 rounded-lg animate-pulse" />
@@ -384,7 +384,7 @@ export function DeliveryForm({
                     onChange={(e) => setBuildingId(e.target.value)}
                     className="w-full h-10 px-3 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
-                    <option value="">Kein spezifisches Gebaeude</option>
+                    <option value="">Kein spezifisches Gebäude</option>
                     {buildings.map((building) => (
                       <option key={building.id} value={building.id}>
                         {building.name}

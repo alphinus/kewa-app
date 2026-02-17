@@ -37,7 +37,7 @@ export function DefectReviewCard({ defect, onActionTaken, users }: DefectReviewC
     }
 
     if (selectedAction === 'task_created' && !assigneeId) {
-      toast.warning('Bitte waehlen Sie einen Verantwortlichen aus')
+      toast.warning('Bitte wählen Sie einen Verantwortlichen aus')
       return
     }
 

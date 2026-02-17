@@ -51,7 +51,7 @@ export async function detectAndResolveConflict(params: {
       )
 
       // Notify user their changes were overwritten
-      toast('Ihre Aenderungen wurden ueberschrieben', { duration: 4000 })
+      toast('Ihre Änderungen wurden überschrieben', { duration: 4000 })
 
       return {
         winner: 'server',

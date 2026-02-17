@@ -54,7 +54,7 @@ export async function POST(
     const validation = await validateContractorAccess(token)
     if (!validation.valid || !validation.email) {
       return NextResponse.json(
-        { error: 'Ungueltiger oder abgelaufener Token' },
+        { error: 'Ungültiger oder abgelaufener Token' },
         { status: 401 }
       )
     }
@@ -108,7 +108,7 @@ export async function POST(
     const validationResult = validateContractorUpload(file, mediaType)
     if (!validationResult.valid) {
       return NextResponse.json(
-        { error: validationResult.error || 'Ungueltige Datei' },
+        { error: validationResult.error || 'Ungültige Datei' },
         { status: 400 }
       )
     }

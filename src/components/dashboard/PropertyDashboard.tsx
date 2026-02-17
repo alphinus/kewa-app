@@ -52,7 +52,7 @@ export async function PropertyDashboard({
           color="blue"
         />
         <StatCard
-          label="Raeume renoviert"
+          label="Räume renoviert"
           value={`${summary.renovatedRooms}/${summary.totalRooms}`}
         />
       </div>
@@ -65,7 +65,7 @@ export async function PropertyDashboard({
         {/* Building Heatmap */}
         <div className="flex-1">
           <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-            Gebaeude
+            Gebäude
           </h3>
           <BuildingHeatmap
             buildingId={buildingId}

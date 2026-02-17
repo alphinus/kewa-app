@@ -71,7 +71,7 @@ export function LineItemEditor({
             onClick={handleAdd}
             className="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 font-medium"
           >
-            + Position hinzufuegen
+            + Position hinzufügen
           </button>
         )}
       </div>
@@ -194,7 +194,7 @@ export function LineItemEditor({
               onClick={handleAdd}
               className="text-blue-600 hover:text-blue-700 dark:text-blue-400"
             >
-              Position hinzufuegen
+              Position hinzufügen
             </button>
           )}
         </div>

@@ -91,7 +91,7 @@ export function ReInspectionButton({ inspection }: ReInspectionButtonProps) {
               </label>
 
               <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-                Die Checkliste und aufgeschobene Maengel werden uebernommen.
+                Die Checkliste und aufgeschobene Mängel werden übernommen.
               </p>
 
               {error && (

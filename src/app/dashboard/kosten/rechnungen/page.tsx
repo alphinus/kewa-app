@@ -37,7 +37,7 @@ function StatCard({
  * Invoices list page
  *
  * Shows all invoices with filters and stats.
- * Status cards: Offen, In Pruefung, Freigegeben, Beanstandet
+ * Status cards: Offen, In Prüfung, Freigegeben, Beanstandet
  */
 export default async function RechnungenPage() {
   // Fetch status counts for stats cards
@@ -59,7 +59,7 @@ export default async function RechnungenPage() {
             Rechnungen
           </h1>
           <p className="text-gray-600 dark:text-gray-400 mt-1">
-            Rechnungspruefung und Freigabe
+            Rechnungsprüfung und Freigabe
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -84,7 +84,7 @@ export default async function RechnungenPage() {
           color="blue"
         />
         <StatCard
-          label="In Pruefung"
+          label="In Prüfung"
           value={counts.under_review}
           color="yellow"
         />

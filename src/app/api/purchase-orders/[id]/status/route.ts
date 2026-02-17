@@ -140,13 +140,13 @@ export async function POST(
 
       return NextResponse.json(
         {
-          error: `Ungueltiger Statusuebergang: ${getPurchaseOrderStatusLabel(currentStatus)} -> ${getPurchaseOrderStatusLabel(targetStatus)}`,
+          error: `Ungültiger Statusuebergang: ${getPurchaseOrderStatusLabel(currentStatus)} -> ${getPurchaseOrderStatusLabel(targetStatus)}`,
           current_status: currentStatus,
           target_status: targetStatus,
           valid_transitions: validNext,
           message: validNext.length > 0
-            ? `Erlaubte Uebergaenge: ${validLabels}`
-            : 'Keine weiteren Statusaenderungen moeglich',
+            ? `Erlaubte Übergaenge: ${validLabels}`
+            : 'Keine weiteren Statusänderungen möglich',
         },
         { status: 400 }
       )

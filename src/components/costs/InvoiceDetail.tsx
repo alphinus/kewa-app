@@ -50,7 +50,7 @@ interface InvoiceDetailProps {
 const STATUS_LABELS: Record<InvoiceStatus, string> = {
   draft: 'Entwurf',
   received: 'Erhalten',
-  under_review: 'In Pruefung',
+  under_review: 'In Prüfung',
   approved: 'Freigegeben',
   disputed: 'Beanstandet',
   partially_paid: 'Teilweise bezahlt',
@@ -84,7 +84,7 @@ function StatusTimeline({ invoice }: { invoice: InvoiceWithPartner }) {
       active: true
     },
     {
-      label: 'In Pruefung',
+      label: 'In Prüfung',
       status: 'under_review',
       date: null,
       active: ['under_review', 'approved', 'disputed', 'paid', 'partially_paid'].includes(invoice.status)
@@ -444,7 +444,7 @@ export function InvoiceDetail({ invoice: initialInvoice, onUpdate }: InvoiceDeta
             size="lg"
             onClick={handleStartReview}
           >
-            Pruefung starten
+            Prüfung starten
           </Button>
         </div>
       )}
@@ -453,7 +453,7 @@ export function InvoiceDetail({ invoice: initialInvoice, onUpdate }: InvoiceDeta
       {invoice.status === 'under_review' && (
         <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
           <h3 className="text-sm font-medium text-blue-700 dark:text-blue-400 mb-4">
-            Rechnung pruefen und freigeben
+            Rechnung prüfen und freigeben
           </h3>
           <InvoiceApprovalActions
             invoice={invoice}

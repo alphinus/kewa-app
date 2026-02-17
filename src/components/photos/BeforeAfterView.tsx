@@ -10,7 +10,7 @@ interface BeforeAfterViewProps {
 
 /**
  * Side-by-side comparison view for explanation vs completion photos
- * Two columns: "Erklaerung (KEWA AG)" | "Erledigung (Imeri)"
+ * Two columns: "Erklärung (KEWA AG)" | "Erledigung (Imeri)"
  * Stacks vertically on very small screens (<400px)
  */
 export function BeforeAfterView({

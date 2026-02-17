@@ -297,7 +297,7 @@ export async function POST(request: NextRequest) {
 
     if (purchaseOrder.status !== 'confirmed') {
       return NextResponse.json(
-        { error: `Lieferung kann nur fuer bestaetigte Bestellungen erfasst werden. Aktueller Status: ${purchaseOrder.status}` },
+        { error: `Lieferung kann nur für bestätigte Bestellungen erfasst werden. Aktueller Status: ${purchaseOrder.status}` },
         { status: 400 }
       )
     }

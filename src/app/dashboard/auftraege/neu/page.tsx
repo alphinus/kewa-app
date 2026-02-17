@@ -90,7 +90,7 @@ export default function CreateWorkOrderPage() {
           href="/dashboard/auftraege"
           className="hover:text-gray-700 dark:hover:text-gray-300"
         >
-          Arbeitsauftraege
+          Arbeitsaufträge
         </Link>
         <span>/</span>
         <span className="text-gray-900 dark:text-gray-100">Neuer Auftrag</span>
@@ -102,7 +102,7 @@ export default function CreateWorkOrderPage() {
           Neuer Arbeitsauftrag
         </h1>
         <p className="text-gray-600 dark:text-gray-400 mt-1">
-          Erstellen Sie einen Arbeitsauftrag fuer einen externen Handwerker.
+          Erstellen Sie einen Arbeitsauftrag für einen externen Handwerker.
         </p>
       </div>
 

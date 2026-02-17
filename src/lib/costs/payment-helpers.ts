@@ -65,13 +65,13 @@ export function validatePaymentAmount(
   outstanding: number
 ): { valid: boolean; error?: string } {
   if (amount <= 0) {
-    return { valid: false, error: 'Betrag muss groesser als 0 sein' }
+    return { valid: false, error: 'Betrag muss größer als 0 sein' }
   }
 
   if (amount > outstanding) {
     return {
       valid: false,
-      error: `Betrag uebersteigt den offenen Betrag (${formatCHF(outstanding)})`
+      error: `Betrag übersteigt den offenen Betrag (${formatCHF(outstanding)})`
     }
   }
 

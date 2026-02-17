@@ -50,7 +50,7 @@ function getStatusBadge(status: string): { label: string; className: string } {
       }
     case 'review':
       return {
-        label: 'In Pruefung',
+        label: 'In Prüfung',
         className: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300',
       }
     case 'published':
@@ -395,7 +395,7 @@ export default async function CategoryPage({ params }: PageProps) {
                 d="M10 19l-7-7m0 0l7-7m-7 7h18"
               />
             </svg>
-            Zurueck zur Wissensdatenbank
+            Zurück zur Wissensdatenbank
           </Link>
         </div>
       </main>

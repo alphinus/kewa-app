@@ -85,7 +85,7 @@ function getUnitTypeLabel(unitType: string): string {
     case 'common':
       return 'Allgemeinflaeche'
     case 'building':
-      return 'Gebaeude'
+      return 'Gebäude'
     default:
       return unitType
   }

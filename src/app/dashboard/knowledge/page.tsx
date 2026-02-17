@@ -223,7 +223,7 @@ function KnowledgePageContent() {
               >
                 <option value="all">Alle Status</option>
                 <option value="draft">Entwurf</option>
-                <option value="review">Pruefung</option>
+                <option value="review">Prüfung</option>
                 <option value="published">Veroeffentlicht</option>
                 <option value="archived">Archiviert</option>
               </select>
@@ -323,7 +323,7 @@ function KnowledgePageContent() {
                 d="M10 19l-7-7m0 0l7-7m-7 7h18"
               />
             </svg>
-            Zurueck zum Dashboard
+            Zurück zum Dashboard
           </Link>
         </div>
       </main>

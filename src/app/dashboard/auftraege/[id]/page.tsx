@@ -232,7 +232,7 @@ export default function WorkOrderDetailPage({ params }: PageProps) {
             href="/dashboard/auftraege"
             className="inline-block mt-4 text-sm text-red-700 dark:text-red-300 underline"
           >
-            Zurueck zur Liste
+            Zurück zur Liste
           </Link>
         </div>
       </div>
@@ -261,7 +261,7 @@ export default function WorkOrderDetailPage({ params }: PageProps) {
           href="/dashboard/auftraege"
           className="hover:text-gray-700 dark:hover:text-gray-300"
         >
-          Arbeitsauftraege
+          Arbeitsaufträge
         </Link>
         <span>/</span>
         <span className="text-gray-900 dark:text-gray-100">{workOrder.title}</span>
@@ -471,7 +471,7 @@ export default function WorkOrderDetailPage({ params }: PageProps) {
             <p className="text-sm text-gray-500 dark:text-gray-400">Antwort bis</p>
             <p className={`font-medium ${isOverdue ? 'text-red-600 dark:text-red-400' : 'text-gray-900 dark:text-gray-100'}`}>
               {formatDateTime(workOrder.acceptance_deadline)}
-              {isOverdue && <span className="text-xs ml-1">(ueberfaellig)</span>}
+              {isOverdue && <span className="text-xs ml-1">(überfaellig)</span>}
             </p>
           </div>
           <div>
@@ -614,7 +614,7 @@ export default function WorkOrderDetailPage({ params }: PageProps) {
             {workOrder.internal_notes}
           </p>
           <p className="text-xs text-yellow-600 dark:text-yellow-400 mt-2">
-            (nur fuer KEWA sichtbar)
+            (nur für KEWA sichtbar)
           </p>
         </div>
       )}
@@ -659,7 +659,7 @@ export default function WorkOrderDetailPage({ params }: PageProps) {
               d="M10 19l-7-7m0 0l7-7m-7 7h18"
             />
           </svg>
-          Zurueck zur Liste
+          Zurück zur Liste
         </Link>
       </div>
 

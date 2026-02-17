@@ -80,7 +80,7 @@ export default function ApplyTemplatePage() {
             href="/dashboard"
             className="text-blue-600 hover:underline"
           >
-            Zurueck zum Dashboard
+            Zurück zum Dashboard
           </Link>
         </div>
       </div>
@@ -96,7 +96,7 @@ export default function ApplyTemplatePage() {
             href="/dashboard"
             className="text-blue-600 hover:underline"
           >
-            Zurueck zum Dashboard
+            Zurück zum Dashboard
           </Link>
         </div>
       </div>
@@ -121,7 +121,7 @@ export default function ApplyTemplatePage() {
             href={`/dashboard/projekte/${projectId}`}
             className="inline-block px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
           >
-            Zurueck zum Projekt
+            Zurück zum Projekt
           </Link>
         </div>
       </div>
@@ -138,16 +138,16 @@ export default function ApplyTemplatePage() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
             </svg>
           </div>
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">Status nicht gueltig</h2>
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">Status nicht gültig</h2>
           <p className="text-gray-600 mb-6">
-            Vorlagen koennen nur auf Projekte im Status &quot;geplant&quot; angewendet werden.
+            Vorlagen können nur auf Projekte im Status &quot;geplant&quot; angewendet werden.
             Dieses Projekt hat den Status: <strong>{project.status}</strong>
           </p>
           <Link
             href={`/dashboard/projekte/${projectId}`}
             className="inline-block px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
           >
-            Zurueck zum Projekt
+            Zurück zum Projekt
           </Link>
         </div>
       </div>

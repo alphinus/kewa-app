@@ -115,21 +115,21 @@ function EditorToolbar({ editor }: EditorToolbarProps) {
       <ToolbarButton
         onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
         active={editor.isActive('heading', { level: 1 })}
-        title="Ueberschrift 1"
+        title="Überschrift 1"
       >
         H1
       </ToolbarButton>
       <ToolbarButton
         onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
         active={editor.isActive('heading', { level: 2 })}
-        title="Ueberschrift 2"
+        title="Überschrift 2"
       >
         H2
       </ToolbarButton>
       <ToolbarButton
         onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
         active={editor.isActive('heading', { level: 3 })}
-        title="Ueberschrift 3"
+        title="Überschrift 3"
       >
         H3
       </ToolbarButton>
@@ -158,7 +158,7 @@ function EditorToolbar({ editor }: EditorToolbarProps) {
       <ToolbarButton
         onClick={addLink}
         active={editor.isActive('link')}
-        title="Link einfuegen"
+        title="Link einfügen"
       >
         <LinkIcon />
       </ToolbarButton>

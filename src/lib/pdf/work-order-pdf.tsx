@@ -363,7 +363,7 @@ function WorkOrderPDFDocument({ data }: WorkOrderPDFProps) {
         {/* Footer */}
         <View style={styles.footer}>
           <Text style={styles.footerInstruction}>
-            Bitte antworten Sie auf diese Anfrage ueber den Link in der Email.
+            Bitte antworten Sie auf diese Anfrage über den Link in der Email.
           </Text>
           <Text style={styles.footerText}>
             KEWA AG - Liegenschaftsverwaltung

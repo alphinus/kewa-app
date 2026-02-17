@@ -97,7 +97,7 @@ export function AlertSection({ overdueProjects, stalledProjects, inactivePartner
         ) : (
           <div>
             <AlertCategory
-              title="Ueberfaellige Projekte"
+              title="Überfaellige Projekte"
               icon={<Clock className="h-4 w-4" />}
               items={overdueProjects.map(p => ({
                 id: p.id,
@@ -105,7 +105,7 @@ export function AlertSection({ overdueProjects, stalledProjects, inactivePartner
                 href: `/dashboard/kosten/projekte/${p.id}`
               }))}
               colorClass="text-red-600 dark:text-red-400"
-              emptyText="Keine ueberfaelligen Projekte"
+              emptyText="Keine überfaelligen Projekte"
             />
 
             <AlertCategory

@@ -177,8 +177,8 @@ Plans:
 **Plans:** 2 plans
 
 Plans:
-- [ ] 34-01-PLAN.md — UTF-8 infrastructure: EditorConfig, git config, encoding verification script, database collation check
-- [ ] 34-02-PLAN.md — Umlaut corrections: Replace all ae/oe/ue substitutions with proper umlauts
+- [x] 34-01-PLAN.md — UTF-8 infrastructure: EditorConfig, git config, encoding verification script, database collation check
+- [x] 34-02-PLAN.md — Umlaut corrections: Replace all ae/oe/ue substitutions with proper umlauts
 
 ---
 
@@ -199,10 +199,10 @@ Phase 34 can run in parallel with 31-33 after 30 completes.
 | 31. Performance Profiling | v3.1 | 3/3 | Complete | 2026-02-05 |
 | 32. Database Optimization | v3.1 | 2/2 | Complete | 2026-02-05 |
 | 33. Bundle & Rendering | v3.1 | 2/2 | Complete | 2026-02-06 |
-| 34. German Umlauts | v3.1 | 0/2 | Planned | - |
+| 34. German Umlauts | v3.1 | 2/2 | Complete | 2026-02-17 |
 
-**Total:** 33 phases complete, 1 phase planned
+**Total:** 34 phases complete, 0 phases planned
 
 ---
 
-*Last updated: 2026-02-06 — Phase 34 planned*
+*Last updated: 2026-02-17 — v3.1 milestone complete*

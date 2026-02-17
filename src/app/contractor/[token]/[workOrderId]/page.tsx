@@ -72,7 +72,7 @@ export default async function WorkOrderDetailPage({
             d="M15 19l-7-7 7-7"
           />
         </svg>
-        Zurueck zur Uebersicht
+        Zurück zur Übersicht
       </Link>
 
       {/* Full Work Order Card */}
@@ -100,14 +100,14 @@ export default async function WorkOrderDetailPage({
       {workOrder.status === 'viewed' && workOrder.counter_offer_status === 'pending' && (
         <ActionHint
           type="pending"
-          message="Ihr Gegenangebot wird von KEWA geprueft. Sie erhalten eine Antwort."
+          message="Ihr Gegenangebot wird von KEWA geprüft. Sie erhalten eine Antwort."
         />
       )}
 
       {workOrder.status === 'viewed' && workOrder.counter_offer_status === 'rejected' && (
         <ActionHint
           type="respond"
-          message="Ihr Gegenangebot wurde abgelehnt. Sie koennen ein neues Angebot einreichen."
+          message="Ihr Gegenangebot wurde abgelehnt. Sie können ein neues Angebot einreichen."
         />
       )}
 

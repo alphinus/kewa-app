@@ -338,39 +338,39 @@ export function TemplateEditor({ template, onUpdate }: TemplateEditorProps) {
 
   // Delete handlers
   const handleDeletePhase = async (phaseId: string) => {
-    if (!confirm('Phase und alle enthaltenen Pakete und Aufgaben loeschen?')) return
+    if (!confirm('Phase und alle enthaltenen Pakete und Aufgaben löschen?')) return
     setLoading(true)
     try {
       await deletePhase(template.id, phaseId)
       onUpdate?.()
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Fehler beim Loeschen')
+      setError(err instanceof Error ? err.message : 'Fehler beim Löschen')
     } finally {
       setLoading(false)
     }
   }
 
   const handleDeletePackage = async (packageId: string) => {
-    if (!confirm('Paket und alle enthaltenen Aufgaben loeschen?')) return
+    if (!confirm('Paket und alle enthaltenen Aufgaben löschen?')) return
     setLoading(true)
     try {
       await deletePackage(template.id, packageId)
       onUpdate?.()
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Fehler beim Loeschen')
+      setError(err instanceof Error ? err.message : 'Fehler beim Löschen')
     } finally {
       setLoading(false)
     }
   }
 
   const handleDeleteTask = async (taskId: string) => {
-    if (!confirm('Aufgabe loeschen?')) return
+    if (!confirm('Aufgabe löschen?')) return
     setLoading(true)
     try {
       await deleteTask(template.id, taskId)
       onUpdate?.()
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Fehler beim Loeschen')
+      setError(err instanceof Error ? err.message : 'Fehler beim Löschen')
     } finally {
       setLoading(false)
     }
@@ -392,7 +392,7 @@ export function TemplateEditor({ template, onUpdate }: TemplateEditorProps) {
           disabled={loading}
           className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 min-h-[44px]"
         >
-          + Phase hinzufuegen
+          + Phase hinzufügen
         </button>
       </div>
 
@@ -866,7 +866,7 @@ function EditorTree({
               onClick={() => onDeletePhase(phase.id)}
               className="text-xs px-2 py-1 text-red-600 hover:bg-red-100 rounded"
             >
-              Loeschen
+              Löschen
             </button>
           </div>
 
@@ -904,7 +904,7 @@ function EditorTree({
                   onClick={() => onDeletePackage(pkg.id)}
                   className="text-xs px-2 py-1 text-red-600 hover:bg-red-100 rounded"
                 >
-                  Loeschen
+                  Löschen
                 </button>
               </div>
 
@@ -933,7 +933,7 @@ function EditorTree({
                     onClick={() => onDeleteTask(task.id)}
                     className="text-xs px-2 py-1 text-red-600 hover:bg-red-100 rounded"
                   >
-                    Loeschen
+                    Löschen
                   </button>
                 </div>
               ))}

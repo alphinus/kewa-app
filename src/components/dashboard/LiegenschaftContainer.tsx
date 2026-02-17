@@ -80,7 +80,7 @@ export function LiegenschaftContainer() {
   if (!selectedBuildingId) {
     return (
       <div className="p-8 text-center text-gray-500 dark:text-gray-400">
-        <p>Bitte waehlen Sie eine Liegenschaft aus.</p>
+        <p>Bitte wählen Sie eine Liegenschaft aus.</p>
         <p className="text-sm mt-2">Nutzen Sie den Property-Selector in der Kopfzeile.</p>
       </div>
     )
@@ -91,7 +91,7 @@ export function LiegenschaftContainer() {
     return (
       <div className="p-8 text-center text-gray-500 dark:text-gray-400">
         <p className="text-lg font-medium">Alle Liegenschaften</p>
-        <p className="text-sm mt-2">Globale Uebersicht wird eingerichtet...</p>
+        <p className="text-sm mt-2">Globale Übersicht wird eingerichtet...</p>
       </div>
     )
   }
@@ -121,7 +121,7 @@ export function LiegenschaftContainer() {
 
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-          Liegenschaftsuebersicht
+          Liegenschaftsübersicht
         </h1>
       </div>
 

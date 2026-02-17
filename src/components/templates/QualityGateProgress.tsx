@@ -229,7 +229,7 @@ export function QualityGateProgress({
             <div className="flex items-center justify-between">
               {!gate.completion.is_complete ? (
                 <div className="text-sm text-gray-500">
-                  Alle Anforderungen erfuellen fuer Freigabe
+                  Alle Anforderungen erfüllen für Freigabe
                 </div>
               ) : (
                 <div className="text-sm text-green-600">

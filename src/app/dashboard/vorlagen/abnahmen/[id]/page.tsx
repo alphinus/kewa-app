@@ -89,14 +89,14 @@ export default function EditInspectionTemplatePage({
     }
 
     if (checklistSections.length === 0) {
-      toast.warning('Bitte fuegen Sie mindestens einen Abschnitt hinzu')
+      toast.warning('Bitte fügen Sie mindestens einen Abschnitt hinzu')
       return
     }
 
     // Validate that all sections have names and at least one item
     for (const section of checklistSections) {
       if (!section.name.trim()) {
-        toast.warning('Alle Abschnitte muessen einen Namen haben')
+        toast.warning('Alle Abschnitte müssen einen Namen haben')
         return
       }
       if (section.items.length === 0) {
@@ -105,7 +105,7 @@ export default function EditInspectionTemplatePage({
       }
       for (const item of section.items) {
         if (!item.title.trim()) {
-          toast.warning(`Alle Elemente in "${section.name}" muessen einen Titel haben`)
+          toast.warning(`Alle Elemente in "${section.name}" müssen einen Titel haben`)
           return
         }
       }
@@ -160,7 +160,7 @@ export default function EditInspectionTemplatePage({
       router.push('/dashboard/vorlagen/abnahmen')
     } catch (error) {
       console.error('Error deleting template:', error)
-      toast.error(error instanceof Error ? error.message : 'Fehler beim Loeschen der Vorlage')
+      toast.error(error instanceof Error ? error.message : 'Fehler beim Löschen der Vorlage')
     } finally {
       setIsSubmitting(false)
     }

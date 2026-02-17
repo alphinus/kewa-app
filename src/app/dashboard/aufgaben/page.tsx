@@ -149,13 +149,13 @@ function AufgabenPageContent() {
       })
 
       if (!response.ok) {
-        throw new Error('Fehler beim Loeschen')
+        throw new Error('Fehler beim Löschen')
       }
 
       // Refresh list
       await fetchTasks()
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Fehler beim Loeschen')
+      toast.error(err instanceof Error ? err.message : 'Fehler beim Löschen')
     } finally {
       setDeleteConfirm(null)
     }
@@ -289,9 +289,9 @@ function AufgabenPageContent() {
       <ConfirmationDialog
         open={!!deleteConfirm}
         onOpenChange={(open) => !open && setDeleteConfirm(null)}
-        title="Aufgabe loeschen?"
-        description={`Moechten Sie "${deleteConfirm?.title || ''}" wirklich loeschen? Diese Aktion kann nicht rueckgaengig gemacht werden.`}
-        confirmLabel="Loeschen"
+        title="Aufgabe löschen?"
+        description={`Möchten Sie "${deleteConfirm?.title || ''}" wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.`}
+        confirmLabel="Löschen"
         variant="danger"
         onConfirm={handleDeleteConfirm}
       />

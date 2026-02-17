@@ -55,7 +55,7 @@ export async function POST(request: Request) {
   // Validate session JWT
   const session = await validateSessionWithRBAC(sessionCookie.value)
   if (!session) {
-    return NextResponse.json({ error: 'Ungueltige Session' }, { status: 401 })
+    return NextResponse.json({ error: 'Ungültige Session' }, { status: 401 })
   }
 
   // Fetch user details from database

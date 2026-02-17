@@ -27,7 +27,7 @@ export interface CommonAreasListProps {
  *
  * Shows:
  * - Section title "Gemeinschaftsbereiche"
- * - Building unit first (Gesamtes Gebaeude)
+ * - Building unit first (Gesamtes Gebäude)
  * - Common areas sorted alphabetically
  * - Each with name, color dot indicator, task count
  */

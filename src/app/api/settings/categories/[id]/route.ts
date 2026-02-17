@@ -132,7 +132,7 @@ export async function DELETE(
           { status: 404 }
         )
       }
-      throw new Error(`Fehler beim Loeschen der Kategorie: ${error.message}`)
+      throw new Error(`Fehler beim Löschen der Kategorie: ${error.message}`)
     }
 
     return NextResponse.json({ success: true })
@@ -143,7 +143,7 @@ export async function DELETE(
         error:
           error instanceof Error
             ? error.message
-            : 'Fehler beim Loeschen der Kategorie',
+            : 'Fehler beim Löschen der Kategorie',
       },
       { status: 500 }
     )

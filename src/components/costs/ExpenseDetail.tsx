@@ -101,13 +101,13 @@ export function ExpenseDetail({ expenseId }: ExpenseDetailProps) {
 
       if (!response.ok) {
         const data = await response.json()
-        throw new Error(data.error || 'Loeschen fehlgeschlagen')
+        throw new Error(data.error || 'Löschen fehlgeschlagen')
       }
 
       router.push('/dashboard/kosten/ausgaben')
       router.refresh()
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Fehler beim Loeschen')
+      setError(err instanceof Error ? err.message : 'Fehler beim Löschen')
       setShowDeleteConfirm(false)
     } finally {
       setDeleting(false)
@@ -185,7 +185,7 @@ export function ExpenseDetail({ expenseId }: ExpenseDetailProps) {
             className="mt-4"
             onClick={() => router.push('/dashboard/kosten/ausgaben')}
           >
-            Zurueck zur Liste
+            Zurück zur Liste
           </Button>
         </CardContent>
       </Card>
@@ -237,7 +237,7 @@ export function ExpenseDetail({ expenseId }: ExpenseDetailProps) {
             variant="danger"
             onClick={() => setShowDeleteConfirm(true)}
           >
-            Loeschen
+            Löschen
           </Button>
         </div>
       </div>
@@ -426,11 +426,11 @@ export function ExpenseDetail({ expenseId }: ExpenseDetailProps) {
           <Card className="max-w-md mx-4">
             <CardContent className="p-6">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
-                Ausgabe loeschen?
+                Ausgabe löschen?
               </h3>
               <p className="text-gray-500 mb-6">
-                Moechten Sie die Ausgabe &quot;{expense.title}&quot; wirklich
-                loeschen? Diese Aktion kann nicht rueckgaengig gemacht werden.
+                Möchten Sie die Ausgabe &quot;{expense.title}&quot; wirklich
+                löschen? Diese Aktion kann nicht rückgängig gemacht werden.
               </p>
               <div className="flex gap-3 justify-end">
                 <Button
@@ -445,7 +445,7 @@ export function ExpenseDetail({ expenseId }: ExpenseDetailProps) {
                   onClick={handleDelete}
                   loading={deleting}
                 >
-                  Loeschen
+                  Löschen
                 </Button>
               </div>
             </CardContent>

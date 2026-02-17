@@ -351,7 +351,7 @@ export async function DELETE(
 
     if (articleCount && articleCount > 0) {
       return NextResponse.json(
-        { error: `Kategorie "${category.name}" enthalt noch ${articleCount} Artikel. Verschieben oder loeschen Sie diese zuerst.` },
+        { error: `Kategorie "${category.name}" enthalt noch ${articleCount} Artikel. Verschieben oder löschen Sie diese zuerst.` },
         { status: 400 }
       )
     }
@@ -372,7 +372,7 @@ export async function DELETE(
 
     if (childCount && childCount > 0) {
       return NextResponse.json(
-        { error: `Kategorie "${category.name}" hat noch ${childCount} Unterkategorien. Loeschen Sie diese zuerst.` },
+        { error: `Kategorie "${category.name}" hat noch ${childCount} Unterkategorien. Löschen Sie diese zuerst.` },
         { status: 400 }
       )
     }

@@ -210,7 +210,7 @@ export async function POST(request: NextRequest) {
 
       if (existingWorkOrderInvoice) {
         return NextResponse.json(
-          { error: 'Dieser Arbeitsauftrag hat bereits eine verknuepfte Rechnung' },
+          { error: 'Dieser Arbeitsauftrag hat bereits eine verknüpfte Rechnung' },
           { status: 409 }
         )
       }

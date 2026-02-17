@@ -204,7 +204,7 @@ export interface Component {
 }
 
 /**
- * Project within a unit (e.g., Badezimmer, Kueche)
+ * Project within a unit (e.g., Badezimmer, Küche)
  */
 export interface Project {
   id: string

@@ -204,7 +204,7 @@ export default function ConsumptionAnalyticsPage() {
           <CardDescription>
             {consumptionData.length > 0
               ? `${consumptionData.length} Monate mit Daten`
-              : 'Keine Daten verfuegbar'}
+              : 'Keine Daten verfügbar'}
           </CardDescription>
         </CardHeader>
         <CardContent>

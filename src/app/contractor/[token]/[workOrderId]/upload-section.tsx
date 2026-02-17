@@ -141,7 +141,7 @@ export default function UploadSection({
 
         if (!response.ok) {
           const error = await response.json()
-          throw new Error(error.error || 'Loeschen fehlgeschlagen')
+          throw new Error(error.error || 'Löschen fehlgeschlagen')
         }
 
         // Remove from appropriate list
@@ -154,7 +154,7 @@ export default function UploadSection({
         return true
       } catch (error) {
         console.error('Delete failed:', error)
-        toast.error(error instanceof Error ? error.message : 'Loeschen fehlgeschlagen')
+        toast.error(error instanceof Error ? error.message : 'Löschen fehlgeschlagen')
         return false
       }
     },
@@ -321,7 +321,7 @@ export default function UploadSection({
         {!uploadsAllowed && (
           <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
             <p className="text-sm text-yellow-800">
-              Uploads sind nur moeglich, wenn der Auftrag akzeptiert, in Bearbeitung oder erledigt ist.
+              Uploads sind nur möglich, wenn der Auftrag akzeptiert, in Bearbeitung oder erledigt ist.
             </p>
           </div>
         )}

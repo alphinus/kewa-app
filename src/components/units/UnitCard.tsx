@@ -70,7 +70,7 @@ export function UnitCard({ unit, onEdit, onView }: UnitCardProps) {
 
             {/* Room count */}
             <p className="text-sm text-gray-500 dark:text-gray-400">
-              {roomCount > 0 ? `${roomCount} Raeume` : '- Raeume'}
+              {roomCount > 0 ? `${roomCount} Räume` : '- Räume'}
             </p>
           </div>
 

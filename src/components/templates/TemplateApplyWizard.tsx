@@ -285,12 +285,12 @@ export function TemplateApplyWizard({
         {/* Step 1: Select Template */}
         {step === 'select' && (
           <div className="space-y-4">
-            <p className="text-gray-600">Waehlen Sie eine Vorlage fuer das Projekt:</p>
+            <p className="text-gray-600">Wählen Sie eine Vorlage für das Projekt:</p>
 
             {loading && <p className="text-gray-500">Laden...</p>}
 
             {!loading && templates.length === 0 && (
-              <p className="text-gray-500">Keine aktiven Vorlagen verfuegbar.</p>
+              <p className="text-gray-500">Keine aktiven Vorlagen verfügbar.</p>
             )}
 
             <div className="space-y-2">
@@ -336,7 +336,7 @@ export function TemplateApplyWizard({
         {step === 'configure' && selectedTemplate && (
           <div className="space-y-4">
             <p className="text-gray-600">
-              Diese Vorlage enthaelt optionale Aufgaben. Waehlen Sie, welche ausgefuehrt werden sollen:
+              Diese Vorlage enthält optionale Aufgaben. Wählen Sie, welche ausgeführt werden sollen:
             </p>
 
             <div className="space-y-3">
@@ -394,7 +394,7 @@ export function TemplateApplyWizard({
         {/* Step 3: Start Date */}
         {step === 'date' && (
           <div className="space-y-4">
-            <p className="text-gray-600">Waehlen Sie das Startdatum fuer das Projekt:</p>
+            <p className="text-gray-600">Wählen Sie das Startdatum für das Projekt:</p>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -512,7 +512,7 @@ export function TemplateApplyWizard({
               <div className="grid grid-cols-2 gap-4 mt-2">
                 <div className="p-3 bg-gray-50 rounded text-center">
                   <p className="text-xl font-bold text-gray-900">{result.dependencies_created}</p>
-                  <p className="text-xs text-gray-500">Abhaengigkeiten</p>
+                  <p className="text-xs text-gray-500">Abhängigkeiten</p>
                 </div>
                 <div className="p-3 bg-gray-50 rounded text-center">
                   <p className="text-xl font-bold text-gray-900">{result.gates_created}</p>
@@ -532,7 +532,7 @@ export function TemplateApplyWizard({
               onClick={step === 'select' ? onCancel : goBack}
               className="px-4 py-2 text-gray-600 hover:text-gray-800 min-h-[44px]"
             >
-              {step === 'select' ? 'Abbrechen' : 'Zurueck'}
+              {step === 'select' ? 'Abbrechen' : 'Zurück'}
             </button>
             <button
               onClick={goNext}

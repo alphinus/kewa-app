@@ -15,13 +15,13 @@ interface RoomManagerProps {
 
 const ROOM_TYPES: { value: RoomType; label: string }[] = [
   { value: 'bathroom', label: 'Badezimmer' },
-  { value: 'kitchen', label: 'Kueche' },
+  { value: 'kitchen', label: 'Küche' },
   { value: 'bedroom', label: 'Schlafzimmer' },
   { value: 'living_room', label: 'Wohnzimmer' },
   { value: 'hallway', label: 'Flur' },
   { value: 'balcony', label: 'Balkon' },
   { value: 'storage', label: 'Abstellraum' },
-  { value: 'laundry', label: 'Waschkueche' },
+  { value: 'laundry', label: 'Waschküche' },
   { value: 'office', label: 'Buero' },
   { value: 'other', label: 'Sonstiges' }
 ]
@@ -66,14 +66,14 @@ export function RoomManager({ unitId, rooms, onRoomsUpdated }: RoomManagerProps)
       onRoomsUpdated()
     } catch (error) {
       console.error('Error adding room:', error)
-      toast.error('Fehler beim Hinzufuegen des Raums')
+      toast.error('Fehler beim Hinzufügen des Raums')
     } finally {
       setSaving(false)
     }
   }
 
   async function handleDeleteRoom(roomId: string) {
-    if (!confirm('Raum wirklich loeschen?')) return
+    if (!confirm('Raum wirklich löschen?')) return
 
     try {
       const response = await fetch(`/api/units/${unitId}/rooms/${roomId}`, {
@@ -85,7 +85,7 @@ export function RoomManager({ unitId, rooms, onRoomsUpdated }: RoomManagerProps)
       onRoomsUpdated()
     } catch (error) {
       console.error('Error deleting room:', error)
-      toast.error('Fehler beim Loeschen des Raums')
+      toast.error('Fehler beim Löschen des Raums')
     }
   }
 
@@ -111,8 +111,8 @@ export function RoomManager({ unitId, rooms, onRoomsUpdated }: RoomManagerProps)
       {/* Rooms list */}
       {rooms.length === 0 ? (
         <div className="text-center py-6 text-gray-500 dark:text-gray-400 border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-lg">
-          <p>Keine Raeume vorhanden</p>
-          <p className="text-sm mt-1">Fuegen Sie Raeume hinzu um den Zustand zu verfolgen</p>
+          <p>Keine Räume vorhanden</p>
+          <p className="text-sm mt-1">Fügen Sie Räume hinzu um den Zustand zu verfolgen</p>
         </div>
       ) : (
         <div className="space-y-2">
@@ -147,7 +147,7 @@ export function RoomManager({ unitId, rooms, onRoomsUpdated }: RoomManagerProps)
                 <button
                   onClick={() => handleDeleteRoom(room.id)}
                   className="p-1.5 text-gray-400 hover:text-red-500 transition-colors"
-                  title="Raum loeschen"
+                  title="Raum löschen"
                 >
                   <Trash2 className="h-4 w-4" />
                 </button>
@@ -205,7 +205,7 @@ export function RoomManager({ unitId, rooms, onRoomsUpdated }: RoomManagerProps)
           </div>
           <div className="flex gap-2">
             <Button type="submit" size="sm" loading={saving}>
-              Hinzufuegen
+              Hinzufügen
             </Button>
             <Button type="button" variant="secondary" size="sm" onClick={() => setShowAddForm(false)}>
               Abbrechen
@@ -215,7 +215,7 @@ export function RoomManager({ unitId, rooms, onRoomsUpdated }: RoomManagerProps)
       ) : (
         <Button variant="secondary" onClick={() => setShowAddForm(true)}>
           <Plus className="h-4 w-4 mr-2" />
-          Raum hinzufuegen
+          Raum hinzufügen
         </Button>
       )}
     </div>

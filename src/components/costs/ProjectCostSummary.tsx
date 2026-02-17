@@ -150,7 +150,7 @@ export function ProjectCostSummary({ data }: ProjectCostSummaryProps) {
             value={formatVariance(variance)}
             subtitle={
               variancePercent !== null
-                ? `${variancePercent}% ${variance! > 0 ? 'ueber' : variance! < 0 ? 'unter' : 'im'} Budget`
+                ? `${variancePercent}% ${variance! > 0 ? 'über' : variance! < 0 ? 'unter' : 'im'} Budget`
                 : undefined
             }
             variant={varianceVariant}

@@ -76,7 +76,7 @@ export default function MediaGallery({
   // Handle delete
   const handleDelete = useCallback(
     async (mediaId: string) => {
-      if (!confirm('Datei wirklich loeschen?')) return
+      if (!confirm('Datei wirklich löschen?')) return
 
       try {
         const response = await fetch(
@@ -92,10 +92,10 @@ export default function MediaGallery({
           setMedia((prev) => prev.filter((m) => m.id !== mediaId))
         } else {
           const error = await response.json()
-          toast.error(error.error || 'Loeschen fehlgeschlagen')
+          toast.error(error.error || 'Löschen fehlgeschlagen')
         }
       } catch {
-        toast.error('Loeschen fehlgeschlagen')
+        toast.error('Löschen fehlgeschlagen')
       }
     },
     [token, workOrderId]
@@ -232,7 +232,7 @@ export default function MediaGallery({
                         handleDelete(photo.id)
                       }}
                       className="absolute top-1 right-1 p-1 bg-red-500 text-white rounded opacity-0 group-hover:opacity-100 transition-opacity"
-                      title="Loeschen"
+                      title="Löschen"
                     >
                       <svg
                         className="w-3 h-3"
@@ -326,7 +326,7 @@ export default function MediaGallery({
                       <button
                         onClick={() => handleDelete(doc.id)}
                         className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-full transition-colors"
-                        title="Loeschen"
+                        title="Löschen"
                       >
                         <svg
                           className="w-5 h-5"

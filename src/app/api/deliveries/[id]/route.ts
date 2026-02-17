@@ -298,7 +298,7 @@ export async function DELETE(
     // Don't allow deletion if invoice is linked
     if (existing.invoice_id) {
       return NextResponse.json(
-        { error: 'Lieferung kann nicht geloescht werden, da eine Rechnung verknuepft ist' },
+        { error: 'Lieferung kann nicht gelöscht werden, da eine Rechnung verknüpft ist' },
         { status: 400 }
       )
     }

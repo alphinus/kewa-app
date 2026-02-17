@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
       })
 
       return NextResponse.json(
-        { error: 'Ungueltige Anmeldedaten' },
+        { error: 'Ungültige Anmeldedaten' },
         { status: 401 }
       )
     }
@@ -94,7 +94,7 @@ export async function POST(request: NextRequest) {
       })
 
       return NextResponse.json(
-        { error: 'Ungueltige Anmeldedaten' },
+        { error: 'Ungültige Anmeldedaten' },
         { status: 401 }
       )
     }
