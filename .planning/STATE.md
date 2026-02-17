@@ -4,17 +4,17 @@
 
 See: .planning/PROJECT.md (updated 2026-02-17)
 
-**Core value:** KEWA AG hat volle Transparenz und Kontrolle über alle Renovationen -- mit standardisierten Workflows, externer Handwerker-Integration, Kostenübersicht und automatischer Zustandshistorie.
-**Current focus:** Between milestones — v3.1 Production Hardening shipped
+**Core value:** Immobilienverwaltungen haben volle Transparenz und Kontrolle über alle Renovationen -- mit standardisierten Workflows, mandantenfähiger Datentrennung, externer Handwerker-Integration, Kostenübersicht und automatischer Zustandshistorie.
+**Current focus:** v4.0 Multi-Tenant Data Model & Navigation — defining requirements
 
 ## Current Position
 
-Phase: N/A (between milestones)
-Plan: N/A
-Status: v3.1 milestone archived, planning next milestone
-Last activity: 2026-02-17 — Completed v3.1 milestone archival
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements for v4.0
+Last activity: 2026-02-17 — Milestone v4.0 started
 
-Progress: All 34 phases complete across 6 milestones
+Progress: All 34 phases complete across 6 milestones (v1.0–v3.1)
 
 ## Milestones Completed
 
@@ -52,8 +52,8 @@ From v3.1:
 ## Session Continuity
 
 Last session: 2026-02-17
-Stopped at: v3.1 milestone archived
+Stopped at: v4.0 milestone started, defining requirements
 Resume file: None
 
 ---
-*v3.1 Production Hardening milestone archived. Run /gsd:new-milestone to start next.*
+*v4.0 Multi-Tenant Data Model & Navigation milestone started. Defining requirements.*

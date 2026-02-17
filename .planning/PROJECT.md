@@ -1,12 +1,25 @@
-# KEWA Renovation Operations System
+# Renovation Operations Platform
 
 ## What This Is
 
-Ein umfassendes Renovations-Management-System für KEWA AG. Standardisierte Projektvorlagen (WBS), externes Handwerker-Portal via Magic-Link, vollständige Kostenübersicht mit Offerten→Rechnungen→Zahlungen, automatische Zustandshistorie ("Digital Twin") pro Raum/Wohnung, Property-Dashboard mit Heatmap-Visualisierung, komplette Stammdaten-Verwaltung für Partner, Liegenschaften und Templates, Mieter-Portal mit Ticket-System, und PWA mit Offline-Sync.
+Eine mandantenfähige Immobilienverwaltungs- und Renovations-Plattform. Branchenstandard-Hierarchie (Verwaltung → Mandat → Eigentümer → Liegenschaft → Gebäude → Einheit → Mietverhältnis), standardisierte Projektvorlagen (WBS), externes Handwerker-Portal via Magic-Link, vollständige Kostenübersicht mit Offerten→Rechnungen→Zahlungen, automatische Zustandshistorie ("Digital Twin") pro Raum/Wohnung, Property-Dashboard mit Heatmap-Visualisierung, Stammdaten-Verwaltung für Partner und Templates, Mieter-Portal mit Ticket-System, und PWA mit Offline-Sync. KEWA AG ist der initiale Mandant.
 
 ## Core Value
 
-KEWA AG hat volle Transparenz und Kontrolle über alle Renovationen — mit standardisierten Workflows, externer Handwerker-Integration, Kostenübersicht und automatischer Zustandshistorie.
+Immobilienverwaltungen haben volle Transparenz und Kontrolle über alle Renovationen — mit standardisierten Workflows, mandantenfähiger Datentrennung, externer Handwerker-Integration, Kostenübersicht und automatischer Zustandshistorie.
+
+## Current Milestone: v4.0 Multi-Tenant Data Model & Navigation
+
+**Goal:** Branchenstandard-Datenmodell mit mandantenfähiger Architektur, sauberer Liegenschaft→Gebäude-Hierarchie und redesignter Navigation.
+
+**Target features:**
+- Mandantenfähiges Datenmodell: Organizations, Owners, Mandates, Tenancies
+- Saubere Property→Building-Hierarchie mit konsistenter Terminologie
+- Supabase RLS für Mandanten-Isolation
+- STWE-Vorbereitung (Wertquote, Eigentumsperiode als Felder)
+- Navigation-Redesign: Footer vereinfacht, klares Drill-down
+- Terminologie-Bereinigung im gesamten Code
+- KEWA AG als Seed-Mandant migriert
 
 ## Current State (v3.1 Shipped)
 
@@ -82,7 +95,14 @@ KEWA AG hat volle Transparenz und Kontrolle über alle Renovationen — mit stan
 
 ### Active
 
-*No active requirements — planning next milestone*
+**v4.0 — Multi-Tenant Data Model & Navigation:**
+- [ ] Mandantenfähiges Datenmodell (Organizations, Owners, Mandates, Tenancies)
+- [ ] Property→Building-Hierarchie sauber getrennt
+- [ ] Supabase RLS auf allen Tabellen
+- [ ] STWE-Felder vorbereitet (Wertquote, Eigentumsperiode)
+- [ ] Navigation-Redesign mit Drill-down
+- [ ] Terminologie-Bereinigung (Liegenschaft ≠ Gebäude)
+- [ ] KEWA AG als Seed-Mandant migriert
 
 ### Future
 
@@ -102,23 +122,30 @@ KEWA AG hat volle Transparenz und Kontrolle über alle Renovationen — mit stan
 
 ## Context
 
-**Nutzer:**
-- KEWA AG (Admin): Eigentümerin, verwaltet alles
+**Plattform-Vision:**
+- Mandantenfähige SaaS-Plattform für Immobilienverwaltungen
+- KEWA AG ist initialer Mandant, Software soll verkaufbar sein
+- Branchenstandard-Datenmodell nach Schweizer Immo-Software (Fairwalter, Rimo R5, ImmoTop2)
+
+**Nutzer (pro Mandant):**
+- Verwaltung (Admin): Verwaltet Mandate, Liegenschaften, Eigentümer
 - Property/Project Manager: Erstellt Projekte, koordiniert Handwerker
 - Accounting: Kosten, Rechnungen, Zahlungen
 - Externe Handwerker: Empfangen Aufträge via Magic-Link
+- Eigentümer: Sieht eigene Liegenschaften (zukünftig)
 - Mieter: Können Tickets erstellen, mobile-first
 
 **Nutzungskontext:**
-- KEWA AG: Desktop + Mobile
+- Verwaltung: Desktop + Mobile
 - Handwerker: Mobile-first, oft auf Baustelle
 - Externe Contractors: Minimales Portal, kein Login nötig
 - Mieter: Mobile-first, von zuhause
 
-**Gebäude:**
-- Multi-Property Support (expandable)
-- Units with tenant data and vacancy tracking
-- Rooms with Condition-Tracking (old/partial/new)
+**Immobilien-Hierarchie:**
+- Organization (Verwaltung) → Mandate → Owner (Eigentümer)
+- Mandate → Property (Liegenschaft) → Building (Gebäude) → Unit (Einheit) → Room
+- Tenancy (Mietverhältnis) als zeitgebundene Entität auf Unit
+- STWE-Support vorbereitet (Wertquote, Eigentumsperiode)
 
 ## Constraints
 
@@ -158,7 +185,11 @@ KEWA AG hat volle Transparenz und Kontrolle über alle Renovationen — mit stan
 | Lazy load Recharts + TipTap | Largest client bundles (629KB combined) | ✓ v3.1 |
 | React cache() for query dedup | Request-level caching without external deps | ✓ v3.1 |
 | Composite indexes over single-column | Multi-filter dashboard queries need compound indexes | ✓ v3.1 |
+| Multi-tenant via single DB + RLS | SaaS-typisch, einfacher zu betreiben als separate Instanzen | — v4.0 |
+| Branchenstandard-Hierarchie | Verwaltung→Mandat→Eigentümer→Liegenschaft→Gebäude→Einheit nach Fairwalter/Rimo | — v4.0 |
+| STWE-Felder vorbereiten, kein UI | Zukunftssicherheit für Schweizer Markt ohne Overhead jetzt | — v4.0 |
+| Auth-Umbau auf später | Fokus v4.0 auf Datenmodell, Auth kommt in separatem Milestone | — v4.0 |
 
 ---
-*Last updated: 2026-02-17 — v3.1 Production Hardening shipped*
+*Last updated: 2026-02-17 — v4.0 Multi-Tenant Data Model milestone started*
 *Source: KEWA-RENOVATION-OPS-SPEC_v1 + Original v2.0 Scope*
