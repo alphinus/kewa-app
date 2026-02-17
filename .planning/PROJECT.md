@@ -2,37 +2,26 @@
 
 ## What This Is
 
-Ein umfassendes Renovations-Management-System für KEWA AG. Standardisierte Projektvorlagen (WBS), externes Handwerker-Portal via Magic-Link, vollständige Kostenübersicht mit Offerten→Rechnungen→Zahlungen, automatische Zustandshistorie ("Digital Twin") pro Raum/Wohnung, Property-Dashboard mit Heatmap-Visualisierung, und komplette Stammdaten-Verwaltung für Partner, Liegenschaften und Templates.
+Ein umfassendes Renovations-Management-System für KEWA AG. Standardisierte Projektvorlagen (WBS), externes Handwerker-Portal via Magic-Link, vollständige Kostenübersicht mit Offerten→Rechnungen→Zahlungen, automatische Zustandshistorie ("Digital Twin") pro Raum/Wohnung, Property-Dashboard mit Heatmap-Visualisierung, komplette Stammdaten-Verwaltung für Partner, Liegenschaften und Templates, Mieter-Portal mit Ticket-System, und PWA mit Offline-Sync.
 
 ## Core Value
 
 KEWA AG hat volle Transparenz und Kontrolle über alle Renovationen — mit standardisierten Workflows, externer Handwerker-Integration, Kostenübersicht und automatischer Zustandshistorie.
 
-## Current Milestone: v3.1 Production Hardening
+## Current State (v3.1 Shipped)
 
-**Goal:** App wird schneller, sicherer, und alle deutschen Umlaute werden korrigiert.
-
-**Target features:**
-- Performance-Optimierung (Bottlenecks identifizieren und beheben)
-- Security Audit (OWASP Top 10, Auth Hardening, Data Protection)
-- Dependency Audit (npm audit, veraltete Packages updaten)
-- Rechtschreibung (ae→ä, ue→ü, oe→ö im gesamten Codebase)
-
-## Current State (v3.0 Shipped)
-
-**Tech Stack:** Next.js 16 + React 19 + Supabase + Tailwind CSS 4
+**Tech Stack:** Next.js 16.1.6 + React 19 + Supabase + Tailwind CSS 4
 **Codebase:** ~110,000+ LOC TypeScript, ~750+ files
-**Status:** v3.0 Tenant & Offline shipped
+**Status:** v3.1 Production Hardening shipped, deployed to Vercel production
 
-**Shipped Features (v3.0):**
-- Tenant Portal with WhatsApp-style message threads, real-time updates, QR multi-device login, German mobile-first UI
-- PWA Foundation with installable manifest, service worker caching, connectivity indicator
-- Offline Data Sync with IndexedDB caching, form submission queue, automatic sync on reconnect, LWW conflict resolution
-- Ticket-to-WorkOrder conversion, email/push notifications for tenants
-- UX Pattern Library with skeleton loaders, empty states, error boundaries, confirmation dialogs, breadcrumbs, Sonner toasts
+**Shipped Features (v3.1):**
+- Security hardened: 3 CVEs patched, CSP + security headers, Upstash rate limiting on 13 auth endpoints, error boundaries
+- Performance optimized: 629KB bundle reduction via lazy loading, 18.7% LCP improvement, composite DB indexes, N+1 elimination
+- German text corrected: 664 umlaut replacements across 198 files, UTF-8 infrastructure, database migration
 
 **Previous Milestones:**
-- v2.2 Extensions (shipped 2026-01-29) — See milestones/v2.2-ROADMAP.md (to be created)
+- v3.0 Tenant & Offline (shipped 2026-02-03) — See milestones/v3.0-ROADMAP.md
+- v2.2 Extensions (shipped 2026-01-29) — See milestones/v2.2-ROADMAP.md
 - v2.1 Master Data Management (shipped 2026-01-25) — See milestones/v2.1-ROADMAP.md
 - v2.0 Advanced Features (shipped 2026-01-19) — See milestones/v2.0-ROADMAP.md
 - v1.0 MVP (shipped 2025-03-XX) — See milestones/v1.0-ROADMAP.md
@@ -86,6 +75,11 @@ KEWA AG hat volle Transparenz und Kontrolle über alle Renovationen — mit stan
 - ✓ OFFL-01 to OFFL-12: Offline PWA (manifest, service worker, IndexedDB caching, sync queue, conflict resolution) — v3.0
 - ✓ UXPL-01 to UXPL-10: UX Polish (toast notifications, skeleton loaders, empty states, breadcrumbs) — v3.0
 
+**v3.1:**
+- ✓ SEC-01 to SEC-09: Security Audit (CVE patching, CSP headers, rate limiting, error boundaries, env audit) — v3.1
+- ✓ PERF-01 to PERF-07: Performance (Lighthouse baseline, bundle analysis, DB indexes, N+1 fix, lazy loading) — v3.1
+- ✓ I18N-01 to I18N-03: German Umlauts (UTF-8 infrastructure, umlaut correction, DB collation) — v3.1
+
 ### Active
 
 *No active requirements — planning next milestone*
@@ -113,7 +107,7 @@ KEWA AG hat volle Transparenz und Kontrolle über alle Renovationen — mit stan
 - Property/Project Manager: Erstellt Projekte, koordiniert Handwerker
 - Accounting: Kosten, Rechnungen, Zahlungen
 - Externe Handwerker: Empfangen Aufträge via Magic-Link
-- Mieter (Phase 3): Können Tickets erstellen
+- Mieter: Können Tickets erstellen, mobile-first
 
 **Nutzungskontext:**
 - KEWA AG: Desktop + Mobile
@@ -158,7 +152,13 @@ KEWA AG hat volle Transparenz und Kontrolle über alle Renovationen — mit stan
 | Manual service worker (no Serwist) | Turbopack conflict avoidance | ✓ v3.0 |
 | Last-Write-Wins conflict resolution | Server timestamp authority, simple sync | ✓ v3.0 |
 | Network-first API, cache-first static | Optimized for field workers with intermittent connectivity | ✓ v3.0 |
+| Upstash Redis for rate limiting | Serverless-compatible, no Docker needed | ✓ v3.1 |
+| CSP with unsafe-inline/unsafe-eval | Next.js compatibility requires it | ✓ v3.1 |
+| Dictionary-based umlaut replacement | Avoids false positives on English words | ✓ v3.1 |
+| Lazy load Recharts + TipTap | Largest client bundles (629KB combined) | ✓ v3.1 |
+| React cache() for query dedup | Request-level caching without external deps | ✓ v3.1 |
+| Composite indexes over single-column | Multi-filter dashboard queries need compound indexes | ✓ v3.1 |
 
 ---
-*Last updated: 2026-02-03 — v3.0 Tenant & Offline shipped*
+*Last updated: 2026-02-17 — v3.1 Production Hardening shipped*
 *Source: KEWA-RENOVATION-OPS-SPEC_v1 + Original v2.0 Scope*

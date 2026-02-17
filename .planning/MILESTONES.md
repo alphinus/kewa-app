@@ -131,3 +131,31 @@
 **What's next:** Deploy to Vercel, configure Supabase production environment, user acceptance testing with KEWA AG and Imeri.
 
 ---
+
+## v3.1 Production Hardening (Shipped: 2026-02-17)
+
+**Delivered:** Production-hardened app with security audit (CVE patching, CSP headers, rate limiting), performance optimization (629KB bundle reduction, 18.7% LCP improvement, database indexes), and German umlaut correction across entire codebase.
+
+**Phases completed:** 30-34 (14 plans total)
+
+**Key accomplishments:**
+
+- Security hardened: Next.js 16.1.6 with 3 CVEs patched, CSP + security headers on all routes, Upstash rate limiting on 13 auth endpoints, error boundaries, env audit
+- Performance baselined: Vercel Speed Insights + bundle analyzer integrated, Lighthouse CI with GitHub Actions, baseline metrics documented (LCP 3204ms, score 83)
+- Database optimized: 3 composite indexes for dashboard queries, N+1 elimination via React cache() with TypeScript aggregates
+- Bundle reduced 629KB (6x target): Recharts (337KB) and TipTap (292KB) lazy-loaded via next/dynamic, LCP improved 18.7% to 2605ms
+- German umlauts corrected: 664 replacements across 198 source files, UTF-8 infrastructure (.editorconfig, encoding verification), database migration for German text
+
+**Stats:**
+
+- 50 commits
+- 5 phases (30-34), 14 plans
+- 19 requirements satisfied (SEC-01..09, PERF-01..07, I18N-01..03)
+- 13 days from milestone start to ship (2026-02-05 → 2026-02-17)
+
+**Git range:** `feat(30-01)` → `feat: correct German umlauts across entire codebase (Phase 34)`
+
+**What's next:** Next milestone planning (integrations, analytics, or production onboarding)
+
+---
+
