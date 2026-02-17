@@ -20,7 +20,7 @@ const BuildingContext = createContext<BuildingContextValue | undefined>(undefine
  */
 export function BuildingProvider({ children }: { children: ReactNode }) {
   const [selectedBuildingId, setSelectedBuildingId] = useState<BuildingSelectionId>(null)
-  const [isLoading, setIsLoading] = useState(true)
+  const [isLoading, setIsLoading] = useState(false)
 
   const selectBuilding = useCallback((buildingId: BuildingSelectionId) => {
     setSelectedBuildingId(buildingId)
