@@ -112,13 +112,19 @@ Plans:
 **Goal**: Every database query is automatically scoped to the current organization via RLS, enforced at the database level with no application-layer bypass possible
 **Depends on**: Phase 36
 **Requirements**: RLS-01, RLS-02, RLS-03, RLS-04, RLS-05
-**Plans**: TBD
+**Plans**: 4 plans
 **Success Criteria** (what must be TRUE):
   1. Every tenant table has RLS enabled with SELECT/INSERT/UPDATE/DELETE policies using current_organization_id()
   2. API requests to /dashboard/* include x-organization-id header set by middleware from cookie or user default
   3. All ~119 API route files use createOrgClient for tenant-scoped queries (zero raw createClient calls for tenant data)
   4. A test with two organizations confirms: Org A cannot read, insert, update, or delete Org B's data via the Supabase anon client
   5. Existing application functionality works identically for KEWA AG users after RLS enablement (no empty results, no broken pages)
+
+Plans:
+- [ ] 37-01-PLAN.md -- SQL migration: drop old policies, enable RLS on 62 tables, 248 RESTRICTIVE policies, seed Imeri test org, isolation verification
+- [ ] 37-02-PLAN.md -- TypeScript layer: middleware org header + createOrgClient/createPublicClient/createServiceClient helpers
+- [ ] 37-03-PLAN.md -- API route migration: 123 route files from createClient to createOrgClient or createPublicClient
+- [ ] 37-04-PLAN.md -- Non-API file migration: 45 lib utilities, server components, cached queries
 
 ---
 
