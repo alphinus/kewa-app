@@ -10,9 +10,9 @@ See: .planning/PROJECT.md (updated 2026-02-17)
 ## Current Position
 
 Phase: 38 of 40 (App Context & Org Switcher) -- IN PROGRESS
-Plan: 01 of 3 complete
-Status: Plan 38-01 complete — Organization/Mandate types, GET /api/organizations, GET /api/mandates, mandate_id filter on properties, hauswart in isInternalRole
-Last activity: 2026-02-18 -- Plan 38-01 complete: data layer (types + API routes + permissions fix)
+Plan: 02 of 3 complete
+Status: Plan 38-02 complete — OrganizationProvider + MandateProvider + BuildingProvider with cookie persistence, stale validation, loading cascade
+Last activity: 2026-02-18 -- Plan 38-02 complete: context providers (Organization > Mandate > Building chain)
 
 Progress: [################################........] 35/40 phases across all milestones
 
@@ -25,12 +25,12 @@ Progress: [################################........] 35/40 phases across all mil
 - v3.0 Tenant & Offline (2026-02-03) -- Phases 25-29
 - v3.1 Production Hardening (2026-02-17) -- Phases 30-34
 
-**Total:** 34 phases, 128 plans shipped across 6 milestones (+ 5 in Phase 35 + 3 in Phase 36 + 4 in Phase 37 + 1 in Phase 38 = 141 plans total)
+**Total:** 34 phases, 128 plans shipped across 6 milestones (+ 5 in Phase 35 + 3 in Phase 36 + 4 in Phase 37 + 2 in Phase 38 = 142 plans total)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 141 (128 prior + 5 in Phase 35 + 3 in Phase 36 + 4 in Phase 37 + 1 in Phase 38)
+- Total plans completed: 142 (128 prior + 5 in Phase 35 + 3 in Phase 36 + 4 in Phase 37 + 2 in Phase 38)
 - Metrics from previous milestones -- see milestone archives
 
 | Plan | Duration | Tasks | Files |
@@ -47,6 +47,7 @@ Progress: [################################........] 35/40 phases across all mil
 | 37-03 | 90min | 2 | 123 |
 | 37-04 | 15min | 2 | 45 |
 | 38-01 | 15min | 2 | 5 |
+| 38-02 | 15min | 2 | 3 |
 
 ## Accumulated Context
 
@@ -94,6 +95,9 @@ Recent decisions affecting current work:
 - [Phase 38]: 38-01: hauswart added to isInternalRole() at level 40 in ROLE_HIERARCHY — between accounting(60) and tenant(20), per D7
 - [Phase 38]: 38-01: MandateType exported as standalone type alias alongside Mandate interface — consumers can import either
 - [Phase 38]: 38-01: mandate_id filter treats 'all' string as no-filter — UI convention for 'show all mandates'
+- [Phase 38]: 38-02: switchOrg uses window.location.href not router.push — full page reload required for org switch (D5/Pitfall 7)
+- [Phase 38]: 38-02: MandateProvider useEffect depends on currentOrg to prevent race condition fetching mandates before org resolves (Pitfall 2)
+- [Phase 38]: 38-02: BuildingProvider calls useMandate() but does not filter — CombinedSelector (Plan 03) is responsible for building filtering
 
 ### Blockers/Concerns
 
@@ -111,8 +115,8 @@ Recent decisions affecting current work:
 ## Session Continuity
 
 Last session: 2026-02-18
-Stopped at: Completed 38-01-PLAN.md (data layer: Organization/Mandate types, API routes, hauswart permissions fix)
+Stopped at: Completed 38-02-PLAN.md (context providers: OrganizationProvider + MandateProvider + BuildingProvider with cookie persistence)
 Resume file: None
 
 ---
-*v4.0 Multi-Tenant Architecture -- Phase 38 IN PROGRESS (1 of 3 plans done). Next: Plan 38-02 (OrganizationProvider + MandateProvider context providers)*
+*v4.0 Multi-Tenant Architecture -- Phase 38 IN PROGRESS (2 of 3 plans done). Next: Plan 38-03 (CombinedSelector UI component + dashboard layout wiring)*
