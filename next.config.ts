@@ -23,6 +23,27 @@ const nextConfig: NextConfig = {
     parallelServerBuildTraces: false,
   },
 
+  // Redirects from old routes to new /objekte paths
+  async redirects() {
+    return [
+      {
+        source: '/dashboard/liegenschaft',
+        destination: '/dashboard/objekte',
+        permanent: true,
+      },
+      {
+        source: '/dashboard/gebaude',
+        destination: '/dashboard/objekte',
+        permanent: true,
+      },
+      {
+        source: '/dashboard/einheiten',
+        destination: '/dashboard/objekte',
+        permanent: true,
+      },
+    ]
+  },
+
   // Security and cache control headers
   async headers() {
     return [
