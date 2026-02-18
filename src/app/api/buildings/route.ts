@@ -9,10 +9,8 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createOrgClient, OrgContextMissingError } from '@/lib/supabase/with-org'
-import type { Role } from '@/types'
+import { isInternalRole } from '@/lib/permissions'
 import type { Building } from '@/types/database'
-
-const ALLOWED_ROLES: Role[] = ['kewa', 'imeri']
 
 export interface BuildingWithUnitCount extends Building {
   unit_count: number
@@ -27,13 +25,13 @@ export interface BuildingWithUnitCount extends Building {
 export async function GET(request: NextRequest) {
   try {
     const userId = request.headers.get('x-user-id')
-    const userRole = request.headers.get('x-user-role') as Role | null
 
-    if (!userId || !userRole) {
+    if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    if (!ALLOWED_ROLES.includes(userRole)) {
+    const roleName = request.headers.get('x-user-role-name')
+    if (!roleName || !isInternalRole(roleName)) {
       return NextResponse.json(
         { error: 'Forbidden: Insufficient permissions' },
         { status: 403 }
@@ -92,13 +90,13 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const userId = request.headers.get('x-user-id')
-    const userRole = request.headers.get('x-user-role') as Role | null
 
-    if (!userId || !userRole) {
+    if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    if (!ALLOWED_ROLES.includes(userRole)) {
+    const roleName = request.headers.get('x-user-role-name')
+    if (!roleName || !isInternalRole(roleName)) {
       return NextResponse.json(
         { error: 'Forbidden: Insufficient permissions' },
         { status: 403 }
