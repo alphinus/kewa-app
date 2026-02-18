@@ -60,7 +60,7 @@ See milestones/v3.1-ROADMAP.md
 
 ---
 
-- [ ] **Phase 35: Schema Foundation** - New tables, organization_id on all tenant tables, indexes, helper functions, STWE fields
+- [x] **Phase 35: Schema Foundation** - New tables, organization_id on all tenant tables, indexes, helper functions, STWE fields (completed 2026-02-18)
 - [ ] **Phase 36: Data Migration & Backfill** - Seed KEWA AG, backfill all rows, apply NOT NULL constraints
 - [ ] **Phase 37: RLS Enablement & Context Wiring** - RLS policies on all tables, middleware org header, API route updates, isolation verification
 - [ ] **Phase 38: Application Context & Org Switcher** - OrganizationProvider, MandateProvider, OrgSwitcher UI, BuildingContext scoping
@@ -168,7 +168,7 @@ Phase 40 can start after Phase 37 completes (parallel to 38-39).
 | 18-24 | v2.2 | 25/25 | Complete | 2026-01-29 |
 | 25-29 | v3.0 | 17/17 | Complete | 2026-02-03 |
 | 30-34 | v3.1 | 14/14 | Complete | 2026-02-17 |
-| 35. Schema Foundation | v4.0 | 0/4 | Not started | - |
+| 35. Schema Foundation | v4.0 | Complete    | 2026-02-18 | - |
 | 36. Data Migration | v4.0 | 0/TBD | Not started | - |
 | 37. RLS & Context Wiring | v4.0 | 0/TBD | Not started | - |
 | 38. App Context & Switcher | v4.0 | 0/TBD | Not started | - |
