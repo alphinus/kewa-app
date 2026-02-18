@@ -56,6 +56,7 @@ Progress: [##################################......] 36/40 phases across all mil
 | 39-05 | 15min | 1 | 6 |
 | 40-01 | 2min | 2 | 2 |
 | 40-02 | 8min | 2 | 6 |
+| Phase 40 P03 | 8min | 2 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -126,6 +127,9 @@ Recent decisions affecting current work:
 - [Phase 40]: 40-01: media bucket had no prior unscoped CREATE POLICY statements -- 4 new policies are net-new additions
 - [Phase 40]: 40-02: orgId extracted from x-organization-id header (guaranteed by middleware on /api/* routes) -- no DB lookup needed
 - [Phase 40]: 40-02: missing orgId returns 401 (same as auth failure) -- consistent with OrgContextMissingError handling already in these routes
+- [Phase 40]: 40-03: Signature route reads orgId from x-organization-id header for org-prefixed storage path
+- [Phase 40]: 40-03: Portal new ticket page uses ticket.organization_id from API response to pass orgId to uploadTicketAttachment
+- [Phase 40]: 40-03: ticket-to-work-order dest path uses work_orders (plural) consistent with storage conventions (old path used singular work_order)
 
 ### Blockers/Concerns
 
