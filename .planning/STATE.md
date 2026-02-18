@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-02-17)
 
 **Core value:** Immobilienverwaltungen haben volle Transparenz und Kontrolle ueber alle Renovationen -- mit standardisierten Workflows, mandantenfaehiger Datentrennung, externer Handwerker-Integration, Kostenuebersicht und automatischer Zustandshistorie.
-**Current focus:** v4.0 Multi-Tenant Architecture -- Phase 40 in progress (Plans 01-02 complete).
+**Current focus:** v4.0 Multi-Tenant Architecture -- Phase 40 COMPLETE (all 4 plans done).
 
 ## Current Position
 
-Phase: 40 of 40 (Storage Multi-Tenancy) -- IN PROGRESS
-Plan: 02 of 3 complete
-Status: Plan 40-02 complete — all 6 internal upload routes use org-prefixed paths via typed path builders
-Last activity: 2026-02-18 -- Plan 40-02 complete: 6 internal upload routes org-prefixed
+Phase: 40 of 40 (Storage Multi-Tenancy) -- COMPLETE
+Plan: 4 of 4 complete
+Status: Phase 40 complete — all storage buckets org-prefixed, RLS enforced, migration script ready
+Last activity: 2026-02-18 -- Plan 40-04 complete: storage path migration script created
 
-Progress: [##################################......] 36/40 phases across all milestones (Phase 40 in progress)
+Progress: [########################################] 40/40 phases across all milestones (v4.0 COMPLETE)
 
 ## Milestones Completed
 
@@ -25,12 +25,14 @@ Progress: [##################################......] 36/40 phases across all mil
 - v3.0 Tenant & Offline (2026-02-03) -- Phases 25-29
 - v3.1 Production Hardening (2026-02-17) -- Phases 30-34
 
-**Total:** 34 phases, 128 plans shipped across 6 milestones (+ 5 in Phase 35 + 3 in Phase 36 + 4 in Phase 37 + 3 in Phase 38 + 5 in Phase 39 + 2 in Phase 40 = 150 plans total)
+**Total:** 34 phases, 128 plans shipped across 6 milestones (+ 5 in Phase 35 + 3 in Phase 36 + 4 in Phase 37 + 3 in Phase 38 + 5 in Phase 39 + 4 in Phase 40 = 152 plans total)
+
+**v4.0 Multi-Tenant Architecture COMPLETE** (Phases 35-40)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 150 (148 prior + 2 in Phase 40)
+- Total plans completed: 152 (148 prior + 4 in Phase 40)
 - Metrics from previous milestones -- see milestone archives
 
 | Plan | Duration | Tasks | Files |
@@ -56,7 +58,8 @@ Progress: [##################################......] 36/40 phases across all mil
 | 39-05 | 15min | 1 | 6 |
 | 40-01 | 2min | 2 | 2 |
 | 40-02 | 8min | 2 | 6 |
-| Phase 40 P03 | 8min | 2 tasks | 8 files |
+| 40-03 | 8min | 2 | 8 |
+| 40-04 | 5min | 1 | 1 |
 
 ## Accumulated Context
 
@@ -130,6 +133,9 @@ Recent decisions affecting current work:
 - [Phase 40]: 40-03: Signature route reads orgId from x-organization-id header for org-prefixed storage path
 - [Phase 40]: 40-03: Portal new ticket page uses ticket.organization_id from API response to pass orgId to uploadTicketAttachment
 - [Phase 40]: 40-03: ticket-to-work-order dest path uses work_orders (plural) consistent with storage conventions (old path used singular work_order)
+- [Phase 40]: 40-04: Migration script reads org ID from DB (WHERE slug='kewa-ag') not hardcoded UUID -- works in any environment
+- [Phase 40]: 40-04: Supabase storage list() returns folders with metadata==null; recursive traversal required for nested bucket structures
+- [Phase 40]: 40-04: Remove errors after successful copy are non-fatal -- file is at new path; orphan at old path is acceptable
 
 ### Blockers/Concerns
 
@@ -147,8 +153,8 @@ Recent decisions affecting current work:
 ## Session Continuity
 
 Last session: 2026-02-18
-Stopped at: Completed 40-02-PLAN.md (6 internal upload routes org-prefixed) — Phase 40 Plan 02 complete
+Stopped at: Completed 40-04-PLAN.md (storage path migration script) — Phase 40 COMPLETE
 Resume file: None
 
 ---
-*v4.0 Multi-Tenant Architecture -- Phase 40 IN PROGRESS (2 of 3 plans done). Next: Plan 40-03.*
+*v4.0 Multi-Tenant Architecture -- Phase 40 COMPLETE. All 40 phases done.*
