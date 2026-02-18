@@ -93,7 +93,13 @@ Plans:
 **Goal**: All existing data belongs to KEWA AG organization with no NULL organization_id values remaining
 **Depends on**: Phase 35
 **Requirements**: MIGR-01, MIGR-02, MIGR-03
-**Plans**: TBD
+**Plans**: 3 plans
+
+Plans:
+- [ ] 36-01-PLAN.md -- Hauswart role + seed organizations, owners, mandates, users, org_members (migrations 079+080)
+- [ ] 36-02-PLAN.md -- Seed properties/buildings/units + backfill all existing data (migration 081)
+- [ ] 36-03-PLAN.md -- NOT NULL constraints on all 56 tenant tables (migration 082)
+
 **Success Criteria** (what must be TRUE):
   1. Organization "KEWA AG" (slug: kewa-ag) exists with a seeded owner and default mandate
   2. All active users are mapped to KEWA AG in organization_members with is_default=true
@@ -169,7 +175,7 @@ Phase 40 can start after Phase 37 completes (parallel to 38-39).
 | 25-29 | v3.0 | 17/17 | Complete | 2026-02-03 |
 | 30-34 | v3.1 | 14/14 | Complete | 2026-02-17 |
 | 35. Schema Foundation | v4.0 | Complete    | 2026-02-18 | - |
-| 36. Data Migration | v4.0 | 0/TBD | Not started | - |
+| 36. Data Migration | v4.0 | 0/3 | Planned | - |
 | 37. RLS & Context Wiring | v4.0 | 0/TBD | Not started | - |
 | 38. App Context & Switcher | v4.0 | 0/TBD | Not started | - |
 | 39. Navigation Redesign | v4.0 | 0/TBD | Not started | - |
