@@ -10,9 +10,9 @@ See: .planning/PROJECT.md (updated 2026-02-17)
 ## Current Position
 
 Phase: 37 of 40 (RLS Enablement & Context Wiring) -- IN PROGRESS
-Plan: 02 of 4 complete
-Status: Plan 37-02 complete — TypeScript org-context layer (with-org.ts + middleware x-organization-id header)
-Last activity: 2026-02-18 -- Plan 37-02 complete: createOrgClient/createPublicClient/createServiceClient + middleware org resolution
+Plan: 04 of 4 complete
+Status: Plan 37-04 complete — ALL 45 non-API files migrated to with-org.ts clients; zero createClient imports from server.ts outside API routes
+Last activity: 2026-02-18 -- Plan 37-04 complete: lib utilities + server component pages migrated; TypeScript passes
 
 Progress: [################################........] 35/40 phases across all milestones
 
@@ -25,12 +25,12 @@ Progress: [################################........] 35/40 phases across all mil
 - v3.0 Tenant & Offline (2026-02-03) -- Phases 25-29
 - v3.1 Production Hardening (2026-02-17) -- Phases 30-34
 
-**Total:** 34 phases, 128 plans shipped across 6 milestones (+ 5 in Phase 35 + 3 in Phase 36 + 2 in Phase 37)
+**Total:** 34 phases, 128 plans shipped across 6 milestones (+ 5 in Phase 35 + 3 in Phase 36 + 4 in Phase 37)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 138 (128 prior + 5 in Phase 35 + 3 in Phase 36 + 2 in Phase 37)
+- Total plans completed: 140 (128 prior + 5 in Phase 35 + 3 in Phase 36 + 4 in Phase 37)
 - Metrics from previous milestones -- see milestone archives
 
 | Plan | Duration | Tasks | Files |
@@ -44,6 +44,7 @@ Progress: [################################........] 35/40 phases across all mil
 | 36-03 | 5min | 1 | 1 |
 | 37-01 | 12min | 1 | 1 |
 | 37-02 | 8min | 2 | 2 |
+| 37-04 | 15min | 2 | 45 |
 
 ## Accumulated Context
 
@@ -83,6 +84,8 @@ Recent decisions affecting current work:
 - [Phase 37]: 37-02: Middleware imports createClient from server.ts (not with-org.ts) to avoid circular dependency
 - [Phase 37]: 37-02: createServiceClient() is synchronous — uses @supabase/supabase-js bare client (no cookie/SSR handling needed)
 - [Phase 37]: 37-02: When no cookie and no default org row, orgId is null and x-organization-id header is not set — route gets OrgContextMissingError
+- [Phase 37]: 37-04: createServiceClient is synchronous — removed await from all Group B portal/contractor lib call sites
+- [Phase 37]: 37-04: admin/ticket-to-work-order.ts uses both clients: createPublicClient for tenant queries, createServiceClient replacing inline bare supabase-js client for storage
 
 ### Blockers/Concerns
 
@@ -100,8 +103,8 @@ Recent decisions affecting current work:
 ## Session Continuity
 
 Last session: 2026-02-18
-Stopped at: Completed 37-02-PLAN.md (TypeScript org-context layer — with-org.ts + middleware x-organization-id header)
+Stopped at: Completed 37-04-PLAN.md (non-API client migration — lib utilities + server component pages)
 Resume file: None
 
 ---
-*v4.0 Multi-Tenant Architecture -- Phase 37 Plan 02 complete (with-org.ts + middleware). Next: Phase 37 Plan 03 (portal/contractor route migration)*
+*v4.0 Multi-Tenant Architecture -- Phase 37 COMPLETE (all 4 plans done). Next: Phase 38 (OrganizationProvider — threads org context through React server components)*
