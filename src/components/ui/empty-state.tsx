@@ -12,7 +12,7 @@ import { Button } from '@/components/ui/button'
  *   icon={<Home className="h-12 w-12" />}
  *   title="Keine Liegenschaften"
  *   description="Erstellen Sie Ihre erste Liegenschaft."
- *   action={{ label: "+ Liegenschaft", onClick: () => router.push('/dashboard/liegenschaften/neu') }}
+ *   action={{ label: "+ Objekt", onClick: () => router.push('/dashboard/objekte') }}
  * />
  * ```
  */

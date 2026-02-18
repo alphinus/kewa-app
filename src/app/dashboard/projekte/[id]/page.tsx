@@ -129,7 +129,11 @@ export default async function ProjectDetailPage({ params }: PageProps) {
         id,
         name,
         unit_type,
-        floor
+        floor,
+        building:buildings (
+          id,
+          property_id
+        )
       )
     `)
     .eq('id', id)
@@ -145,6 +149,7 @@ export default async function ProjectDetailPage({ params }: PageProps) {
     name: string
     unit_type: string
     floor: number | null
+    building: { id: string; property_id: string | null } | null
   } | null
 
   const statusBadge = getStatusBadge(project.status)
@@ -222,7 +227,11 @@ export default async function ProjectDetailPage({ params }: PageProps) {
                 </svg>
                 <span>Wohnung:</span>
                 <Link
-                  href={`/dashboard/wohnungen/${unit.id}`}
+                  href={
+                    unit.building?.property_id && unit.building?.id
+                      ? `/dashboard/objekte/${unit.building.property_id}/${unit.building.id}/${unit.id}`
+                      : '/dashboard/objekte'
+                  }
                   className="text-blue-600 dark:text-blue-400 hover:underline font-medium"
                 >
                   {unit.name}

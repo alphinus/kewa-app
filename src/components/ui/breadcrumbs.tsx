@@ -20,8 +20,8 @@ import { ChevronRight } from 'lucide-react'
  *
  * // With explicit items
  * <Breadcrumbs items={[
- *   { label: 'Liegenschaften', href: '/dashboard/liegenschaft' },
- *   { label: 'Musterstrasse 1', href: '/dashboard/liegenschaft/abc' }
+ *   { label: 'Objekte', href: '/dashboard/objekte' },
+ *   { label: 'Musterstrasse 1', href: '/dashboard/objekte/abc' }
  * ]} />
  * ```
  */

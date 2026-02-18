@@ -59,7 +59,7 @@ export function BuildingSelector({ currentBuildingId }: BuildingSelectorProps) {
   function handleSelect(buildingId: string) {
     setIsOpen(false)
     if (buildingId !== currentBuildingId) {
-      router.push(`/dashboard/liegenschaft?building=${buildingId}`)
+      router.push('/dashboard/objekte')
     }
   }
 
