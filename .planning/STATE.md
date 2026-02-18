@@ -9,10 +9,10 @@ See: .planning/PROJECT.md (updated 2026-02-17)
 
 ## Current Position
 
-Phase: 38 of 40 (App Context & Org Switcher) -- IN PROGRESS
-Plan: 02 of 3 complete
-Status: Plan 38-02 complete — OrganizationProvider + MandateProvider + BuildingProvider with cookie persistence, stale validation, loading cascade
-Last activity: 2026-02-18 -- Plan 38-02 complete: context providers (Organization > Mandate > Building chain)
+Phase: 38 of 40 (App Context & Org Switcher) -- COMPLETE
+Plan: 03 of 3 complete
+Status: Plan 38-03 complete — OrgSwitcher + CombinedSelector UI components, header and dashboard layout wired with full provider stack
+Last activity: 2026-02-18 -- Plan 38-03 complete: UI components (OrgSwitcher + CombinedSelector) + layout wiring
 
 Progress: [################################........] 35/40 phases across all milestones
 
@@ -25,12 +25,12 @@ Progress: [################################........] 35/40 phases across all mil
 - v3.0 Tenant & Offline (2026-02-03) -- Phases 25-29
 - v3.1 Production Hardening (2026-02-17) -- Phases 30-34
 
-**Total:** 34 phases, 128 plans shipped across 6 milestones (+ 5 in Phase 35 + 3 in Phase 36 + 4 in Phase 37 + 2 in Phase 38 = 142 plans total)
+**Total:** 34 phases, 128 plans shipped across 6 milestones (+ 5 in Phase 35 + 3 in Phase 36 + 4 in Phase 37 + 3 in Phase 38 = 143 plans total)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 142 (128 prior + 5 in Phase 35 + 3 in Phase 36 + 4 in Phase 37 + 2 in Phase 38)
+- Total plans completed: 143 (128 prior + 5 in Phase 35 + 3 in Phase 36 + 4 in Phase 37 + 3 in Phase 38)
 - Metrics from previous milestones -- see milestone archives
 
 | Plan | Duration | Tasks | Files |
@@ -48,6 +48,7 @@ Progress: [################################........] 35/40 phases across all mil
 | 37-04 | 15min | 2 | 45 |
 | 38-01 | 15min | 2 | 5 |
 | 38-02 | 15min | 2 | 3 |
+| 38-03 | 20min | 2 | 5 |
 
 ## Accumulated Context
 
@@ -98,6 +99,9 @@ Recent decisions affecting current work:
 - [Phase 38]: 38-02: switchOrg uses window.location.href not router.push — full page reload required for org switch (D5/Pitfall 7)
 - [Phase 38]: 38-02: MandateProvider useEffect depends on currentOrg to prevent race condition fetching mandates before org resolves (Pitfall 2)
 - [Phase 38]: 38-02: BuildingProvider calls useMandate() but does not filter — CombinedSelector (Plan 03) is responsible for building filtering
+- [Phase 38]: 38-03: Property interface in database.ts now includes mandate_id: string | null — required for client-side mandate grouping in CombinedSelector
+- [Phase 38]: 38-03: CombinedSelector fetches all properties without mandate_id param, groups client-side using availableMandates from context
+- [Phase 38]: 38-03: OrgSwitcher returns null when isMultiOrg=false — single-org users see only CombinedSelector
 
 ### Blockers/Concerns
 
@@ -115,8 +119,8 @@ Recent decisions affecting current work:
 ## Session Continuity
 
 Last session: 2026-02-18
-Stopped at: Completed 38-02-PLAN.md (context providers: OrganizationProvider + MandateProvider + BuildingProvider with cookie persistence)
+Stopped at: Completed 38-03-PLAN.md (UI components: OrgSwitcher + CombinedSelector + layout wiring)
 Resume file: None
 
 ---
-*v4.0 Multi-Tenant Architecture -- Phase 38 IN PROGRESS (2 of 3 plans done). Next: Plan 38-03 (CombinedSelector UI component + dashboard layout wiring)*
+*v4.0 Multi-Tenant Architecture -- Phase 38 COMPLETE (3 of 3 plans done). Phase 38: App Context & Org Switcher fully shipped.*
