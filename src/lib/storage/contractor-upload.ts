@@ -4,9 +4,9 @@
  * Validation and path generation for contractor file uploads.
  * Implements EXT-11 (document upload) and EXT-12 (photo upload).
  *
- * Storage path conventions from 031_storage_buckets.sql:
- * - work_orders/{work_order_id}/documents/{uuid}.pdf
- * - work_orders/{work_order_id}/photos/{context}/{uuid}.webp
+ * Storage path conventions (org-prefixed per 084_storage_rls.sql):
+ * - {orgId}/work_orders/{work_order_id}/documents/{uuid}.pdf
+ * - {orgId}/work_orders/{work_order_id}/photos/{context}/{uuid}.webp
  */
 
 // ============================================
@@ -163,8 +163,9 @@ export function validateBatchUpload(
 // ============================================
 
 /**
- * Generate a storage path for a contractor upload.
+ * Generate an org-prefixed storage path for a contractor upload.
  *
+ * @param orgId - Organisation UUID (first path segment, enforced by RLS)
  * @param workOrderId - UUID of the work order
  * @param mediaType - 'photo' or 'document'
  * @param context - Upload context (offer, invoice, completion, etc.)
@@ -172,6 +173,7 @@ export function validateBatchUpload(
  * @returns Storage path details
  */
 export function generateStoragePath(
+  orgId: string,
   workOrderId: string,
   mediaType: UploadMediaType,
   context: UploadContext,
@@ -181,10 +183,10 @@ export function generateStoragePath(
   const ext = MIME_TO_EXT[mimeType] || (mediaType === 'photo' ? 'webp' : 'pdf')
   const filename = `${fileId}.${ext}`
 
-  // Path convention from 031_storage_buckets.sql
+  // Org-prefixed path — first segment is orgId, required by Storage RLS (084_storage_rls.sql)
   const path = mediaType === 'document'
-    ? `work_orders/${workOrderId}/documents/${filename}`
-    : `work_orders/${workOrderId}/photos/${context}/${filename}`
+    ? `${orgId}/work_orders/${workOrderId}/documents/${filename}`
+    : `${orgId}/work_orders/${workOrderId}/photos/${context}/${filename}`
 
   return {
     bucket: STORAGE_BUCKET,

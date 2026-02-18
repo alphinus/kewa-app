@@ -6,17 +6,21 @@
  */
 
 import { createPublicClient } from '@/lib/supabase/with-org'
+import { inspectionSignaturePath } from '@/lib/storage/paths'
 
 /**
  * Upload signature image to inspections storage bucket
  *
- * Converts base64 data URL to Buffer and uploads to inspections/{inspectionId}/signature.png
+ * Converts base64 data URL to Buffer and uploads to
+ * {orgId}/inspections/{inspectionId}/signature.png
  *
- * @param inspectionId Inspection ID for path organization
+ * @param orgId Organisation UUID (first path segment, enforced by RLS)
+ * @param inspectionId Inspection ID for path organisation
  * @param dataUrl Base64 PNG data URL (e.g., "data:image/png;base64,iVBORw...")
- * @returns Storage path (e.g., "inspections/abc123/signature.png")
+ * @returns Storage path (e.g., "{orgId}/inspections/abc123/signature.png")
  */
 export async function uploadSignature(
+  orgId: string,
   inspectionId: string,
   dataUrl: string
 ): Promise<string> {
@@ -31,8 +35,8 @@ export async function uploadSignature(
   const base64Data = matches[1]
   const buffer = Buffer.from(base64Data, 'base64')
 
-  // Upload to storage
-  const storagePath = `inspections/${inspectionId}/signature.png`
+  // Org-prefixed path — required by Storage RLS (084_storage_rls.sql)
+  const storagePath = inspectionSignaturePath(orgId, inspectionId)
   const { error } = await supabase
     .storage
     .from('inspections')
@@ -53,7 +57,7 @@ export async function uploadSignature(
  *
  * Returns a temporary signed URL valid for 1 hour.
  *
- * @param storagePath Storage path (e.g., "inspections/abc123/signature.png")
+ * @param storagePath Storage path (e.g., "{orgId}/inspections/abc123/signature.png")
  * @returns Signed URL valid for 1 hour
  */
 export async function getSignatureUrl(storagePath: string): Promise<string> {

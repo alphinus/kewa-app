@@ -66,8 +66,11 @@ export async function POST(
       )
     }
 
+    // Get org ID from middleware-injected header (required for org-prefixed storage path)
+    const orgId = req.headers.get('x-organization-id') || ''
+
     // Upload signature to storage
-    const storagePath = await uploadSignature(inspectionId, image_data_url)
+    const storagePath = await uploadSignature(orgId, inspectionId, image_data_url)
 
     // Update inspection
     const updatedInspection = await updateInspection(inspectionId, {

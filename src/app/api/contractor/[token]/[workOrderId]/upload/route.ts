@@ -67,6 +67,7 @@ export async function POST(
       .select(`
         id,
         status,
+        organization_id,
         partner:partners!inner(email)
       `)
       .eq('id', workOrderId)
@@ -79,6 +80,9 @@ export async function POST(
         { status: 404 }
       )
     }
+
+    // Extract org ID for org-prefixed storage paths
+    const orgId = (workOrder as any).organization_id as string
 
     // Check if uploads are allowed for this status
     if (!UPLOAD_ALLOWED_STATUSES.includes(workOrder.status)) {
@@ -113,8 +117,9 @@ export async function POST(
       )
     }
 
-    // Generate storage path
+    // Generate org-prefixed storage path
     const storagePath = generateStoragePath(
+      orgId,
       workOrderId,
       mediaType,
       context,
