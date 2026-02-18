@@ -150,6 +150,7 @@ export default function TicketDetailPage() {
       {/* Message input */}
       <MessageInput
         ticketId={ticketId}
+        orgId={ticket.organization_id}
         disabled={isClosed}
         onSent={refetch}
       />

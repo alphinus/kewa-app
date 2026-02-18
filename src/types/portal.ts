@@ -75,6 +75,7 @@ export interface Ticket {
   ticket_number: string
   category_id: string
   unit_id: string
+  organization_id: string
   created_by: string
   title: string
   description: string

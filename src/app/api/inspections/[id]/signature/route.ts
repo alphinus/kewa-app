@@ -67,7 +67,10 @@ export async function POST(
     }
 
     // Get org ID from middleware-injected header (required for org-prefixed storage path)
-    const orgId = req.headers.get('x-organization-id') || ''
+    const orgId = req.headers.get('x-organization-id')
+    if (!orgId) {
+      return NextResponse.json({ error: 'Organization context required' }, { status: 401 })
+    }
 
     // Upload signature to storage
     const storagePath = await uploadSignature(orgId, inspectionId, image_data_url)

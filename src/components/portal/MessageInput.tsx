@@ -7,6 +7,7 @@ import { validateAttachment, uploadTicketAttachment, MAX_TICKET_PHOTOS } from '@
 
 interface MessageInputProps {
   ticketId: string
+  orgId: string
   disabled?: boolean
   onSent?: () => void
 }
@@ -15,7 +16,7 @@ interface MessageInputProps {
  * Message input component with text and attachment support
  * Sticky bottom bar for sending messages
  */
-export function MessageInput({ ticketId, disabled, onSent }: MessageInputProps) {
+export function MessageInput({ ticketId, orgId, disabled, onSent }: MessageInputProps) {
   const [content, setContent] = useState('')
   const [attachments, setAttachments] = useState<File[]>([])
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -72,7 +73,7 @@ export function MessageInput({ ticketId, disabled, onSent }: MessageInputProps) 
       // 2. Upload attachments if any
       if (attachments.length > 0) {
         for (const file of attachments) {
-          const { path } = await uploadTicketAttachment(file, ticketId, messageId)
+          const { path } = await uploadTicketAttachment(file, orgId, ticketId, messageId)
 
           // Create attachment record
           await fetch(`/api/portal/tickets/${ticketId}/attachments`, {
