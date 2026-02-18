@@ -5,14 +5,14 @@
 See: .planning/PROJECT.md (updated 2026-02-17)
 
 **Core value:** Immobilienverwaltungen haben volle Transparenz und Kontrolle ueber alle Renovationen -- mit standardisierten Workflows, mandantenfaehiger Datentrennung, externer Handwerker-Integration, Kostenuebersicht und automatischer Zustandshistorie.
-**Current focus:** v4.0 Multi-Tenant Data Migration -- Phase 36 in progress (plan 01 of 3 done)
+**Current focus:** v4.0 Multi-Tenant Data Migration -- Phase 36 in progress (plan 02 of 3 done)
 
 ## Current Position
 
 Phase: 36 of 40 (Data Migration & Backfill)
-Plan: 01 of 3 complete — ready for Plan 02 (seed properties + backfill org_id)
-Status: Phase 36 plan 01 complete — hauswart role + master data seed done
-Last activity: 2026-02-18 -- Plan 36-01 complete: hauswart role, 2 orgs, 4 owners, 4 mandates, 10 users, 17 org_members
+Plan: 02 of 3 complete — ready for Plan 03 (NOT NULL constraints)
+Status: Phase 36 plan 02 complete — property hierarchy, 56-table backfill, tenant assignments done
+Last activity: 2026-02-18 -- Plan 36-02 complete: 7 properties, 5 buildings, 24 units, 56-table org_id backfill, 4 tenancy records
 
 Progress: [##############################..........] 34/40 phases across all milestones
 
@@ -25,12 +25,12 @@ Progress: [##############################..........] 34/40 phases across all mil
 - v3.0 Tenant & Offline (2026-02-03) -- Phases 25-29
 - v3.1 Production Hardening (2026-02-17) -- Phases 30-34
 
-**Total:** 34 phases, 128 plans shipped across 6 milestones
+**Total:** 34 phases, 128 plans shipped across 6 milestones (+ 2 in Phase 36)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 134 (128 prior + 5 in Phase 35 + 1 in Phase 36)
+- Total plans completed: 135 (128 prior + 5 in Phase 35 + 2 in Phase 36)
 - Metrics from previous milestones -- see milestone archives
 
 | Plan | Duration | Tasks | Files |
@@ -40,6 +40,7 @@ Progress: [##############################..........] 34/40 phases across all mil
 | 35-04 | 3min | 1 | 1 |
 | 35-03 | 3min | 2 | 2 |
 | 36-01 | 3min | 2 | 2 |
+| 36-02 | 12min | 1 | 1 |
 
 ## Accumulated Context
 
@@ -66,13 +67,17 @@ Recent decisions affecting current work:
 - 36-01: Existing user 0000-...001 renamed to Rolf Kaelin (preserves FK references vs creating new user at 0020-...001)
 - 36-01: All new Phase 36 users receive role='kewa' as placeholder (legacy NOT NULL column, Phase 37 will drop)
 - 36-01: Flurina Kaelin assigned 0020-...001; Rolf Kaelin reuses existing 0000-...001
+- 36-02: Liegenschaft KEWA renamed to Wohnanlage Seefeld (preserves all FK references, assigned to Eigenverwaltung KEWA mandate)
+- 36-02: contract_type uses 'residential' not 'unlimited' (074 CHECK constraint — unlimited duration = end_date NULL)
+- 36-02: Tenancy idempotency via WHERE NOT EXISTS (tenancies has no unique constraint for ON CONFLICT target)
+- 36-02: Unit namespace split: 0015 for Leweg 4 detailed (10 units), 0016 for all other new property units
 
 ### Blockers/Concerns
 
 - PgBouncer + SET LOCAL interaction needs validation in staging (SET LOCAL is transaction-scoped but PostgREST may not wrap each API call in explicit transaction)
 - 7 tables already have RLS enabled (029_rls_policies.sql) using is_internal_user(auth.uid()) which returns NULL for PIN-auth -- need audit
 - quality_gates table missing in production DB (migration 072 skipped)
-- Docker Desktop not running during 36-01 execution -- supabase db reset verification deferred to next plan
+- Docker Desktop not running during 36-01 and 36-02 execution -- supabase db reset verification deferred (both 079+080+081 reviewed statically)
 
 ### Tech Debt
 
@@ -83,8 +88,8 @@ Recent decisions affecting current work:
 ## Session Continuity
 
 Last session: 2026-02-18
-Stopped at: Completed 36-01-PLAN.md (hauswart role + master data seed)
+Stopped at: Completed 36-02-PLAN.md (property hierarchy + 56-table org_id backfill)
 Resume file: None
 
 ---
-*v4.0 Multi-Tenant Data Migration -- Phase 36 active (plan 01/3 done: 079 + 080 migrations)*
+*v4.0 Multi-Tenant Data Migration -- Phase 36 active (plan 02/3 done: 079 + 080 + 081 migrations)*
