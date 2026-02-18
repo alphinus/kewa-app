@@ -48,11 +48,20 @@ export async function GET(request: NextRequest) {
 
     const supabase = await createOrgClient(request)
 
-    // Fetch all properties
-    const { data: properties, error: propsError } = await supabase
+    // Optional mandate_id filter (D1, D3, D6: filter properties by mandate)
+    const mandateId = request.nextUrl.searchParams.get('mandate_id')
+
+    // Fetch properties, optionally filtered by mandate_id
+    let propertiesQuery = supabase
       .from('properties')
       .select('*')
       .order('name', { ascending: true })
+
+    if (mandateId && mandateId !== 'all') {
+      propertiesQuery = propertiesQuery.eq('mandate_id', mandateId)
+    }
+
+    const { data: properties, error: propsError } = await propertiesQuery
 
     if (propsError) {
       console.error('Error fetching properties:', propsError)
