@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-02-17)
 
 **Core value:** Immobilienverwaltungen haben volle Transparenz und Kontrolle ueber alle Renovationen -- mit standardisierten Workflows, mandantenfaehiger Datentrennung, externer Handwerker-Integration, Kostenuebersicht und automatischer Zustandshistorie.
-**Current focus:** v4.0 Multi-Tenant Architecture -- Phase 38 in progress (App Context & Org Switcher)
+**Current focus:** v4.0 Multi-Tenant Architecture -- Phase 39 in progress (Navigation Redesign)
 
 ## Current Position
 
-Phase: 38 of 40 (App Context & Org Switcher) -- COMPLETE
-Plan: 03 of 3 complete
-Status: Plan 38-03 complete — OrgSwitcher + CombinedSelector UI components, header and dashboard layout wired with full provider stack
-Last activity: 2026-02-18 -- Plan 38-03 complete: UI components (OrgSwitcher + CombinedSelector) + layout wiring
+Phase: 39 of 40 (Navigation Redesign) -- IN PROGRESS
+Plan: 01 of 4 complete
+Status: Plan 39-01 complete — mobile footer reduced to 5 items (4 links + Mehr button), MehrBottomSheet with 10 overflow items
+Last activity: 2026-02-18 -- Plan 39-01 complete: mobile-nav.tsx redesign + MehrBottomSheet component + CSS animation
 
-Progress: [################################........] 35/40 phases across all milestones
+Progress: [##################################......] 36/40 phases across all milestones
 
 ## Milestones Completed
 
@@ -25,12 +25,12 @@ Progress: [################################........] 35/40 phases across all mil
 - v3.0 Tenant & Offline (2026-02-03) -- Phases 25-29
 - v3.1 Production Hardening (2026-02-17) -- Phases 30-34
 
-**Total:** 34 phases, 128 plans shipped across 6 milestones (+ 5 in Phase 35 + 3 in Phase 36 + 4 in Phase 37 + 3 in Phase 38 = 143 plans total)
+**Total:** 34 phases, 128 plans shipped across 6 milestones (+ 5 in Phase 35 + 3 in Phase 36 + 4 in Phase 37 + 3 in Phase 38 + 1 in Phase 39 = 144 plans total)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 143 (128 prior + 5 in Phase 35 + 3 in Phase 36 + 4 in Phase 37 + 3 in Phase 38)
+- Total plans completed: 144 (128 prior + 5 in Phase 35 + 3 in Phase 36 + 4 in Phase 37 + 3 in Phase 38 + 1 in Phase 39)
 - Metrics from previous milestones -- see milestone archives
 
 | Plan | Duration | Tasks | Files |
@@ -49,6 +49,7 @@ Progress: [################################........] 35/40 phases across all mil
 | 38-01 | 15min | 2 | 5 |
 | 38-02 | 15min | 2 | 3 |
 | 38-03 | 20min | 2 | 5 |
+| 39-01 | 8min | 2 | 3 |
 
 ## Accumulated Context
 
@@ -102,6 +103,9 @@ Recent decisions affecting current work:
 - [Phase 38]: 38-03: Property interface in database.ts now includes mandate_id: string | null — required for client-side mandate grouping in CombinedSelector
 - [Phase 38]: 38-03: CombinedSelector fetches all properties without mandate_id param, groups client-side using availableMandates from context
 - [Phase 38]: 38-03: OrgSwitcher returns null when isMultiOrg=false — single-org users see only CombinedSelector
+- [Phase 39]: 39-01: MehrBottomSheet rendered inside MobileNav fragment sibling to nav — avoids layout.tsx changes, z-[60] above nav z-50
+- [Phase 39]: 39-01: MEHR_ROUTES array drives Mehr button active state — pathname startsWith check covers nested routes
+- [Phase 39]: 39-01: Body scroll lock via useEffect with open dep, cleanup restores overflow on unmount
 
 ### Blockers/Concerns
 
@@ -119,8 +123,8 @@ Recent decisions affecting current work:
 ## Session Continuity
 
 Last session: 2026-02-18
-Stopped at: Completed 38-03-PLAN.md (UI components: OrgSwitcher + CombinedSelector + layout wiring)
+Stopped at: Completed 39-01-PLAN.md (mobile-nav 5-item redesign + MehrBottomSheet + CSS animation)
 Resume file: None
 
 ---
-*v4.0 Multi-Tenant Architecture -- Phase 38 COMPLETE (3 of 3 plans done). Phase 38: App Context & Org Switcher fully shipped.*
+*v4.0 Multi-Tenant Architecture -- Phase 39 IN PROGRESS (1 of 4 plans done). Phase 38 COMPLETE.*
