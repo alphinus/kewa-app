@@ -117,6 +117,7 @@ export interface Property {
   name: string
   address: string | null
   description: string | null
+  mandate_id: string | null
   created_at: string
   updated_at: string
 }
