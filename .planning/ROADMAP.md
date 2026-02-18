@@ -66,7 +66,7 @@ See milestones/v3.1-ROADMAP.md
 - [x] **Phase 38: Application Context & Org Switcher** - OrganizationProvider, MandateProvider, OrgSwitcher UI, BuildingContext scoping (completed 2026-02-18)
 - [x] **Phase 39: Navigation Redesign** - Breadcrumbs, simplified footer, Objekte drill-down routes, URL redirects (completed 2026-02-18)
 - [x] **Phase 40: Storage Multi-Tenancy** - Org-prefixed storage paths, storage RLS policies, existing file migration (completed 2026-02-18)
-- [ ] **Phase 41: v4.0 Bug Fixes & Cleanup** - Signature storage RLS fix, hauswart role access, cached-queries regression, orphaned file cleanup
+- [x] **Phase 41: v4.0 Bug Fixes & Cleanup** - Signature storage RLS fix, hauswart role access, cached-queries regression, orphaned file cleanup (completed 2026-02-18)
 
 ## Phase Details
 
@@ -219,7 +219,7 @@ Phase 40 can start after Phase 37 completes (parallel to 38-39).
 | 38. App Context & Switcher | v4.0 | Complete    | 2026-02-18 | - |
 | 39. Navigation Redesign | v4.0 | Complete    | 2026-02-18 | - |
 | 40. Storage Multi-Tenancy | v4.0 | Complete    | 2026-02-18 | - |
-| 41. Bug Fixes & Cleanup | v4.0 | Pending | - | - |
+| 41. Bug Fixes & Cleanup | v4.0 | Complete    | 2026-02-18 | - |
 
 **Total:** 40 phases complete, 1 phase pending
 
