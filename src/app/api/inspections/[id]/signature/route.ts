@@ -9,6 +9,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getCurrentUser } from '@/lib/session'
 import { getInspection, updateInspection } from '@/lib/inspections/queries'
 import { uploadSignature, getSignatureUrl } from '@/lib/inspections/signature-utils'
+import { createOrgClient, OrgContextMissingError } from '@/lib/supabase/with-org'
 
 export async function POST(
   req: NextRequest,
@@ -72,8 +73,11 @@ export async function POST(
       return NextResponse.json({ error: 'Organization context required' }, { status: 401 })
     }
 
+    // Create org-scoped client so storage RLS INSERT passes with correct org context
+    const supabase = await createOrgClient(req)
+
     // Upload signature to storage
-    const storagePath = await uploadSignature(orgId, inspectionId, image_data_url)
+    const storagePath = await uploadSignature(supabase, orgId, inspectionId, image_data_url)
 
     // Update inspection
     const updatedInspection = await updateInspection(inspectionId, {
@@ -84,7 +88,7 @@ export async function POST(
     })
 
     // Get signed URL for immediate display
-    const signatureUrl = await getSignatureUrl(storagePath)
+    const signatureUrl = await getSignatureUrl(supabase, storagePath)
 
     return NextResponse.json({
       inspection: updatedInspection,
@@ -92,6 +96,9 @@ export async function POST(
     })
   } catch (error) {
     console.error('Error saving signature:', error)
+    if (error instanceof OrgContextMissingError) {
+      return NextResponse.json({ error: 'Organization context required' }, { status: 401 })
+    }
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Fehler beim Speichern der Unterschrift' },
       { status: 500 }

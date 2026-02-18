@@ -5,7 +5,7 @@
  * Phase: 22-inspection-core Plan 03
  */
 
-import { createPublicClient } from '@/lib/supabase/with-org'
+import type { SupabaseClient } from '@supabase/supabase-js'
 import { inspectionSignaturePath } from '@/lib/storage/paths'
 
 /**
@@ -14,18 +14,18 @@ import { inspectionSignaturePath } from '@/lib/storage/paths'
  * Converts base64 data URL to Buffer and uploads to
  * {orgId}/inspections/{inspectionId}/signature.png
  *
+ * @param supabase Org-scoped Supabase client (with RLS context set)
  * @param orgId Organisation UUID (first path segment, enforced by RLS)
  * @param inspectionId Inspection ID for path organisation
  * @param dataUrl Base64 PNG data URL (e.g., "data:image/png;base64,iVBORw...")
  * @returns Storage path (e.g., "{orgId}/inspections/abc123/signature.png")
  */
 export async function uploadSignature(
+  supabase: SupabaseClient,
   orgId: string,
   inspectionId: string,
   dataUrl: string
 ): Promise<string> {
-  const supabase = await createPublicClient()
-
   // Extract base64 data from data URL
   const matches = dataUrl.match(/^data:image\/png;base64,(.+)$/)
   if (!matches) {
@@ -57,12 +57,11 @@ export async function uploadSignature(
  *
  * Returns a temporary signed URL valid for 1 hour.
  *
+ * @param supabase Org-scoped Supabase client (with RLS context set)
  * @param storagePath Storage path (e.g., "{orgId}/inspections/abc123/signature.png")
  * @returns Signed URL valid for 1 hour
  */
-export async function getSignatureUrl(storagePath: string): Promise<string> {
-  const supabase = await createPublicClient()
-
+export async function getSignatureUrl(supabase: SupabaseClient, storagePath: string): Promise<string> {
   const { data, error } = await supabase
     .storage
     .from('inspections')
