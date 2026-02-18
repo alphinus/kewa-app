@@ -188,12 +188,14 @@ Plans:
 **Depends on**: Phase 40
 **Gap Closure**: Closes INT-01, INT-02, Flow #3 from v4.0-MILESTONE-AUDIT.md
 **Plans**: 1 plan
+Plans:
+- [ ] 41-01-PLAN.md -- Fix INT-01 signature RLS, INT-02 hauswart 403, cached-queries regression, delete orphaned PropertySelector
 **Success Criteria** (what must be TRUE):
-  1.  uses org-scoped Supabase client — signature uploads pass storage RLS
-  2. hauswart role can access  and  — CombinedSelector loads without 403
-  3.  uses org-scoped client — server components return tenant data
-  4.  deleted — no orphaned components
-  5. All hardcoded  arrays replaced with  calls
+  1. signature-utils.ts uses org-scoped Supabase client -- signature uploads pass storage RLS
+  2. hauswart role can access /api/properties and /api/buildings -- CombinedSelector loads without 403
+  3. cached-queries.ts uses org-scoped client -- server components return tenant data
+  4. PropertySelector.tsx deleted -- no orphaned components
+  5. All hardcoded ALLOWED_ROLES arrays in properties/buildings routes replaced with isInternalRole() calls
 
 ---
 
