@@ -132,7 +132,13 @@ Plans:
 **Goal**: Users can view and switch between organizations and mandates, with all downstream data automatically scoped
 **Depends on**: Phase 37
 **Requirements**: CTX-01, CTX-02, CTX-03, CTX-04
-**Plans**: TBD
+**Plans**: 3 plans
+
+Plans:
+- [ ] 38-01-PLAN.md -- Types, API endpoints (organizations + mandates), permissions fix (hauswart)
+- [ ] 38-02-PLAN.md -- Context providers (OrganizationProvider + MandateProvider + BuildingProvider cookie persistence)
+- [ ] 38-03-PLAN.md -- UI components (OrgSwitcher + CombinedSelector) and layout/header wiring
+
 **Success Criteria** (what must be TRUE):
   1. Dashboard layout wraps children in OrganizationProvider > MandateProvider > BuildingProvider hierarchy
   2. Header displays current organization name (static for single-org users, dropdown for multi-org)
