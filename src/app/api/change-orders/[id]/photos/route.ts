@@ -10,6 +10,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createOrgClient, OrgContextMissingError } from '@/lib/supabase/with-org'
+import { changeOrderPhotoPath } from '@/lib/storage/paths'
 
 interface RouteContext {
   params: Promise<{ id: string }>
@@ -130,6 +131,11 @@ export async function POST(
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
+    const orgId = request.headers.get('x-organization-id')
+    if (!orgId) {
+      return NextResponse.json({ error: 'Organization context required' }, { status: 401 })
+    }
+
     // Verify change order exists
     const { data: changeOrder, error: coError } = await supabase
       .from('change_orders')
@@ -161,10 +167,10 @@ export async function POST(
       return NextResponse.json({ error: 'File size exceeds 10MB limit' }, { status: 400 })
     }
 
-    // Generate storage path: change_orders/{co_id}/photos/{timestamp}-{filename}
+    // Generate storage path: {orgId}/change_orders/{co_id}/photos/{timestamp}-{filename}
     const timestamp = Date.now()
     const filename = file.name.replace(/[^a-zA-Z0-9.-]/g, '_') // Sanitize filename
-    const storagePath = `change_orders/${id}/photos/${timestamp}-${filename}`
+    const storagePath = changeOrderPhotoPath(orgId, id, timestamp, filename)
 
     // Upload to storage
     const { error: uploadError } = await supabase.storage

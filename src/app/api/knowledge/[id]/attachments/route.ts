@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createOrgClient, OrgContextMissingError } from '@/lib/supabase/with-org'
+import { kbAttachmentPath } from '@/lib/storage/paths'
 import type {
   KBAttachment,
   KBAttachmentWithUrl,
@@ -141,6 +142,11 @@ export async function POST(
       )
     }
 
+    const orgId = request.headers.get('x-organization-id')
+    if (!orgId) {
+      return NextResponse.json({ error: 'Organization context required' }, { status: 401 })
+    }
+
     // Validate UUID format
     const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
     if (!uuidRegex.test(articleId)) {
@@ -195,7 +201,7 @@ export async function POST(
     // Generate unique file ID and path
     const fileId = crypto.randomUUID()
     const ext = file.name.split('.').pop()?.toLowerCase() || 'bin'
-    const storagePath = `kb_articles/${articleId}/attachments/${fileId}.${ext}`
+    const storagePath = kbAttachmentPath(orgId, articleId, fileId, ext)
 
     // Upload to Supabase Storage
     const arrayBuffer = await file.arrayBuffer()

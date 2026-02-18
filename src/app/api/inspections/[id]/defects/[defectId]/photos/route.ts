@@ -9,6 +9,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createOrgClient, OrgContextMissingError } from '@/lib/supabase/with-org'
+import { inspectionDefectPhotoPath } from '@/lib/storage/paths'
 import type { Role } from '@/types'
 
 const ALLOWED_ROLES: Role[] = ['kewa', 'imeri']
@@ -139,6 +140,11 @@ export async function POST(
       )
     }
 
+    const orgId = request.headers.get('x-organization-id')
+    if (!orgId) {
+      return NextResponse.json({ error: 'Organization context required' }, { status: 401 })
+    }
+
     const supabase = await createOrgClient(request)
 
     // Check inspections bucket exists
@@ -183,7 +189,7 @@ export async function POST(
 
     // Generate unique filename
     const uuid = crypto.randomUUID()
-    const storagePath = `${id}/defects/${uuid}.webp`
+    const storagePath = inspectionDefectPhotoPath(orgId, id, uuid)
 
     // Upload file to storage
     const arrayBuffer = await file.arrayBuffer()
