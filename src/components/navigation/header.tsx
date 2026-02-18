@@ -4,33 +4,26 @@ import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { LogOut, WifiOff } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { PropertySelector } from './PropertySelector'
+import { OrgSwitcher } from './OrgSwitcher'
+import { CombinedSelector } from './CombinedSelector'
 import { NotificationBell } from '@/components/notifications/NotificationBell'
 import { SyncStatusBadge } from '@/components/SyncStatusBadge'
 import { useConnectivity } from '@/contexts/ConnectivityContext'
 import type { User } from '@/types'
-import type { BuildingSelectionId } from '@/contexts/BuildingContext'
 
 interface HeaderProps {
   user?: User
-  selectedBuildingId: BuildingSelectionId
-  onBuildingSelect?: (buildingId: BuildingSelectionId) => void
 }
 
 /**
- * App header with logo, property selector (for KEWA), and logout button
- * Sticky top, h-16 for touch-friendly interaction
+ * App header with logo, org switcher + combined selector (for internal users), and logout button.
+ * OrgSwitcher renders null for single-org users — no visual change for KEWA-only deployments.
+ * Sticky top, h-16 for touch-friendly interaction.
  */
-export function Header({ user, selectedBuildingId, onBuildingSelect }: HeaderProps) {
+export function Header({ user }: HeaderProps) {
   const router = useRouter()
   const [loggingOut, setLoggingOut] = useState(false)
   const { isOnline } = useConnectivity()
-
-  function handleBuildingSelect(buildingId: BuildingSelectionId) {
-    if (onBuildingSelect) {
-      onBuildingSelect(buildingId)
-    }
-  }
 
   async function handleLogout() {
     setLoggingOut(true)
@@ -60,13 +53,11 @@ export function Header({ user, selectedBuildingId, onBuildingSelect }: HeaderPro
           </span>
         </div>
 
-        {/* Property selector (for all internal users) */}
+        {/* Org switcher + combined selector (for all internal users) */}
         {user?.isInternal && (
-          <div className="flex-shrink-0">
-            <PropertySelector
-              selectedBuildingId={selectedBuildingId}
-              onSelect={handleBuildingSelect}
-            />
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <OrgSwitcher />
+            <CombinedSelector />
           </div>
         )}
 
