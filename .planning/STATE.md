@@ -5,14 +5,14 @@
 See: .planning/PROJECT.md (updated 2026-02-17)
 
 **Core value:** Immobilienverwaltungen haben volle Transparenz und Kontrolle ueber alle Renovationen -- mit standardisierten Workflows, mandantenfaehiger Datentrennung, externer Handwerker-Integration, Kostenuebersicht und automatischer Zustandshistorie.
-**Current focus:** v4.0 Multi-Tenant Architecture -- Phase 39 in progress (Navigation Redesign)
+**Current focus:** v4.0 Multi-Tenant Architecture -- Phase 39 COMPLETE. Next: Phase 40.
 
 ## Current Position
 
 Phase: 39 of 40 (Navigation Redesign) -- COMPLETE
-Plan: 04 of 4 complete
-Status: Plan 39-04 complete — URL redirects (HTTP 308) + client redirect stubs for old ID routes + all internal links migrated to /objekte
-Last activity: 2026-02-18 -- Plan 39-04 complete: Phase 39 Navigation Redesign fully done
+Plan: 05 of 5 complete
+Status: Plan 39-05 complete — DashboardBreadcrumbs wired to all 59 non-home dashboard pages; NAV-01 satisfied
+Last activity: 2026-02-18 -- Plan 39-05 complete: breadcrumb gap closure, Phase 39 fully done
 
 Progress: [##################################......] 36/40 phases across all milestones
 
@@ -25,12 +25,12 @@ Progress: [##################################......] 36/40 phases across all mil
 - v3.0 Tenant & Offline (2026-02-03) -- Phases 25-29
 - v3.1 Production Hardening (2026-02-17) -- Phases 30-34
 
-**Total:** 34 phases, 128 plans shipped across 6 milestones (+ 5 in Phase 35 + 3 in Phase 36 + 4 in Phase 37 + 3 in Phase 38 + 4 in Phase 39 = 147 plans total)
+**Total:** 34 phases, 128 plans shipped across 6 milestones (+ 5 in Phase 35 + 3 in Phase 36 + 4 in Phase 37 + 3 in Phase 38 + 5 in Phase 39 = 148 plans total)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 147 (128 prior + 5 in Phase 35 + 3 in Phase 36 + 4 in Phase 37 + 3 in Phase 38 + 4 in Phase 39)
+- Total plans completed: 148 (128 prior + 5 in Phase 35 + 3 in Phase 36 + 4 in Phase 37 + 3 in Phase 38 + 5 in Phase 39)
 - Metrics from previous milestones -- see milestone archives
 
 | Plan | Duration | Tasks | Files |
@@ -53,6 +53,7 @@ Progress: [##################################......] 36/40 phases across all mil
 | 39-02 | 4min | 2 | 3 |
 | 39-03 | 15min | 2 | 3 |
 | 39-04 | 4min | 2 | 12 |
+| 39-05 | 15min | 1 | 6 |
 
 ## Accumulated Context
 
@@ -116,6 +117,8 @@ Recent decisions affecting current work:
 - [Phase 39]: 39-03: building.property_id (string|null) coerced to undefined with ?? for DeliveryList propertyId?: string
 - [Phase 39]: 39-04: projekte/[id] query extended with building(property_id) join to build full /objekte path server-side
 - [Phase 39]: 39-04: BuildingSelector push updated to /objekte — CombinedSelector from Phase 38 handles building context now
+- [Phase 39-05]: 39-05: vorlagen pages had old manual nav breadcrumbs replaced entirely by DashboardBreadcrumbs
+- [Phase 39-05]: 39-05: 59 total pages with DashboardBreadcrumbs satisfying NAV-01 (5 objekte + 54 others)
 
 ### Blockers/Concerns
 
@@ -133,8 +136,8 @@ Recent decisions affecting current work:
 ## Session Continuity
 
 Last session: 2026-02-18
-Stopped at: Completed 39-04-PLAN.md (URL redirects + internal link migration) — Phase 39 COMPLETE
+Stopped at: Completed 39-05-PLAN.md (breadcrumb gap closure, all 59 pages wired) — Phase 39 fully COMPLETE
 Resume file: None
 
 ---
-*v4.0 Multi-Tenant Architecture -- Phase 39 COMPLETE (4 of 4 plans done). Next: Phase 40.*
+*v4.0 Multi-Tenant Architecture -- Phase 39 COMPLETE (5 of 5 plans done). Next: Phase 40.*
