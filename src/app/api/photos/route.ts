@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createOrgClient, OrgContextMissingError } from '@/lib/supabase/with-org'
+import { taskPhotoPath } from '@/lib/storage/paths'
 import type {
   TaskPhoto,
   TaskPhotoWithUrl,
@@ -148,6 +149,11 @@ export async function POST(
       )
     }
 
+    const orgId = request.headers.get('x-organization-id')
+    if (!orgId) {
+      return NextResponse.json({ error: 'Organization context required' }, { status: 401 })
+    }
+
     // Parse multipart form data
     const formData = await request.formData()
     const file = formData.get('file') as File | null
@@ -230,7 +236,7 @@ export async function POST(
     // Generate unique storage path
     const fileId = crypto.randomUUID()
     const extension = file.type === 'image/webp' ? 'webp' : 'jpg'
-    const storagePath = `${taskId}/${photoType}/${fileId}.${extension}`
+    const storagePath = taskPhotoPath(orgId, taskId, photoType, fileId, extension)
 
     // Convert File to ArrayBuffer for upload
     const arrayBuffer = await file.arrayBuffer()

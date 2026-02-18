@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createOrgClient, createServiceClient, OrgContextMissingError } from '@/lib/supabase/with-org'
+import { taskAudioPath } from '@/lib/storage/paths'
 import { transcribeAudio } from '@/lib/transcription'
 import type {
   TaskAudio,
@@ -206,6 +207,11 @@ export async function POST(
       )
     }
 
+    const orgId = request.headers.get('x-organization-id')
+    if (!orgId) {
+      return NextResponse.json({ error: 'Organization context required' }, { status: 401 })
+    }
+
     // Parse multipart form data
     const formData = await request.formData()
     const file = formData.get('file') as File | null
@@ -308,7 +314,7 @@ export async function POST(
     // Generate unique storage path
     const fileId = crypto.randomUUID()
     const extension = getFileExtension(file.type)
-    const storagePath = `${taskId}/${audioType}/${fileId}.${extension}`
+    const storagePath = taskAudioPath(orgId, taskId, audioType, fileId, extension)
 
     // Convert File to ArrayBuffer for upload
     const arrayBuffer = await file.arrayBuffer()
