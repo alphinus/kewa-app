@@ -205,6 +205,7 @@ export const ROLE_HIERARCHY: Record<string, number> = {
   admin: 100,
   property_manager: 80,
   accounting: 60,
+  hauswart: 40,
   tenant: 20,
   external_contractor: 10
 }
@@ -222,5 +223,5 @@ export function isRoleAtLeast(roleName: string, minimumRole: string): boolean {
  * Check if role is an internal role (can access dashboard)
  */
 export function isInternalRole(roleName: string): boolean {
-  return ['admin', 'property_manager', 'accounting'].includes(roleName)
+  return ['admin', 'property_manager', 'accounting', 'hauswart'].includes(roleName)
 }

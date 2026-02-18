@@ -226,6 +226,26 @@ export interface SessionResponse {
 }
 
 // =============================================
+// ORGANIZATION & MANDATE TYPES (Phase 38)
+// =============================================
+
+export interface Organization {
+  id: string
+  name: string
+  slug: string
+  isDefault?: boolean
+}
+
+export type MandateType = 'rental' | 'stwe' | 'mixed'
+
+export interface Mandate {
+  id: string
+  name: string
+  mandate_type: MandateType
+  is_active: boolean
+}
+
+// =============================================
 // TEMPLATE SYSTEM TYPES (Phase 08)
 // =============================================
 
