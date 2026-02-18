@@ -7,7 +7,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { EmptyState } from '@/components/ui/empty-state'
 import { ConfirmationDialog } from '@/components/ui/confirmation-dialog'
-import { Breadcrumbs } from '@/components/ui/breadcrumbs'
+import { DashboardBreadcrumbs } from '@/components/navigation/DashboardBreadcrumbs'
 import { TaskListSkeleton } from '@/components/skeletons/TaskListSkeleton'
 import { TaskList } from '@/components/tasks/TaskList'
 import { TaskForm } from '@/components/tasks/TaskForm'
@@ -188,7 +188,7 @@ function AufgabenPageContent() {
   return (
     <div className="space-y-4">
       {/* Breadcrumbs */}
-      <Breadcrumbs />
+      <DashboardBreadcrumbs />
 
       {/* Header */}
       <div className="flex items-center justify-between">

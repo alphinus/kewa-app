@@ -18,7 +18,7 @@ import { redirect } from 'next/navigation'
 import { FileText, Plus } from 'lucide-react'
 import { createPublicClient } from '@/lib/supabase/with-org'
 import { validateSession, SESSION_COOKIE_NAME } from '@/lib/session'
-import { Breadcrumbs } from '@/components/ui/breadcrumbs'
+import { DashboardBreadcrumbs } from '@/components/navigation/DashboardBreadcrumbs'
 import { Button } from '@/components/ui/button'
 import type { Role, WorkOrderStatus } from '@/types'
 
@@ -170,7 +170,7 @@ export default async function AuftraegePage({ searchParams }: PageProps) {
   return (
     <div className="space-y-6 pb-20">
       {/* Breadcrumbs */}
-      <Breadcrumbs />
+      <DashboardBreadcrumbs />
 
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
