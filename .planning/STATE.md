@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-02-17)
 
 **Core value:** Immobilienverwaltungen haben volle Transparenz und Kontrolle ueber alle Renovationen -- mit standardisierten Workflows, mandantenfaehiger Datentrennung, externer Handwerker-Integration, Kostenuebersicht und automatischer Zustandshistorie.
-**Current focus:** v4.0 Multi-Tenant Data Migration -- Phase 36 in progress (plan 02 of 3 done)
+**Current focus:** v4.0 Multi-Tenant Architecture -- Phase 36 complete, ready for Phase 37 (RLS policies)
 
 ## Current Position
 
-Phase: 36 of 40 (Data Migration & Backfill)
-Plan: 02 of 3 complete — ready for Plan 03 (NOT NULL constraints)
-Status: Phase 36 plan 02 complete — property hierarchy, 56-table backfill, tenant assignments done
-Last activity: 2026-02-18 -- Plan 36-02 complete: 7 properties, 5 buildings, 24 units, 56-table org_id backfill, 4 tenancy records
+Phase: 36 of 40 (Data Migration & Backfill) -- COMPLETE
+Plan: 03 of 3 complete — Phase 36 done
+Status: Phase 36 complete — all 4 migrations applied, 56-table NOT NULL constraints sealed
+Last activity: 2026-02-18 -- Plan 36-03 complete: 082_not_null_constraints.sql — verification DO block + 56-table NOT NULL promotion
 
-Progress: [##############################..........] 34/40 phases across all milestones
+Progress: [################################........] 35/40 phases across all milestones
 
 ## Milestones Completed
 
@@ -25,12 +25,12 @@ Progress: [##############################..........] 34/40 phases across all mil
 - v3.0 Tenant & Offline (2026-02-03) -- Phases 25-29
 - v3.1 Production Hardening (2026-02-17) -- Phases 30-34
 
-**Total:** 34 phases, 128 plans shipped across 6 milestones (+ 2 in Phase 36)
+**Total:** 34 phases, 128 plans shipped across 6 milestones (+ 5 in Phase 35 + 3 in Phase 36)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 135 (128 prior + 5 in Phase 35 + 2 in Phase 36)
+- Total plans completed: 136 (128 prior + 5 in Phase 35 + 3 in Phase 36)
 - Metrics from previous milestones -- see milestone archives
 
 | Plan | Duration | Tasks | Files |
@@ -41,6 +41,7 @@ Progress: [##############################..........] 34/40 phases across all mil
 | 35-03 | 3min | 2 | 2 |
 | 36-01 | 3min | 2 | 2 |
 | 36-02 | 12min | 1 | 1 |
+| 36-03 | 5min | 1 | 1 |
 
 ## Accumulated Context
 
@@ -68,16 +69,20 @@ Recent decisions affecting current work:
 - 36-01: All new Phase 36 users receive role='kewa' as placeholder (legacy NOT NULL column, Phase 37 will drop)
 - 36-01: Flurina Kaelin assigned 0020-...001; Rolf Kaelin reuses existing 0000-...001
 - 36-02: Liegenschaft KEWA renamed to Wohnanlage Seefeld (preserves all FK references, assigned to Eigenverwaltung KEWA mandate)
-- 36-02: contract_type uses 'residential' not 'unlimited' (074 CHECK constraint — unlimited duration = end_date NULL)
+- 36-02: contract_type uses 'residential' not 'unlimited' (074 CHECK constraint -- unlimited duration = end_date NULL)
 - 36-02: Tenancy idempotency via WHERE NOT EXISTS (tenancies has no unique constraint for ON CONFLICT target)
 - 36-02: Unit namespace split: 0015 for Leweg 4 detailed (10 units), 0016 for all other new property units
+- 36-03: Two separate DO blocks for verification (56-table loop + properties-specific check) -- cleaner separation
+- 36-03: ALTER TABLE statements written explicitly, not generated -- DDL must be auditable
+- 36-03: 6 template tables excluded from NOT NULL (NULL = system template, by design from 075)
+- 36-03: tenancies excluded from ALTER (already NOT NULL from 074)
 
 ### Blockers/Concerns
 
 - PgBouncer + SET LOCAL interaction needs validation in staging (SET LOCAL is transaction-scoped but PostgREST may not wrap each API call in explicit transaction)
 - 7 tables already have RLS enabled (029_rls_policies.sql) using is_internal_user(auth.uid()) which returns NULL for PIN-auth -- need audit
 - quality_gates table missing in production DB (migration 072 skipped)
-- Docker Desktop not running during 36-01 and 36-02 execution -- supabase db reset verification deferred (both 079+080+081 reviewed statically)
+- Docker Desktop not running during 36-01, 36-02, 36-03 execution -- supabase db reset verification deferred (079+080+081+082 reviewed statically)
 
 ### Tech Debt
 
@@ -88,8 +93,8 @@ Recent decisions affecting current work:
 ## Session Continuity
 
 Last session: 2026-02-18
-Stopped at: Completed 36-02-PLAN.md (property hierarchy + 56-table org_id backfill)
+Stopped at: Completed 36-03-PLAN.md (NOT NULL constraints — Phase 36 complete)
 Resume file: None
 
 ---
-*v4.0 Multi-Tenant Data Migration -- Phase 36 active (plan 02/3 done: 079 + 080 + 081 migrations)*
+*v4.0 Multi-Tenant Architecture -- Phase 36 complete (4 migrations: 079+080+081+082). Next: Phase 37 (RLS policies)*
