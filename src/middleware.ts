@@ -13,6 +13,7 @@ import {
 } from '@/lib/permissions'
 import { validateContractorAccess } from '@/lib/magic-link'
 import { getPortalSessionFromRequest } from '@/lib/portal/session'
+import { createClient } from '@/lib/supabase/server'
 
 /**
  * Middleware for authentication and authorization
@@ -78,8 +79,28 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // Valid session - continue with session data in response headers
+  // Valid session - resolve organization context
+  const orgCookie = request.cookies.get('organization_id')?.value
+  let orgId = orgCookie || null
+
+  if (!orgCookie) {
+    // No org cookie — look up user's default organization
+    const supabase = await createClient()
+    const { data } = await supabase
+      .from('organization_members')
+      .select('organization_id')
+      .eq('user_id', session.userId)
+      .eq('is_default', true)
+      .single()
+    orgId = data?.organization_id || null
+  }
+
   const response = NextResponse.next()
+
+  // Set org context header for downstream route handlers
+  if (orgId) {
+    response.headers.set('x-organization-id', orgId)
+  }
 
   // Legacy headers for backward compatibility
   response.headers.set('x-user-id', session.userId)
