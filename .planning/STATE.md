@@ -25,7 +25,7 @@ Progress: [################################........] 35/40 phases across all mil
 - v3.0 Tenant & Offline (2026-02-03) -- Phases 25-29
 - v3.1 Production Hardening (2026-02-17) -- Phases 30-34
 
-**Total:** 34 phases, 128 plans shipped across 6 milestones (+ 5 in Phase 35 + 3 in Phase 36 + 4 in Phase 37)
+**Total:** 34 phases, 128 plans shipped across 6 milestones (+ 5 in Phase 35 + 3 in Phase 36 + 4 in Phase 37 = 140 plans total)
 
 ## Performance Metrics
 
@@ -44,6 +44,7 @@ Progress: [################################........] 35/40 phases across all mil
 | 36-03 | 5min | 1 | 1 |
 | 37-01 | 12min | 1 | 1 |
 | 37-02 | 8min | 2 | 2 |
+| 37-03 | 90min | 2 | 123 |
 | 37-04 | 15min | 2 | 45 |
 
 ## Accumulated Context
@@ -86,6 +87,9 @@ Recent decisions affecting current work:
 - [Phase 37]: 37-02: When no cookie and no default org row, orgId is null and x-organization-id header is not set — route gets OrgContextMissingError
 - [Phase 37]: 37-04: createServiceClient is synchronous — removed await from all Group B portal/contractor lib call sites
 - [Phase 37]: 37-04: admin/ticket-to-work-order.ts uses both clients: createPublicClient for tenant queries, createServiceClient replacing inline bare supabase-js client for storage
+- [Phase 37]: 37-03: Portal/contractor routes use createServiceClient (service_role) not createPublicClient — they query RLS-protected tenant tables; token validation provides application-layer access control
+- [Phase 37]: 37-03: createServiceClient() is synchronous throughout — no await in any portal/contractor route
+- [Phase 37]: 37-03: Two inspection route files used req instead of request parameter name — corrected to pass req to createOrgClient
 
 ### Blockers/Concerns
 
@@ -103,7 +107,7 @@ Recent decisions affecting current work:
 ## Session Continuity
 
 Last session: 2026-02-18
-Stopped at: Completed 37-04-PLAN.md (non-API client migration — lib utilities + server component pages)
+Stopped at: Completed 37-03-PLAN.md (API route migration — 123 files from createClient to org-aware clients)
 Resume file: None
 
 ---
