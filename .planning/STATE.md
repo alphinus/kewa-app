@@ -10,9 +10,9 @@ See: .planning/PROJECT.md (updated 2026-02-17)
 ## Current Position
 
 Phase: 39 of 40 (Navigation Redesign) -- IN PROGRESS
-Plan: 01 of 4 complete
-Status: Plan 39-01 complete — mobile footer reduced to 5 items (4 links + Mehr button), MehrBottomSheet with 10 overflow items
-Last activity: 2026-02-18 -- Plan 39-01 complete: mobile-nav.tsx redesign + MehrBottomSheet component + CSS animation
+Plan: 02 of 4 complete
+Status: Plan 39-02 complete — DashboardBreadcrumbs component + /dashboard/objekte property list + /dashboard/objekte/[propertyId] property detail pages
+Last activity: 2026-02-18 -- Plan 39-02 complete: DashboardBreadcrumbs + /objekte route hierarchy (property list grouped by mandate, property detail with buildings)
 
 Progress: [##################################......] 36/40 phases across all milestones
 
@@ -25,12 +25,12 @@ Progress: [##################################......] 36/40 phases across all mil
 - v3.0 Tenant & Offline (2026-02-03) -- Phases 25-29
 - v3.1 Production Hardening (2026-02-17) -- Phases 30-34
 
-**Total:** 34 phases, 128 plans shipped across 6 milestones (+ 5 in Phase 35 + 3 in Phase 36 + 4 in Phase 37 + 3 in Phase 38 + 1 in Phase 39 = 144 plans total)
+**Total:** 34 phases, 128 plans shipped across 6 milestones (+ 5 in Phase 35 + 3 in Phase 36 + 4 in Phase 37 + 3 in Phase 38 + 2 in Phase 39 = 145 plans total)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 144 (128 prior + 5 in Phase 35 + 3 in Phase 36 + 4 in Phase 37 + 3 in Phase 38 + 1 in Phase 39)
+- Total plans completed: 145 (128 prior + 5 in Phase 35 + 3 in Phase 36 + 4 in Phase 37 + 3 in Phase 38 + 2 in Phase 39)
 - Metrics from previous milestones -- see milestone archives
 
 | Plan | Duration | Tasks | Files |
@@ -50,6 +50,7 @@ Progress: [##################################......] 36/40 phases across all mil
 | 38-02 | 15min | 2 | 3 |
 | 38-03 | 20min | 2 | 5 |
 | 39-01 | 8min | 2 | 3 |
+| 39-02 | 4min | 2 | 3 |
 
 ## Accumulated Context
 
@@ -106,6 +107,9 @@ Recent decisions affecting current work:
 - [Phase 39]: 39-01: MehrBottomSheet rendered inside MobileNav fragment sibling to nav — avoids layout.tsx changes, z-[60] above nav z-50
 - [Phase 39]: 39-01: MEHR_ROUTES array drives Mehr button active state — pathname startsWith check covers nested routes
 - [Phase 39]: 39-01: Body scroll lock via useEffect with open dep, cleanup restores overflow on unmount
+- [Phase 39]: 39-02: DashboardBreadcrumbs lives in navigation/ dir, separate from general-purpose ui/breadcrumbs.tsx (different purpose)
+- [Phase 39]: 39-02: isSingleMandate derived from unique mandate_ids in fetched properties, not from availableMandates.length (source of truth is properties data)
+- [Phase 39]: 39-02: unit_count displayed only when present in building objects — /api/properties returns buildings without unit join (safe fallback)
 
 ### Blockers/Concerns
 
@@ -123,8 +127,8 @@ Recent decisions affecting current work:
 ## Session Continuity
 
 Last session: 2026-02-18
-Stopped at: Completed 39-01-PLAN.md (mobile-nav 5-item redesign + MehrBottomSheet + CSS animation)
+Stopped at: Completed 39-02-PLAN.md (DashboardBreadcrumbs + /objekte property list + property detail pages)
 Resume file: None
 
 ---
-*v4.0 Multi-Tenant Architecture -- Phase 39 IN PROGRESS (1 of 4 plans done). Phase 38 COMPLETE.*
+*v4.0 Multi-Tenant Architecture -- Phase 39 IN PROGRESS (2 of 4 plans done). Phase 38 COMPLETE.*
