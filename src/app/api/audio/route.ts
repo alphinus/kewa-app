@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createOrgClient, createServiceClient, OrgContextMissingError } from '@/lib/supabase/with-org'
 import { transcribeAudio } from '@/lib/transcription'
 import type {
   TaskAudio,
@@ -48,7 +48,7 @@ export async function GET(
   request: NextRequest
 ): Promise<NextResponse<AudiosResponse | ErrorResponse>> {
   try {
-    const supabase = await createClient()
+    const supabase = await createOrgClient(request)
 
     // Get user info from headers (set by middleware)
     const userId = request.headers.get('x-user-id')
@@ -171,6 +171,9 @@ export async function GET(
 
     return NextResponse.json({ audios: audiosWithUrls })
   } catch (error) {
+    if (error instanceof OrgContextMissingError) {
+      return NextResponse.json({ error: 'Organization context required' }, { status: 401 })
+    }
     console.error('Unexpected error in GET /api/audio:', error)
     return NextResponse.json(
       { error: 'Internal server error' },
@@ -190,7 +193,7 @@ export async function POST(
   request: NextRequest
 ): Promise<NextResponse<AudioResponse | ErrorResponse>> {
   try {
-    const supabase = await createClient()
+    const supabase = await createOrgClient(request)
 
     // Get user info from headers (set by middleware)
     const userId = request.headers.get('x-user-id')
@@ -388,6 +391,9 @@ export async function POST(
 
     return NextResponse.json({ audio: audioWithUrl }, { status: 201 })
   } catch (error) {
+    if (error instanceof OrgContextMissingError) {
+      return NextResponse.json({ error: 'Organization context required' }, { status: 401 })
+    }
     console.error('Unexpected error in POST /api/audio:', error)
     return NextResponse.json(
       { error: 'Internal server error' },
@@ -422,7 +428,7 @@ async function triggerTranscription(
   storagePath: string,
   fileName: string
 ): Promise<void> {
-  const supabase = await createClient()
+  const supabase = createServiceClient()
 
   try {
     // Update status to processing

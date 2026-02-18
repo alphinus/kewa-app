@@ -8,7 +8,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createOrgClient, OrgContextMissingError } from '@/lib/supabase/with-org'
 import type { Role } from '@/types'
 import type { CreateInspectionTemplateInput } from '@/types/inspections'
 import {
@@ -62,6 +62,9 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ templates })
   } catch (error) {
     console.error('Error in GET /api/inspection-templates:', error)
+    if (error instanceof OrgContextMissingError) {
+      return NextResponse.json({ error: 'Organization context required' }, { status: 401 })
+    }
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Internal server error' },
       { status: 500 }
@@ -129,6 +132,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ template }, { status: 201 })
   } catch (error) {
     console.error('Error in POST /api/inspection-templates:', error)
+    if (error instanceof OrgContextMissingError) {
+      return NextResponse.json({ error: 'Organization context required' }, { status: 401 })
+    }
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Internal server error' },
       { status: 500 }

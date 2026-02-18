@@ -8,7 +8,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createOrgClient, OrgContextMissingError } from '@/lib/supabase/with-org'
 import type { UserRole } from '@/types'
 
 /**
@@ -40,7 +40,7 @@ export async function GET(
   }
 
   try {
-    const supabase = await createClient()
+    const supabase = await createOrgClient(request)
 
     // Fetch ticket with full details
     const { data: ticket, error: ticketError } = await supabase
@@ -138,6 +138,9 @@ export async function GET(
     })
   } catch (error) {
     console.error('Error in GET /api/admin/tickets/[id]:', error)
+    if (error instanceof OrgContextMissingError) {
+      return NextResponse.json({ error: 'Organization context required' }, { status: 401 })
+    }
     return NextResponse.json(
       { error: 'Interner Serverfehler' },
       { status: 500 }
@@ -175,7 +178,7 @@ export async function PATCH(
 
   try {
     const body = await request.json()
-    const supabase = await createClient()
+    const supabase = await createOrgClient(request)
 
     // Allowed fields for update
     const allowedFields = ['assigned_to']
@@ -211,6 +214,9 @@ export async function PATCH(
     return NextResponse.json({ ticket })
   } catch (error) {
     console.error('Error in PATCH /api/admin/tickets/[id]:', error)
+    if (error instanceof OrgContextMissingError) {
+      return NextResponse.json({ error: 'Organization context required' }, { status: 401 })
+    }
     return NextResponse.json(
       { error: 'Interner Serverfehler' },
       { status: 500 }

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createOrgClient, OrgContextMissingError } from '@/lib/supabase/with-org'
 import { transcribeAudio } from '@/lib/transcription'
 import type {
   TaskAudio,
@@ -33,7 +33,7 @@ export async function POST(
   { params }: RouteParams
 ): Promise<NextResponse<AudioResponse | ErrorResponse>> {
   try {
-    const supabase = await createClient()
+    const supabase = await createOrgClient(request)
     const { id } = await params
 
     // Get user info from headers (set by middleware)
@@ -203,6 +203,9 @@ export async function POST(
     }
   } catch (error) {
     console.error('Unexpected error in POST /api/audio/[id]/transcribe:', error)
+    if (error instanceof OrgContextMissingError) {
+      return NextResponse.json({ error: 'Organization context required' }, { status: 401 })
+    }
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

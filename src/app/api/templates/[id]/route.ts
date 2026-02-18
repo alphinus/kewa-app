@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createOrgClient, OrgContextMissingError } from '@/lib/supabase/with-org'
 import type { UpdateTemplateInput } from '@/types/templates'
 import type { Role } from '@/types'
 
@@ -29,7 +29,7 @@ export async function GET(
     }
 
     const { id } = await params
-    const supabase = await createClient()
+    const supabase = await createOrgClient(request)
 
     // Fetch template with full nested hierarchy
     const { data, error } = await supabase
@@ -66,6 +66,9 @@ export async function GET(
     return NextResponse.json({ template: data })
   } catch (error) {
     console.error('Unexpected error in GET /api/templates/[id]:', error)
+    if (error instanceof OrgContextMissingError) {
+      return NextResponse.json({ error: 'Organization context required' }, { status: 401 })
+    }
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -103,7 +106,7 @@ export async function PATCH(
 
     const { id } = await params
     const body: UpdateTemplateInput = await request.json()
-    const supabase = await createClient()
+    const supabase = await createOrgClient(request)
 
     // Validate room scope requires target_room_type
     if (body.scope === 'room' && body.target_room_type === null) {
@@ -134,6 +137,9 @@ export async function PATCH(
     return NextResponse.json({ template: data })
   } catch (error) {
     console.error('Unexpected error in PATCH /api/templates/[id]:', error)
+    if (error instanceof OrgContextMissingError) {
+      return NextResponse.json({ error: 'Organization context required' }, { status: 401 })
+    }
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -171,7 +177,7 @@ export async function DELETE(
     }
 
     const { id } = await params
-    const supabase = await createClient()
+    const supabase = await createOrgClient(request)
 
     const { error } = await supabase
       .from('templates')
@@ -186,6 +192,9 @@ export async function DELETE(
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('Unexpected error in DELETE /api/templates/[id]:', error)
+    if (error instanceof OrgContextMissingError) {
+      return NextResponse.json({ error: 'Organization context required' }, { status: 401 })
+    }
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

@@ -9,7 +9,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createOrgClient, OrgContextMissingError } from '@/lib/supabase/with-org'
 import type { Role } from '@/types'
 import { getPreviousReading, calculateConsumption } from '@/lib/suppliers/inventory-queries'
 
@@ -62,7 +62,7 @@ export async function GET(
       return NextResponse.json({ error: 'Invalid ID format' }, { status: 400 })
     }
 
-    const supabase = await createClient()
+    const supabase = await createOrgClient(request)
 
     const { data: movement, error } = await supabase
       .from('inventory_movements')
@@ -77,6 +77,9 @@ export async function GET(
     return NextResponse.json({ movement })
   } catch (error) {
     console.error('Unexpected error in GET /api/inventory-movements/[id]:', error)
+    if (error instanceof OrgContextMissingError) {
+      return NextResponse.json({ error: 'Organization context required' }, { status: 401 })
+    }
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
@@ -120,7 +123,7 @@ export async function PATCH(
     }
 
     const body = await request.json()
-    const supabase = await createClient()
+    const supabase = await createOrgClient(request)
 
     // Get current movement
     const { data: currentMovement, error: fetchError } = await supabase
@@ -188,6 +191,9 @@ export async function PATCH(
     return NextResponse.json({ movement })
   } catch (error) {
     console.error('Unexpected error in PATCH /api/inventory-movements/[id]:', error)
+    if (error instanceof OrgContextMissingError) {
+      return NextResponse.json({ error: 'Organization context required' }, { status: 401 })
+    }
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
@@ -222,7 +228,7 @@ export async function DELETE(
       return NextResponse.json({ error: 'Invalid ID format' }, { status: 400 })
     }
 
-    const supabase = await createClient()
+    const supabase = await createOrgClient(request)
 
     const { error } = await supabase.from('inventory_movements').delete().eq('id', id)
 
@@ -234,6 +240,9 @@ export async function DELETE(
     return new NextResponse(null, { status: 204 })
   } catch (error) {
     console.error('Unexpected error in DELETE /api/inventory-movements/[id]:', error)
+    if (error instanceof OrgContextMissingError) {
+      return NextResponse.json({ error: 'Organization context required' }, { status: 401 })
+    }
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

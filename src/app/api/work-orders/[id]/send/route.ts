@@ -5,7 +5,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createOrgClient, OrgContextMissingError } from '@/lib/supabase/with-org'
 import type { Role } from '@/types'
 import { createMagicLink } from '@/lib/magic-link'
 import { logSentEvent } from '@/lib/work-orders/events'
@@ -78,7 +78,7 @@ export async function POST(
       )
     }
 
-    const supabase = await createClient()
+    const supabase = await createOrgClient(request)
 
     // Fetch work order with partner
     const { data: workOrder, error: fetchError } = await supabase
@@ -179,6 +179,9 @@ export async function POST(
     })
   } catch (error) {
     console.error('Unexpected error in POST /api/work-orders/[id]/send:', error)
+    if (error instanceof OrgContextMissingError) {
+      return NextResponse.json({ error: 'Organization context required' }, { status: 401 })
+    }
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

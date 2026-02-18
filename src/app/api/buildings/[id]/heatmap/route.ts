@@ -8,7 +8,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createOrgClient, OrgContextMissingError } from '@/lib/supabase/with-org'
 import type { Role, RoomCondition } from '@/types'
 
 const ALLOWED_ROLES: Role[] = ['kewa', 'imeri']
@@ -62,7 +62,7 @@ export async function GET(
       )
     }
 
-    const supabase = await createClient()
+    const supabase = await createOrgClient(request)
 
     // Verify building exists
     const { data: building, error: buildingError } = await supabase
@@ -133,6 +133,9 @@ export async function GET(
       units: heatmapUnits
     })
   } catch (error) {
+    if (error instanceof OrgContextMissingError) {
+      return NextResponse.json({ error: 'Organization context required' }, { status: 401 })
+    }
     console.error('Unexpected error in GET /api/buildings/[id]/heatmap:', error)
     return NextResponse.json(
       { error: 'Internal server error' },

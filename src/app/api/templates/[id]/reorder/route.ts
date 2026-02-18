@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createOrgClient, OrgContextMissingError } from '@/lib/supabase/with-org'
 import type { Role } from '@/types'
 
 interface RouteParams {
@@ -77,7 +77,7 @@ export async function PATCH(
       }
     }
 
-    const supabase = await createClient()
+    const supabase = await createOrgClient(request)
 
     // Determine table based on type
     const tableMap = {
@@ -111,6 +111,9 @@ export async function PATCH(
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('Unexpected error in PATCH /api/templates/[id]/reorder:', error)
+    if (error instanceof OrgContextMissingError) {
+      return NextResponse.json({ error: 'Organization context required' }, { status: 401 })
+    }
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

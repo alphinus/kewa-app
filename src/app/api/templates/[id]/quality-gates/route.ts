@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createOrgClient, OrgContextMissingError } from '@/lib/supabase/with-org'
 import type { CreateTemplateQualityGateInput } from '@/types/templates'
 import type { Role } from '@/types'
 
@@ -23,7 +23,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     }
 
     const { id } = await params
-    const supabase = await createClient()
+    const supabase = await createOrgClient(request)
 
     const { data, error } = await supabase
       .from('template_quality_gates')
@@ -43,6 +43,9 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     return NextResponse.json({ quality_gates: data })
   } catch (error) {
     console.error('Unexpected error in GET /api/templates/[id]/quality-gates:', error)
+    if (error instanceof OrgContextMissingError) {
+      return NextResponse.json({ error: 'Organization context required' }, { status: 401 })
+    }
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -97,7 +100,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
       )
     }
 
-    const supabase = await createClient()
+    const supabase = await createOrgClient(request)
 
     const { data, error } = await supabase
       .from('template_quality_gates')
@@ -125,6 +128,9 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     return NextResponse.json({ quality_gate: data }, { status: 201 })
   } catch (error) {
     console.error('Unexpected error in POST /api/templates/[id]/quality-gates:', error)
+    if (error instanceof OrgContextMissingError) {
+      return NextResponse.json({ error: 'Organization context required' }, { status: 401 })
+    }
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

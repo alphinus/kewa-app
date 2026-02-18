@@ -9,7 +9,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createOrgClient, OrgContextMissingError } from '@/lib/supabase/with-org'
 import {
   getTenantNotificationData,
   notifyTenantTicketReply,
@@ -71,7 +71,7 @@ export async function GET(
       )
     }
 
-    const supabase = await createClient()
+    const supabase = await createOrgClient(request)
 
     // Verify ticket exists
     const { data: ticket, error: ticketError } = await supabase
@@ -133,6 +133,9 @@ export async function GET(
     return NextResponse.json({ messages: messages || [] })
   } catch (error) {
     console.error('Unexpected error in GET /api/admin/tickets/[id]/messages:', error)
+    if (error instanceof OrgContextMissingError) {
+      return NextResponse.json({ error: 'Organization context required' }, { status: 401 })
+    }
     return NextResponse.json(
       { error: 'Interner Serverfehler' },
       { status: 500 }
@@ -201,7 +204,7 @@ export async function POST(
       )
     }
 
-    const supabase = await createClient()
+    const supabase = await createOrgClient(request)
 
     // Verify ticket exists and get its status
     const { data: ticket, error: ticketError } = await supabase
@@ -283,6 +286,9 @@ export async function POST(
     return NextResponse.json({ message }, { status: 201 })
   } catch (error) {
     console.error('Unexpected error in POST /api/admin/tickets/[id]/messages:', error)
+    if (error instanceof OrgContextMissingError) {
+      return NextResponse.json({ error: 'Organization context required' }, { status: 401 })
+    }
     return NextResponse.json(
       { error: 'Interner Serverfehler' },
       { status: 500 }

@@ -8,7 +8,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createOrgClient, OrgContextMissingError } from '@/lib/supabase/with-org'
 import type { Role } from '@/types'
 import type { Building } from '@/types/database'
 
@@ -40,7 +40,7 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    const supabase = await createClient()
+    const supabase = await createOrgClient(request)
     const { searchParams } = new URL(request.url)
     const propertyId = searchParams.get('property_id')
 
@@ -73,6 +73,9 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ buildings })
   } catch (error) {
+    if (error instanceof OrgContextMissingError) {
+      return NextResponse.json({ error: 'Organization context required' }, { status: 401 })
+    }
     console.error('Unexpected error in GET /api/buildings:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
@@ -112,7 +115,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'property_id is required' }, { status: 400 })
     }
 
-    const supabase = await createClient()
+    const supabase = await createOrgClient(request)
 
     // Verify property exists
     const { data: property, error: propertyError } = await supabase
@@ -142,6 +145,9 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ building }, { status: 201 })
   } catch (error) {
+    if (error instanceof OrgContextMissingError) {
+      return NextResponse.json({ error: 'Organization context required' }, { status: 401 })
+    }
     console.error('Unexpected error in POST /api/buildings:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }

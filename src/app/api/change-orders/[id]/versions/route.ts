@@ -7,7 +7,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createOrgClient, OrgContextMissingError } from '@/lib/supabase/with-org'
 import type { Role } from '@/types'
 
 interface RouteContext {
@@ -61,7 +61,7 @@ export async function GET(
       )
     }
 
-    const supabase = await createClient()
+    const supabase = await createOrgClient(request)
 
     // Verify change order exists
     const { data: changeOrder, error: coError } = await supabase
@@ -111,6 +111,9 @@ export async function GET(
     })
   } catch (error) {
     console.error('Unexpected error in GET /api/change-orders/[id]/versions:', error)
+    if (error instanceof OrgContextMissingError) {
+      return NextResponse.json({ error: 'Organization context required' }, { status: 401 })
+    }
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

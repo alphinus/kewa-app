@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createOrgClient, OrgContextMissingError } from '@/lib/supabase/with-org'
 import type {
   TaskPhoto,
   TaskPhotoWithUrl,
@@ -29,7 +29,7 @@ export async function GET(
   request: NextRequest
 ): Promise<NextResponse<PhotosResponse | ErrorResponse>> {
   try {
-    const supabase = await createClient()
+    const supabase = await createOrgClient(request)
 
     // Get user info from headers (set by middleware)
     const userId = request.headers.get('x-user-id')
@@ -114,6 +114,9 @@ export async function GET(
     return NextResponse.json({ photos: photosWithUrls })
   } catch (error) {
     console.error('Unexpected error in GET /api/photos:', error)
+    if (error instanceof OrgContextMissingError) {
+      return NextResponse.json({ error: 'Organization context required' }, { status: 401 })
+    }
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -132,7 +135,7 @@ export async function POST(
   request: NextRequest
 ): Promise<NextResponse<PhotoResponse | ErrorResponse>> {
   try {
-    const supabase = await createClient()
+    const supabase = await createOrgClient(request)
 
     // Get user info from headers (set by middleware)
     const userId = request.headers.get('x-user-id')
@@ -288,6 +291,9 @@ export async function POST(
     return NextResponse.json({ photo: photoWithUrl }, { status: 201 })
   } catch (error) {
     console.error('Unexpected error in POST /api/photos:', error)
+    if (error instanceof OrgContextMissingError) {
+      return NextResponse.json({ error: 'Organization context required' }, { status: 401 })
+    }
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

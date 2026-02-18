@@ -6,7 +6,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createOrgClient, OrgContextMissingError } from '@/lib/supabase/with-org'
 import type { Role, PaymentStatus } from '@/types'
 
 // Select query for payment with invoice relation
@@ -56,7 +56,7 @@ export async function GET(
     }
 
     const { id } = await context.params
-    const supabase = await createClient()
+    const supabase = await createOrgClient(request)
 
     const { data: payment, error } = await supabase
       .from('payments')
@@ -78,6 +78,9 @@ export async function GET(
     return NextResponse.json({ payment })
   } catch (error) {
     console.error('Unexpected error in GET /api/payments/[id]:', error)
+    if (error instanceof OrgContextMissingError) {
+      return NextResponse.json({ error: 'Organization context required' }, { status: 401 })
+    }
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -119,7 +122,7 @@ export async function DELETE(
     }
 
     const { id } = await context.params
-    const supabase = await createClient()
+    const supabase = await createOrgClient(request)
 
     // First, check if payment exists and get its status
     const { data: payment, error: fetchError } = await supabase
@@ -163,6 +166,9 @@ export async function DELETE(
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('Unexpected error in DELETE /api/payments/[id]:', error)
+    if (error instanceof OrgContextMissingError) {
+      return NextResponse.json({ error: 'Organization context required' }, { status: 401 })
+    }
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

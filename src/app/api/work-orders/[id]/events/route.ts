@@ -13,7 +13,7 @@ import { cookies } from 'next/headers'
 import { validateSessionWithRBAC, SESSION_COOKIE_NAME } from '@/lib/session'
 import { isInternalRole } from '@/lib/permissions'
 import { getWorkOrderEvents, type WorkOrderEventType } from '@/lib/work-orders/events'
-import { createClient } from '@/lib/supabase/server'
+import { createOrgClient, OrgContextMissingError } from '@/lib/supabase/with-org'
 
 interface RouteContext {
   params: Promise<{ id: string }>
@@ -61,7 +61,7 @@ export async function GET(
     }
 
     // Verify work order exists
-    const supabase = await createClient()
+    const supabase = await createOrgClient(request)
     const { data: workOrder, error: fetchError } = await supabase
       .from('work_orders')
       .select('id')
@@ -105,6 +105,9 @@ export async function GET(
     })
   } catch (error) {
     console.error('Error fetching work order events:', error)
+    if (error instanceof OrgContextMissingError) {
+      return NextResponse.json({ error: 'Organization context required' }, { status: 401 })
+    }
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

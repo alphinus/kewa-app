@@ -9,7 +9,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createOrgClient, OrgContextMissingError } from '@/lib/supabase/with-org'
 
 interface RouteContext {
   params: Promise<{ id: string }>
@@ -26,7 +26,7 @@ export async function GET(
 ) {
   try {
     const { id } = await context.params
-    const supabase = await createClient()
+    const supabase = await createOrgClient(request)
 
     // Verify user authentication and role
     const {
@@ -89,6 +89,9 @@ export async function GET(
     return NextResponse.json({ photos: photosWithUrls })
   } catch (error) {
     console.error('Error in GET /api/change-orders/[id]/photos:', error)
+    if (error instanceof OrgContextMissingError) {
+      return NextResponse.json({ error: 'Organization context required' }, { status: 401 })
+    }
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
@@ -104,7 +107,7 @@ export async function POST(
 ) {
   try {
     const { id } = await context.params
-    const supabase = await createClient()
+    const supabase = await createOrgClient(request)
 
     // Verify user authentication and role
     const {
@@ -214,6 +217,9 @@ export async function POST(
     )
   } catch (error) {
     console.error('Error in POST /api/change-orders/[id]/photos:', error)
+    if (error instanceof OrgContextMissingError) {
+      return NextResponse.json({ error: 'Organization context required' }, { status: 401 })
+    }
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
@@ -236,7 +242,7 @@ export async function DELETE(
       return NextResponse.json({ error: 'Missing photo_id parameter' }, { status: 400 })
     }
 
-    const supabase = await createClient()
+    const supabase = await createOrgClient(request)
 
     // Verify user authentication and role
     const {
@@ -295,6 +301,9 @@ export async function DELETE(
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('Error in DELETE /api/change-orders/[id]/photos:', error)
+    if (error instanceof OrgContextMissingError) {
+      return NextResponse.json({ error: 'Organization context required' }, { status: 401 })
+    }
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createOrgClient, OrgContextMissingError } from '@/lib/supabase/with-org'
 import type { Role } from '@/types'
 
 interface RouteParams {
@@ -53,7 +53,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     }
 
     const { id } = await params
-    const supabase = await createClient()
+    const supabase = await createOrgClient(request)
 
     const { data, error } = await supabase
       .from('project_quality_gates')
@@ -99,6 +99,9 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     return NextResponse.json({ quality_gates: gatesWithStatus })
   } catch (error) {
     console.error('Unexpected error in GET /api/renovation-projects/[id]/quality-gates:', error)
+    if (error instanceof OrgContextMissingError) {
+      return NextResponse.json({ error: 'Organization context required' }, { status: 401 })
+    }
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

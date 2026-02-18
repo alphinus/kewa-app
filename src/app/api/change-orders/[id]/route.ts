@@ -9,7 +9,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createOrgClient, OrgContextMissingError } from '@/lib/supabase/with-org'
 import type { Role } from '@/types'
 import type { UpdateChangeOrderInput } from '@/types/change-orders'
 import { calculateLineItemsTotal, CHANGE_ORDER_SELECT } from '@/lib/change-orders/queries'
@@ -52,7 +52,7 @@ export async function GET(
       )
     }
 
-    const supabase = await createClient()
+    const supabase = await createOrgClient(request)
 
     // Fetch change order
     const { data: changeOrder, error: coError } = await supabase
@@ -86,6 +86,9 @@ export async function GET(
     })
   } catch (error) {
     console.error('Unexpected error in GET /api/change-orders/[id]:', error)
+    if (error instanceof OrgContextMissingError) {
+      return NextResponse.json({ error: 'Organization context required' }, { status: 401 })
+    }
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -137,7 +140,7 @@ export async function PATCH(
     }
 
     const body: UpdateChangeOrderInput = await request.json()
-    const supabase = await createClient()
+    const supabase = await createOrgClient(request)
 
     // Fetch current change order
     const { data: current, error: fetchError } = await supabase
@@ -235,6 +238,9 @@ export async function PATCH(
     return NextResponse.json({ change_order: changeOrder })
   } catch (error) {
     console.error('Unexpected error in PATCH /api/change-orders/[id]:', error)
+    if (error instanceof OrgContextMissingError) {
+      return NextResponse.json({ error: 'Organization context required' }, { status: 401 })
+    }
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -287,7 +293,7 @@ export async function DELETE(
       )
     }
 
-    const supabase = await createClient()
+    const supabase = await createOrgClient(request)
 
     // Fetch current change order
     const { data: current, error: fetchError } = await supabase
@@ -330,6 +336,9 @@ export async function DELETE(
     return NextResponse.json({ change_order: changeOrder })
   } catch (error) {
     console.error('Unexpected error in DELETE /api/change-orders/[id]:', error)
+    if (error instanceof OrgContextMissingError) {
+      return NextResponse.json({ error: 'Organization context required' }, { status: 401 })
+    }
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createOrgClient, OrgContextMissingError } from '@/lib/supabase/with-org'
 import type { KBShortcutsResponse, KBErrorResponse } from '@/types/knowledge-base'
 
 /**
@@ -12,7 +12,7 @@ export async function GET(
   request: NextRequest
 ): Promise<NextResponse<KBShortcutsResponse | KBErrorResponse>> {
   try {
-    const supabase = await createClient()
+    const supabase = await createOrgClient(request)
 
     // Get user info from headers (set by middleware)
     const userId = request.headers.get('x-user-id')
@@ -76,6 +76,9 @@ export async function GET(
     return NextResponse.json({ shortcuts })
   } catch (error) {
     console.error('Unexpected error in GET /api/knowledge/shortcuts:', error)
+    if (error instanceof OrgContextMissingError) {
+      return NextResponse.json({ error: 'Organization context required' }, { status: 401 })
+    }
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

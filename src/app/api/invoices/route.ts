@@ -6,7 +6,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createOrgClient, OrgContextMissingError } from '@/lib/supabase/with-org'
 import { INVOICE_SELECT, type InvoiceFilters } from '@/lib/costs/invoice-queries'
 import type { Role } from '@/types'
 import type { CreateInvoiceInput } from '@/types/database'
@@ -64,7 +64,7 @@ export async function GET(request: NextRequest) {
       filters.limit = 20
     }
 
-    const supabase = await createClient()
+    const supabase = await createOrgClient(request)
 
     let query = supabase
       .from('invoices')
@@ -115,6 +115,9 @@ export async function GET(request: NextRequest) {
     })
   } catch (error) {
     console.error('Unexpected error in GET /api/invoices:', error)
+    if (error instanceof OrgContextMissingError) {
+      return NextResponse.json({ error: 'Organization context required' }, { status: 401 })
+    }
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -183,7 +186,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const supabase = await createClient()
+    const supabase = await createOrgClient(request)
 
     // Check for duplicate invoice number from same partner
     const { data: existing } = await supabase
@@ -250,6 +253,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ invoice }, { status: 201 })
   } catch (error) {
     console.error('Unexpected error in POST /api/invoices:', error)
+    if (error instanceof OrgContextMissingError) {
+      return NextResponse.json({ error: 'Organization context required' }, { status: 401 })
+    }
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

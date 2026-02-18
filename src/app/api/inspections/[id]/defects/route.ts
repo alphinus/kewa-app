@@ -8,7 +8,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createOrgClient, OrgContextMissingError } from '@/lib/supabase/with-org'
 import type { Role } from '@/types'
 import type { CreateDefectInput } from '@/types/inspections'
 import { listDefects, createDefect } from '@/lib/inspections/queries'
@@ -48,6 +48,9 @@ export async function GET(
     return NextResponse.json({ defects })
   } catch (error) {
     console.error('Error in GET /api/inspections/[id]/defects:', error)
+    if (error instanceof OrgContextMissingError) {
+      return NextResponse.json({ error: 'Organization context required' }, { status: 401 })
+    }
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -101,7 +104,7 @@ export async function POST(
     }
 
     // Validate inspection exists
-    const supabase = await createClient()
+    const supabase = await createOrgClient(request)
     const { data: inspection, error: inspectionError } = await supabase
       .from('inspections')
       .select('id')
@@ -120,6 +123,9 @@ export async function POST(
     return NextResponse.json({ defect }, { status: 201 })
   } catch (error) {
     console.error('Error in POST /api/inspections/[id]/defects:', error)
+    if (error instanceof OrgContextMissingError) {
+      return NextResponse.json({ error: 'Organization context required' }, { status: 401 })
+    }
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

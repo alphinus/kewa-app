@@ -9,7 +9,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createOrgClient, OrgContextMissingError } from '@/lib/supabase/with-org'
 import type { Role } from '@/types'
 
 interface RouteContext {
@@ -66,7 +66,7 @@ export async function GET(
       )
     }
 
-    const supabase = await createClient()
+    const supabase = await createOrgClient(request)
 
     const { data: building, error } = await supabase
       .from('buildings')
@@ -88,6 +88,9 @@ export async function GET(
     return NextResponse.json({ building })
   } catch (error) {
     console.error('Unexpected error in GET /api/buildings/[id]:', error)
+    if (error instanceof OrgContextMissingError) {
+      return NextResponse.json({ error: 'Organization context required' }, { status: 401 })
+    }
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -146,7 +149,7 @@ export async function PATCH(
       )
     }
 
-    const supabase = await createClient()
+    const supabase = await createOrgClient(request)
 
     // Check building exists
     const { data: existing, error: checkError } = await supabase
@@ -228,6 +231,9 @@ export async function PATCH(
     return NextResponse.json({ building })
   } catch (error) {
     console.error('Unexpected error in PATCH /api/buildings/[id]:', error)
+    if (error instanceof OrgContextMissingError) {
+      return NextResponse.json({ error: 'Organization context required' }, { status: 401 })
+    }
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -274,7 +280,7 @@ export async function DELETE(
       )
     }
 
-    const supabase = await createClient()
+    const supabase = await createOrgClient(request)
 
     // Check building exists
     const { data: existing, error: checkError } = await supabase
@@ -317,6 +323,9 @@ export async function DELETE(
     return new NextResponse(null, { status: 204 })
   } catch (error) {
     console.error('Unexpected error in DELETE /api/buildings/[id]:', error)
+    if (error instanceof OrgContextMissingError) {
+      return NextResponse.json({ error: 'Organization context required' }, { status: 401 })
+    }
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

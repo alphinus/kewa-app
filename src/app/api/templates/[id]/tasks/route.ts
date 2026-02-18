@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createOrgClient, OrgContextMissingError } from '@/lib/supabase/with-org'
 import type { CreateTemplateTaskInput } from '@/types/templates'
 import type { Role } from '@/types'
 
@@ -35,7 +35,7 @@ export async function GET(
     const { searchParams } = new URL(request.url)
     const packageId = searchParams.get('package_id')
 
-    const supabase = await createClient()
+    const supabase = await createOrgClient(request)
 
     // Get all packages for this template through phases
     const { data: phases, error: phasesError } = await supabase
@@ -92,6 +92,9 @@ export async function GET(
     return NextResponse.json({ tasks: data })
   } catch (error) {
     console.error('Unexpected error in GET /api/templates/[id]/tasks:', error)
+    if (error instanceof OrgContextMissingError) {
+      return NextResponse.json({ error: 'Organization context required' }, { status: 401 })
+    }
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -139,7 +142,7 @@ export async function POST(
       )
     }
 
-    const supabase = await createClient()
+    const supabase = await createOrgClient(request)
 
     // Verify package belongs to this template (through phase)
     const { data: pkg, error: pkgError } = await supabase
@@ -212,6 +215,9 @@ export async function POST(
     return NextResponse.json({ task: data }, { status: 201 })
   } catch (error) {
     console.error('Unexpected error in POST /api/templates/[id]/tasks:', error)
+    if (error instanceof OrgContextMissingError) {
+      return NextResponse.json({ error: 'Organization context required' }, { status: 401 })
+    }
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

@@ -6,7 +6,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createOrgClient, OrgContextMissingError } from '@/lib/supabase/with-org'
 import { getCurrentUser } from '@/lib/auth'
 
 interface SendApprovalBody {
@@ -20,7 +20,7 @@ export async function POST(
 ) {
   try {
     const { id } = await params
-    const supabase = await createClient()
+    const supabase = await createOrgClient(request)
     const user = await getCurrentUser()
 
     if (!user) {
@@ -115,6 +115,9 @@ export async function POST(
     })
   } catch (error) {
     console.error('Error in send-approval endpoint:', error)
+    if (error instanceof OrgContextMissingError) {
+      return NextResponse.json({ error: 'Organization context required' }, { status: 401 })
+    }
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

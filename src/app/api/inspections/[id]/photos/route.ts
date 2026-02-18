@@ -8,7 +8,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createOrgClient, OrgContextMissingError } from '@/lib/supabase/with-org'
 import type { Role } from '@/types'
 
 const ALLOWED_ROLES: Role[] = ['kewa', 'imeri']
@@ -46,7 +46,7 @@ export async function GET(
       )
     }
 
-    const supabase = await createClient()
+    const supabase = await createOrgClient(request)
 
     // Check inspections bucket exists
     const { data: buckets } = await supabase.storage.listBuckets()
@@ -106,6 +106,9 @@ export async function GET(
     return NextResponse.json({ photos })
   } catch (error) {
     console.error('Error in GET /api/inspections/[id]/photos:', error)
+    if (error instanceof OrgContextMissingError) {
+      return NextResponse.json({ error: 'Organization context required' }, { status: 401 })
+    }
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -148,7 +151,7 @@ export async function POST(
       )
     }
 
-    const supabase = await createClient()
+    const supabase = await createOrgClient(request)
 
     // Check inspections bucket exists
     const { data: buckets } = await supabase.storage.listBuckets()
@@ -264,6 +267,9 @@ export async function POST(
     }, { status: 201 })
   } catch (error) {
     console.error('Error in POST /api/inspections/[id]/photos:', error)
+    if (error instanceof OrgContextMissingError) {
+      return NextResponse.json({ error: 'Organization context required' }, { status: 401 })
+    }
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

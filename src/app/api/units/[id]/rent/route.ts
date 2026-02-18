@@ -9,7 +9,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createOrgClient, OrgContextMissingError } from '@/lib/supabase/with-org'
 import type { Role } from '@/types'
 
 interface UpdateRentInput {
@@ -40,7 +40,7 @@ export async function PATCH(
 ): Promise<NextResponse<UnitRentResponse | { error: string }>> {
   try {
     const { id } = await params
-    const supabase = await createClient()
+    const supabase = await createOrgClient(request)
 
     // Get user info from headers (set by middleware)
     const userId = request.headers.get('x-user-id')
@@ -153,6 +153,9 @@ export async function PATCH(
     })
   } catch (error) {
     console.error('Error in PATCH /api/units/[id]/rent:', error)
+    if (error instanceof OrgContextMissingError) {
+      return NextResponse.json({ error: 'Organization context required' }, { status: 401 })
+    }
     return NextResponse.json(
       { error: 'Interner Serverfehler' },
       { status: 500 }
@@ -170,7 +173,7 @@ export async function GET(
 ): Promise<NextResponse<UnitRentResponse | { error: string }>> {
   try {
     const { id } = await params
-    const supabase = await createClient()
+    const supabase = await createOrgClient(request)
 
     // Get user info from headers (set by middleware)
     const userId = request.headers.get('x-user-id')
@@ -222,6 +225,9 @@ export async function GET(
     })
   } catch (error) {
     console.error('Error in GET /api/units/[id]/rent:', error)
+    if (error instanceof OrgContextMissingError) {
+      return NextResponse.json({ error: 'Organization context required' }, { status: 401 })
+    }
     return NextResponse.json(
       { error: 'Interner Serverfehler' },
       { status: 500 }

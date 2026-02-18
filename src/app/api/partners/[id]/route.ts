@@ -9,7 +9,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createOrgClient, OrgContextMissingError } from '@/lib/supabase/with-org'
 import type { Role } from '@/types'
 import type { Partner } from '@/types/database'
 
@@ -73,7 +73,7 @@ export async function GET(
       )
     }
 
-    const supabase = await createClient()
+    const supabase = await createOrgClient(request)
 
     const { data: partner, error } = await supabase
       .from('partners')
@@ -95,6 +95,9 @@ export async function GET(
     return NextResponse.json({ partner })
   } catch (error) {
     console.error('Unexpected error in GET /api/partners/[id]:', error)
+    if (error instanceof OrgContextMissingError) {
+      return NextResponse.json({ error: 'Organization context required' }, { status: 401 })
+    }
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -155,7 +158,7 @@ export async function PATCH(
       )
     }
 
-    const supabase = await createClient()
+    const supabase = await createOrgClient(request)
 
     // Check partner exists
     const { data: existing, error: checkError } = await supabase
@@ -259,6 +262,9 @@ export async function PATCH(
     return NextResponse.json({ partner })
   } catch (error) {
     console.error('Unexpected error in PATCH /api/partners/[id]:', error)
+    if (error instanceof OrgContextMissingError) {
+      return NextResponse.json({ error: 'Organization context required' }, { status: 401 })
+    }
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -306,7 +312,7 @@ export async function DELETE(
       )
     }
 
-    const supabase = await createClient()
+    const supabase = await createOrgClient(request)
 
     // Check partner exists
     const { data: existing, error: checkError } = await supabase
@@ -349,6 +355,9 @@ export async function DELETE(
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('Unexpected error in DELETE /api/partners/[id]:', error)
+    if (error instanceof OrgContextMissingError) {
+      return NextResponse.json({ error: 'Organization context required' }, { status: 401 })
+    }
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createOrgClient, OrgContextMissingError } from '@/lib/supabase/with-org'
 import type {
   KBArticleStatus,
   KBArticleWithMeta,
@@ -55,7 +55,7 @@ export async function PUT(
   { params }: RouteParams
 ): Promise<NextResponse<KBArticleResponse | KBErrorResponse>> {
   try {
-    const supabase = await createClient()
+    const supabase = await createOrgClient(request)
     const { id: articleId } = await params
 
     // Get user info from headers (set by middleware)
@@ -227,6 +227,9 @@ export async function PUT(
     return NextResponse.json({ article: transformedArticle })
   } catch (error) {
     console.error('Unexpected error in PUT /api/knowledge/[id]/status:', error)
+    if (error instanceof OrgContextMissingError) {
+      return NextResponse.json({ error: 'Organization context required' }, { status: 401 })
+    }
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

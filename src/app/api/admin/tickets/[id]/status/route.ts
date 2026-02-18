@@ -8,7 +8,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createOrgClient, OrgContextMissingError } from '@/lib/supabase/with-org'
 import {
   getTenantNotificationData,
   notifyTenantTicketStatusChange,
@@ -97,7 +97,7 @@ export async function PATCH(
       )
     }
 
-    const supabase = await createClient()
+    const supabase = await createOrgClient(request)
 
     // Get current ticket
     const { data: ticket, error: fetchError } = await supabase
@@ -174,6 +174,9 @@ export async function PATCH(
     return NextResponse.json({ ticket: updatedTicket })
   } catch (error) {
     console.error('Unexpected error in PATCH /api/admin/tickets/[id]/status:', error)
+    if (error instanceof OrgContextMissingError) {
+      return NextResponse.json({ error: 'Organization context required' }, { status: 401 })
+    }
     return NextResponse.json(
       { error: 'Interner Serverfehler' },
       { status: 500 }

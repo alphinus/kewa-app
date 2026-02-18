@@ -7,7 +7,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createOrgClient, OrgContextMissingError } from '@/lib/supabase/with-org'
 import type { Role } from '@/types'
 import type { Partner } from '@/types/database'
 
@@ -43,7 +43,7 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    const supabase = await createClient()
+    const supabase = await createOrgClient(request)
     const { searchParams } = new URL(request.url)
 
     // Parse filters
@@ -81,6 +81,9 @@ export async function GET(request: NextRequest) {
     })
   } catch (error) {
     console.error('Unexpected error in GET /api/suppliers:', error)
+    if (error instanceof OrgContextMissingError) {
+      return NextResponse.json({ error: 'Organization context required' }, { status: 401 })
+    }
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

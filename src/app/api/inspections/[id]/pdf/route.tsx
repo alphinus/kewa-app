@@ -12,7 +12,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { renderToBuffer } from '@react-pdf/renderer'
 import { SESSION_COOKIE_NAME, validateSession } from '@/lib/session'
-import { createClient } from '@/lib/supabase/server'
+import { createOrgClient, OrgContextMissingError } from '@/lib/supabase/with-org'
 import { getInspection } from '@/lib/inspections/queries'
 import { InspectionPDFDocument } from '@/components/inspections/InspectionPDF'
 import type { InspectionPDFData } from '@/components/inspections/InspectionPDF'
@@ -42,7 +42,7 @@ export async function GET(
     let signatureDataUrl: string | undefined
     if (inspection.signature_storage_path) {
       try {
-        const supabase = await createClient()
+        const supabase = await createOrgClient(request)
         const { data: signatureBlob } = await supabase.storage
           .from('inspections')
           .download(inspection.signature_storage_path)
@@ -81,6 +81,9 @@ export async function GET(
     })
   } catch (error) {
     console.error('Error generating PDF:', error)
+    if (error instanceof OrgContextMissingError) {
+      return NextResponse.json({ error: 'Organization context required' }, { status: 401 })
+    }
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Fehler beim Erstellen des PDFs' },
       { status: 500 }

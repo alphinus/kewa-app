@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createOrgClient, OrgContextMissingError } from '@/lib/supabase/with-org'
 import type { CreateTemplatePackageInput } from '@/types/templates'
 import type { Role } from '@/types'
 
@@ -35,7 +35,7 @@ export async function GET(
     const { searchParams } = new URL(request.url)
     const phaseId = searchParams.get('phase_id')
 
-    const supabase = await createClient()
+    const supabase = await createOrgClient(request)
 
     // First get phases for this template
     const { data: phases, error: phasesError } = await supabase
@@ -75,6 +75,9 @@ export async function GET(
     return NextResponse.json({ packages: data })
   } catch (error) {
     console.error('Unexpected error in GET /api/templates/[id]/packages:', error)
+    if (error instanceof OrgContextMissingError) {
+      return NextResponse.json({ error: 'Organization context required' }, { status: 401 })
+    }
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -122,7 +125,7 @@ export async function POST(
       )
     }
 
-    const supabase = await createClient()
+    const supabase = await createOrgClient(request)
 
     // Verify phase belongs to this template
     const { data: phase, error: phaseError } = await supabase
@@ -174,6 +177,9 @@ export async function POST(
     return NextResponse.json({ package: data }, { status: 201 })
   } catch (error) {
     console.error('Unexpected error in POST /api/templates/[id]/packages:', error)
+    if (error instanceof OrgContextMissingError) {
+      return NextResponse.json({ error: 'Organization context required' }, { status: 401 })
+    }
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createOrgClient, OrgContextMissingError } from '@/lib/supabase/with-org'
 import type {
   KBAttachment,
   KBAttachmentWithUrl,
@@ -37,7 +37,7 @@ export async function GET(
   { params }: RouteParams
 ): Promise<NextResponse<KBAttachmentsResponse | KBErrorResponse>> {
   try {
-    const supabase = await createClient()
+    const supabase = await createOrgClient(request)
     const { id: articleId } = await params
 
     // Get user info from headers (set by middleware)
@@ -106,6 +106,9 @@ export async function GET(
     return NextResponse.json({ attachments: attachmentsWithUrls })
   } catch (error) {
     console.error('Unexpected error in GET /api/knowledge/[id]/attachments:', error)
+    if (error instanceof OrgContextMissingError) {
+      return NextResponse.json({ error: 'Organization context required' }, { status: 401 })
+    }
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -124,7 +127,7 @@ export async function POST(
   { params }: RouteParams
 ): Promise<NextResponse<KBAttachmentResponse | KBErrorResponse>> {
   try {
-    const supabase = await createClient()
+    const supabase = await createOrgClient(request)
     const { id: articleId } = await params
 
     // Get user info from headers (set by middleware)
@@ -239,6 +242,9 @@ export async function POST(
     return NextResponse.json({ attachment })
   } catch (error) {
     console.error('Unexpected error in POST /api/knowledge/[id]/attachments:', error)
+    if (error instanceof OrgContextMissingError) {
+      return NextResponse.json({ error: 'Organization context required' }, { status: 401 })
+    }
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -257,7 +263,7 @@ export async function DELETE(
   { params }: RouteParams
 ): Promise<NextResponse<KBSuccessResponse | KBErrorResponse>> {
   try {
-    const supabase = await createClient()
+    const supabase = await createOrgClient(request)
     const { id: articleId } = await params
 
     // Get user info from headers (set by middleware)
@@ -344,6 +350,9 @@ export async function DELETE(
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('Unexpected error in DELETE /api/knowledge/[id]/attachments:', error)
+    if (error instanceof OrgContextMissingError) {
+      return NextResponse.json({ error: 'Organization context required' }, { status: 401 })
+    }
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

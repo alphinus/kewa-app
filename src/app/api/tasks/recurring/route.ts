@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createOrgClient, OrgContextMissingError } from '@/lib/supabase/with-org'
 import type { Task, TaskResponse, ErrorResponse } from '@/types/database'
 
 interface RecurringTaskInput {
@@ -43,7 +43,7 @@ export async function POST(
   request: NextRequest
 ): Promise<NextResponse<TaskResponse | ErrorResponse>> {
   try {
-    const supabase = await createClient()
+    const supabase = await createOrgClient(request)
 
     // Parse request body
     const body: RecurringTaskInput = await request.json()
@@ -127,6 +127,9 @@ export async function POST(
     return NextResponse.json({ task: newTask }, { status: 201 })
   } catch (error) {
     console.error('Unexpected error in POST /api/tasks/recurring:', error)
+    if (error instanceof OrgContextMissingError) {
+      return NextResponse.json({ error: 'Organization context required' }, { status: 401 })
+    }
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

@@ -5,7 +5,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createOrgClient, OrgContextMissingError } from '@/lib/supabase/with-org'
 import { createDataAuditLog } from '@/lib/audit'
 import { INVOICE_SELECT } from '@/lib/costs/invoice-queries'
 import type { Role } from '@/types'
@@ -66,7 +66,7 @@ export async function POST(
       )
     }
 
-    const supabase = await createClient()
+    const supabase = await createOrgClient(request)
 
     // Check invoice exists and is in under_review status
     const { data: existing, error: checkError } = await supabase
@@ -121,6 +121,9 @@ export async function POST(
     return NextResponse.json({ invoice })
   } catch (error) {
     console.error('Unexpected error in POST /api/invoices/[id]/approve:', error)
+    if (error instanceof OrgContextMissingError) {
+      return NextResponse.json({ error: 'Organization context required' }, { status: 401 })
+    }
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

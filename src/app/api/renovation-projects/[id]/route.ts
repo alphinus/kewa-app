@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createOrgClient, OrgContextMissingError } from '@/lib/supabase/with-org'
 import type { Role } from '@/types'
 
 interface RouteParams {
@@ -22,7 +22,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     }
 
     const { id } = await params
-    const supabase = await createClient()
+    const supabase = await createOrgClient(request)
 
     const { data, error } = await supabase
       .from('renovation_projects')
@@ -59,6 +59,9 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     return NextResponse.json({ project: data })
   } catch (error) {
     console.error('Unexpected error in GET /api/renovation-projects/[id]:', error)
+    if (error instanceof OrgContextMissingError) {
+      return NextResponse.json({ error: 'Organization context required' }, { status: 401 })
+    }
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -86,7 +89,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
 
     const { id } = await params
     const body = await request.json()
-    const supabase = await createClient()
+    const supabase = await createOrgClient(request)
 
     // Only allow updating specific fields
     const allowedFields = [
@@ -133,6 +136,9 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     return NextResponse.json({ project: data })
   } catch (error) {
     console.error('Unexpected error in PATCH /api/renovation-projects/[id]:', error)
+    if (error instanceof OrgContextMissingError) {
+      return NextResponse.json({ error: 'Organization context required' }, { status: 401 })
+    }
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

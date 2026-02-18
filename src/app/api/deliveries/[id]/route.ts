@@ -9,7 +9,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createOrgClient, OrgContextMissingError } from '@/lib/supabase/with-org'
 import type { Role } from '@/types'
 import type { UpdateDeliveryInput } from '@/types/suppliers'
 
@@ -87,7 +87,7 @@ export async function GET(
       )
     }
 
-    const supabase = await createClient()
+    const supabase = await createOrgClient(request)
 
     const { data: delivery, error } = await supabase
       .from('deliveries')
@@ -109,6 +109,9 @@ export async function GET(
     return NextResponse.json({ delivery })
   } catch (error) {
     console.error('Unexpected error in GET /api/deliveries/[id]:', error)
+    if (error instanceof OrgContextMissingError) {
+      return NextResponse.json({ error: 'Organization context required' }, { status: 401 })
+    }
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -170,7 +173,7 @@ export async function PATCH(
       )
     }
 
-    const supabase = await createClient()
+    const supabase = await createOrgClient(request)
 
     // Check delivery exists and get current data
     const { data: existing, error: checkError } = await supabase
@@ -233,6 +236,9 @@ export async function PATCH(
     return NextResponse.json({ delivery })
   } catch (error) {
     console.error('Unexpected error in PATCH /api/deliveries/[id]:', error)
+    if (error instanceof OrgContextMissingError) {
+      return NextResponse.json({ error: 'Organization context required' }, { status: 401 })
+    }
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -279,7 +285,7 @@ export async function DELETE(
       )
     }
 
-    const supabase = await createClient()
+    const supabase = await createOrgClient(request)
 
     // Check delivery exists and has no invoice linked
     const { data: existing, error: checkError } = await supabase
@@ -317,6 +323,9 @@ export async function DELETE(
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('Unexpected error in DELETE /api/deliveries/[id]:', error)
+    if (error instanceof OrgContextMissingError) {
+      return NextResponse.json({ error: 'Organization context required' }, { status: 401 })
+    }
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

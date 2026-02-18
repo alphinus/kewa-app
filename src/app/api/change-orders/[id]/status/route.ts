@@ -7,7 +7,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createOrgClient, OrgContextMissingError } from '@/lib/supabase/with-org'
 import type { Role } from '@/types'
 import type { ChangeOrderStatus } from '@/types/change-orders'
 import {
@@ -130,7 +130,7 @@ export async function PATCH(
       )
     }
 
-    const supabase = await createClient()
+    const supabase = await createOrgClient(request)
 
     // Get current change order with work order for project lookup
     const { data: existing, error: checkError } = await supabase
@@ -265,6 +265,9 @@ export async function PATCH(
     })
   } catch (error) {
     console.error('Unexpected error in PATCH /api/change-orders/[id]/status:', error)
+    if (error instanceof OrgContextMissingError) {
+      return NextResponse.json({ error: 'Organization context required' }, { status: 401 })
+    }
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

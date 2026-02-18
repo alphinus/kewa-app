@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createOrgClient, OrgContextMissingError } from '@/lib/supabase/with-org'
 import type { Role } from '@/types'
 import type { SupabaseClient } from '@supabase/supabase-js'
 
@@ -34,7 +34,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     }
 
     const { gateId } = await params
-    const supabase = await createClient()
+    const supabase = await createOrgClient(request)
 
     const { data, error } = await supabase
       .from('project_quality_gates')
@@ -58,6 +58,9 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     return NextResponse.json({ quality_gate: data })
   } catch (error) {
     console.error('Unexpected error in GET /api/renovation-projects/[id]/quality-gates/[gateId]:', error)
+    if (error instanceof OrgContextMissingError) {
+      return NextResponse.json({ error: 'Organization context required' }, { status: 401 })
+    }
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -84,7 +87,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
 
     const { gateId } = await params
     const body = await request.json()
-    const supabase = await createClient()
+    const supabase = await createOrgClient(request)
 
     // Handle checklist item toggle
     if (body.toggle_checklist_item) {
@@ -162,6 +165,9 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     return NextResponse.json({ error: 'Invalid update' }, { status: 400 })
   } catch (error) {
     console.error('Unexpected error in PATCH /api/renovation-projects/[id]/quality-gates/[gateId]:', error)
+    if (error instanceof OrgContextMissingError) {
+      return NextResponse.json({ error: 'Organization context required' }, { status: 401 })
+    }
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

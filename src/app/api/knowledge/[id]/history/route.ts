@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createOrgClient, OrgContextMissingError } from '@/lib/supabase/with-org'
 import type { KBArticleHistoryResponse, KBErrorResponse } from '@/types/knowledge-base'
 
 type RouteParams = {
@@ -18,7 +18,7 @@ export async function GET(
   { params }: RouteParams
 ): Promise<NextResponse<KBArticleHistoryResponse | KBErrorResponse>> {
   try {
-    const supabase = await createClient()
+    const supabase = await createOrgClient(request)
     const { id } = await params
 
     // Get user info from headers (set by middleware)
@@ -93,6 +93,9 @@ export async function GET(
     return NextResponse.json({ history })
   } catch (error) {
     console.error('Unexpected error in GET /api/knowledge/[id]/history:', error)
+    if (error instanceof OrgContextMissingError) {
+      return NextResponse.json({ error: 'Organization context required' }, { status: 401 })
+    }
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

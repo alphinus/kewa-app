@@ -8,7 +8,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createOrgClient, OrgContextMissingError } from '@/lib/supabase/with-org'
 import type { Role, RoomType } from '@/types'
 import type { Room } from '@/types/database'
 
@@ -68,7 +68,7 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    const supabase = await createClient()
+    const supabase = await createOrgClient(request)
 
     const { data, error } = await supabase
       .from('rooms')
@@ -87,6 +87,9 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ rooms })
   } catch (error) {
     console.error('Unexpected error in GET /api/rooms:', error)
+    if (error instanceof OrgContextMissingError) {
+      return NextResponse.json({ error: 'Organization context required' }, { status: 401 })
+    }
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -173,7 +176,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    const supabase = await createClient()
+    const supabase = await createOrgClient(request)
 
     // Create room with defaults
     const { data: room, error: createError } = await supabase
@@ -198,6 +201,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ room }, { status: 201 })
   } catch (error) {
     console.error('Unexpected error in POST /api/rooms:', error)
+    if (error instanceof OrgContextMissingError) {
+      return NextResponse.json({ error: 'Organization context required' }, { status: 401 })
+    }
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

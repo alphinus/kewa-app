@@ -9,7 +9,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createOrgClient, OrgContextMissingError } from '@/lib/supabase/with-org'
 import type { UnitWithStats, UnitResponse, UpdateUnitInput, ErrorResponse, SuccessResponse } from '@/types/database'
 import type { Role, UnitType } from '@/types'
 
@@ -23,7 +23,7 @@ const ALLOWED_ROLES: Role[] = ['kewa', 'imeri']
  * Helper: Calculate task counts for a unit
  */
 async function getUnitTaskCounts(
-  supabase: Awaited<ReturnType<typeof createClient>>,
+  supabase: Awaited<ReturnType<typeof createOrgClient>>,
   unitId: string,
   userRole: Role
 ): Promise<{ open: number; total: number }> {
@@ -77,7 +77,7 @@ export async function GET(
 ): Promise<NextResponse<UnitResponse | ErrorResponse>> {
   try {
     const { id } = await params
-    const supabase = await createClient()
+    const supabase = await createOrgClient(request)
 
     // Get user info from headers (set by middleware)
     const userId = request.headers.get('x-user-id')
@@ -132,6 +132,9 @@ export async function GET(
     return NextResponse.json({ unit: unitWithStats })
   } catch (error) {
     console.error('Unexpected error in GET /api/units/[id]:', error)
+    if (error instanceof OrgContextMissingError) {
+      return NextResponse.json({ error: 'Organization context required' }, { status: 401 })
+    }
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -151,7 +154,7 @@ export async function PATCH(
 ): Promise<NextResponse<UnitResponse | ErrorResponse>> {
   try {
     const { id } = await params
-    const supabase = await createClient()
+    const supabase = await createOrgClient(request)
 
     // Get user info from headers (set by middleware)
     const userId = request.headers.get('x-user-id')
@@ -276,6 +279,9 @@ export async function PATCH(
     return NextResponse.json({ unit: unitWithStats })
   } catch (error) {
     console.error('Unexpected error in PATCH /api/units/[id]:', error)
+    if (error instanceof OrgContextMissingError) {
+      return NextResponse.json({ error: 'Organization context required' }, { status: 401 })
+    }
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -295,7 +301,7 @@ export async function DELETE(
 ): Promise<NextResponse<SuccessResponse | ErrorResponse>> {
   try {
     const { id } = await params
-    const supabase = await createClient()
+    const supabase = await createOrgClient(request)
 
     // Get user info from headers (set by middleware)
     const userId = request.headers.get('x-user-id')
@@ -365,6 +371,9 @@ export async function DELETE(
     return new NextResponse(null, { status: 204 })
   } catch (error) {
     console.error('Unexpected error in DELETE /api/units/[id]:', error)
+    if (error instanceof OrgContextMissingError) {
+      return NextResponse.json({ error: 'Organization context required' }, { status: 401 })
+    }
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

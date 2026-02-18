@@ -7,7 +7,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createOrgClient, OrgContextMissingError } from '@/lib/supabase/with-org'
 import { sendDigestNotification } from '@/lib/notifications/send'
 import { getUnreadCount } from '@/lib/notifications/queries'
 
@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Batch mode: find all users with digest enabled at current hour
-    const supabase = await createClient()
+    const supabase = await createOrgClient(request)
 
     // Get current hour in UTC (pg_cron runs in UTC)
     const currentHour = new Date().getUTCHours()
@@ -98,6 +98,9 @@ export async function POST(request: NextRequest) {
     })
   } catch (error) {
     console.error('POST /api/notifications/digest error:', error)
+    if (error instanceof OrgContextMissingError) {
+      return NextResponse.json({ error: 'Organization context required' }, { status: 401 })
+    }
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

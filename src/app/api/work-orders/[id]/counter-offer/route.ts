@@ -12,7 +12,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
-import { createClient } from '@/lib/supabase/server'
+import { createOrgClient, OrgContextMissingError } from '@/lib/supabase/with-org'
 import { validateSessionWithRBAC, SESSION_COOKIE_NAME } from '@/lib/session'
 import { isInternalRole } from '@/lib/permissions'
 import {
@@ -70,7 +70,7 @@ export async function POST(
       )
     }
 
-    const supabase = await createClient()
+    const supabase = await createOrgClient(request)
 
     // Get current work order
     const { data: workOrder, error: fetchError } = await supabase
@@ -171,6 +171,9 @@ export async function POST(
     })
   } catch (error) {
     console.error('Counter-offer response error:', error)
+    if (error instanceof OrgContextMissingError) {
+      return NextResponse.json({ error: 'Organization context required' }, { status: 401 })
+    }
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

@@ -7,7 +7,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createOrgClient, OrgContextMissingError } from '@/lib/supabase/with-org'
 import { INVOICE_SELECT } from '@/lib/costs/invoice-queries'
 import type { Role } from '@/types'
 import { notifyApprovalNeeded } from '@/lib/notifications/triggers'
@@ -50,7 +50,7 @@ export async function GET(
       )
     }
 
-    const supabase = await createClient()
+    const supabase = await createOrgClient(request)
 
     const { data: invoice, error } = await supabase
       .from('invoices')
@@ -72,6 +72,9 @@ export async function GET(
     return NextResponse.json({ invoice })
   } catch (error) {
     console.error('Unexpected error in GET /api/invoices/[id]:', error)
+    if (error instanceof OrgContextMissingError) {
+      return NextResponse.json({ error: 'Organization context required' }, { status: 401 })
+    }
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -132,7 +135,7 @@ export async function PATCH(
       )
     }
 
-    const supabase = await createClient()
+    const supabase = await createOrgClient(request)
 
     // Check invoice exists and get current status
     const { data: existing, error: checkError } = await supabase
@@ -203,6 +206,9 @@ export async function PATCH(
     return NextResponse.json({ invoice })
   } catch (error) {
     console.error('Unexpected error in PATCH /api/invoices/[id]:', error)
+    if (error instanceof OrgContextMissingError) {
+      return NextResponse.json({ error: 'Organization context required' }, { status: 401 })
+    }
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -250,7 +256,7 @@ export async function DELETE(
       )
     }
 
-    const supabase = await createClient()
+    const supabase = await createOrgClient(request)
 
     // Check invoice exists and is in received status
     const { data: existing, error: checkError } = await supabase
@@ -287,6 +293,9 @@ export async function DELETE(
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('Unexpected error in DELETE /api/invoices/[id]:', error)
+    if (error instanceof OrgContextMissingError) {
+      return NextResponse.json({ error: 'Organization context required' }, { status: 401 })
+    }
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

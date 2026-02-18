@@ -8,7 +8,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createOrgClient, OrgContextMissingError } from '@/lib/supabase/with-org'
 import type { UnitWithStats, UnitsResponse, ErrorResponse, CreateUnitInput } from '@/types/database'
 import type { Role, UnitType } from '@/types'
 
@@ -33,7 +33,7 @@ export async function GET(
   request: NextRequest
 ): Promise<NextResponse<UnitsResponse | ErrorResponse>> {
   try {
-    const supabase = await createClient()
+    const supabase = await createOrgClient(request)
     const { searchParams } = new URL(request.url)
     const buildingId = searchParams.get('building_id')
 
@@ -131,6 +131,9 @@ export async function GET(
     return NextResponse.json({ units: unitsWithStats })
   } catch (error) {
     console.error('Unexpected error in GET /api/units:', error)
+    if (error instanceof OrgContextMissingError) {
+      return NextResponse.json({ error: 'Organization context required' }, { status: 401 })
+    }
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -200,7 +203,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const supabase = await createClient()
+    const supabase = await createOrgClient(request)
 
     // Create unit with defaults
     // Only use columns that exist in the base schema (001_initial_schema.sql)
@@ -233,6 +236,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ unit: unitWithStats }, { status: 201 })
   } catch (error) {
     console.error('Unexpected error in POST /api/units:', error)
+    if (error instanceof OrgContextMissingError) {
+      return NextResponse.json({ error: 'Organization context required' }, { status: 401 })
+    }
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

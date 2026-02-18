@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createOrgClient, OrgContextMissingError } from '@/lib/supabase/with-org'
 import type { ProjectResponse, ErrorResponse } from '@/types/database'
 import type { Role } from '@/types'
 
@@ -21,7 +21,7 @@ export async function POST(
 ): Promise<NextResponse<ProjectResponse | ErrorResponse>> {
   try {
     const { id: projectId } = await params
-    const supabase = await createClient()
+    const supabase = await createOrgClient(request)
 
     // Get user info from headers (set by middleware)
     const userId = request.headers.get('x-user-id')
@@ -176,6 +176,9 @@ export async function POST(
     }
   } catch (error) {
     console.error('Unexpected error in POST /api/projects/[id]/archive:', error)
+    if (error instanceof OrgContextMissingError) {
+      return NextResponse.json({ error: 'Organization context required' }, { status: 401 })
+    }
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

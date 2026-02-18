@@ -1,12 +1,12 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { fetchComments, createComment } from '@/lib/comments/comment-queries'
 import { SESSION_COOKIE_NAME, validateSessionWithRBAC } from '@/lib/session'
 import { isInternalRole } from '@/lib/permissions'
-import { createClient } from '@/lib/supabase/server'
+import { createOrgClient } from '@/lib/supabase/with-org'
 import type { CommentEntityType, CommentVisibility } from '@/types/comments'
 
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
   const entityType = searchParams.get('entity_type') as CommentEntityType
   const entityId = searchParams.get('entity_id')
@@ -29,7 +29,7 @@ export async function GET(request: Request) {
     if (session) {
       viewerRole = isInternalRole(session.roleName) ? 'kewa' : 'contractor'
       // Fetch email from database for is_own_comment check
-      const supabase = await createClient()
+      const supabase = await createOrgClient(request)
       const { data: user } = await supabase
         .from('users')
         .select('email')
@@ -44,7 +44,7 @@ export async function GET(request: Request) {
   return NextResponse.json({ comments })
 }
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   const cookieStore = await cookies()
   const sessionCookie = cookieStore.get(SESSION_COOKIE_NAME)
 
@@ -59,7 +59,7 @@ export async function POST(request: Request) {
   }
 
   // Fetch user details from database
-  const supabase = await createClient()
+  const supabase = await createOrgClient(request)
   const { data: user } = await supabase
     .from('users')
     .select('email, display_name')

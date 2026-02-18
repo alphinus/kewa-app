@@ -8,7 +8,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createOrgClient, OrgContextMissingError } from '@/lib/supabase/with-org'
 import type { Role } from '@/types'
 import type { UpdateDefectInput } from '@/types/inspections'
 import { updateDefect, deleteDefect } from '@/lib/inspections/queries'
@@ -55,7 +55,7 @@ export async function PATCH(
     const body: UpdateDefectInput = await request.json()
 
     // Validate defect belongs to inspection
-    const supabase = await createClient()
+    const supabase = await createOrgClient(request)
     const { data: defect, error: defectError } = await supabase
       .from('inspection_defects')
       .select('id, inspection_id')
@@ -81,6 +81,9 @@ export async function PATCH(
     return NextResponse.json({ defect: updatedDefect })
   } catch (error) {
     console.error('Error in PATCH /api/inspections/[id]/defects/[defectId]:', error)
+    if (error instanceof OrgContextMissingError) {
+      return NextResponse.json({ error: 'Organization context required' }, { status: 401 })
+    }
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -119,7 +122,7 @@ export async function DELETE(
     }
 
     // Validate defect belongs to inspection and no action taken
-    const supabase = await createClient()
+    const supabase = await createOrgClient(request)
     const { data: defect, error: defectError } = await supabase
       .from('inspection_defects')
       .select('id, inspection_id, action')
@@ -152,6 +155,9 @@ export async function DELETE(
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('Error in DELETE /api/inspections/[id]/defects/[defectId]:', error)
+    if (error instanceof OrgContextMissingError) {
+      return NextResponse.json({ error: 'Organization context required' }, { status: 401 })
+    }
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createOrgClient, OrgContextMissingError } from '@/lib/supabase/with-org'
 import type {
   KBCategoryWithCount,
   KBCategoriesResponse,
@@ -21,7 +21,7 @@ export async function GET(
   request: NextRequest
 ): Promise<NextResponse<KBCategoriesResponse | KBErrorResponse>> {
   try {
-    const supabase = await createClient()
+    const supabase = await createOrgClient(request)
 
     // Get user info from headers (set by middleware)
     const userId = request.headers.get('x-user-id')
@@ -137,6 +137,9 @@ export async function GET(
     return NextResponse.json({ categories: result })
   } catch (error) {
     console.error('Unexpected error in GET /api/knowledge/categories:', error)
+    if (error instanceof OrgContextMissingError) {
+      return NextResponse.json({ error: 'Organization context required' }, { status: 401 })
+    }
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -154,7 +157,7 @@ export async function POST(
   request: NextRequest
 ): Promise<NextResponse<KBCategoryResponse | KBErrorResponse>> {
   try {
-    const supabase = await createClient()
+    const supabase = await createOrgClient(request)
 
     // Get user info from headers (set by middleware)
     const userId = request.headers.get('x-user-id')
@@ -247,6 +250,9 @@ export async function POST(
     return NextResponse.json({ category: newCategory }, { status: 201 })
   } catch (error) {
     console.error('Unexpected error in POST /api/knowledge/categories:', error)
+    if (error instanceof OrgContextMissingError) {
+      return NextResponse.json({ error: 'Organization context required' }, { status: 401 })
+    }
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
