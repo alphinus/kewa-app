@@ -5,14 +5,14 @@
 See: .planning/PROJECT.md (updated 2026-02-17)
 
 **Core value:** Immobilienverwaltungen haben volle Transparenz und Kontrolle ueber alle Renovationen -- mit standardisierten Workflows, mandantenfaehiger Datentrennung, externer Handwerker-Integration, Kostenuebersicht und automatischer Zustandshistorie.
-**Current focus:** v4.0 Multi-Tenant Data Model & Navigation -- Phase 35 complete (all 4 plans done)
+**Current focus:** v4.0 Multi-Tenant Data Migration -- Phase 36 in progress (plan 01 of 3 done)
 
 ## Current Position
 
-Phase: 35 of 40 (Schema Foundation)
-Plan: All 4 plans complete (01, 02, 03, 04)
-Status: Phase 35 complete — ready for Phase 36 (Org-ID Backfill)
-Last activity: 2026-02-18 -- Plan 35-03 complete: RLS helpers + 37 org_id sync triggers
+Phase: 36 of 40 (Data Migration & Backfill)
+Plan: 01 of 3 complete — ready for Plan 02 (seed properties + backfill org_id)
+Status: Phase 36 plan 01 complete — hauswart role + master data seed done
+Last activity: 2026-02-18 -- Plan 36-01 complete: hauswart role, 2 orgs, 4 owners, 4 mandates, 10 users, 17 org_members
 
 Progress: [##############################..........] 34/40 phases across all milestones
 
@@ -30,7 +30,7 @@ Progress: [##############################..........] 34/40 phases across all mil
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 133 (128 prior + 5 in Phase 35)
+- Total plans completed: 134 (128 prior + 5 in Phase 35 + 1 in Phase 36)
 - Metrics from previous milestones -- see milestone archives
 
 | Plan | Duration | Tasks | Files |
@@ -39,6 +39,7 @@ Progress: [##############################..........] 34/40 phases across all mil
 | 35-02 | ~15min | 1 | 1 |
 | 35-04 | 3min | 1 | 1 |
 | 35-03 | 3min | 2 | 2 |
+| 36-01 | 3min | 2 | 2 |
 
 ## Accumulated Context
 
@@ -61,12 +62,17 @@ Recent decisions affecting current work:
 - 35-03: task_dependencies trigger uses task_id (not depends_on_task_id) -- org follows the dependent task
 - 35-03: expenses trigger covers 4 parent FKs (renovation_project_id, work_order_id, unit_id, room_id) to match validate_expense_relationship() constraint
 - 35-03: purchase_orders excluded from trigger (no hierarchical parent) -- backfill in Phase 36
+- 36-01: Organizations use 0010 UUID namespace (avoids collision with 0001 buildings namespace from migration 001)
+- 36-01: Existing user 0000-...001 renamed to Rolf Kaelin (preserves FK references vs creating new user at 0020-...001)
+- 36-01: All new Phase 36 users receive role='kewa' as placeholder (legacy NOT NULL column, Phase 37 will drop)
+- 36-01: Flurina Kaelin assigned 0020-...001; Rolf Kaelin reuses existing 0000-...001
 
 ### Blockers/Concerns
 
 - PgBouncer + SET LOCAL interaction needs validation in staging (SET LOCAL is transaction-scoped but PostgREST may not wrap each API call in explicit transaction)
 - 7 tables already have RLS enabled (029_rls_policies.sql) using is_internal_user(auth.uid()) which returns NULL for PIN-auth -- need audit
 - quality_gates table missing in production DB (migration 072 skipped)
+- Docker Desktop not running during 36-01 execution -- supabase db reset verification deferred to next plan
 
 ### Tech Debt
 
@@ -77,8 +83,8 @@ Recent decisions affecting current work:
 ## Session Continuity
 
 Last session: 2026-02-18
-Stopped at: Completed 35-03-PLAN.md (RLS helpers + 37 org_id sync triggers)
+Stopped at: Completed 36-01-PLAN.md (hauswart role + master data seed)
 Resume file: None
 
 ---
-*v4.0 Multi-Tenant Data Model & Navigation -- Phase 35 complete (all 4 plans: 01, 02, 03, 04)*
+*v4.0 Multi-Tenant Data Migration -- Phase 36 active (plan 01/3 done: 079 + 080 migrations)*
