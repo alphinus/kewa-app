@@ -70,6 +70,7 @@ export async function convertTicketToWorkOrder(
     .from('tickets')
     .select(`
       *,
+      organization_id,
       unit:units (
         id,
         name,
@@ -137,13 +138,16 @@ export async function convertTicketToWorkOrder(
     // Create service client with service role for storage operations
     const supabaseAdmin = createServiceClient()
 
+    // Org ID from ticket — required for org-prefixed destination path (084_storage_rls.sql)
+    const orgId = (ticket as any).organization_id as string || ''
+
     for (const attachment of attachments) {
       try {
         // Source path is the ticket attachment storage path
         const sourcePath = attachment.storage_path
 
-        // Destination path in media bucket with work order prefix
-        const destPath = `work_order/${workOrder.id}/${attachment.file_name}`
+        // Org-prefixed destination path in media bucket
+        const destPath = `${orgId}/work_orders/${workOrder.id}/${attachment.file_name}`
 
         // Copy file in storage
         const { error: copyError } = await supabaseAdmin.storage

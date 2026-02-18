@@ -52,12 +52,22 @@ export async function POST(
       )
     }
 
+    // Fetch org ID from ticket (required for org-prefixed storage paths)
+    const supabaseAdmin = createServiceClient()
+    const { data: ticketData } = await supabaseAdmin
+      .from('tickets')
+      .select('organization_id')
+      .eq('id', ticketId)
+      .single()
+    const orgId = ticketData?.organization_id
+    if (!orgId) {
+      return NextResponse.json({ error: 'Ticket nicht gefunden' }, { status: 404 })
+    }
+
     // For ticket-level attachments, enforce MAX_TICKET_PHOTOS
     if (!messageId) {
-      const supabase = createServiceClient()
-
       // Count existing ticket-level attachments
-      const { count: existingCount } = await supabase
+      const { count: existingCount } = await supabaseAdmin
         .from('ticket_attachments')
         .select('id', { count: 'exact', head: true })
         .eq('ticket_id', ticketId)
@@ -88,11 +98,10 @@ export async function POST(
 
     // Upload all files
     const uploadResults = await Promise.all(
-      files.map((file) => uploadTicketAttachment(file, ticketId, messageId || undefined))
+      files.map((file) => uploadTicketAttachment(file, orgId, ticketId, messageId || undefined))
     )
 
     // Create attachment records in database
-    const supabase = createServiceClient()
     const attachmentRecords = uploadResults.map((result, idx) => ({
       ticket_id: ticketId,
       message_id: messageId || null,
@@ -103,7 +112,7 @@ export async function POST(
       mime_type: files[idx].type,
     }))
 
-    const { data: attachments, error: insertError } = await supabase
+    const { data: attachments, error: insertError } = await supabaseAdmin
       .from('ticket_attachments')
       .insert(attachmentRecords)
       .select()
@@ -114,7 +123,7 @@ export async function POST(
       // Clean up uploaded files
       await Promise.all(
         uploadResults.map((result) =>
-          supabase.storage.from('media').remove([result.path])
+          supabaseAdmin.storage.from('media').remove([result.path])
         )
       )
 

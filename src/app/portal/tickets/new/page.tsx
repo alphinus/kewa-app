@@ -92,7 +92,7 @@ export default function NewTicketPage() {
       // 2. Upload photos if any
       if (photos.length > 0) {
         for (const photo of photos) {
-          const { path } = await uploadTicketAttachment(photo, ticket.id)
+          const { path } = await uploadTicketAttachment(photo, ticket.organization_id, ticket.id)
 
           // Create attachment record
           await fetch(`/api/portal/tickets/${ticket.id}/attachments`, {

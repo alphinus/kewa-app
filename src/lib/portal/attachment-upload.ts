@@ -8,6 +8,7 @@
  */
 
 import { createClient } from '@/lib/supabase/client'
+import { buildStoragePath } from '@/lib/storage/paths'
 
 // ============================================
 // TYPES
@@ -110,17 +111,19 @@ export function validateAttachment(
 /**
  * Upload a ticket attachment to Supabase Storage
  *
- * Storage path convention:
- * - tickets/{ticket_id}/photos/{uuid}.{ext}
- * - tickets/{ticket_id}/messages/{message_id}/{uuid}.{ext}
+ * Storage path convention (org-prefixed per 084_storage_rls.sql):
+ * - {orgId}/tickets/{ticket_id}/photos/{uuid}.{ext}
+ * - {orgId}/tickets/{ticket_id}/messages/{message_id}/{uuid}.{ext}
  *
  * @param file - File to upload
+ * @param orgId - Organisation UUID (first path segment, enforced by RLS)
  * @param ticketId - Ticket UUID
  * @param messageId - Optional message UUID (for message attachments)
  * @returns Storage path and public URL
  */
 export async function uploadTicketAttachment(
   file: File,
+  orgId: string,
   ticketId: string,
   messageId?: string
 ): Promise<AttachmentUploadResult> {
@@ -130,10 +133,10 @@ export async function uploadTicketAttachment(
   const fileExt = file.name.split('.').pop()?.toLowerCase() || 'jpg'
   const fileName = `${crypto.randomUUID()}.${fileExt}`
 
-  // Storage path
+  // Org-prefixed path — first segment is orgId, required by Storage RLS (084_storage_rls.sql)
   const path = messageId
-    ? `tickets/${ticketId}/messages/${messageId}/${fileName}`
-    : `tickets/${ticketId}/photos/${fileName}`
+    ? buildStoragePath(orgId, 'tickets', ticketId, 'messages', messageId, fileName)
+    : buildStoragePath(orgId, 'tickets', ticketId, 'photos', fileName)
 
   // Upload to storage
   const arrayBuffer = await file.arrayBuffer()
