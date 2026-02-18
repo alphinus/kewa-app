@@ -5,7 +5,7 @@
 See: .planning/PROJECT.md (updated 2026-02-17)
 
 **Core value:** Immobilienverwaltungen haben volle Transparenz und Kontrolle ueber alle Renovationen -- mit standardisierten Workflows, mandantenfaehiger Datentrennung, externer Handwerker-Integration, Kostenuebersicht und automatischer Zustandshistorie.
-**Current focus:** v4.0 Multi-Tenant Data Model & Navigation -- Phase 35 in progress (Plans 01, 02, 04 complete)
+**Current focus:** v4.0 Multi-Tenant Data Model & Navigation -- Phase 35 in progress (Plans 01, 02, 04 complete — 03 next)
 
 ## Current Position
 
@@ -56,6 +56,7 @@ Recent decisions affecting current work:
 - 35-04: parking_spot renamed to parking; unit_type CHECK expanded to include parking, garage, storage
 - 35-04: renewal_fund_balance DEFAULT 0 (always a balance, even zero); renewal_fund_target nullable (absence of target is meaningful)
 - 35-04: German legal terms (Wertquote, Eigentumsperiode, Erneuerungsfonds) used only in SQL comments/COMMENT ON strings -- English identifiers only (D1)
+- 35-02: 62 tables receive organization_id (more than 44+ D2 estimate); tenant_users included (per-org per D2); ticket_categories excluded (global lookup table)
 
 ### Blockers/Concerns
 
@@ -72,7 +73,7 @@ Recent decisions affecting current work:
 ## Session Continuity
 
 Last session: 2026-02-18
-Stopped at: Completed 35-04-PLAN.md (STWE fields + parking unit_type normalization)
+Stopped at: Completed 35-02-PLAN.md (organization_id on all 62 per-org tables)
 Resume file: None
 
 ---
