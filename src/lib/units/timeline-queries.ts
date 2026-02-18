@@ -91,7 +91,7 @@ export async function fetchUnitTimeline(
  * Fetch project-related events for a unit
  */
 async function fetchProjectEvents(
-  supabase: Awaited<ReturnType<typeof createClient>>,
+  supabase: Awaited<ReturnType<typeof createPublicClient>>,
   unitId: string
 ): Promise<TimelineEvent[]> {
   const { data, error } = await supabase
@@ -144,7 +144,7 @@ async function fetchProjectEvents(
  * Fetch work order events for a unit (via projects)
  */
 async function fetchWorkOrderEvents(
-  supabase: Awaited<ReturnType<typeof createClient>>,
+  supabase: Awaited<ReturnType<typeof createPublicClient>>,
   unitId: string
 ): Promise<TimelineEvent[]> {
   // First get all project IDs for this unit
@@ -253,7 +253,7 @@ async function fetchWorkOrderEvents(
  * Fetch condition change events for a unit (via rooms)
  */
 async function fetchConditionEvents(
-  supabase: Awaited<ReturnType<typeof createClient>>,
+  supabase: Awaited<ReturnType<typeof createPublicClient>>,
   unitId: string
 ): Promise<TimelineEvent[]> {
   // First get all room IDs for this unit
@@ -302,7 +302,7 @@ async function fetchConditionEvents(
  * Fetch paid invoice events for a unit (via projects)
  */
 async function fetchInvoiceEvents(
-  supabase: Awaited<ReturnType<typeof createClient>>,
+  supabase: Awaited<ReturnType<typeof createPublicClient>>,
   unitId: string
 ): Promise<TimelineEvent[]> {
   // First get all project IDs for this unit
