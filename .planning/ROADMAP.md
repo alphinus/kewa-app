@@ -54,7 +54,7 @@ See milestones/v3.1-ROADMAP.md
 
 </details>
 
-### 📋 v4.0 Multi-Tenant Data Model & Navigation (Phases 35-40)
+### 📋 v4.0 Multi-Tenant Data Model & Navigation (Phases 35-41)
 
 **Milestone Goal:** Branchenstandard-Datenmodell mit mandantenfaehiger Architektur (Organization > Mandat > Eigentuemer > Liegenschaft > Gebaeude > Einheit), Supabase RLS fuer Mandanten-Isolation, und Navigation-Redesign mit hierarchischem Drill-down.
 
@@ -66,6 +66,7 @@ See milestones/v3.1-ROADMAP.md
 - [x] **Phase 38: Application Context & Org Switcher** - OrganizationProvider, MandateProvider, OrgSwitcher UI, BuildingContext scoping (completed 2026-02-18)
 - [x] **Phase 39: Navigation Redesign** - Breadcrumbs, simplified footer, Objekte drill-down routes, URL redirects (completed 2026-02-18)
 - [x] **Phase 40: Storage Multi-Tenancy** - Org-prefixed storage paths, storage RLS policies, existing file migration (completed 2026-02-18)
+- [ ] **Phase 41: v4.0 Bug Fixes & Cleanup** - Signature storage RLS fix, hauswart role access, cached-queries regression, orphaned file cleanup
 
 ## Phase Details
 
@@ -182,10 +183,24 @@ Plans:
 
 ---
 
+### Phase 41: v4.0 Bug Fixes & Cleanup
+**Goal**: Close integration bugs and tech debt identified by milestone audit — signature storage RLS, hauswart role access, cached-queries regression, orphaned file
+**Depends on**: Phase 40
+**Gap Closure**: Closes INT-01, INT-02, Flow #3 from v4.0-MILESTONE-AUDIT.md
+**Plans**: 1 plan
+**Success Criteria** (what must be TRUE):
+  1.  uses org-scoped Supabase client — signature uploads pass storage RLS
+  2. hauswart role can access  and  — CombinedSelector loads without 403
+  3.  uses org-scoped client — server components return tenant data
+  4.  deleted — no orphaned components
+  5. All hardcoded  arrays replaced with  calls
+
+---
+
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 35 > 36 > 37 > 38 > 39 > 40
+Phases execute in numeric order: 35 > 36 > 37 > 38 > 39 > 40 > 41
 Phase 40 can start after Phase 37 completes (parallel to 38-39).
 
 | Phase | Milestone | Plans Complete | Status | Completed |
@@ -202,9 +217,10 @@ Phase 40 can start after Phase 37 completes (parallel to 38-39).
 | 38. App Context & Switcher | v4.0 | Complete    | 2026-02-18 | - |
 | 39. Navigation Redesign | v4.0 | Complete    | 2026-02-18 | - |
 | 40. Storage Multi-Tenancy | v4.0 | Complete    | 2026-02-18 | - |
+| 41. Bug Fixes & Cleanup | v4.0 | Pending | - | - |
 
-**Total:** 34 phases complete, 6 phases planned
+**Total:** 40 phases complete, 1 phase pending
 
 ---
 
-*Last updated: 2026-02-18 -- Phase 35 planned (4 plans, 3 waves)*
+*Last updated: 2026-02-18 -- Phase 41 added (gap closure from milestone audit)*

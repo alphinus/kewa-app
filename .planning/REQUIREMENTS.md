@@ -178,10 +178,10 @@ Migrate existing storage file paths to include organization_id prefix (KEWA AG).
 | CTX-04 | Phase 38 | Pending |
 | NAV-01 | Phase 39 | Pending |
 | NAV-02 | Phase 39 | Pending |
-| NAV-03 | Phase 39 | Pending |
+| NAV-03 | Phase 39 + 41 | Pending |
 | NAV-04 | Phase 39 | Pending |
 | STOR-01 | Phase 40 | Pending |
-| STOR-02 | Phase 40 | Pending |
+| STOR-02 | Phase 40 + 41 | Pending |
 | STOR-03 | Phase 40 | Pending |
 
 ---
