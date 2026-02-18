@@ -169,7 +169,12 @@ Plans:
 **Goal**: File storage is organization-isolated with RLS enforcement on storage buckets
 **Depends on**: Phase 37 (can run parallel to Phases 38-39 after RLS is in place)
 **Requirements**: STOR-01, STOR-02, STOR-03
-**Plans**: TBD
+**Plans**: 4 plans
+Plans:
+- [ ] 40-01-PLAN.md -- Storage path builder helper + Storage RLS migration (all 4 buckets)
+- [ ] 40-02-PLAN.md -- Internal upload site updates (photos, audio, change orders, KB, inspections)
+- [ ] 40-03-PLAN.md -- External upload site updates (contractor, portal, signature, ticket-to-WO)
+- [ ] 40-04-PLAN.md -- Existing file migration script (copy to org-prefixed paths, update DB records)
 **Success Criteria** (what must be TRUE):
   1. New file uploads are stored under {organization_id}/{property_id}/{building_id}/{entity_type}/{filename} path structure
   2. Storage RLS policies prevent users from accessing files outside their organization's folder
