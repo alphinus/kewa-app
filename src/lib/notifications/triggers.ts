@@ -5,7 +5,7 @@
  * Phase: 24-push-notifications
  */
 
-import { createClient } from '@/lib/supabase/server'
+import { createPublicClient } from '@/lib/supabase/with-org'
 import { sendNotification } from '@/lib/notifications/send'
 import type { NotificationType } from '@/types/notifications'
 
@@ -17,7 +17,7 @@ import type { NotificationType } from '@/types/notifications'
  * Get all users with specified roles
  */
 async function getUsersByRoles(roleNames: string[]): Promise<string[]> {
-  const supabase = await createClient()
+  const supabase = await createPublicClient()
 
   const { data: users, error } = await supabase
     .from('user_roles')
@@ -38,7 +38,7 @@ async function getUsersByRoles(roleNames: string[]): Promise<string[]> {
  * Get contractor user for a work order (based on partner assignment)
  */
 async function getContractorUserForWorkOrder(workOrderId: string): Promise<string | null> {
-  const supabase = await createClient()
+  const supabase = await createPublicClient()
 
   // Get work order's partner_id
   const { data: workOrder, error: woError } = await supabase
@@ -78,7 +78,7 @@ async function getContractorUserForWorkOrder(workOrderId: string): Promise<strin
 export async function getUpcomingDeadlines(): Promise<
   Array<{ id: string; wo_number: string; acceptance_deadline: string }>
 > {
-  const supabase = await createClient()
+  const supabase = await createPublicClient()
 
   const { data, error } = await supabase
     .from('work_orders')

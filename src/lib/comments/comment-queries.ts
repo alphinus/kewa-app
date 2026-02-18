@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { createPublicClient } from '@/lib/supabase/with-org'
 import type {
   Comment,
   CommentWithAuthor,
@@ -12,7 +12,7 @@ export async function fetchComments(
   viewerRole: 'kewa' | 'contractor',
   viewerEmail?: string
 ): Promise<CommentWithAuthor[]> {
-  const supabase = await createClient()
+  const supabase = await createPublicClient()
 
   // Build query
   let query = supabase
@@ -55,7 +55,7 @@ export async function createComment(
   authorEmail?: string,
   authorName?: string
 ): Promise<{ success: boolean; comment?: Comment; error?: string }> {
-  const supabase = await createClient()
+  const supabase = await createPublicClient()
 
   const { data, error } = await supabase
     .from('comments')
@@ -82,7 +82,7 @@ export async function getCommentCount(
   entityType: CommentEntityType,
   entityId: string
 ): Promise<number> {
-  const supabase = await createClient()
+  const supabase = await createPublicClient()
 
   const { count } = await supabase
     .from('comments')

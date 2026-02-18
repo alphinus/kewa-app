@@ -5,7 +5,7 @@
  * Used by API routes and server components.
  */
 
-import { createClient } from '@/lib/supabase/server'
+import { createPublicClient } from '@/lib/supabase/with-org'
 import type { Invoice, Partner, Offer, WorkOrder, RenovationProject } from '@/types/database'
 
 /**
@@ -54,7 +54,7 @@ export const INVOICE_SELECT = `
 export async function getInvoiceWithRelations(
   id: string
 ): Promise<InvoiceWithRelations | null> {
-  const supabase = await createClient()
+  const supabase = await createPublicClient()
 
   const { data, error } = await supabase
     .from('invoices')
@@ -89,7 +89,7 @@ export interface InvoiceFilters {
 export async function getInvoicesByFilters(
   filters: InvoiceFilters = {}
 ): Promise<{ invoices: InvoiceWithRelations[]; total: number }> {
-  const supabase = await createClient()
+  const supabase = await createPublicClient()
 
   let query = supabase
     .from('invoices')
@@ -175,7 +175,7 @@ export interface InvoiceStatusCounts {
  * Get invoice counts by status
  */
 export async function getInvoiceStatusCounts(): Promise<InvoiceStatusCounts> {
-  const supabase = await createClient()
+  const supabase = await createPublicClient()
 
   const { data, error } = await supabase
     .from('invoices')

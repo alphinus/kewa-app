@@ -8,7 +8,7 @@
  * Requirement: HIST-01
  */
 
-import { createClient } from '@/lib/supabase/server'
+import { createPublicClient } from '@/lib/supabase/with-org'
 import type {
   TimelineEvent,
   TimelineEventType,
@@ -45,7 +45,7 @@ export async function fetchUnitTimeline(
   limit: number = DEFAULT_LIMIT,
   offset: number = 0
 ): Promise<TimelineResponse> {
-  const supabase = await createClient()
+  const supabase = await createPublicClient()
 
   // Clamp limit
   const safeLimit = Math.min(Math.max(1, limit), MAX_LIMIT)

@@ -3,7 +3,7 @@
  * Server-side operations for fetching and updating parking data
  */
 
-import { createClient } from '@/lib/supabase/server'
+import { createPublicClient } from '@/lib/supabase/with-org'
 import type { ParkingSpot } from '@/types/database'
 import type { ParkingStatus } from '@/types'
 
@@ -11,7 +11,7 @@ import type { ParkingStatus } from '@/types'
  * Fetch all parking spots for a building, ordered by parking number
  */
 export async function fetchParkingSpots(buildingId: string): Promise<ParkingSpot[]> {
-  const supabase = await createClient()
+  const supabase = await createPublicClient()
 
   const { data, error } = await supabase
     .from('units')
@@ -36,7 +36,7 @@ export async function updateParkingStatus(
   status: ParkingStatus,
   tenantName?: string | null
 ): Promise<{ success: boolean; error?: string }> {
-  const supabase = await createClient()
+  const supabase = await createPublicClient()
 
   const { error } = await supabase
     .from('units')
@@ -77,7 +77,7 @@ export async function getParkingStats(buildingId: string): Promise<{
  * Fetch a single parking spot by ID
  */
 export async function fetchParkingSpot(spotId: string): Promise<ParkingSpot | null> {
-  const supabase = await createClient()
+  const supabase = await createPublicClient()
 
   const { data, error } = await supabase
     .from('units')

@@ -5,7 +5,7 @@
  * Phase: 22-inspection-core Plan 03
  */
 
-import { createClient } from '@/lib/supabase/server'
+import { createPublicClient } from '@/lib/supabase/with-org'
 import type { InspectionDefect, Inspection, DefectSeverity } from '@/types/inspections'
 
 /**
@@ -40,7 +40,7 @@ export async function createFollowUpTask(
   inspection: Inspection,
   assigneeId: string
 ) {
-  const supabase = await createClient()
+  const supabase = await createPublicClient()
 
   // Build task data
   const taskTitle = `Mangel: ${defect.title}`
@@ -120,7 +120,7 @@ export async function deferDefect(
   defectId: string,
   reason?: string
 ): Promise<void> {
-  const supabase = await createClient()
+  const supabase = await createPublicClient()
 
   const { error } = await supabase
     .from('inspection_defects')
@@ -145,7 +145,7 @@ export async function dismissDefect(
   defectId: string,
   reason: string
 ): Promise<void> {
-  const supabase = await createClient()
+  const supabase = await createPublicClient()
 
   if (!reason || reason.trim() === '') {
     throw new Error('Reason is required when dismissing a defect')

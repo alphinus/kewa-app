@@ -5,7 +5,7 @@
  * Phase: 22-inspection-core Plan 03
  */
 
-import { createClient } from '@/lib/supabase/server'
+import { createPublicClient } from '@/lib/supabase/with-org'
 
 /**
  * Upload signature image to inspections storage bucket
@@ -20,7 +20,7 @@ export async function uploadSignature(
   inspectionId: string,
   dataUrl: string
 ): Promise<string> {
-  const supabase = await createClient()
+  const supabase = await createPublicClient()
 
   // Extract base64 data from data URL
   const matches = dataUrl.match(/^data:image\/png;base64,(.+)$/)
@@ -57,7 +57,7 @@ export async function uploadSignature(
  * @returns Signed URL valid for 1 hour
  */
 export async function getSignatureUrl(storagePath: string): Promise<string> {
-  const supabase = await createClient()
+  const supabase = await createPublicClient()
 
   const { data, error } = await supabase
     .storage

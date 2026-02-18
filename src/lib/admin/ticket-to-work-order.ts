@@ -7,8 +7,7 @@
  * Phase 29: Tenant Extras & UX Improvements
  */
 
-import { createClient as createServerClient } from '@/lib/supabase/server'
-import { createClient } from '@supabase/supabase-js'
+import { createPublicClient, createServiceClient } from '@/lib/supabase/with-org'
 
 // =============================================
 // TYPES
@@ -64,7 +63,7 @@ export async function convertTicketToWorkOrder(
 ): Promise<ConvertTicketResult> {
   const { ticketId, operatorUserId, workOrderType, partnerId, description } = params
 
-  const supabase = await createServerClient()
+  const supabase = await createPublicClient()
 
   // Step 1: Fetch ticket with attachments and unit details
   const { data: ticket, error: ticketError } = await supabase
@@ -135,11 +134,8 @@ export async function convertTicketToWorkOrder(
   // Step 5: Copy ticket photos to work order media
   const attachments = ticket.attachments || []
   if (attachments.length > 0) {
-    // Create admin client with service role for storage operations
-    const supabaseAdmin = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
-    )
+    // Create service client with service role for storage operations
+    const supabaseAdmin = createServiceClient()
 
     for (const attachment of attachments) {
       try {

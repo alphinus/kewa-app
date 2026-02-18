@@ -5,7 +5,7 @@
  * Phase: 24-push-notifications
  */
 
-import { createClient } from '@/lib/supabase/server'
+import { createPublicClient } from '@/lib/supabase/with-org'
 import type {
   NotificationPreferences,
   UpdatePreferencesInput,
@@ -22,7 +22,7 @@ import { ROLE_NOTIFICATION_TYPES } from '@/types/notifications'
  * Returns defaults if no preferences exist (does not auto-insert)
  */
 export async function getPreferences(userId: string): Promise<NotificationPreferences> {
-  const supabase = await createClient()
+  const supabase = await createPublicClient()
 
   const { data, error } = await supabase
     .from('notification_preferences')
@@ -60,7 +60,7 @@ export async function upsertPreferences(
   userId: string,
   input: UpdatePreferencesInput
 ): Promise<NotificationPreferences> {
-  const supabase = await createClient()
+  const supabase = await createPublicClient()
 
   const { data, error } = await supabase
     .from('notification_preferences')

@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { createPublicClient } from '@/lib/supabase/with-org'
 import type { KBSearchFilters, KBSearchResult } from '@/types/knowledge-base'
 
 /**
@@ -21,7 +21,7 @@ export async function searchArticles(
     return { results: [], total: 0 }
   }
 
-  const supabase = await createClient()
+  const supabase = await createPublicClient()
 
   // Call the PostgreSQL search function
   const { data, error, count } = await supabase.rpc('search_kb_articles', {
@@ -85,7 +85,7 @@ export async function getSuggestions(
     return []
   }
 
-  const supabase = await createClient()
+  const supabase = await createPublicClient()
 
   // Call the PostgreSQL suggestions function
   const { data, error } = await supabase.rpc('get_kb_suggestions', {

@@ -5,7 +5,7 @@
  * Phase: 24-push-notifications
  */
 
-import { createClient } from '@/lib/supabase/server'
+import { createPublicClient } from '@/lib/supabase/with-org'
 import type {
   Notification,
   UserNotification,
@@ -31,7 +31,7 @@ export async function listUserNotifications(
     offset?: number
   }
 ) {
-  const supabase = await createClient()
+  const supabase = await createPublicClient()
 
   let query = supabase
     .from('user_notifications')
@@ -109,7 +109,7 @@ export async function listUserNotifications(
  * Get unread notification count for a user
  */
 export async function getUnreadCount(userId: string): Promise<number> {
-  const supabase = await createClient()
+  const supabase = await createPublicClient()
 
   const { count, error } = await supabase
     .from('user_notifications')
@@ -126,7 +126,7 @@ export async function getUnreadCount(userId: string): Promise<number> {
  * Mark a notification as read
  */
 export async function markAsRead(userId: string, notificationId: string) {
-  const supabase = await createClient()
+  const supabase = await createPublicClient()
 
   const { error } = await supabase
     .from('user_notifications')
@@ -141,7 +141,7 @@ export async function markAsRead(userId: string, notificationId: string) {
  * Mark all notifications as read for a user
  */
 export async function markAllAsRead(userId: string) {
-  const supabase = await createClient()
+  const supabase = await createPublicClient()
 
   const { error } = await supabase
     .from('user_notifications')
@@ -158,7 +158,7 @@ export async function markAllAsRead(userId: string) {
 export async function createNotification(
   input: CreateNotificationInput
 ): Promise<Notification> {
-  const supabase = await createClient()
+  const supabase = await createPublicClient()
 
   const { data, error } = await supabase
     .from('notifications')
@@ -184,7 +184,7 @@ export async function createNotification(
  * Create a user notification record
  */
 export async function createUserNotification(userId: string, notificationId: string) {
-  const supabase = await createClient()
+  const supabase = await createPublicClient()
 
   const { data, error } = await supabase
     .from('user_notifications')
@@ -208,7 +208,7 @@ export async function createNotificationForUsers(
   input: CreateNotificationInput,
   userIds: string[]
 ) {
-  const supabase = await createClient()
+  const supabase = await createPublicClient()
 
   // Create the notification
   const notification = await createNotification(input)
@@ -236,7 +236,7 @@ export async function createNotificationForUsers(
  * Save or update a push subscription (upsert)
  */
 export async function saveSubscription(userId: string, input: SubscribePushInput) {
-  const supabase = await createClient()
+  const supabase = await createPublicClient()
 
   const { error } = await supabase
     .from('push_subscriptions')
@@ -260,7 +260,7 @@ export async function saveSubscription(userId: string, input: SubscribePushInput
  * Remove a push subscription by device ID
  */
 export async function removeSubscription(userId: string, deviceId: string) {
-  const supabase = await createClient()
+  const supabase = await createPublicClient()
 
   const { error } = await supabase
     .from('push_subscriptions')
@@ -275,7 +275,7 @@ export async function removeSubscription(userId: string, deviceId: string) {
  * Remove a push subscription by endpoint (for handling 410 Gone responses)
  */
 export async function removeSubscriptionByEndpoint(endpoint: string) {
-  const supabase = await createClient()
+  const supabase = await createPublicClient()
 
   const { error } = await supabase
     .from('push_subscriptions')
@@ -289,7 +289,7 @@ export async function removeSubscriptionByEndpoint(endpoint: string) {
  * Get all enabled push subscriptions for a user
  */
 export async function getUserSubscriptions(userId: string): Promise<PushSubscriptionRecord[]> {
-  const supabase = await createClient()
+  const supabase = await createPublicClient()
 
   const { data, error } = await supabase
     .from('push_subscriptions')

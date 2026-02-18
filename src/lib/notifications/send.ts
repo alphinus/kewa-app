@@ -6,7 +6,7 @@
  */
 
 import webpush from 'web-push'
-import { createClient } from '@/lib/supabase/server'
+import { createPublicClient } from '@/lib/supabase/with-org'
 import {
   createNotificationForUsers,
   getUserSubscriptions,
@@ -120,7 +120,7 @@ export async function sendNotificationToRole(
   input: CreateNotificationInput,
   roleName: string
 ): Promise<{ notificationId: string; deliveredTo: number }> {
-  const supabase = await createClient()
+  const supabase = await createPublicClient()
 
   // Get all users with this role
   const { data: users, error } = await supabase

@@ -5,7 +5,7 @@
  * to the audit_logs table.
  */
 
-import { createClient } from '@/lib/supabase/server'
+import { createPublicClient } from '@/lib/supabase/with-org'
 
 /**
  * Authentication audit event types
@@ -43,7 +43,7 @@ export interface AuthAuditLogOptions {
  * Uses the 'auth' table name to distinguish from data change logs.
  */
 export async function createAuthAuditLog(
-  supabase: Awaited<ReturnType<typeof createClient>>,
+  supabase: Awaited<ReturnType<typeof createPublicClient>>,
   options: AuthAuditLogOptions
 ): Promise<void> {
   try {
@@ -91,7 +91,7 @@ export interface DataAuditLogOptions {
  * Create a data change audit log entry
  */
 export async function createDataAuditLog(
-  supabase: Awaited<ReturnType<typeof createClient>>,
+  supabase: Awaited<ReturnType<typeof createPublicClient>>,
   options: DataAuditLogOptions
 ): Promise<string | null> {
   try {
@@ -127,7 +127,7 @@ export async function createDataAuditLog(
  * Get audit history for a specific record
  */
 export async function getRecordAuditHistory(
-  supabase: Awaited<ReturnType<typeof createClient>>,
+  supabase: Awaited<ReturnType<typeof createPublicClient>>,
   tableName: string,
   recordId: string
 ) {
@@ -150,7 +150,7 @@ export async function getRecordAuditHistory(
  * Get recent auth events for a user
  */
 export async function getUserAuthHistory(
-  supabase: Awaited<ReturnType<typeof createClient>>,
+  supabase: Awaited<ReturnType<typeof createPublicClient>>,
   userId: string,
   limit = 20
 ) {
@@ -174,7 +174,7 @@ export async function getUserAuthHistory(
  * Get failed login attempts in a time window (for security monitoring)
  */
 export async function getFailedLoginAttempts(
-  supabase: Awaited<ReturnType<typeof createClient>>,
+  supabase: Awaited<ReturnType<typeof createPublicClient>>,
   ipAddress: string,
   windowMinutes = 15
 ): Promise<number> {

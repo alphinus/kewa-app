@@ -7,7 +7,7 @@
  * Implements: EXT-14 (Timestamped event logging)
  */
 
-import { createClient } from '@/lib/supabase/server'
+import { createPublicClient } from '@/lib/supabase/with-org'
 
 // ============================================
 // EVENT TYPES
@@ -121,7 +121,7 @@ export async function logWorkOrderEvent(
     email?: string | null
   } = { type: 'system' }
 ): Promise<WorkOrderEvent | null> {
-  const supabase = await createClient()
+  const supabase = await createPublicClient()
 
   const { data: event, error } = await supabase
     .from('work_order_events')
@@ -166,7 +166,7 @@ export async function getWorkOrderEvents(
   options: GetEventsOptions = {}
 ): Promise<{ events: WorkOrderEvent[]; total: number }> {
   const { limit = 50, offset = 0, eventTypes } = options
-  const supabase = await createClient()
+  const supabase = await createPublicClient()
 
   // Build query
   let query = supabase
@@ -205,7 +205,7 @@ export async function getWorkOrderEvents(
 export async function getRecentEvents(
   limit: number = 20
 ): Promise<(WorkOrderEvent & { work_order: { id: string; title: string } })[]> {
-  const supabase = await createClient()
+  const supabase = await createPublicClient()
 
   const { data, error } = await supabase
     .from('work_order_events')

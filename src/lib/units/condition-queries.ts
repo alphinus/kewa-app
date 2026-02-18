@@ -8,7 +8,7 @@
  * Requirements: HIST-02, HIST-05
  */
 
-import { createClient } from '@/lib/supabase/server'
+import { createPublicClient } from '@/lib/supabase/with-org'
 import type { RoomCondition, RoomType } from '@/types'
 import type { UnitConditionSummary } from '@/types/database'
 
@@ -41,7 +41,7 @@ export interface RoomWithCondition {
 export async function fetchUnitConditionSummary(
   unitId: string
 ): Promise<UnitConditionSummary | null> {
-  const supabase = await createClient()
+  const supabase = await createPublicClient()
 
   const { data, error } = await supabase
     .from('unit_condition_summary')
@@ -72,7 +72,7 @@ export async function fetchUnitConditionSummary(
 export async function fetchRoomsWithConditions(
   unitId: string
 ): Promise<RoomWithCondition[]> {
-  const supabase = await createClient()
+  const supabase = await createPublicClient()
 
   const { data, error } = await supabase
     .from('rooms')
@@ -155,7 +155,7 @@ export async function fetchRecentConditionHistory(
   unitId: string,
   limit: number = 5
 ): Promise<ConditionHistoryEntry[]> {
-  const supabase = await createClient()
+  const supabase = await createPublicClient()
 
   const { data, error } = await supabase
     .from('room_condition_timeline')

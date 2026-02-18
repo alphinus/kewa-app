@@ -8,7 +8,7 @@
  * Requirements: OCCU-01, OCCU-02, OCCU-03, OCCU-04, PARK-05
  */
 
-import { createClient } from '@/lib/supabase/server'
+import { createPublicClient } from '@/lib/supabase/with-org'
 
 export interface OccupancyMetrics {
   totalUnits: number
@@ -31,7 +31,7 @@ export interface OccupancyMetrics {
 export async function fetchOccupancyMetrics(
   buildingId: string
 ): Promise<OccupancyMetrics> {
-  const supabase = await createClient()
+  const supabase = await createPublicClient()
 
   // Fetch all units for this building
   const { data: units } = await supabase

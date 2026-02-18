@@ -7,7 +7,7 @@
  * Phase 26: Tenant Portal Core
  */
 
-import { createClient } from '@/lib/supabase/server'
+import { createServiceClient } from '@/lib/supabase/with-org'
 import { verifyTicketOwnership } from './tenant-isolation'
 import type {
   TicketMessageWithAttachments,
@@ -30,7 +30,7 @@ export async function getTicketMessages(
   // Verify ownership first
   await verifyTicketOwnership(userId, ticketId)
 
-  const supabase = await createClient()
+  const supabase = createServiceClient()
 
   const { data: messages, error } = await supabase
     .from('ticket_messages')
@@ -77,7 +77,7 @@ export async function createMessage(
   // Verify ownership first
   await verifyTicketOwnership(userId, ticketId)
 
-  const supabase = await createClient()
+  const supabase = createServiceClient()
 
   const { error } = await supabase.from('ticket_messages').insert({
     ticket_id: ticketId,
@@ -100,7 +100,7 @@ export async function markMessagesAsRead(userId: string, ticketId: string): Prom
   // Verify ownership first
   await verifyTicketOwnership(userId, ticketId)
 
-  const supabase = await createClient()
+  const supabase = createServiceClient()
 
   const { error } = await supabase
     .from('ticket_messages')
@@ -125,7 +125,7 @@ export async function markMessagesAsRead(userId: string, ticketId: string): Prom
  * Get count of unread operator messages across all tickets for user
  */
 export async function getUnreadMessageCount(userId: string): Promise<number> {
-  const supabase = await createClient()
+  const supabase = createServiceClient()
 
   // Get all ticket IDs owned by user
   const { data: tickets } = await supabase

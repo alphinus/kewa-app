@@ -7,7 +7,7 @@
  * Phase 26: Tenant Portal Core
  */
 
-import { createClient } from '@/lib/supabase/server'
+import { createServiceClient } from '@/lib/supabase/with-org'
 import { getTenantContext, verifyTicketOwnership } from './tenant-isolation'
 import type {
   Ticket,
@@ -27,7 +27,7 @@ import type {
  * Ordered by last_message_at DESC (most recent activity first).
  */
 export async function getTickets(userId: string): Promise<TicketWithDetails[]> {
-  const supabase = await createClient()
+  const supabase = createServiceClient()
 
   const { data: tickets, error } = await supabase
     .from('tickets')
@@ -92,7 +92,7 @@ export async function getTicketById(
   // Verify ownership first
   await verifyTicketOwnership(userId, ticketId)
 
-  const supabase = await createClient()
+  const supabase = createServiceClient()
 
   const { data: ticket, error } = await supabase
     .from('tickets')
@@ -150,7 +150,7 @@ export async function createTicket(
   // Get tenant context to retrieve unit_id
   const { unitId } = await getTenantContext(userId)
 
-  const supabase = await createClient()
+  const supabase = createServiceClient()
 
   const { data: ticket, error } = await supabase
     .from('tickets')
@@ -185,7 +185,7 @@ export async function cancelTicket(userId: string, ticketId: string): Promise<Ti
     throw new Error('Nur offene Tickets können storniert werden')
   }
 
-  const supabase = await createClient()
+  const supabase = createServiceClient()
 
   const { data: updatedTicket, error } = await supabase
     .from('tickets')
@@ -214,7 +214,7 @@ export async function cancelTicket(userId: string, ticketId: string): Promise<Ti
  * Ordered by sort_order for consistent display.
  */
 export async function getTicketCategories(): Promise<TicketCategory[]> {
-  const supabase = await createClient()
+  const supabase = createServiceClient()
 
   const { data: categories, error } = await supabase
     .from('ticket_categories')
@@ -237,7 +237,7 @@ export async function getTicketCategories(): Promise<TicketCategory[]> {
  * Get count of open and in-progress tickets for user
  */
 export async function getOpenTicketCount(userId: string): Promise<number> {
-  const supabase = await createClient()
+  const supabase = createServiceClient()
 
   const { count, error } = await supabase
     .from('tickets')

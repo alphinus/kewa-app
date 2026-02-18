@@ -5,7 +5,7 @@
  * Phase: 22-inspection-core
  */
 
-import { createClient } from '@/lib/supabase/server'
+import { createPublicClient } from '@/lib/supabase/with-org'
 import type {
   InspectionTemplate,
   Inspection,
@@ -31,7 +31,7 @@ export async function listInspectionTemplates(filters?: {
   trade_category?: string
   is_active?: boolean
 }) {
-  const supabase = await createClient()
+  const supabase = await createPublicClient()
 
   let query = supabase
     .from('inspection_templates')
@@ -59,7 +59,7 @@ export async function listInspectionTemplates(filters?: {
  * Get single inspection template by ID
  */
 export async function getInspectionTemplate(id: string) {
-  const supabase = await createClient()
+  const supabase = await createPublicClient()
 
   const { data, error } = await supabase
     .from('inspection_templates')
@@ -81,7 +81,7 @@ export async function createInspectionTemplate(
   input: CreateInspectionTemplateInput,
   userId: string
 ) {
-  const supabase = await createClient()
+  const supabase = await createPublicClient()
 
   const insertData = {
     name: input.name,
@@ -112,7 +112,7 @@ export async function updateInspectionTemplate(
   id: string,
   input: UpdateInspectionTemplateInput
 ) {
-  const supabase = await createClient()
+  const supabase = await createPublicClient()
 
   const updateData: Record<string, unknown> = {}
 
@@ -141,7 +141,7 @@ export async function updateInspectionTemplate(
  * Delete (soft-delete) an inspection template
  */
 export async function deleteInspectionTemplate(id: string) {
-  const supabase = await createClient()
+  const supabase = await createPublicClient()
 
   const { error } = await supabase
     .from('inspection_templates')
@@ -179,7 +179,7 @@ export async function listInspections(filters?: {
   status?: string
   inspector_id?: string
 }) {
-  const supabase = await createClient()
+  const supabase = await createPublicClient()
 
   let query = supabase
     .from('inspections')
@@ -215,7 +215,7 @@ export async function listInspections(filters?: {
  * Get single inspection by ID with defects
  */
 export async function getInspection(id: string) {
-  const supabase = await createClient()
+  const supabase = await createPublicClient()
 
   // Fetch inspection with joins
   const { data: inspection, error: inspectionError } = await supabase
@@ -255,7 +255,7 @@ export async function createInspection(
   input: CreateInspectionInput,
   userId: string
 ) {
-  const supabase = await createClient()
+  const supabase = await createPublicClient()
 
   // If template_id provided, fetch template to populate checklist
   let checklistItems: ChecklistSectionResult[] = input.checklist_items || []
@@ -310,7 +310,7 @@ export async function updateInspection(
   id: string,
   input: UpdateInspectionInput
 ) {
-  const supabase = await createClient()
+  const supabase = await createPublicClient()
 
   // If status change requested, validate transition
   if (input.status) {
@@ -364,7 +364,7 @@ export async function updateInspection(
  * Only allowed if status is 'in_progress'.
  */
 export async function deleteInspection(id: string) {
-  const supabase = await createClient()
+  const supabase = await createPublicClient()
 
   // Check current status
   const { data: current } = await supabase
@@ -395,7 +395,7 @@ export async function deleteInspection(id: string) {
  * List defects for an inspection
  */
 export async function listDefects(inspectionId: string) {
-  const supabase = await createClient()
+  const supabase = await createPublicClient()
 
   const { data, error } = await supabase
     .from('inspection_defects')
@@ -418,7 +418,7 @@ export async function createDefect(
   input: CreateDefectInput,
   userId: string
 ) {
-  const supabase = await createClient()
+  const supabase = await createPublicClient()
 
   const insertData = {
     inspection_id: input.inspection_id,
@@ -451,7 +451,7 @@ export async function updateDefect(
   id: string,
   input: UpdateDefectInput
 ) {
-  const supabase = await createClient()
+  const supabase = await createPublicClient()
 
   // If status change requested, validate transition
   if (input.status) {
@@ -501,7 +501,7 @@ export async function updateDefect(
  * Delete a defect
  */
 export async function deleteDefect(id: string) {
-  const supabase = await createClient()
+  const supabase = await createPublicClient()
 
   const { error } = await supabase
     .from('inspection_defects')

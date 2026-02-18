@@ -7,7 +7,7 @@
  * Phase 26: Tenant Portal Core
  */
 
-import { createClient } from '@/lib/supabase/server'
+import { createServiceClient } from '@/lib/supabase/with-org'
 import type { Ticket } from '@/types/portal'
 
 // =============================================
@@ -29,7 +29,7 @@ export interface TenantContext {
  * @throws Error if user is not linked to an active unit
  */
 export async function getTenantContext(userId: string): Promise<TenantContext> {
-  const supabase = await createClient()
+  const supabase = createServiceClient()
 
   const { data: tenantUser, error } = await supabase
     .from('tenant_users')
@@ -59,7 +59,7 @@ export async function verifyTicketOwnership(
   userId: string,
   ticketId: string
 ): Promise<Ticket> {
-  const supabase = await createClient()
+  const supabase = createServiceClient()
 
   const { data: ticket, error } = await supabase
     .from('tickets')

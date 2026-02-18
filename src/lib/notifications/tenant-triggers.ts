@@ -7,7 +7,7 @@
  * Phase 29: Tenant Extras & UX
  */
 
-import { createClient } from '@/lib/supabase/server'
+import { createPublicClient } from '@/lib/supabase/with-org'
 import { sendNotification } from '@/lib/notifications/send'
 import { sendEmail } from '@/lib/email/send'
 import TicketStatusEmail from '@/emails/ticket-status-changed'
@@ -64,7 +64,7 @@ export async function getTenantNotificationData(
   ticketId: string
 ): Promise<TenantNotificationData | null> {
   try {
-    const supabase = await createClient()
+    const supabase = await createPublicClient()
 
     // Get ticket with tenant user details
     const { data: ticket, error } = await supabase

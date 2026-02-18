@@ -7,7 +7,7 @@
  * Phase: 23-inspection-advanced Plan 02
  */
 
-import { createClient } from '@/lib/supabase/server'
+import { createServiceClient } from '@/lib/supabase/with-org'
 
 /**
  * Create a magic link token for inspection portal access
@@ -24,7 +24,7 @@ export async function createInspectionPortalToken(
   contractorEmail: string,
   expiryHours: number = 168 // 7 days default
 ): Promise<string> {
-  const supabase = await createClient()
+  const supabase = createServiceClient()
 
   // Use existing magic link token RPC
   const { data: token, error: tokenError } = await supabase.rpc('create_magic_link_token', {
@@ -62,7 +62,7 @@ export async function validateInspectionPortalToken(token: string): Promise<{
   inspectionId?: string
   email?: string
 }> {
-  const supabase = await createClient()
+  const supabase = createServiceClient()
 
   // Validate token (read-only, DO NOT consume)
   const { data: tokenData } = await supabase
@@ -102,7 +102,7 @@ export async function validateInspectionPortalToken(token: string): Promise<{
  * @returns True if consumed successfully
  */
 export async function consumeInspectionPortalToken(token: string): Promise<boolean> {
-  const supabase = await createClient()
+  const supabase = createServiceClient()
 
   const { error } = await supabase
     .from('magic_link_tokens')

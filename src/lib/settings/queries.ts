@@ -7,7 +7,7 @@
  * Phase 26: Tenant Portal Core
  */
 
-import { createClient } from '@/lib/supabase/server'
+import { createPublicClient } from '@/lib/supabase/with-org'
 import type { AppSetting } from '@/types/portal'
 
 // =============================================
@@ -20,7 +20,7 @@ import type { AppSetting } from '@/types/portal'
  * @returns Setting value or null if not found
  */
 export async function getSetting(key: string): Promise<string | null> {
-  const supabase = await createClient()
+  const supabase = await createPublicClient()
 
   const { data, error } = await supabase
     .from('app_settings')
@@ -41,7 +41,7 @@ export async function getSetting(key: string): Promise<string | null> {
  * Convenient for client-side context providers.
  */
 export async function getAllSettings(): Promise<Record<string, string>> {
-  const supabase = await createClient()
+  const supabase = await createPublicClient()
 
   const { data: settings, error } = await supabase
     .from('app_settings')
@@ -60,7 +60,7 @@ export async function getAllSettings(): Promise<Record<string, string>> {
  * Used by admin UI for settings management.
  */
 export async function getSettingsFull(): Promise<AppSetting[]> {
-  const supabase = await createClient()
+  const supabase = await createPublicClient()
 
   const { data: settings, error } = await supabase
     .from('app_settings')
@@ -86,7 +86,7 @@ export async function updateSetting(
   value: string,
   updatedBy: string
 ): Promise<AppSetting> {
-  const supabase = await createClient()
+  const supabase = await createPublicClient()
 
   const { data: setting, error } = await supabase
     .from('app_settings')

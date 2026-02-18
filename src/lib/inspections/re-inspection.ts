@@ -5,7 +5,7 @@
  * Phase: 23-inspection-advanced
  */
 
-import { createClient } from '@/lib/supabase/server'
+import { createPublicClient } from '@/lib/supabase/with-org'
 import type { Inspection, InspectionDefect, ChecklistSectionResult } from '@/types/inspections'
 
 /**
@@ -20,7 +20,7 @@ export async function scheduleReInspection(
   scheduledDate: string,
   inspectorId?: string
 ): Promise<Inspection> {
-  const supabase = await createClient()
+  const supabase = await createPublicClient()
 
   // Fetch parent inspection with defects
   const { data: parent, error: parentError } = await supabase
@@ -124,7 +124,7 @@ export async function scheduleReInspection(
  * Ordered by inspection_date ascending.
  */
 export async function getInspectionHistory(inspectionId: string): Promise<Inspection[]> {
-  const supabase = await createClient()
+  const supabase = await createPublicClient()
 
   // Find root inspection by traversing up the parent chain
   let currentId: string | null = inspectionId
@@ -200,7 +200,7 @@ export async function getInspectionHistory(inspectionId: string): Promise<Inspec
  * Check if an inspection has children (re-inspections)
  */
 export async function hasReInspections(inspectionId: string): Promise<boolean> {
-  const supabase = await createClient()
+  const supabase = await createPublicClient()
 
   const { count, error } = await supabase
     .from('inspections')

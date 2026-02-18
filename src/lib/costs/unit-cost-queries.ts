@@ -8,7 +8,7 @@
  * Phase 10-06: Unit Investment View and Rent Entry
  */
 
-import { createClient } from '@/lib/supabase/server'
+import { createPublicClient } from '@/lib/supabase/with-org'
 import type { UnitCosts } from '@/types/database'
 
 /**
@@ -25,7 +25,7 @@ export interface UnitCostWithBuilding extends UnitCosts {
 export async function getUnitCostSummary(
   unitId: string
 ): Promise<UnitCosts | null> {
-  const supabase = await createClient()
+  const supabase = await createPublicClient()
 
   const { data, error } = await supabase
     .from('unit_costs')
@@ -48,7 +48,7 @@ export async function getUnitCostSummary(
 export async function getAllUnitCosts(
   buildingId?: string
 ): Promise<UnitCostWithBuilding[]> {
-  const supabase = await createClient()
+  const supabase = await createPublicClient()
 
   // Join unit_costs view with units to get building info
   const { data, error } = await supabase
@@ -134,7 +134,7 @@ export async function getUnitProjectCosts(unitId: string): Promise<{
   }>
   total: number
 }> {
-  const supabase = await createClient()
+  const supabase = await createPublicClient()
 
   const { data, error } = await supabase
     .from('renovation_projects')
@@ -195,7 +195,7 @@ export async function getUnitDirectExpenses(unitId: string): Promise<{
   }>
   total: number
 }> {
-  const supabase = await createClient()
+  const supabase = await createPublicClient()
 
   const { data, error } = await supabase
     .from('expenses')
@@ -256,7 +256,7 @@ export async function getBuildingsForFilter(): Promise<Array<{
   id: string
   name: string
 }>> {
-  const supabase = await createClient()
+  const supabase = await createPublicClient()
 
   const { data, error } = await supabase
     .from('buildings')

@@ -11,7 +11,7 @@
  * 4. Token marked as used (single-use by default)
  */
 
-import { createClient } from '@/lib/supabase/server'
+import { createServiceClient } from '@/lib/supabase/with-org'
 
 // ============================================
 // TYPES
@@ -76,7 +76,7 @@ const DEFAULT_CONFIG: MagicLinkConfig = {
  */
 async function getExpiryHoursFromSettings(): Promise<number> {
   try {
-    const supabase = await createClient()
+    const supabase = createServiceClient()
     const { data } = await supabase
       .from('system_settings')
       .select('value')
@@ -114,7 +114,7 @@ export async function createMagicLink(
   config?: Partial<MagicLinkConfig>,
   createdBy?: string
 ): Promise<CreateMagicLinkResult> {
-  const supabase = await createClient()
+  const supabase = createServiceClient()
 
   // Get expiry hours from settings or config
   const expiryHours = config?.expiryHours ?? await getExpiryHoursFromSettings()
@@ -167,7 +167,7 @@ export async function verifyMagicLink(
   token: string,
   markAsUsed = true
 ): Promise<VerifyMagicLinkResult> {
-  const supabase = await createClient()
+  const supabase = createServiceClient()
 
   // Find token
   const { data, error } = await supabase
@@ -240,7 +240,7 @@ export async function peekMagicLink(token: string): Promise<VerifyMagicLinkResul
  * @param token - The token to revoke
  */
 export async function revokeMagicLink(token: string): Promise<void> {
-  const supabase = await createClient()
+  const supabase = createServiceClient()
 
   const { error } = await supabase
     .from('magic_link_tokens')
@@ -259,7 +259,7 @@ export async function revokeMagicLink(token: string): Promise<void> {
  * @param workOrderId - UUID of the work order
  */
 export async function revokeAllForWorkOrder(workOrderId: string): Promise<void> {
-  const supabase = await createClient()
+  const supabase = createServiceClient()
 
   const { error } = await supabase
     .from('magic_link_tokens')
@@ -284,7 +284,7 @@ export async function getActiveTokensForWorkOrder(workOrderId: string): Promise<
   count: number
   latestExpiry: Date | null
 }> {
-  const supabase = await createClient()
+  const supabase = createServiceClient()
 
   const { data, error } = await supabase
     .from('magic_link_tokens')
@@ -320,7 +320,7 @@ export async function getOrCreateContractorUrl(
 
   if (active.count > 0 && active.latestExpiry) {
     // Return existing (we don't have the URL, but can reconstruct it)
-    const supabase = await createClient()
+    const supabase = createServiceClient()
     const { data } = await supabase
       .from('magic_link_tokens')
       .select('token')
@@ -351,7 +351,7 @@ export async function getOrCreateContractorUrl(
  * Useful for showing warnings in the UI.
  */
 export async function isTokenExpiringSoon(token: string): Promise<boolean> {
-  const supabase = await createClient()
+  const supabase = createServiceClient()
 
   const { data } = await supabase
     .from('magic_link_tokens')
@@ -388,7 +388,7 @@ export async function isTokenExpiringSoon(token: string): Promise<boolean> {
 export async function validateContractorAccess(
   token: string
 ): Promise<ContractorAccessResult> {
-  const supabase = await createClient()
+  const supabase = createServiceClient()
 
   // Find token with work order status
   const { data: tokenData, error: tokenError } = await supabase

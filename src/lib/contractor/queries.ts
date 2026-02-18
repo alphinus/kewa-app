@@ -11,7 +11,7 @@
  * - Sort by created_at descending (newest first)
  */
 
-import { createClient } from '@/lib/supabase/server'
+import { createServiceClient } from '@/lib/supabase/with-org'
 
 // ============================================
 // TYPES
@@ -86,7 +86,7 @@ export interface GroupedWorkOrders {
 export async function getContractorWorkOrders(
   email: string
 ): Promise<ContractorWorkOrder[]> {
-  const supabase = await createClient()
+  const supabase = createServiceClient()
 
   // Query work orders where partner email matches
   // Use !inner join on partners to filter by email
@@ -222,7 +222,7 @@ export async function getContractorWorkOrderById(
   workOrderId: string,
   contractorEmail: string
 ): Promise<ContractorWorkOrder | null> {
-  const supabase = await createClient()
+  const supabase = createServiceClient()
 
   const { data, error } = await supabase
     .from('work_orders')
@@ -286,7 +286,7 @@ export async function getContractorWorkOrderById(
  * @returns Count of work orders in sent/viewed status
  */
 export async function getActionNeededCount(email: string): Promise<number> {
-  const supabase = await createClient()
+  const supabase = createServiceClient()
 
   const { count, error } = await supabase
     .from('work_orders')

@@ -9,7 +9,7 @@
 
 import { cache } from 'react'
 import 'server-only'
-import { createClient } from '@/lib/supabase/server'
+import { createPublicClient } from '@/lib/supabase/with-org'
 import type { RoomCondition } from '@/types'
 
 export interface UnitWithRooms {
@@ -46,7 +46,7 @@ export interface UnitConditionSummary {
  * Now: single query with embedded relation
  */
 export const getCachedUnitsWithRooms = cache(async (buildingId: string): Promise<UnitWithRooms[]> => {
-  const supabase = await createClient()
+  const supabase = await createPublicClient()
 
   const { data, error } = await supabase
     .from('units')
@@ -68,7 +68,7 @@ export const getCachedUnitsWithRooms = cache(async (buildingId: string): Promise
  * Uses the unit_condition_summary view which aggregates room conditions.
  */
 export const getCachedUnitConditionSummary = cache(async (buildingId: string): Promise<UnitConditionSummary[]> => {
-  const supabase = await createClient()
+  const supabase = await createPublicClient()
 
   const { data, error } = await supabase
     .from('unit_condition_summary')
@@ -86,7 +86,7 @@ export const getCachedUnitConditionSummary = cache(async (buildingId: string): P
 export const getCachedActiveProjectCount = cache(async (unitIds: string[]): Promise<number> => {
   if (unitIds.length === 0) return 0
 
-  const supabase = await createClient()
+  const supabase = await createPublicClient()
 
   const { count, error } = await supabase
     .from('renovation_projects')
