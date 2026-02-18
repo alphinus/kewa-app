@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase/server'
+import { createPublicClient } from '@/lib/supabase/with-org'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { formatCHF } from '@/lib/costs/formatters'
 import {
@@ -80,7 +80,7 @@ function StatusBadge({ status }: { status: string }) {
  * Phase 10-04: Project Cost Dashboard
  */
 export default async function KostenOverviewPage() {
-  const supabase = await createClient()
+  const supabase = await createPublicClient()
 
   // Fetch stats
   const { data: stats } = await getCostStatistics(supabase)

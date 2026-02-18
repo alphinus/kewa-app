@@ -8,7 +8,7 @@
  * Phase 10-05: CSV Export for Accounting (COST-06)
  */
 
-import { createClient } from '@/lib/supabase/server'
+import { createPublicClient } from '@/lib/supabase/with-org'
 import { Card, CardContent } from '@/components/ui/card'
 import { ExportForm } from './ExportForm'
 
@@ -16,7 +16,7 @@ import { ExportForm } from './ExportForm'
  * Export page - standalone export configuration
  */
 export default async function KostenExportPage() {
-  const supabase = await createClient()
+  const supabase = await createPublicClient()
 
   // Fetch projects for filter dropdown
   const { data: projects } = await supabase

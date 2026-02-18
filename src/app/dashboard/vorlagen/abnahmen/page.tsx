@@ -7,12 +7,12 @@
  */
 
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase/server'
+import { createPublicClient } from '@/lib/supabase/with-org'
 import { Button } from '@/components/ui/button'
 import type { InspectionTemplate } from '@/types/inspections'
 
 export default async function InspectionTemplatesPage() {
-  const supabase = await createClient()
+  const supabase = await createPublicClient()
 
   // Fetch templates
   const { data: templates } = await supabase

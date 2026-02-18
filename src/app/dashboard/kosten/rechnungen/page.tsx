@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase/server'
+import { createPublicClient } from '@/lib/supabase/with-org'
 import { Card, CardContent } from '@/components/ui/card'
 import { InvoiceList } from '@/components/costs/InvoiceList'
 import { ExportButton } from '@/components/costs/ExportButton'
@@ -44,7 +44,7 @@ export default async function RechnungenPage() {
   const counts = await getInvoiceStatusCounts()
 
   // Fetch projects for filter dropdown
-  const supabase = await createClient()
+  const supabase = await createPublicClient()
   const { data: projects } = await supabase
     .from('renovation_projects')
     .select('id, name')

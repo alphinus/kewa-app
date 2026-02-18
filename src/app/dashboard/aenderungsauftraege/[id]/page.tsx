@@ -9,7 +9,7 @@
 
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
+import { createPublicClient } from '@/lib/supabase/with-org'
 import { Button } from '@/components/ui/button'
 import { ChangeOrderDetail } from '@/components/change-orders/ChangeOrderDetail'
 import { CHANGE_ORDER_SELECT } from '@/lib/change-orders/queries'
@@ -20,7 +20,7 @@ interface PageProps {
 
 export default async function AenderungsauftragDetailPage({ params }: PageProps) {
   const { id } = await params
-  const supabase = await createClient()
+  const supabase = await createPublicClient()
 
   // Get current user
   const {

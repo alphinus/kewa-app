@@ -10,7 +10,7 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { validateContractorAccess } from '@/lib/magic-link'
-import { createClient } from '@/lib/supabase/server'
+import { createPublicClient } from '@/lib/supabase/with-org'
 import TokenError from '../../token-error'
 import RequestLinkForm from '../../request-link-form'
 import ContractorArticleContent from './article-content'
@@ -34,7 +34,7 @@ export default async function ContractorArticlePage({
     return <TokenError error={validation.error ?? 'not_found'} />
   }
 
-  const supabase = await createClient()
+  const supabase = await createPublicClient()
 
   // Fetch article with visibility check
   const { data: article, error } = await supabase

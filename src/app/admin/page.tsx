@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation'
 import { cookies } from 'next/headers'
 import { Building2, Users, FolderKanban, FileText } from 'lucide-react'
-import { createClient } from '@/lib/supabase/server'
+import { createPublicClient } from '@/lib/supabase/with-org'
 import { CounterCard } from '@/components/admin/CounterCard'
 import { AlertSection } from '@/components/admin/AlertSection'
 import { QuickActions } from '@/components/admin/QuickActions'
@@ -12,7 +12,7 @@ import { AdminDashboardClient } from './AdminDashboardClient'
  * Shows overview counts, alerts, and quick actions for administrators
  */
 export default async function AdminDashboardPage() {
-  const supabase = await createClient()
+  const supabase = await createPublicClient()
 
   // Get current user and verify admin role
   const cookieStore = await cookies()

@@ -16,7 +16,7 @@
 import { cookies } from 'next/headers'
 import Link from 'next/link'
 import { redirect, notFound } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
+import { createPublicClient } from '@/lib/supabase/with-org'
 import { validateSession, SESSION_COOKIE_NAME } from '@/lib/session'
 import type { Role } from '@/types'
 
@@ -115,7 +115,7 @@ export default async function ProjectDetailPage({ params }: PageProps) {
 
   // Fetch project data directly from Supabase
   // Note: Using 'projects' table (v1 schema) for compatibility with existing data
-  const supabase = await createClient()
+  const supabase = await createPublicClient()
   const { data: project, error } = await supabase
     .from('projects')
     .select(`

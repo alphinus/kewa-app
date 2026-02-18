@@ -22,7 +22,7 @@ import {
   getUnitProjectCosts,
   getUnitDirectExpenses
 } from '@/lib/costs/unit-cost-queries'
-import { createClient } from '@/lib/supabase/server'
+import { createPublicClient } from '@/lib/supabase/with-org'
 import { validateSessionWithRBAC, SESSION_COOKIE_NAME } from '@/lib/session'
 import { isInternalRole } from '@/lib/permissions'
 
@@ -370,7 +370,7 @@ export default async function UnitInvestmentDetailPage({ params }: PageProps) {
 async function fetchUnitBuilding(unitId: string): Promise<{
   building_name: string | null
 } | null> {
-  const supabase = await createClient()
+  const supabase = await createPublicClient()
 
   const { data, error } = await supabase
     .from('units')

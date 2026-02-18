@@ -15,7 +15,7 @@
 import { cookies } from 'next/headers'
 import Link from 'next/link'
 import { redirect, notFound } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
+import { createPublicClient } from '@/lib/supabase/with-org'
 import { validateSessionWithRBAC, SESSION_COOKIE_NAME } from '@/lib/session'
 import { CategoryTree } from '@/components/knowledge/CategoryTree'
 import { SearchBar } from '@/components/knowledge/SearchBar'
@@ -97,7 +97,7 @@ export default async function CategoryPage({ params }: PageProps) {
   const isAdmin = session.roleName === 'admin'
 
   // Fetch category with articles
-  const supabase = await createClient()
+  const supabase = await createPublicClient()
 
   // Fetch category
   const { data: category, error: categoryError } = await supabase

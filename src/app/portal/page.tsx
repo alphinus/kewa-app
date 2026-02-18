@@ -6,7 +6,7 @@ import { getTenantContext } from '@/lib/portal/tenant-isolation'
 import { getOpenTicketCount, getRecentTickets } from '@/lib/portal/ticket-queries'
 import { getUnreadMessageCount } from '@/lib/portal/message-queries'
 import { TicketCard } from '@/components/portal/TicketCard'
-import { createClient } from '@/lib/supabase/server'
+import { createPublicClient } from '@/lib/supabase/with-org'
 
 /**
  * Portal dashboard - tenant homepage
@@ -22,7 +22,7 @@ export default async function PortalDashboardPage() {
   // Get tenant context and unit details
   const { unitId } = await getTenantContext(user.id)
 
-  const supabase = await createClient()
+  const supabase = await createPublicClient()
   const { data: unit } = await supabase
     .from('units')
     .select('name, buildings!inner (name)')

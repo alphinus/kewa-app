@@ -16,7 +16,7 @@ import { cookies } from 'next/headers'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { FileText, Plus } from 'lucide-react'
-import { createClient } from '@/lib/supabase/server'
+import { createPublicClient } from '@/lib/supabase/with-org'
 import { validateSession, SESSION_COOKIE_NAME } from '@/lib/session'
 import { Breadcrumbs } from '@/components/ui/breadcrumbs'
 import { Button } from '@/components/ui/button'
@@ -132,7 +132,7 @@ export default async function AuftraegePage({ searchParams }: PageProps) {
   }
 
   // Fetch work orders from Supabase
-  const supabase = await createClient()
+  const supabase = await createPublicClient()
   let query = supabase
     .from('work_orders')
     .select(`

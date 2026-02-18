@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
+import { createPublicClient } from '@/lib/supabase/with-org'
 import { getProjectCostBreakdown } from '@/lib/costs/project-cost-queries'
 import { ProjectCostDashboard } from '@/components/costs/ProjectCostDashboard'
 
@@ -22,7 +22,7 @@ interface Props {
 export default async function ProjectCostPage({ params }: Props) {
   const { id } = await params
 
-  const supabase = await createClient()
+  const supabase = await createPublicClient()
 
   // Fetch project cost data
   const { data, error } = await getProjectCostBreakdown(supabase, id)

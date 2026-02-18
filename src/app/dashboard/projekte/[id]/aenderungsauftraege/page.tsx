@@ -11,7 +11,7 @@
 
 import { Suspense } from 'react'
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase/server'
+import { createPublicClient } from '@/lib/supabase/with-org'
 import { BudgetSummaryCards } from '@/components/change-orders/BudgetSummaryCards'
 import { LazyBudgetImpactChart } from '@/components/change-orders/LazyBudgetImpactChart'
 import { ChevronRight, Plus, FileText } from 'lucide-react'
@@ -66,7 +66,7 @@ function getStatusColor(status: string): string {
 
 export default async function ProjectChangeOrdersPage({ params }: PageProps) {
   const { id } = await params
-  const supabase = await createClient()
+  const supabase = await createPublicClient()
 
   // Fetch analytics data
   const response = await fetch(

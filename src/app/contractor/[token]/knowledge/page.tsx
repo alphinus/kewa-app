@@ -12,7 +12,7 @@
 
 import Link from 'next/link'
 import { validateContractorAccess } from '@/lib/magic-link'
-import { createClient } from '@/lib/supabase/server'
+import { createPublicClient } from '@/lib/supabase/with-org'
 import TokenError from '../token-error'
 import RequestLinkForm from '../request-link-form'
 import type { KBArticleWithMeta, KBCategoryWithCount } from '@/types/knowledge-base'
@@ -39,7 +39,7 @@ export default async function ContractorKnowledgePage({
     return <TokenError error={validation.error ?? 'not_found'} />
   }
 
-  const supabase = await createClient()
+  const supabase = await createPublicClient()
 
   // Fetch contractor-visible articles
   let articlesQuery = supabase

@@ -8,7 +8,7 @@
  */
 
 import { notFound } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
+import { createPublicClient } from '@/lib/supabase/with-org'
 import { ClientPortalWrapper } from './ClientPortalWrapper'
 import type { ChangeOrder } from '@/types/change-orders'
 import type { Metadata } from 'next'
@@ -22,7 +22,7 @@ export async function generateMetadata({
   params,
 }: PageProps): Promise<Metadata> {
   const { token } = await params
-  const supabase = await createClient()
+  const supabase = await createPublicClient()
 
   try {
     const response = await fetch(

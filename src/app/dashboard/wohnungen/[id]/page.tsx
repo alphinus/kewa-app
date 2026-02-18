@@ -36,7 +36,7 @@
 import { cookies } from 'next/headers'
 import Link from 'next/link'
 import { redirect, notFound } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
+import { createPublicClient } from '@/lib/supabase/with-org'
 import { validateSession, SESSION_COOKIE_NAME } from '@/lib/session'
 import { ConditionBadge, getConditionLabel } from '@/components/units/ConditionBadge'
 import { UnitActions } from '@/components/units/UnitActions'
@@ -114,7 +114,7 @@ export default async function UnitDetailPage({ params }: PageProps) {
   }
 
   // Fetch unit data
-  const supabase = await createClient()
+  const supabase = await createPublicClient()
   const { data: unit, error: unitError } = await supabase
     .from('units')
     .select(`
