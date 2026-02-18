@@ -11,7 +11,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { validateContractorAccess } from '@/lib/magic-link'
-import { createClient } from '@/lib/supabase/server'
+import { createServiceClient } from '@/lib/supabase/with-org'
 import { logViewedEvent } from '@/lib/work-orders/events'
 
 interface RequestBody {
@@ -45,7 +45,7 @@ export async function POST(
       )
     }
 
-    const supabase = await createClient()
+    const supabase = createServiceClient()
 
     // Update work orders to 'viewed' status
     // Only update if current status is 'sent' (security check)

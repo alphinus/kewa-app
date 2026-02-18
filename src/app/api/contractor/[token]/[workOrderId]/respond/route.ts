@@ -13,7 +13,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { validateContractorAccess } from '@/lib/magic-link'
-import { createClient } from '@/lib/supabase/server'
+import { createServiceClient } from '@/lib/supabase/with-org'
 import { ResponseAction, getRejectionReasonById } from '@/lib/contractor/constants'
 import {
   logAcceptedEvent,
@@ -84,7 +84,7 @@ export async function POST(
       )
     }
 
-    const supabase = await createClient()
+    const supabase = createServiceClient()
 
     // Get current work order - verify ownership by contractor email
     const { data: workOrder, error: fetchError } = await supabase

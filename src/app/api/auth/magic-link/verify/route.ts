@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies, headers } from 'next/headers'
-import { createClient } from '@/lib/supabase/server'
+import { createPublicClient } from '@/lib/supabase/with-org'
 import { createSession, SESSION_COOKIE_NAME, SESSION_COOKIE_OPTIONS } from '@/lib/auth'
 import { createAuthAuditLog } from '@/lib/audit'
 import { checkRateLimit } from '@/lib/rate-limit'
@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const supabase = await createClient()
+    const supabase = await createPublicClient()
 
     // Validate token using database function (also marks as used)
     const { data: validationResult, error: validationError } = await supabase
@@ -248,7 +248,7 @@ export async function GET(request: NextRequest) {
  * Get permissions for a role
  */
 async function getPermissionsForRole(
-  supabase: Awaited<ReturnType<typeof createClient>>,
+  supabase: Awaited<ReturnType<typeof createPublicClient>>,
   roleId: string
 ): Promise<string[]> {
   const { data: permissions } = await supabase

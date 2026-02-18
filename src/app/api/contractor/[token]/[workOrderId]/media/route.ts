@@ -9,7 +9,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { validateContractorAccess } from '@/lib/magic-link'
-import { createClient } from '@/lib/supabase/server'
+import { createServiceClient } from '@/lib/supabase/with-org'
 import { STORAGE_BUCKET } from '@/lib/storage/contractor-upload'
 
 interface MediaItem {
@@ -62,7 +62,7 @@ export async function GET(
       )
     }
 
-    const supabase = await createClient()
+    const supabase = createServiceClient()
 
     // Verify work order belongs to this contractor
     const { data: workOrder, error: woError } = await supabase
@@ -165,7 +165,7 @@ export async function DELETE(
       )
     }
 
-    const supabase = await createClient()
+    const supabase = createServiceClient()
 
     // Verify work order belongs to this contractor and check status
     const { data: workOrder, error: woError } = await supabase

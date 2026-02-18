@@ -13,7 +13,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { validateContractorAccess } from '@/lib/magic-link'
-import { createClient } from '@/lib/supabase/server'
+import { createServiceClient } from '@/lib/supabase/with-org'
 import { logStartedEvent, logCompletedEvent } from '@/lib/work-orders/events'
 
 interface StatusUpdateRequest {
@@ -61,7 +61,7 @@ export async function POST(
       )
     }
 
-    const supabase = await createClient()
+    const supabase = createServiceClient()
 
     // Get current work order - verify it belongs to this contractor
     const { data: workOrder, error: fetchError } = await supabase

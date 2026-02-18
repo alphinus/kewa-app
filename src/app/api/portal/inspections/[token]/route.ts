@@ -8,7 +8,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createServiceClient } from '@/lib/supabase/with-org'
 import { validateInspectionPortalToken } from '@/lib/inspections/portal-tokens'
 
 export async function GET(
@@ -26,7 +26,7 @@ export async function GET(
       )
     }
 
-    const supabase = await createClient()
+    const supabase = createServiceClient()
 
     // Fetch inspection with defects (exclude internal fields like inspector_id, notes)
     const { data: inspection, error } = await supabase

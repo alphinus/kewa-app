@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { headers } from 'next/headers'
-import { createClient } from '@/lib/supabase/server'
+import { createPublicClient } from '@/lib/supabase/with-org'
 import { getSessionWithRBACFromRequest } from '@/lib/session'
 import { isInternalRole } from '@/lib/permissions'
 import { createAuthAuditLog } from '@/lib/audit'
@@ -71,7 +71,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const supabase = await createClient()
+    const supabase = await createPublicClient()
 
     // Verify work order exists and get partner info
     const { data: workOrder, error: woError } = await supabase

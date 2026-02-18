@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies, headers } from 'next/headers'
-import { createClient } from '@/lib/supabase/server'
+import { createPublicClient } from '@/lib/supabase/with-org'
 import { verifyPassword } from '@/lib/auth'
 import { createPortalSession, PORTAL_COOKIE_NAME, PORTAL_COOKIE_OPTIONS } from '@/lib/portal/session'
 import { createAuthAuditLog } from '@/lib/audit'
@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const supabase = await createClient()
+    const supabase = await createPublicClient()
 
     // Find user by email with tenant role
     const { data: user, error } = await supabase

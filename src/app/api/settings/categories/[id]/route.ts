@@ -9,7 +9,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createPublicClient } from '@/lib/supabase/with-org'
 import type { UpdateCategoryInput } from '@/types/portal'
 
 /**
@@ -54,7 +54,7 @@ export async function PUT(
       )
     }
 
-    const supabase = await createClient()
+    const supabase = await createPublicClient()
 
     const { data: category, error } = await supabase
       .from('ticket_categories')
@@ -115,7 +115,7 @@ export async function DELETE(
   try {
     const { id: categoryId } = await params
 
-    const supabase = await createClient()
+    const supabase = await createPublicClient()
 
     const { error } = await supabase
       .from('ticket_categories')

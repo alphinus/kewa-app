@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createPublicClient } from '@/lib/supabase/with-org'
 import { verifyInviteToken } from '@/lib/portal/invite-tokens'
 import { checkRateLimit } from '@/lib/rate-limit'
 
@@ -28,7 +28,7 @@ export async function GET(
       })
     }
 
-    const supabase = await createClient()
+    const supabase = await createPublicClient()
 
     // Look up tenant user
     const { data: tenantUser, error: tenantError } = await supabase

@@ -9,7 +9,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createPublicClient } from '@/lib/supabase/with-org'
 import type { CreateCategoryInput } from '@/types/portal'
 
 /**
@@ -31,7 +31,7 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const supabase = await createClient()
+    const supabase = await createPublicClient()
 
     const { data: categories, error } = await supabase
       .from('ticket_categories')
@@ -88,7 +88,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const supabase = await createClient()
+    const supabase = await createPublicClient()
 
     // Get max sort_order to append at end
     const { data: maxCategory } = await supabase

@@ -11,7 +11,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createServiceClient } from '@/lib/supabase/with-org'
 
 // =============================================
 // TYPES
@@ -46,7 +46,7 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const supabase = await createClient()
+    const supabase = createServiceClient()
 
     // Fetch user with tenant_users relation for unit info
     const { data: user, error: userError } = await supabase
@@ -147,7 +147,7 @@ export async function PATCH(request: NextRequest) {
 
   try {
     const body = (await request.json()) as ProfileUpdateBody
-    const supabase = await createClient()
+    const supabase = createServiceClient()
 
     // Validate phone format if provided
     if (body.phone !== undefined && body.phone !== null && body.phone !== '') {

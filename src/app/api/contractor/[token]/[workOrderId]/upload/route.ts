@@ -13,7 +13,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { validateContractorAccess } from '@/lib/magic-link'
-import { createClient } from '@/lib/supabase/server'
+import { createServiceClient } from '@/lib/supabase/with-org'
 import {
   validateContractorUpload,
   generateStoragePath,
@@ -59,7 +59,7 @@ export async function POST(
       )
     }
 
-    const supabase = await createClient()
+    const supabase = createServiceClient()
 
     // Verify work order belongs to this contractor and is in valid status
     const { data: workOrder, error: woError } = await supabase

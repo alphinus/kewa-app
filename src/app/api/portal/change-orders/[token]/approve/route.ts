@@ -6,7 +6,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createServiceClient } from '@/lib/supabase/with-org'
 
 interface ApproveBody {
   comment?: string
@@ -18,7 +18,7 @@ export async function POST(
 ) {
   try {
     const { token } = await params
-    const supabase = await createClient()
+    const supabase = createServiceClient()
     const body: ApproveBody = await request.json()
 
     // Validate token (same check as GET)

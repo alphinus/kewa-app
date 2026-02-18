@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { headers } from 'next/headers'
-import { createClient } from '@/lib/supabase/server'
+import { createPublicClient } from '@/lib/supabase/with-org'
 import { hashPassword } from '@/lib/auth'
 import { getSessionWithRBACFromRequest } from '@/lib/session'
 import { isInternalRole } from '@/lib/permissions'
@@ -90,7 +90,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const supabase = await createClient()
+    const supabase = await createPublicClient()
 
     // Check if email already exists
     const { data: existingUser } = await supabase

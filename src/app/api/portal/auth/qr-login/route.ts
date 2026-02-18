@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies, headers } from 'next/headers'
 import { jwtVerify, type JWTPayload } from 'jose'
-import { createClient } from '@/lib/supabase/server'
+import { createPublicClient } from '@/lib/supabase/with-org'
 import { createPortalSession, PORTAL_COOKIE_NAME, PORTAL_COOKIE_OPTIONS } from '@/lib/portal/session'
 import { createAuthAuditLog } from '@/lib/audit'
 import { checkRateLimit } from '@/lib/rate-limit'
@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const supabase = await createClient()
+    const supabase = await createPublicClient()
 
     // Look up user and verify tenant role and active status
     const { data: user, error } = await supabase

@@ -16,7 +16,7 @@ import {
 import { getUnreadMessageCount } from '@/lib/portal/message-queries'
 import { getTenantContext } from '@/lib/portal/tenant-isolation'
 import { getSetting } from '@/lib/settings/queries'
-import { createClient } from '@/lib/supabase/server'
+import { createServiceClient } from '@/lib/supabase/with-org'
 
 /**
  * GET /api/portal/dashboard
@@ -38,7 +38,7 @@ export async function GET(request: NextRequest) {
   try {
     // Get tenant context (unit assignment)
     const tenantContext = await getTenantContext(userId)
-    const supabase = await createClient()
+    const supabase = createServiceClient()
 
     // Fetch unit details
     const { data: unit } = await supabase

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies, headers } from 'next/headers'
-import { createClient } from '@/lib/supabase/server'
+import { createPublicClient } from '@/lib/supabase/with-org'
 import { hashPassword } from '@/lib/auth'
 import { verifyInviteToken } from '@/lib/portal/invite-tokens'
 import { createPortalSession, PORTAL_COOKIE_NAME, PORTAL_COOKIE_OPTIONS } from '@/lib/portal/session'
@@ -46,7 +46,7 @@ export async function POST(
       )
     }
 
-    const supabase = await createClient()
+    const supabase = await createPublicClient()
 
     // Look up tenant user by tenantUserId from token
     const { data: tenantUser, error: tenantError } = await supabase

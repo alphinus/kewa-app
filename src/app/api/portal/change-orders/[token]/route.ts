@@ -6,7 +6,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createServiceClient } from '@/lib/supabase/with-org'
 
 export async function GET(
   request: NextRequest,
@@ -14,7 +14,7 @@ export async function GET(
 ) {
   try {
     const { token } = await params
-    const supabase = await createClient()
+    const supabase = createServiceClient()
 
     // Manual token validation (DO NOT consume token - read-only check)
     const { data: tokenData, error: tokenError } = await supabase

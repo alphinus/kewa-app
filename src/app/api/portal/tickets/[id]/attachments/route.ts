@@ -15,7 +15,7 @@ import {
   uploadTicketAttachment,
   MAX_TICKET_PHOTOS,
 } from '@/lib/portal/attachment-upload'
-import { createClient } from '@/lib/supabase/server'
+import { createServiceClient } from '@/lib/supabase/with-org'
 
 /**
  * POST /api/portal/tickets/:id/attachments
@@ -54,7 +54,7 @@ export async function POST(
 
     // For ticket-level attachments, enforce MAX_TICKET_PHOTOS
     if (!messageId) {
-      const supabase = await createClient()
+      const supabase = createServiceClient()
 
       // Count existing ticket-level attachments
       const { count: existingCount } = await supabase
@@ -92,7 +92,7 @@ export async function POST(
     )
 
     // Create attachment records in database
-    const supabase = await createClient()
+    const supabase = createServiceClient()
     const attachmentRecords = uploadResults.map((result, idx) => ({
       ticket_id: ticketId,
       message_id: messageId || null,

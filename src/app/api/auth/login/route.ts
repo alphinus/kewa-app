@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies, headers } from 'next/headers'
-import { createClient } from '@/lib/supabase/server'
+import { createPublicClient } from '@/lib/supabase/with-org'
 import { verifyPin, verifyPassword, createSession, SESSION_COOKIE_NAME, SESSION_COOKIE_OPTIONS } from '@/lib/auth'
 import { createAuthAuditLog } from '@/lib/audit'
 import { checkRateLimit } from '@/lib/rate-limit'
@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { pin, email, password } = body
 
-    const supabase = await createClient()
+    const supabase = await createPublicClient()
 
     // Determine auth method based on input
     if (pin && typeof pin === 'string') {
@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
  * Handle PIN-based authentication
  */
 async function handlePinAuth(
-  supabase: Awaited<ReturnType<typeof createClient>>,
+  supabase: Awaited<ReturnType<typeof createPublicClient>>,
   pin: string,
   ipAddress: string,
   userAgent: string
@@ -189,7 +189,7 @@ async function handlePinAuth(
  * Handle Email+Password authentication
  */
 async function handleEmailAuth(
-  supabase: Awaited<ReturnType<typeof createClient>>,
+  supabase: Awaited<ReturnType<typeof createPublicClient>>,
   email: string,
   password: string,
   ipAddress: string,
@@ -333,7 +333,7 @@ async function handleEmailAuth(
  * Get permissions for a role
  */
 async function getUserPermissions(
-  supabase: Awaited<ReturnType<typeof createClient>>,
+  supabase: Awaited<ReturnType<typeof createPublicClient>>,
   roleId: string | null
 ): Promise<string[]> {
   if (!roleId) return []
