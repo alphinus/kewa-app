@@ -9,10 +9,10 @@ See: .planning/PROJECT.md (updated 2026-02-17)
 
 ## Current Position
 
-Phase: 39 of 40 (Navigation Redesign) -- IN PROGRESS
-Plan: 03 of 4 complete
-Status: Plan 39-03 complete — building detail (tabs), unit detail (condition + room cards), room detail (condition + action links)
-Last activity: 2026-02-18 -- Plan 39-03 complete: full /objekte drill-down to room level (building/unit/room detail pages)
+Phase: 39 of 40 (Navigation Redesign) -- COMPLETE
+Plan: 04 of 4 complete
+Status: Plan 39-04 complete — URL redirects (HTTP 308) + client redirect stubs for old ID routes + all internal links migrated to /objekte
+Last activity: 2026-02-18 -- Plan 39-04 complete: Phase 39 Navigation Redesign fully done
 
 Progress: [##################################......] 36/40 phases across all milestones
 
@@ -25,12 +25,12 @@ Progress: [##################################......] 36/40 phases across all mil
 - v3.0 Tenant & Offline (2026-02-03) -- Phases 25-29
 - v3.1 Production Hardening (2026-02-17) -- Phases 30-34
 
-**Total:** 34 phases, 128 plans shipped across 6 milestones (+ 5 in Phase 35 + 3 in Phase 36 + 4 in Phase 37 + 3 in Phase 38 + 3 in Phase 39 = 146 plans total)
+**Total:** 34 phases, 128 plans shipped across 6 milestones (+ 5 in Phase 35 + 3 in Phase 36 + 4 in Phase 37 + 3 in Phase 38 + 4 in Phase 39 = 147 plans total)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 146 (128 prior + 5 in Phase 35 + 3 in Phase 36 + 4 in Phase 37 + 3 in Phase 38 + 3 in Phase 39)
+- Total plans completed: 147 (128 prior + 5 in Phase 35 + 3 in Phase 36 + 4 in Phase 37 + 3 in Phase 38 + 4 in Phase 39)
 - Metrics from previous milestones -- see milestone archives
 
 | Plan | Duration | Tasks | Files |
@@ -52,6 +52,7 @@ Progress: [##################################......] 36/40 phases across all mil
 | 39-01 | 8min | 2 | 3 |
 | 39-02 | 4min | 2 | 3 |
 | 39-03 | 15min | 2 | 3 |
+| 39-04 | 4min | 2 | 12 |
 
 ## Accumulated Context
 
@@ -113,6 +114,8 @@ Recent decisions affecting current work:
 - [Phase 39]: 39-02: unit_count displayed only when present in building objects — /api/properties returns buildings without unit join (safe fallback)
 - [Phase 39]: 39-03: HeatmapUnit imported from @/lib/dashboard/heatmap-queries (not redefined) — required for UnitDetailPanel type compatibility
 - [Phase 39]: 39-03: building.property_id (string|null) coerced to undefined with ?? for DeliveryList propertyId?: string
+- [Phase 39]: 39-04: projekte/[id] query extended with building(property_id) join to build full /objekte path server-side
+- [Phase 39]: 39-04: BuildingSelector push updated to /objekte — CombinedSelector from Phase 38 handles building context now
 
 ### Blockers/Concerns
 
@@ -130,8 +133,8 @@ Recent decisions affecting current work:
 ## Session Continuity
 
 Last session: 2026-02-18
-Stopped at: Completed 39-03-PLAN.md (building detail tabs + unit detail + room detail pages)
+Stopped at: Completed 39-04-PLAN.md (URL redirects + internal link migration) — Phase 39 COMPLETE
 Resume file: None
 
 ---
-*v4.0 Multi-Tenant Architecture -- Phase 39 IN PROGRESS (3 of 4 plans done). Phase 38 COMPLETE.*
+*v4.0 Multi-Tenant Architecture -- Phase 39 COMPLETE (4 of 4 plans done). Next: Phase 40.*
