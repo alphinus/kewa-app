@@ -5,14 +5,14 @@
 See: .planning/PROJECT.md (updated 2026-02-17)
 
 **Core value:** Immobilienverwaltungen haben volle Transparenz und Kontrolle ueber alle Renovationen -- mit standardisierten Workflows, mandantenfaehiger Datentrennung, externer Handwerker-Integration, Kostenuebersicht und automatischer Zustandshistorie.
-**Current focus:** v4.0 Multi-Tenant Architecture -- Phase 40 in progress (Plan 01 complete).
+**Current focus:** v4.0 Multi-Tenant Architecture -- Phase 40 in progress (Plans 01-02 complete).
 
 ## Current Position
 
 Phase: 40 of 40 (Storage Multi-Tenancy) -- IN PROGRESS
-Plan: 01 of 3 complete
-Status: Plan 40-01 complete — paths.ts and 084_storage_rls.sql created; STOR-01/STOR-02 foundation established
-Last activity: 2026-02-18 -- Plan 40-01 complete: storage path builder + RLS migration
+Plan: 02 of 3 complete
+Status: Plan 40-02 complete — all 6 internal upload routes use org-prefixed paths via typed path builders
+Last activity: 2026-02-18 -- Plan 40-02 complete: 6 internal upload routes org-prefixed
 
 Progress: [##################################......] 36/40 phases across all milestones (Phase 40 in progress)
 
@@ -25,12 +25,12 @@ Progress: [##################################......] 36/40 phases across all mil
 - v3.0 Tenant & Offline (2026-02-03) -- Phases 25-29
 - v3.1 Production Hardening (2026-02-17) -- Phases 30-34
 
-**Total:** 34 phases, 128 plans shipped across 6 milestones (+ 5 in Phase 35 + 3 in Phase 36 + 4 in Phase 37 + 3 in Phase 38 + 5 in Phase 39 + 1 in Phase 40 = 149 plans total)
+**Total:** 34 phases, 128 plans shipped across 6 milestones (+ 5 in Phase 35 + 3 in Phase 36 + 4 in Phase 37 + 3 in Phase 38 + 5 in Phase 39 + 2 in Phase 40 = 150 plans total)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 149 (148 prior + 1 in Phase 40)
+- Total plans completed: 150 (148 prior + 2 in Phase 40)
 - Metrics from previous milestones -- see milestone archives
 
 | Plan | Duration | Tasks | Files |
@@ -55,6 +55,7 @@ Progress: [##################################......] 36/40 phases across all mil
 | 39-04 | 4min | 2 | 12 |
 | 39-05 | 15min | 1 | 6 |
 | 40-01 | 2min | 2 | 2 |
+| 40-02 | 8min | 2 | 6 |
 
 ## Accumulated Context
 
@@ -123,6 +124,8 @@ Recent decisions affecting current work:
 - [Phase 40]: 40-01: inspectionSignaturePath uses {orgId}/inspections/{id}/signature.png -- 'inspections' literal sub-folder distinguishes signature from item/defect paths
 - [Phase 40]: 40-01: 059_inspections.sql used storage.policies table inserts (not CREATE POLICY) -- DROP POLICY for inspection policies in 084 are safety-only
 - [Phase 40]: 40-01: media bucket had no prior unscoped CREATE POLICY statements -- 4 new policies are net-new additions
+- [Phase 40]: 40-02: orgId extracted from x-organization-id header (guaranteed by middleware on /api/* routes) -- no DB lookup needed
+- [Phase 40]: 40-02: missing orgId returns 401 (same as auth failure) -- consistent with OrgContextMissingError handling already in these routes
 
 ### Blockers/Concerns
 
@@ -140,8 +143,8 @@ Recent decisions affecting current work:
 ## Session Continuity
 
 Last session: 2026-02-18
-Stopped at: Completed 40-01-PLAN.md (storage path builder + RLS migration) — Phase 40 Plan 01 complete
+Stopped at: Completed 40-02-PLAN.md (6 internal upload routes org-prefixed) — Phase 40 Plan 02 complete
 Resume file: None
 
 ---
-*v4.0 Multi-Tenant Architecture -- Phase 40 IN PROGRESS (1 of 3 plans done). Next: Plan 40-02.*
+*v4.0 Multi-Tenant Architecture -- Phase 40 IN PROGRESS (2 of 3 plans done). Next: Plan 40-03.*
