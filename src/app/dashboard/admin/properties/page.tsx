@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Building2, Plus, X, ArrowLeft } from 'lucide-react'
 import { PropertyBuilder } from '@/components/admin/PropertyBuilder'
+import { DashboardBreadcrumbs } from '@/components/navigation/DashboardBreadcrumbs'
 import { toast } from 'sonner'
 import type { Property, Building } from '@/types/database'
 
@@ -110,6 +111,7 @@ export default function PropertiesPage() {
 
   return (
     <div className="p-4 pb-20 sm:p-6 max-w-6xl mx-auto">
+      <DashboardBreadcrumbs />
       {/* Create Form Modal */}
       {showCreateForm && (
         <CreatePropertyForm

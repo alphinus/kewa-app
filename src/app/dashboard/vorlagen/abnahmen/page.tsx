@@ -9,6 +9,7 @@
 import Link from 'next/link'
 import { createPublicClient } from '@/lib/supabase/with-org'
 import { Button } from '@/components/ui/button'
+import { DashboardBreadcrumbs } from '@/components/navigation/DashboardBreadcrumbs'
 import type { InspectionTemplate } from '@/types/inspections'
 
 export default async function InspectionTemplatesPage() {
@@ -51,18 +52,7 @@ export default async function InspectionTemplatesPage() {
 
   return (
     <div className="p-4 pb-20 sm:p-6 max-w-6xl mx-auto">
-      {/* Breadcrumb */}
-      <nav className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mb-6">
-        <Link href="/dashboard" className="hover:text-gray-700 dark:hover:text-gray-300">
-          Dashboard
-        </Link>
-        <span>/</span>
-        <Link href="/dashboard/vorlagen" className="hover:text-gray-700 dark:hover:text-gray-300">
-          Vorlagen
-        </Link>
-        <span>/</span>
-        <span className="text-gray-900 dark:text-gray-100">Abnahmen</span>
-      </nav>
+      <DashboardBreadcrumbs />
 
       {/* Header */}
       <div className="flex items-center justify-between mb-6">

@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { ImeriTaskCard } from '@/components/tasks/ImeriTaskCard'
 import { CompleteTaskModal } from '@/components/tasks/CompleteTaskModal'
+import { DashboardBreadcrumbs } from '@/components/navigation/DashboardBreadcrumbs'
 import type { TaskWithProject, TasksResponse } from '@/types/database'
 
 /**
@@ -156,6 +157,7 @@ export default function ImeriTasksPage() {
 
   return (
     <div className="space-y-4 pb-20">
+      <DashboardBreadcrumbs />
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">

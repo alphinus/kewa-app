@@ -5,6 +5,7 @@ import { useSearchParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { PartnerList } from '@/components/partners/PartnerList'
 import { PartnerForm } from '@/components/partners/PartnerForm'
+import { DashboardBreadcrumbs } from '@/components/navigation/DashboardBreadcrumbs'
 import type { Partner } from '@/types/database'
 import type { PartnerType } from '@/types'
 
@@ -77,6 +78,7 @@ export default function PartnerPage() {
 
   return (
     <div className="p-4 pb-20 sm:p-6 max-w-6xl mx-auto">
+      <DashboardBreadcrumbs />
       {/* Header */}
       <div className="mb-6">
         <div className="flex items-center justify-between mb-2">
