@@ -5,14 +5,14 @@
 See: .planning/PROJECT.md (updated 2026-02-17)
 
 **Core value:** Immobilienverwaltungen haben volle Transparenz und Kontrolle ueber alle Renovationen -- mit standardisierten Workflows, mandantenfaehiger Datentrennung, externer Handwerker-Integration, Kostenuebersicht und automatischer Zustandshistorie.
-**Current focus:** v4.0 Multi-Tenant Data Model & Navigation -- Phase 35 in progress (Plan 01 complete)
+**Current focus:** v4.0 Multi-Tenant Data Model & Navigation -- Phase 35 in progress (Plans 01, 02, 04 complete)
 
 ## Current Position
 
 Phase: 35 of 40 (Schema Foundation)
-Plan: 01 complete, 02 next
+Plan: 04 complete, 03 next (if not already complete via parallel execution)
 Status: In progress
-Last activity: 2026-02-18 -- Plan 35-01 complete: org foundation + tenancies migrations
+Last activity: 2026-02-18 -- Plan 35-04 complete: STWE fields + parking unit_type normalization
 
 Progress: [##############################..........] 34/40 phases across all milestones
 
@@ -30,8 +30,14 @@ Progress: [##############################..........] 34/40 phases across all mil
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 128
+- Total plans completed: 132 (128 prior + 4 in Phase 35 so far)
 - Metrics from previous milestones -- see milestone archives
+
+| Plan | Duration | Tasks | Files |
+|------|----------|-------|-------|
+| 35-01 | 8min | 2 | 2 |
+| 35-02 | ~15min | 1 | 1 |
+| 35-04 | 3min | 1 | 1 |
 
 ## Accumulated Context
 
@@ -47,6 +53,9 @@ Recent decisions affecting current work:
 - 35-01: owner_type and mandate_type use text + CHECK (not CREATE TYPE enum) -- consistent with schema style
 - 35-01: DATERANGE avoided for temporal ranges; use two DATE columns (Supabase TS generation Pitfall 6)
 - 35-01: tenancies.organization_id has no ON DELETE CASCADE -- intentional (org deletion must not cascade to tenancy history)
+- 35-04: parking_spot renamed to parking; unit_type CHECK expanded to include parking, garage, storage
+- 35-04: renewal_fund_balance DEFAULT 0 (always a balance, even zero); renewal_fund_target nullable (absence of target is meaningful)
+- 35-04: German legal terms (Wertquote, Eigentumsperiode, Erneuerungsfonds) used only in SQL comments/COMMENT ON strings -- English identifiers only (D1)
 
 ### Blockers/Concerns
 
@@ -58,12 +67,13 @@ Recent decisions affecting current work:
 
 - useInstallPrompt timer cleanup missing (warning severity)
 - Emergency contact schema extension needed (info severity)
+- Any code filtering on unit_type = 'parking_spot' must be updated to 'parking' (migration 078 renamed data)
 
 ## Session Continuity
 
 Last session: 2026-02-18
-Stopped at: Completed 35-01-PLAN.md (org foundation + tenancies migrations)
+Stopped at: Completed 35-04-PLAN.md (STWE fields + parking unit_type normalization)
 Resume file: None
 
 ---
-*v4.0 Multi-Tenant Data Model & Navigation -- Phase 35 Plan 01 complete, Plan 02 next*
+*v4.0 Multi-Tenant Data Model & Navigation -- Phase 35 Plans 01, 02, 04 complete*
