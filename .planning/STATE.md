@@ -5,14 +5,14 @@
 See: .planning/PROJECT.md (updated 2026-02-17)
 
 **Core value:** Immobilienverwaltungen haben volle Transparenz und Kontrolle ueber alle Renovationen -- mit standardisierten Workflows, mandantenfaehiger Datentrennung, externer Handwerker-Integration, Kostenuebersicht und automatischer Zustandshistorie.
-**Current focus:** v4.0 Multi-Tenant Architecture -- Phase 37 in progress (RLS context wiring)
+**Current focus:** v4.0 Multi-Tenant Architecture -- Phase 38 in progress (App Context & Org Switcher)
 
 ## Current Position
 
-Phase: 37 of 40 (RLS Enablement & Context Wiring) -- IN PROGRESS
-Plan: 04 of 4 complete
-Status: Plan 37-04 complete — ALL 45 non-API files migrated to with-org.ts clients; zero createClient imports from server.ts outside API routes
-Last activity: 2026-02-18 -- Plan 37-04 complete: lib utilities + server component pages migrated; TypeScript passes
+Phase: 38 of 40 (App Context & Org Switcher) -- IN PROGRESS
+Plan: 01 of 3 complete
+Status: Plan 38-01 complete — Organization/Mandate types, GET /api/organizations, GET /api/mandates, mandate_id filter on properties, hauswart in isInternalRole
+Last activity: 2026-02-18 -- Plan 38-01 complete: data layer (types + API routes + permissions fix)
 
 Progress: [################################........] 35/40 phases across all milestones
 
@@ -25,12 +25,12 @@ Progress: [################################........] 35/40 phases across all mil
 - v3.0 Tenant & Offline (2026-02-03) -- Phases 25-29
 - v3.1 Production Hardening (2026-02-17) -- Phases 30-34
 
-**Total:** 34 phases, 128 plans shipped across 6 milestones (+ 5 in Phase 35 + 3 in Phase 36 + 4 in Phase 37 = 140 plans total)
+**Total:** 34 phases, 128 plans shipped across 6 milestones (+ 5 in Phase 35 + 3 in Phase 36 + 4 in Phase 37 + 1 in Phase 38 = 141 plans total)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 140 (128 prior + 5 in Phase 35 + 3 in Phase 36 + 4 in Phase 37)
+- Total plans completed: 141 (128 prior + 5 in Phase 35 + 3 in Phase 36 + 4 in Phase 37 + 1 in Phase 38)
 - Metrics from previous milestones -- see milestone archives
 
 | Plan | Duration | Tasks | Files |
@@ -46,6 +46,7 @@ Progress: [################################........] 35/40 phases across all mil
 | 37-02 | 8min | 2 | 2 |
 | 37-03 | 90min | 2 | 123 |
 | 37-04 | 15min | 2 | 45 |
+| 38-01 | 15min | 2 | 5 |
 
 ## Accumulated Context
 
@@ -90,6 +91,9 @@ Recent decisions affecting current work:
 - [Phase 37]: 37-03: Portal/contractor routes use createServiceClient (service_role) not createPublicClient — they query RLS-protected tenant tables; token validation provides application-layer access control
 - [Phase 37]: 37-03: createServiceClient() is synchronous throughout — no await in any portal/contractor route
 - [Phase 37]: 37-03: Two inspection route files used req instead of request parameter name — corrected to pass req to createOrgClient
+- [Phase 38]: 38-01: hauswart added to isInternalRole() at level 40 in ROLE_HIERARCHY — between accounting(60) and tenant(20), per D7
+- [Phase 38]: 38-01: MandateType exported as standalone type alias alongside Mandate interface — consumers can import either
+- [Phase 38]: 38-01: mandate_id filter treats 'all' string as no-filter — UI convention for 'show all mandates'
 
 ### Blockers/Concerns
 
@@ -107,8 +111,8 @@ Recent decisions affecting current work:
 ## Session Continuity
 
 Last session: 2026-02-18
-Stopped at: Completed 37-03-PLAN.md (API route migration — 123 files from createClient to org-aware clients)
+Stopped at: Completed 38-01-PLAN.md (data layer: Organization/Mandate types, API routes, hauswart permissions fix)
 Resume file: None
 
 ---
-*v4.0 Multi-Tenant Architecture -- Phase 37 COMPLETE (all 4 plans done). Next: Phase 38 (OrganizationProvider — threads org context through React server components)*
+*v4.0 Multi-Tenant Architecture -- Phase 38 IN PROGRESS (1 of 3 plans done). Next: Plan 38-02 (OrganizationProvider + MandateProvider context providers)*
