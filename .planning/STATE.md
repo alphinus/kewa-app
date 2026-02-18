@@ -5,14 +5,14 @@
 See: .planning/PROJECT.md (updated 2026-02-17)
 
 **Core value:** Immobilienverwaltungen haben volle Transparenz und Kontrolle ueber alle Renovationen -- mit standardisierten Workflows, mandantenfaehiger Datentrennung, externer Handwerker-Integration, Kostenuebersicht und automatischer Zustandshistorie.
-**Current focus:** v4.0 Multi-Tenant Data Model & Navigation -- Phase 35 in progress (Plans 01, 02, 04 complete — 03 next)
+**Current focus:** v4.0 Multi-Tenant Data Model & Navigation -- Phase 35 complete (all 4 plans done)
 
 ## Current Position
 
 Phase: 35 of 40 (Schema Foundation)
-Plan: 04 complete, 03 next (if not already complete via parallel execution)
-Status: In progress
-Last activity: 2026-02-18 -- Plan 35-04 complete: STWE fields + parking unit_type normalization
+Plan: All 4 plans complete (01, 02, 03, 04)
+Status: Phase 35 complete — ready for Phase 36 (Org-ID Backfill)
+Last activity: 2026-02-18 -- Plan 35-03 complete: RLS helpers + 37 org_id sync triggers
 
 Progress: [##############################..........] 34/40 phases across all milestones
 
@@ -30,7 +30,7 @@ Progress: [##############################..........] 34/40 phases across all mil
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 132 (128 prior + 4 in Phase 35 so far)
+- Total plans completed: 133 (128 prior + 5 in Phase 35)
 - Metrics from previous milestones -- see milestone archives
 
 | Plan | Duration | Tasks | Files |
@@ -38,6 +38,7 @@ Progress: [##############################..........] 34/40 phases across all mil
 | 35-01 | 8min | 2 | 2 |
 | 35-02 | ~15min | 1 | 1 |
 | 35-04 | 3min | 1 | 1 |
+| 35-03 | 3min | 2 | 2 |
 
 ## Accumulated Context
 
@@ -57,6 +58,9 @@ Recent decisions affecting current work:
 - 35-04: renewal_fund_balance DEFAULT 0 (always a balance, even zero); renewal_fund_target nullable (absence of target is meaningful)
 - 35-04: German legal terms (Wertquote, Eigentumsperiode, Erneuerungsfonds) used only in SQL comments/COMMENT ON strings -- English identifiers only (D1)
 - 35-02: 62 tables receive organization_id (more than 44+ D2 estimate); tenant_users included (per-org per D2); ticket_categories excluded (global lookup table)
+- 35-03: task_dependencies trigger uses task_id (not depends_on_task_id) -- org follows the dependent task
+- 35-03: expenses trigger covers 4 parent FKs (renovation_project_id, work_order_id, unit_id, room_id) to match validate_expense_relationship() constraint
+- 35-03: purchase_orders excluded from trigger (no hierarchical parent) -- backfill in Phase 36
 
 ### Blockers/Concerns
 
@@ -73,8 +77,8 @@ Recent decisions affecting current work:
 ## Session Continuity
 
 Last session: 2026-02-18
-Stopped at: Completed 35-02-PLAN.md (organization_id on all 62 per-org tables)
+Stopped at: Completed 35-03-PLAN.md (RLS helpers + 37 org_id sync triggers)
 Resume file: None
 
 ---
-*v4.0 Multi-Tenant Data Model & Navigation -- Phase 35 Plans 01, 02, 04 complete*
+*v4.0 Multi-Tenant Data Model & Navigation -- Phase 35 complete (all 4 plans: 01, 02, 03, 04)*
