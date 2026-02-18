@@ -1,0 +1,188 @@
+# Requirements: v4.0 Multi-Tenant Data Model & Navigation
+
+## Overview
+
+Mandantenfaehiges Datenmodell mit Branchenstandard-Hierarchie (Verwaltung > Mandat > Eigentuemer > Liegenschaft > Gebaeude > Einheit), Supabase RLS fuer Mandanten-Isolation, STWE-Vorbereitung, und Navigation-Redesign mit Drill-down.
+
+## v1 Requirements
+
+### SCHEMA: Schema Foundation
+
+**SCHEMA-01: Organization & Member Tables**
+Create `organizations` table (id, name, slug, is_active) and `organization_members` junction table (organization_id, user_id, role_id, is_default) with proper indexes.
+- Acceptance: Tables exist, indexes on organization_id and user_id, UNIQUE constraint on (organization_id, user_id)
+- Pitfall prevention: Pitfall 3 (indexes created atomically with tables)
+
+**SCHEMA-02: Owner & Mandate Tables**
+Create `owners` table (organization_id, name, contact info, owner_type enum) and `mandates` table (organization_id, owner_id, name, mandate_type enum, start/end dates, is_active) with proper indexes.
+- Acceptance: Tables exist with FK constraints, composite indexes on (organization_id, is_active)
+- Pitfall prevention: Pitfall 3 (indexes), Pitfall 4 (FK includes organization_id)
+
+**SCHEMA-03: Tenancy Table**
+Create `tenancies` table (organization_id, unit_id, tenant info, rent_amount, start/end dates, is_active) with proper indexes.
+- Acceptance: Table exists, indexes on organization_id, unit_id, and (unit_id, is_active)
+- Pitfall prevention: Pitfall 3 (indexes created with table)
+
+**SCHEMA-04: organization_id on Existing Tables**
+Add nullable `organization_id UUID` column to all existing tenant tables (~44 tables needing addition). Add `mandate_id` and `property_type` to properties table.
+- Acceptance: All tenant tables have organization_id column (nullable), properties has mandate_id and property_type
+- Pitfall prevention: Pitfall 5 (nullable first, NOT NULL later), Pitfall 3 (indexes in same migration)
+
+**SCHEMA-05: RLS Helper Functions**
+Create `current_organization_id()` SECURITY DEFINER function reading `current_setting('app.current_organization_id', true)`, and `set_org_context(org_id UUID)` RPC function using `set_config(..., true)` for LOCAL scope.
+- Acceptance: Both functions exist, `set_org_context` sets transaction-local config, `current_organization_id()` returns the set value
+- Pitfall prevention: Pitfall 3 from PITFALLS.md (`set_config` with LOCAL flag prevents connection pool contamination)
+
+**SCHEMA-06: STWE Preparation Fields**
+Add nullable STWE fields to units table: `wertquote DECIMAL(5,4)`, `eigentumsperiode DATERANGE`, `stwe_owner_id UUID REFERENCES owners(id)`. Add `erneuerungsfonds_balance` and `erneuerungsfonds_target` to properties table.
+- Acceptance: Fields exist as nullable, no impact on existing rental workflows, property_type discriminator controls visibility
+- Pitfall prevention: Pitfall 9 (all fields nullable, property_type discriminator present)
+
+**SCHEMA-07: organization_id Sync Triggers**
+Create BEFORE INSERT/UPDATE triggers on child tables (buildings, units, rooms, tasks, etc.) that inherit organization_id from their parent FK relationship. Replace CASCADE with NO ACTION on critical multi-tenant FK paths.
+- Acceptance: Inserting a building auto-populates organization_id from its property. Updating a building's property_id updates its organization_id. Cross-tenant FK violations blocked.
+- Pitfall prevention: Pitfall 4 (FK cascades bypassing RLS)
+
+### MIGR: Data Migration & Backfill
+
+**MIGR-01: Seed KEWA AG Organization**
+Insert KEWA AG as initial organization with deterministic UUID. Create corresponding owner and default mandate. Map existing users to organization via organization_members with is_default=true.
+- Acceptance: Organization "KEWA AG" exists with slug "kewa-ag", owner and mandate created, all active users mapped
+- Pitfall prevention: Pitfall 5 (seed before backfill)
+
+**MIGR-02: Backfill organization_id**
+Update all existing rows across all tenant tables to set organization_id to KEWA AG's UUID. Backfill mandate_id on properties. Set property_type='rental' on all existing properties.
+- Acceptance: Zero NULL organization_id values across all tenant tables. All properties have mandate_id and property_type set.
+- Pitfall prevention: Pitfall 5 (batch backfill for large tables, single UPDATE for small tables)
+
+**MIGR-03: Apply NOT NULL Constraints**
+After backfill verification, alter all organization_id columns to NOT NULL.
+- Acceptance: `ALTER TABLE ... ALTER COLUMN organization_id SET NOT NULL` succeeds on all tables. No NULL values remain.
+- Pitfall prevention: Pitfall 5 (only after 100% backfill verified)
+
+### RLS: Row-Level Security & Context Wiring
+
+**RLS-01: RLS Policies on All Tenant Tables**
+Enable RLS and create SELECT/INSERT/UPDATE/DELETE policies on all tenant tables using `organization_id = current_organization_id()`. Drop existing permissive policies (029_rls_policies.sql).
+- Acceptance: Every tenant table has RLS enabled with org-scoped policies. Queries via anon key with set_org_context return only matching org rows. Queries without org context return empty (not error).
+- Pitfall prevention: Pitfall 1 (policies paired with RLS enablement), Pitfall 10 (WITH CHECK on INSERT/UPDATE)
+
+**RLS-02: Middleware Organization Header**
+Enhance existing middleware to resolve organization context from cookie or user's default org. Set `x-organization-id` header on all requests.
+- Acceptance: Every request to /dashboard/* has x-organization-id header. Cookie `organization_id` persists org selection across sessions.
+- Pitfall prevention: Pitfall 2 (context available to all API routes)
+
+**RLS-03: createOrgClient Helper**
+Create `lib/supabase/with-org.ts` exporting `createOrgClient(request)` that reads x-organization-id header, creates Supabase client, and calls set_org_context RPC.
+- Acceptance: Single-line org-scoped client creation in API routes. Error thrown if no org context.
+- Pitfall prevention: Pitfall 2 (standardized context wiring), Pitfall 8 (never uses service role for tenant queries)
+
+**RLS-04: Update API Routes**
+Update all ~119 API route files to use createOrgClient instead of raw createClient for tenant-scoped queries. Service role client used only for admin operations.
+- Acceptance: All .from() calls in API routes go through org-scoped client. No tenant data accessible without org context.
+- Pitfall prevention: Pitfall 2 (Server Component context), Pitfall 8 (service role only for admin)
+
+**RLS-05: Cross-Tenant Isolation Verification**
+Create verification script that tests: Org A cannot read Org B data, Org A cannot insert into Org B, Org A cannot update Org B records, cascade operations stay within org boundary.
+- Acceptance: All cross-tenant operations correctly blocked. Test with at least 2 test organizations.
+- Pitfall prevention: Pitfall 8 (test with client SDK not service role), Pitfall 10 (verify WITH CHECK blocks cross-org writes)
+
+### CTX: Application Context & Organization Switcher
+
+**CTX-01: OrganizationContext Provider**
+Create OrganizationProvider with: currentOrg, availableOrgs, switchOrg(), isLoading. Reads from cookie, fetches available orgs from organization_members. Memoized context value.
+- Acceptance: OrganizationProvider wraps dashboard layout. currentOrg populated from cookie/default. availableOrgs fetched from DB.
+- Pitfall prevention: Anti-pattern 5 from ARCHITECTURE.md (memoized to prevent re-render cascade)
+
+**CTX-02: MandateContext Provider**
+Create MandateProvider (child of OrganizationProvider) with: currentMandate, availableMandates, switchMandate('all' | mandateId), isLoading. Mandates scoped to current org.
+- Acceptance: MandateProvider wraps dashboard layout inside OrganizationProvider. Mandate list filtered by current org. 'all' option shows all mandates.
+- Pitfall prevention: Anti-pattern 5 (memoized)
+
+**CTX-03: OrgSwitcher Component**
+Replace PropertySelector with OrgSwitcher in header. Single-org users see static org name. Multi-org users see dropdown. Org switch clears mandate and building selection, refreshes data.
+- Acceptance: Header shows org name for single-org users. Dropdown appears for multi-org users. Switching org clears downstream state.
+
+**CTX-04: BuildingContext Scoping**
+Scope existing BuildingContext to current mandate (or all mandates). Building list filtered by mandate selection. Existing building selector behavior preserved.
+- Acceptance: Building dropdown shows only buildings from selected mandate. 'Alle' shows buildings across mandates within org.
+
+### NAV: Navigation Redesign
+
+**NAV-01: Breadcrumb Component**
+Create Breadcrumbs component using usePathname(). Display hierarchy: Org > Mandat > Liegenschaft > Gebaeude > Einheit. Map URL segments to German labels.
+- Acceptance: Breadcrumbs render on all dashboard pages. Each segment is a clickable link except current page. German labels used.
+
+**NAV-02: Simplified Footer Navigation**
+Reduce mobile footer from 8 items to 5: Uebersicht, Objekte, Aufgaben, Kosten, Mehr. "Mehr" opens overflow with: Projekte, Lieferanten, Berichte, Einstellungen, Wissen.
+- Acceptance: Footer shows 5 items on mobile. Mehr menu accessible with one tap. All previously top-level items reachable within 2 taps.
+- Pitfall prevention: Pitfall 7 (keep high-frequency items at top level)
+
+**NAV-03: Objekte Drill-Down Routes**
+Create hierarchical URL structure: /dashboard/objekte > /[propertyId] > /[buildingId] > /[unitId]. Replaces separate liegenschaft/ and gebaude/ routes.
+- Acceptance: Full drill-down from property list to unit detail works. Each level shows relevant entity list/detail. Back navigation works via breadcrumbs and browser back.
+- Pitfall prevention: Pitfall 7 (hierarchical navigation matches data model)
+
+**NAV-04: URL Redirects for Old Routes**
+Redirect old URLs (/dashboard/liegenschaft/*, /dashboard/gebaude/*) to new /dashboard/objekte/* structure.
+- Acceptance: Old bookmarked URLs redirect to correct new URLs. No 404 errors for previously valid routes.
+- Pitfall prevention: Pitfall 7 (preserve bookmarks)
+
+### STOR: Storage Multi-Tenancy
+
+**STOR-01: Storage Path Convention**
+Update file upload logic to prefix storage paths with organization_id: `{org_id}/{property_id}/{building_id}/{entity_type}/{filename}`.
+- Acceptance: New uploads stored under org-prefixed paths. Upload helper function enforces path convention.
+
+**STOR-02: Storage RLS Policies**
+Create storage.objects RLS policies for INSERT/SELECT/DELETE that validate first folder segment matches current_organization_id().
+- Acceptance: User can upload/view/delete files only in their org's folder. Cross-org file access blocked.
+- Pitfall prevention: Pitfall from PITFALLS.md Security Mistakes table (Storage RLS separate from database RLS)
+
+**STOR-03: Existing File Migration**
+Migrate existing storage file paths to include organization_id prefix (KEWA AG). Update media table references.
+- Acceptance: All existing files accessible under new path structure. No broken image/file links in UI.
+
+## v2 (Deferred)
+
+- Cross-mandate portfolio dashboard (aggregated KPI view across mandates)
+- Owner self-service portal (read-only live dashboard for Eigentuemer)
+- Organization user invites (email invite with role + mandate assignment)
+- STWE advanced features (voting, assemblies, Erneuerungsfonds UI)
+- Multi-language support (French, Italian for Romandie/Ticino)
+- Audit log viewer UI (browse existing audit_log table)
+- Mandate-level template libraries (copy templates between mandates)
+
+## Traceability
+
+| Requirement | Phase | Status |
+|-------------|-------|--------|
+| SCHEMA-01 | Phase 35 | Pending |
+| SCHEMA-02 | Phase 35 | Pending |
+| SCHEMA-03 | Phase 35 | Pending |
+| SCHEMA-04 | Phase 35 | Pending |
+| SCHEMA-05 | Phase 35 | Pending |
+| SCHEMA-06 | Phase 35 | Pending |
+| SCHEMA-07 | Phase 35 | Pending |
+| MIGR-01 | Phase 36 | Pending |
+| MIGR-02 | Phase 36 | Pending |
+| MIGR-03 | Phase 36 | Pending |
+| RLS-01 | Phase 37 | Pending |
+| RLS-02 | Phase 37 | Pending |
+| RLS-03 | Phase 37 | Pending |
+| RLS-04 | Phase 37 | Pending |
+| RLS-05 | Phase 37 | Pending |
+| CTX-01 | Phase 38 | Pending |
+| CTX-02 | Phase 38 | Pending |
+| CTX-03 | Phase 38 | Pending |
+| CTX-04 | Phase 38 | Pending |
+| NAV-01 | Phase 39 | Pending |
+| NAV-02 | Phase 39 | Pending |
+| NAV-03 | Phase 39 | Pending |
+| NAV-04 | Phase 39 | Pending |
+| STOR-01 | Phase 40 | Pending |
+| STOR-02 | Phase 40 | Pending |
+| STOR-03 | Phase 40 | Pending |
+
+---
+*Created: 2026-02-18 -- v4.0 Multi-Tenant Data Model & Navigation*
