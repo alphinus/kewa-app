@@ -42,7 +42,7 @@ export async function POST(
       )
     }
 
-    const supabase = await createOrgClient(request)
+    const supabase = await createOrgClient(req)
 
     // Fetch defect and validate it belongs to inspection
     const { data: defect, error: defectError } = await supabase

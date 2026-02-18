@@ -42,7 +42,7 @@ export async function GET(
     let signatureDataUrl: string | undefined
     if (inspection.signature_storage_path) {
       try {
-        const supabase = await createOrgClient(request)
+        const supabase = await createOrgClient(req)
         const { data: signatureBlob } = await supabase.storage
           .from('inspections')
           .download(inspection.signature_storage_path)
