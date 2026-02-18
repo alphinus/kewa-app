@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-02-17)
 
 **Core value:** Immobilienverwaltungen haben volle Transparenz und Kontrolle ueber alle Renovationen -- mit standardisierten Workflows, mandantenfaehiger Datentrennung, externer Handwerker-Integration, Kostenuebersicht und automatischer Zustandshistorie.
-**Current focus:** v4.0 Multi-Tenant Architecture -- Phase 40 COMPLETE (all 4 plans done).
+**Current focus:** Phase 41 Bug Fixes & Cleanup -- Plan 01 complete (3 integration bugs resolved).
 
 ## Current Position
 
-Phase: 40 of 40 (Storage Multi-Tenancy) -- COMPLETE
-Plan: 4 of 4 complete
-Status: Phase 40 complete — all storage buckets org-prefixed, RLS enforced, migration script ready
-Last activity: 2026-02-18 -- Plan 40-04 complete: storage path migration script created
+Phase: 41 of 41 (Bug Fixes & Cleanup) -- IN PROGRESS
+Plan: 1 of 1 complete
+Status: Phase 41 Plan 01 complete — INT-01/02/03 resolved, PropertySelector deleted
+Last activity: 2026-02-18 -- Plan 41-01 complete: signature RLS fix, isInternalRole auth, cached-queries org-scoped
 
-Progress: [########################################] 40/40 phases across all milestones (v4.0 COMPLETE)
+Progress: [########################################] 41/41 phases across all milestones (v4.0 + Phase 41)
 
 ## Milestones Completed
 
@@ -32,7 +32,7 @@ Progress: [########################################] 40/40 phases across all mil
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 152 (148 prior + 4 in Phase 40)
+- Total plans completed: 153 (152 prior + 1 in Phase 41)
 - Metrics from previous milestones -- see milestone archives
 
 | Plan | Duration | Tasks | Files |
@@ -60,6 +60,7 @@ Progress: [########################################] 40/40 phases across all mil
 | 40-02 | 8min | 2 | 6 |
 | 40-03 | 8min | 2 | 8 |
 | 40-04 | 5min | 1 | 1 |
+| 41-01 | 12min | 3 | 10 |
 
 ## Accumulated Context
 
@@ -136,6 +137,10 @@ Recent decisions affecting current work:
 - [Phase 40]: 40-04: Migration script reads org ID from DB (WHERE slug='kewa-ag') not hardcoded UUID -- works in any environment
 - [Phase 40]: 40-04: Supabase storage list() returns folders with metadata==null; recursive traversal required for nested bucket structures
 - [Phase 40]: 40-04: Remove errors after successful copy are non-fatal -- file is at new path; orphan at old path is acceptable
+- [Phase 41]: 41-01: signature-utils functions accept SupabaseClient as first parameter -- caller (route) provides org-scoped client (INT-01)
+- [Phase 41]: 41-01: properties/buildings routes use x-user-role-name + isInternalRole() -- hauswart now passes authorization (INT-02)
+- [Phase 41]: 41-01: cached-queries.ts createOrgScopedClient(orgId) is private helper -- orgId as cache() argument ensures cross-tenant cache isolation (INT-03)
+- [Phase 41]: 41-01: BuildingHeatmap and PropertyDashboard read orgId from organization_id cookie -- no prop threading through server component tree
 
 ### Blockers/Concerns
 
@@ -153,8 +158,8 @@ Recent decisions affecting current work:
 ## Session Continuity
 
 Last session: 2026-02-18
-Stopped at: Completed 40-04-PLAN.md (storage path migration script) — Phase 40 COMPLETE
+Stopped at: Completed 41-01-PLAN.md (integration bug fixes) — 3 tasks, 10 files
 Resume file: None
 
 ---
-*v4.0 Multi-Tenant Architecture -- Phase 40 COMPLETE. All 40 phases done.*
+*v4.0 Multi-Tenant Architecture COMPLETE. Phase 41 (Bug Fixes & Cleanup) IN PROGRESS — Plan 01 done.*
