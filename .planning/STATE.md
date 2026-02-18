@@ -5,14 +5,14 @@
 See: .planning/PROJECT.md (updated 2026-02-17)
 
 **Core value:** Immobilienverwaltungen haben volle Transparenz und Kontrolle ueber alle Renovationen -- mit standardisierten Workflows, mandantenfaehiger Datentrennung, externer Handwerker-Integration, Kostenuebersicht und automatischer Zustandshistorie.
-**Current focus:** v4.0 Multi-Tenant Architecture -- Phase 37 in progress (RLS policies)
+**Current focus:** v4.0 Multi-Tenant Architecture -- Phase 37 in progress (RLS context wiring)
 
 ## Current Position
 
 Phase: 37 of 40 (RLS Enablement & Context Wiring) -- IN PROGRESS
-Plan: 01 of 4 complete
-Status: Plan 37-01 complete — 248 RESTRICTIVE RLS policies on 62 tables, legacy teardown, Imeri org seeded
-Last activity: 2026-02-18 -- Plan 37-01 complete: 083_rls_policies.sql — 248 RESTRICTIVE policies + cross-tenant isolation DO-block
+Plan: 02 of 4 complete
+Status: Plan 37-02 complete — TypeScript org-context layer (with-org.ts + middleware x-organization-id header)
+Last activity: 2026-02-18 -- Plan 37-02 complete: createOrgClient/createPublicClient/createServiceClient + middleware org resolution
 
 Progress: [################################........] 35/40 phases across all milestones
 
@@ -25,12 +25,12 @@ Progress: [################################........] 35/40 phases across all mil
 - v3.0 Tenant & Offline (2026-02-03) -- Phases 25-29
 - v3.1 Production Hardening (2026-02-17) -- Phases 30-34
 
-**Total:** 34 phases, 128 plans shipped across 6 milestones (+ 5 in Phase 35 + 3 in Phase 36 + 1 in Phase 37)
+**Total:** 34 phases, 128 plans shipped across 6 milestones (+ 5 in Phase 35 + 3 in Phase 36 + 2 in Phase 37)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 137 (128 prior + 5 in Phase 35 + 3 in Phase 36 + 1 in Phase 37)
+- Total plans completed: 138 (128 prior + 5 in Phase 35 + 3 in Phase 36 + 2 in Phase 37)
 - Metrics from previous milestones -- see milestone archives
 
 | Plan | Duration | Tasks | Files |
@@ -43,6 +43,7 @@ Progress: [################################........] 35/40 phases across all mil
 | 36-02 | 12min | 1 | 1 |
 | 36-03 | 5min | 1 | 1 |
 | 37-01 | 12min | 1 | 1 |
+| 37-02 | 8min | 2 | 2 |
 
 ## Accumulated Context
 
@@ -79,6 +80,9 @@ Recent decisions affecting current work:
 - 36-03: tenancies excluded from ALTER (already NOT NULL from 074)
 - [Phase 37]: 37-01: DROP POLICY count 24 not 21 — 029 had 16 actual policies (16+4+4=24); all dropped correctly
 - [Phase 37]: 37-01: Template tables (6) use SELECT with OR IS NULL for system templates; strict org_id match for INSERT/UPDATE/DELETE
+- [Phase 37]: 37-02: Middleware imports createClient from server.ts (not with-org.ts) to avoid circular dependency
+- [Phase 37]: 37-02: createServiceClient() is synchronous — uses @supabase/supabase-js bare client (no cookie/SSR handling needed)
+- [Phase 37]: 37-02: When no cookie and no default org row, orgId is null and x-organization-id header is not set — route gets OrgContextMissingError
 
 ### Blockers/Concerns
 
@@ -96,8 +100,8 @@ Recent decisions affecting current work:
 ## Session Continuity
 
 Last session: 2026-02-18
-Stopped at: Completed 37-01-PLAN.md (RLS policies migration — 248 RESTRICTIVE policies on 62 tables)
+Stopped at: Completed 37-02-PLAN.md (TypeScript org-context layer — with-org.ts + middleware x-organization-id header)
 Resume file: None
 
 ---
-*v4.0 Multi-Tenant Architecture -- Phase 37 Plan 01 complete (083_rls_policies.sql). Next: Phase 37 Plan 02 (middleware + createOrgClient)*
+*v4.0 Multi-Tenant Architecture -- Phase 37 Plan 02 complete (with-org.ts + middleware). Next: Phase 37 Plan 03 (portal/contractor route migration)*
