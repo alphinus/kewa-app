@@ -65,7 +65,7 @@ See milestones/v3.1-ROADMAP.md
 - [x] **Phase 37: RLS Enablement & Context Wiring** - RLS policies on all tables, middleware org header, API route updates, isolation verification (completed 2026-02-18)
 - [x] **Phase 38: Application Context & Org Switcher** - OrganizationProvider, MandateProvider, OrgSwitcher UI, BuildingContext scoping (completed 2026-02-18)
 - [x] **Phase 39: Navigation Redesign** - Breadcrumbs, simplified footer, Objekte drill-down routes, URL redirects (completed 2026-02-18)
-- [ ] **Phase 40: Storage Multi-Tenancy** - Org-prefixed storage paths, storage RLS policies, existing file migration
+- [x] **Phase 40: Storage Multi-Tenancy** - Org-prefixed storage paths, storage RLS policies, existing file migration (completed 2026-02-18)
 
 ## Phase Details
 
@@ -201,7 +201,7 @@ Phase 40 can start after Phase 37 completes (parallel to 38-39).
 | 37. RLS & Context Wiring | v4.0 | Complete    | 2026-02-18 | - |
 | 38. App Context & Switcher | v4.0 | Complete    | 2026-02-18 | - |
 | 39. Navigation Redesign | v4.0 | Complete    | 2026-02-18 | - |
-| 40. Storage Multi-Tenancy | v4.0 | 0/TBD | Not started | - |
+| 40. Storage Multi-Tenancy | v4.0 | Complete    | 2026-02-18 | - |
 
 **Total:** 34 phases complete, 6 phases planned
 
