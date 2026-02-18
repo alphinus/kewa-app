@@ -8,6 +8,7 @@
  * Requirements: DASH-01 (property dashboard)
  */
 
+import { cookies } from 'next/headers'
 import { fetchDashboardSummary } from '@/lib/dashboard/dashboard-queries'
 import { BuildingHeatmap } from './BuildingHeatmap'
 import { OccupancyGauge } from './OccupancyGauge'
@@ -31,7 +32,8 @@ export async function PropertyDashboard({
   buildingId,
   className
 }: PropertyDashboardProps) {
-  const summary = await fetchDashboardSummary(buildingId)
+  const orgId = (await cookies()).get('organization_id')?.value ?? ''
+  const summary = await fetchDashboardSummary(buildingId, orgId)
 
   return (
     <div className={cn('space-y-6', className)}>

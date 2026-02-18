@@ -8,6 +8,7 @@
  * Requirements: DASH-02, DASH-03 (building visualization)
  */
 
+import { cookies } from 'next/headers'
 import { cn } from '@/lib/utils'
 import { fetchHeatmapData, type HeatmapUnit } from '@/lib/dashboard/heatmap-queries'
 import { HeatmapUnitCell } from './HeatmapUnitCell'
@@ -69,7 +70,8 @@ export async function BuildingHeatmap({
   buildingId,
   className
 }: BuildingHeatmapProps) {
-  const units = await fetchHeatmapData(buildingId)
+  const orgId = (await cookies()).get('organization_id')?.value ?? ''
+  const units = await fetchHeatmapData(buildingId, orgId)
 
   return (
     <div className={cn('space-y-1', className)}>

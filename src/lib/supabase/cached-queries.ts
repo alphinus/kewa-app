@@ -3,13 +3,15 @@
  *
  * React cache() wrappers for Supabase queries to prevent N+1 in Server Components.
  * Request-level deduplication - same query called multiple times in one request returns cached result.
+ * Cache keys include orgId to prevent cross-tenant cache hits.
  *
  * Phase 32-02: PERF-04 N+1 elimination
  */
 
 import { cache } from 'react'
 import 'server-only'
-import { createPublicClient } from '@/lib/supabase/with-org'
+import { createServerClient } from '@supabase/ssr'
+import { cookies } from 'next/headers'
 import type { RoomCondition } from '@/types'
 
 export interface UnitWithRooms {
@@ -40,13 +42,44 @@ export interface UnitConditionSummary {
 }
 
 /**
+ * Create an org-scoped Supabase client for server component use.
+ *
+ * Calls set_org_context RPC to enable RLS row filtering by organization.
+ * orgId MUST be passed as a parameter (not read from cookies here) because
+ * cache() keys on arguments — reading from cookies inside would break cache
+ * isolation between orgs.
+ */
+async function createOrgScopedClient(orgId: string) {
+  const cookieStore = await cookies()
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() { return cookieStore.getAll() },
+        setAll(cookiesToSet) {
+          try {
+            cookiesToSet.forEach(({ name, value, options }) => cookieStore.set(name, value, options))
+          } catch { /* server component — cookie writes are no-ops */ }
+        },
+      },
+    }
+  )
+  await supabase.rpc('set_org_context', { org_id: orgId })
+  return supabase
+}
+
+/**
  * Get units with embedded rooms for a building (single query, no N+1)
  *
  * Replaces pattern: query units, then query rooms separately
  * Now: single query with embedded relation
+ *
+ * @param buildingId - Building to fetch units for
+ * @param orgId - Organization UUID (sets RLS context; also used as cache key)
  */
-export const getCachedUnitsWithRooms = cache(async (buildingId: string): Promise<UnitWithRooms[]> => {
-  const supabase = await createPublicClient()
+export const getCachedUnitsWithRooms = cache(async (buildingId: string, orgId: string): Promise<UnitWithRooms[]> => {
+  const supabase = await createOrgScopedClient(orgId)
 
   const { data, error } = await supabase
     .from('units')
@@ -66,9 +99,12 @@ export const getCachedUnitsWithRooms = cache(async (buildingId: string): Promise
  * Get unit condition summaries for a building (single query)
  *
  * Uses the unit_condition_summary view which aggregates room conditions.
+ *
+ * @param buildingId - Building to fetch summaries for
+ * @param orgId - Organization UUID (sets RLS context; also used as cache key)
  */
-export const getCachedUnitConditionSummary = cache(async (buildingId: string): Promise<UnitConditionSummary[]> => {
-  const supabase = await createPublicClient()
+export const getCachedUnitConditionSummary = cache(async (buildingId: string, orgId: string): Promise<UnitConditionSummary[]> => {
+  const supabase = await createOrgScopedClient(orgId)
 
   const { data, error } = await supabase
     .from('unit_condition_summary')
@@ -82,11 +118,14 @@ export const getCachedUnitConditionSummary = cache(async (buildingId: string): P
 
 /**
  * Get active project count for units (single query with IN clause)
+ *
+ * @param unitIds - Unit IDs to count projects for
+ * @param orgId - Organization UUID (sets RLS context; also used as cache key)
  */
-export const getCachedActiveProjectCount = cache(async (unitIds: string[]): Promise<number> => {
+export const getCachedActiveProjectCount = cache(async (unitIds: string[], orgId: string): Promise<number> => {
   if (unitIds.length === 0) return 0
 
-  const supabase = await createPublicClient()
+  const supabase = await createOrgScopedClient(orgId)
 
   const { count, error } = await supabase
     .from('renovation_projects')

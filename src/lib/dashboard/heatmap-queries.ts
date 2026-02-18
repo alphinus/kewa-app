@@ -72,13 +72,15 @@ function computeConditionSummary(rooms: Array<{ condition: RoomCondition }>) {
  * Condition aggregates computed in TypeScript.
  *
  * @param buildingId - Building to fetch units for
+ * @param orgId - Organization UUID (passed to cached query for RLS context and cache isolation)
  * @returns Array of units with condition data
  */
 export async function fetchHeatmapData(
-  buildingId: string
+  buildingId: string,
+  orgId: string
 ): Promise<HeatmapUnit[]> {
   // Single cached query with embedded rooms - eliminates N+1
-  const units = await getCachedUnitsWithRooms(buildingId)
+  const units = await getCachedUnitsWithRooms(buildingId, orgId)
 
   // Filter to apartments only and compute condition aggregates
   return units
