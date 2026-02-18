@@ -151,7 +151,11 @@ Plans:
 **Goal**: Navigation follows the data hierarchy with breadcrumbs and a simplified footer that keeps high-frequency features accessible
 **Depends on**: Phase 38
 **Requirements**: NAV-01, NAV-02, NAV-03, NAV-04
-**Plans**: TBD
+**Plans**: 4 plans
+- [ ] 39-01-PLAN.md — MobileNav 5-item footer + MehrBottomSheet
+- [ ] 39-02-PLAN.md — DashboardBreadcrumbs + Objekte property list + property detail pages
+- [ ] 39-03-PLAN.md — Building detail tabs + unit detail + room detail pages
+- [ ] 39-04-PLAN.md — URL redirects + internal link updates
 **Success Criteria** (what must be TRUE):
   1. Breadcrumbs display on all dashboard pages showing clickable path (Org > Mandat > Liegenschaft > Gebaeude > Einheit)
   2. Mobile footer shows 5 items (Uebersicht, Objekte, Aufgaben, Kosten, Mehr) with all other features accessible via Mehr menu
