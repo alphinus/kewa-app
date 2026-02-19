@@ -159,3 +159,36 @@
 
 ---
 
+
+## v4.0 Multi-Tenant Data Model & Navigation (Shipped: 2026-02-19)
+
+**Delivered:** Branchenstandard multi-tenant data model with organization-scoped RLS on 62 tables, hierarchical navigation with /objekte drill-down, and org-isolated file storage.
+
+**Phases completed:** 35-41 (24 plans total)
+
+**Key accomplishments:**
+
+- Multi-tenant schema: 5 new tables (organizations, organization_members, owners, mandates, tenancies) + organization_id on 62 existing tables + 37 BEFORE INSERT/UPDATE triggers auto-propagating org_id through property hierarchy
+- Data migration: KEWA AG + Imeri Immobilien AG seeded with 4 owners, 4 mandates, 10 users, 17 org_members; full backfill + NOT NULL constraints on 56 tables
+- Row-level security: 248 RESTRICTIVE policies on 62 tables, middleware x-organization-id header, 168 API/lib files migrated to org-aware Supabase clients (createOrgClient/createPublicClient/createServiceClient)
+- Application context: OrganizationProvider > MandateProvider > BuildingProvider hierarchy with OrgSwitcher dropdown and CombinedSelector (mandate + building grouping)
+- Navigation redesign: 5-item mobile footer with MehrBottomSheet, DashboardBreadcrumbs on 59 pages, /objekte drill-down (property > building > unit > room)
+- Storage multi-tenancy: Org-prefixed storage paths on 4 buckets, storage RLS policies, file migration script
+- Integration bug fixes: Signature storage RLS via client injection, hauswart isInternalRole() auth, cached-queries org-scoped with React cache()
+
+**Stats:**
+
+- 95 commits
+- 7 phases (35-41), 24 plans
+- 26 requirements satisfied (SCHEMA-01..07, MIGR-01..03, RLS-01..05, CTX-01..04, NAV-01..04, STOR-01..03)
+- 305 files changed, +26,305 / -5,645 lines
+- 2 days from milestone start to ship (2026-02-17 → 2026-02-18)
+
+**Git range:** `docs: start milestone v4.0` → `docs(v4.0): milestone audit`
+
+**Tech debt:** 6 items (34 routes retain legacy ALLOWED_ROLES, visible_to_imeri pattern, legacy users.role column, liegenschaft redirect ID mismatch, runtime DB verification deferred, manual storage migration ordering). None blocking.
+
+**What's next:** Deploy migration chain (073-084) to staging, runtime verification, production deployment
+
+---
+
