@@ -8,21 +8,25 @@ Eine mandantenfähige Immobilienverwaltungs- und Renovations-Plattform. Branchen
 
 Immobilienverwaltungen haben volle Transparenz und Kontrolle über alle Renovationen — mit standardisierten Workflows, mandantenfähiger Datentrennung, externer Handwerker-Integration, Kostenübersicht und automatischer Zustandshistorie.
 
-## Current State (v4.0 Shipped)
+## Current State (v5.0 In Progress)
 
 **Tech Stack:** Next.js 16.1.6 + React 19 + Supabase + Tailwind CSS 4
 **Codebase:** ~130,000+ LOC TypeScript, ~850+ files
-**Status:** v4.0 Multi-Tenant Data Model & Navigation shipped
+**Status:** v5.0 Unified Auth & RBAC in progress
 
-**Shipped Features (v4.0):**
-- Multi-tenant data model: Organizations, Owners, Mandates, Tenancies with organization_id on 62 tables
-- Supabase RLS: 248 RESTRICTIVE policies, set_config/current_setting context, org-aware Supabase clients
-- Application context: OrganizationProvider > MandateProvider > BuildingProvider with OrgSwitcher + CombinedSelector
-- Navigation redesign: 5-item mobile footer, DashboardBreadcrumbs on 59 pages, /objekte drill-down
-- Storage multi-tenancy: Org-prefixed paths, storage RLS on 4 buckets
-- STWE preparation: Schema fields (Wertquote, Eigentumsperiode, Erneuerungsfonds) ready, UI deferred
+## Current Milestone: v5.0 Unified Auth & RBAC
+
+**Goal:** Komplettes Auth-System auf Supabase Auth migrieren, Rollen org-basiert machen, RLS auf JWT umstellen, Legacy-Auth-Code bereinigen.
+
+**Target features:**
+- Supabase Auth für alle Nutzertypen (Email/Passwort, Magic-Link, Email)
+- Org-basierte Rollen via organization_members (5 Rollen pro Org)
+- RLS-Policies auf auth.uid() + JWT claims umstellen
+- 34 API-Routen von ALLOWED_ROLES auf org-basierte Berechtigungen migrieren
+- Legacy-Code entfernen (users.role, visible_to_imeri)
 
 **Previous Milestones:**
+- v4.0 Multi-Tenant Data Model & Navigation (shipped 2026-02-19) — See milestones/v4.0-ROADMAP.md
 - v3.1 Production Hardening (shipped 2026-02-17) — See milestones/v3.1-ROADMAP.md
 - v3.0 Tenant & Offline (shipped 2026-02-03) — See milestones/v3.0-ROADMAP.md
 - v2.2 Extensions (shipped 2026-01-29) — See milestones/v2.2-ROADMAP.md
@@ -94,7 +98,12 @@ Immobilienverwaltungen haben volle Transparenz und Kontrolle über alle Renovati
 
 ### Active
 
-(No active requirements — next milestone not yet planned)
+**v5.0 — Unified Auth & RBAC:**
+- [ ] Supabase Auth Integration (Email/Passwort für Interne, Magic-Link für Contractors, Email für Mieter)
+- [ ] Org-basierte Rollen (organization_members.role, 5 Rollen pro Org)
+- [ ] RLS-Migration auf JWT (auth.uid() + JWT claims statt set_config/current_setting)
+- [ ] API-Route Cleanup (34 Legacy ALLOWED_ROLES Routen → org-basierte Berechtigungen)
+- [ ] Legacy-Cleanup (users.role Spalte droppen, visible_to_imeri entfernen)
 
 ### Future
 
@@ -141,9 +150,9 @@ Immobilienverwaltungen haben volle Transparenz und Kontrolle über alle Renovati
 - STWE-Support vorbereitet (Wertquote, Eigentumsperiode)
 
 **Known Tech Debt (from v4.0):**
-- 34 API routes retain legacy ALLOWED_ROLES pattern (works via role='kewa' placeholder, breaks when users.role dropped)
-- visible_to_imeri business logic in 4 routes (pre-existing, not regression)
-- Legacy users.role column not dropped (deferred to auth milestone)
+- 34 API routes retain legacy ALLOWED_ROLES pattern (works via role='kewa' placeholder, breaks when users.role dropped) — **targeted by v5.0**
+- visible_to_imeri business logic in 4 routes (pre-existing, not regression) — **targeted by v5.0**
+- Legacy users.role column not dropped (deferred to auth milestone) — **targeted by v5.0**
 - liegenschaft/[id] redirect ID mismatch (silent fallback)
 - Runtime DB verification of migration chain 073-084 deferred
 - Storage migration script must run before 084_storage_rls.sql
@@ -190,7 +199,7 @@ Immobilienverwaltungen haben volle Transparenz und Kontrolle über alle Renovati
 | Multi-tenant via single DB + RLS | SaaS-typisch, einfacher zu betreiben als separate Instanzen | ✓ v4.0 |
 | Branchenstandard-Hierarchie | Verwaltung→Mandat→Eigentümer→Liegenschaft→Gebäude→Einheit nach Fairwalter/Rimo | ✓ v4.0 |
 | STWE-Felder vorbereiten, kein UI | Zukunftssicherheit für Schweizer Markt ohne Overhead jetzt | ✓ v4.0 |
-| Auth-Umbau auf später | Fokus v4.0 auf Datenmodell, Auth kommt in separatem Milestone | ✓ v4.0 |
+| Auth-Umbau auf später | Fokus v4.0 auf Datenmodell, Auth kommt in separatem Milestone | ✓ v4.0 → v5.0 |
 | set_config/current_setting for RLS | PIN auth has no JWT claims; transaction-local config works with PgBouncer | ✓ v4.0 |
 | Denormalized org_id on 62 tables | Direct equality faster than subquery joins for RLS policies | ✓ v4.0 |
 | Triggers for org_id sync | Automatic propagation through hierarchy, no compound PKs needed | ✓ v4.0 |
@@ -198,5 +207,5 @@ Immobilienverwaltungen haben volle Transparenz und Kontrolle über alle Renovati
 | Org-prefixed storage paths | {org_id}/{property_id}/{building_id}/{entity_type}/{filename} | ✓ v4.0 |
 
 ---
-*Last updated: 2026-02-19 — after v4.0 milestone completion*
+*Last updated: 2026-02-19 — v5.0 Unified Auth & RBAC milestone started*
 *Source: KEWA-RENOVATION-OPS-SPEC_v1 + Original v2.0 Scope*
