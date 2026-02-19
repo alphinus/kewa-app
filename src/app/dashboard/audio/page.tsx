@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
+import { DashboardBreadcrumbs } from '@/components/navigation/DashboardBreadcrumbs'
 import { Card, CardContent } from '@/components/ui/card'
 import { AudioGallery } from '@/components/audio/AudioGallery'
 import type { TaskAudioWithUrl, AudioType, AudiosResponse } from '@/types/database'
@@ -113,6 +114,7 @@ export default function AudioPage() {
 
   return (
     <div className="space-y-4 pb-24">
+      <DashboardBreadcrumbs />
       {/* Header with back button */}
       <div className="flex items-center gap-4">
         <button

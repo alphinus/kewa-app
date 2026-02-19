@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
+import { DashboardBreadcrumbs } from '@/components/navigation/DashboardBreadcrumbs'
 import { Button } from '@/components/ui/button'
 import { WeeklyReport, type WeeklyReportData } from '@/components/reports/WeeklyReport'
 
@@ -197,6 +198,7 @@ export default function BerichtePage() {
 
   return (
     <div className="space-y-4 pb-20">
+      <DashboardBreadcrumbs />
       {/* Page header */}
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">

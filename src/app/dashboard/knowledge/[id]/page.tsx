@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
+import { DashboardBreadcrumbs } from '@/components/navigation/DashboardBreadcrumbs'
 import { Pin, PinOff } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -140,6 +141,7 @@ export default function ArticleViewPage() {
 
   return (
     <div className="space-y-4 pb-24">
+      <DashboardBreadcrumbs />
       {/* Header with back button and pin action */}
       <div className="flex items-center justify-between">
         <button

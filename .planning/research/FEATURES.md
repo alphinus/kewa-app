@@ -1,206 +1,252 @@
-# Feature Research: Multi-Tenant Property Management
+# Feature Research
 
-**Domain:** Swiss Property Management SaaS (Multi-Tenant)
-**Researched:** 2026-02-18
-**Confidence:** MEDIUM
+**Domain:** Multi-tenant SaaS auth — Unified Supabase Auth, org-based RBAC, user management, invitation flows
+**Researched:** 2026-02-19
+**Confidence:** HIGH (Supabase official docs verified, existing codebase fully read, patterns confirmed from multiple sources)
+
+---
+
+## Context: What Already Exists (Do Not Re-Build)
+
+This is a migration milestone onto a working system. The existing auth infrastructure must inform what counts as "table stakes" vs what is genuinely new work.
+
+| Component | Status | v5.0 Action |
+|-----------|--------|-------------|
+| PIN login (KEWA, Imeri) | Working — bcrypt + custom JWT via jose, httpOnly cookie | Replace with Supabase Auth email/password |
+| Custom JWT session (`session` cookie) | Working — `SESSION_COOKIE_NAME='session'`, 7-day expiry | Replace with Supabase `sb-*` SSR cookies |
+| Magic-link for contractors | Working — custom `magic_link_tokens` table, status-aware expiry, revocation | Preserve as-is; do NOT migrate to Supabase Auth users |
+| Email login for tenants | Working — bcrypt `password_hash` on `users` table | Migrate to Supabase Auth OTP (magic-link for tenants) |
+| 5 roles (global `users.role`) | Working — admin, property_manager, accounting, hauswart, tenant | Drop; replace with `organization_members.role_id` per org |
+| `organization_members` table | Schema exists — `user_id` → `organization_id` → `role_id`, not used for auth | Activate as source of truth for org-scoped roles |
+| 248 RLS policies | Working — `set_config/current_setting` pattern | Rewrite to `auth.uid()` + JWT claims |
+| OrganizationProvider + OrgSwitcher | Working — org context set via request header | Preserve UI; adapt to trigger JWT refresh on org switch |
+| 34 API routes with `ALLOWED_ROLES` | Legacy debt — `role='kewa'` placeholder | Migrate to org-scoped membership check |
+| `users.role` global column | Active | Drop after all consumers migrated |
+| `visible_to_imeri` business logic | 4 routes | Remove entirely |
+
+---
 
 ## Feature Landscape
 
 ### Table Stakes (Users Expect These)
 
-Features users assume exist. Missing these = product feels incomplete.
+Features that must exist for the auth system to work. Missing any of these breaks the product or creates a security gap that blocks SaaS launch with new customers.
 
 | Feature | Why Expected | Complexity | Notes |
 |---------|--------------|------------|-------|
-| Organization/Verwaltung Switcher | Standard SaaS pattern - users manage multiple mandates/clients | MEDIUM | Dropdown in header with search, recent items. Token-based tenant isolation. See Clerk, WorkOS patterns. |
-| Mandate (Mandat) Management | Core Swiss property mgmt concept - each mandate = distinct client/property portfolio | MEDIUM | Verwaltungsmandat is legal contract (Swiss Code of Obligations). Track mandate dates, scope, billing terms. |
-| Property Hierarchy Navigation | Users expect: Verwaltung → Mandat → Eigentümer → Liegenschaft → Gebäude → Einheit → Mietverhältnis | HIGH | Current confusion: "Liegenschaft" vs "Gebäude" used interchangeably. Fix: Liegenschaft = property parcel, Gebäude = building structure. Breadcrumbs + drilldown menus essential. |
-| Role-Based Owner vs Manager Views | Owners see limited financial/strategic data; managers see operations | MEDIUM | Owner portal: occupancy, rental income, high-level maintenance. Manager: full CRUD, detailed workflows. Row-level security required. |
-| STWE (Stockwerkeigentum) Fields | Condominium ownership is common in Switzerland - unit owners, special assessments, voting | HIGH | Already prepared in data model (good!). Need: unit owner list, ownership %, assembly minutes, special assessment tracking, individual unit cost allocation. |
-| Multi-Property Dashboard | Mandate-level view aggregating all properties under that mandate | MEDIUM | Heatmap, occupancy %, cost rollup. Already exists at property level - extend to mandate level. |
-| Property → Building Drill-Down | Properties contain multiple buildings (Swiss context: large estates/complexes) | LOW | Fix terminology confusion first. Gebäude subordinate to Liegenschaft. |
-| Owner Financial Reporting | Separate P&L per Eigentümer, especially for STWE where each unit owner needs statements | MEDIUM | Swiss law requires transparent condominium accounting. Auto-generate owner statements quarterly/annually. |
-| Mandate-Scoped Data Isolation | All data (projects, tasks, invoices, media) scoped to mandate - zero leakage | HIGH | Critical for SaaS. tenant_id on every table. Middleware enforcement. Supabase RLS already in place - extend to mandate_id. |
-| Organization User Invites | Invite team members to specific mandates with role assignment | MEDIUM | Standard SaaS. Email invite, role picker, mandate assignment. |
+| Email + password login for internal users | Standard credential auth; PIN was an MVP compromise for 2 users, not viable for a SaaS with N orgs | MEDIUM | Supabase `signInWithPassword()`. Supabase manages bcrypt. Replaces current `verifyPin()` + custom JWT flow. |
+| Supabase Auth session (SSR cookies) replacing custom JWT | All auth must flow through Supabase Auth; RLS cannot use the custom `session` JWT | HIGH | Core infrastructure change. `@supabase/ssr` `createServerClient` + middleware. Current `SESSION_COOKIE_NAME='session'` replaced by Supabase `sb-*` cookies. Single biggest change. |
+| Middleware route protection via `auth.getUser()` | Every protected route must validate Supabase session server-side | MEDIUM | Replace current `validateSession()` in middleware.ts with `supabase.auth.getUser()`. Per Supabase docs: never use `getSession()` server-side — it does not re-validate the token. `getUser()` hits Supabase Auth server on every call. |
+| Custom access token hook: inject org_id + role into JWT | RLS policies need org context without a DB roundtrip per request; Supabase's documented RBAC pattern | HIGH | PostgreSQL function registered as Custom Access Token Hook in Supabase Dashboard. Reads `organization_members` for the authenticating user, injects `org_id` + `role` claims. Enables `auth.jwt()->>'org_id'` in RLS policies. |
+| 248 RLS policies rewritten to `auth.uid()` + JWT claims | Current `set_config/current_setting` pattern is incompatible with Supabase Auth sessions; PgBouncer concern also resolved by moving to JWT | HIGH | All 248 policies must shift from `current_organization_id()` to `auth.uid()` and `(auth.jwt()->>'org_id')::uuid`. The existing `set_org_context()` RPC becomes unused. |
+| Magic-link / OTP login for tenants | Tenants are mobile-first; password-based login creates support burden (forgot password flow); magic-link is standard for low-frequency users | LOW | Supabase `signInWithOtp({ email })`. Replaces current `bcrypt` email+password for tenants. Existing `email` field on `users` carries over. |
+| Session expiry and logout | Users expect sessions to time out; logout must clear server-side state | LOW | Supabase `signOut()` + cookie clear in SSR. Supabase default JWT expiry is 1 hour (configurable). Refresh tokens handle persistence up to configured max. |
+| User deactivation (ban from login) | Admins must be able to lock out a user instantly (employee leaves org, tenant vacates) | LOW | Supabase Admin API: `auth.admin.updateUserById(id, { ban_duration: 'none' })` to ban, `ban_duration: '0s'` to unban. Also soft-delete via `is_active=false` on the `users` row for RLS enforcement. |
+| Auth state sync across browser tabs | Standard browser behavior — logout in one tab should propagate | LOW | Supabase client's `onAuthStateChange` handles this natively. Hook into `OrganizationProvider` to clear org context on `SIGNED_OUT` event. |
+| 34 API routes migrated from `ALLOWED_ROLES` | Legacy `role='kewa'` placeholder breaks when `users.role` is dropped | MEDIUM | Replace `ALLOWED_ROLES` check with org-membership query: `organization_members` where `user_id = auth.uid()` and `organization_id = current org`. |
+| `users.role` global column dropped | Completing the removal of the legacy global role model; required for multi-tenant correctness | LOW | Drop column after all 248 RLS policies, 34 API routes, and Supabase session migration are done. Run `ALTER TABLE users DROP COLUMN role;` as final cleanup migration. |
+| `visible_to_imeri` logic removed | 4 routes contain pre-multi-tenant cross-org visibility logic that has no place in the org-isolated model | LOW | Remove the 4 conditional branches. Data is already org-isolated by RLS; the extra filter is redundant and confusing. |
 
 ### Differentiators (Competitive Advantage)
 
-Features that set the product apart. Not required, but valuable.
+Features that lift this above a minimal auth migration. Specifically valuable for the property management SaaS context and for KEWA's ability to onboard new customer orgs.
 
 | Feature | Value Proposition | Complexity | Notes |
 |---------|-------------------|------------|-------|
-| Unified Renovation + STWE in One Platform | Competitors separate STWE admin from project management (Rimo R5, ImmoTop2, GARAIO REM focus on accounting; project tools are separate) | LOW | Already have renovation system built. Adding STWE layer = competitive edge. Market gap. |
-| Owner Self-Service Portal with Live Updates | Most Swiss tools generate static reports - live dashboard rare | MEDIUM | Owners login, see real-time renovation status, costs, unit conditions. Builds on existing digital twin. Reduces "status update" emails. |
-| Automatic Unit Condition Tracking (Digital Twin) | Few competitors auto-derive unit state from completed work | LOW | Already built (HIST-01 to HIST-05). Extend to STWE context: show which unit owners have which renovations done. |
-| Cross-Mandate Portfolio View | Manage multiple mandates in single pane - competitors often silo per mandate | MEDIUM | Dashboard showing all mandates with KPIs: total units, occupancy %, active projects. Switcher for drill-down. |
-| Transparent External Contractor Integration | Magic-link portal is simpler than forcing contractors into "another login" | LOW | Already built (EXT-01 to EXT-16). Competitors require contractor accounts or email-only workflows. |
-| Flexible Property Hierarchy | Support both single-building and complex multi-building estates without forcing structure | MEDIUM | Gebäude optional under Liegenschaft. Competitors force one model. Swiss market has both (single villa vs large complex). |
-| Mobile-First Owner Portal | Owners check status on phone - most Swiss tools desktop-only | LOW | PWA already built. Extend owner view. |
-| Multi-Language Support (German, French, Italian) | Swiss market requirement - Fairwalter, Rimo R5 offer this | MEDIUM | Currently German-only. Add i18n for CH-FR, CH-IT. Umlaut handling already fixed (Phase 34). |
+| Email invitation flow with pre-assigned role | Admin invites a new property manager by email; they click the link, set a password, and land in the right org with the right role — no manual setup | MEDIUM | Supabase `auth.admin.inviteUserByEmail(email, { data: { org_id, role } })`. On first sign-in, a DB trigger or post-login hook reads `user_metadata` and inserts the `organization_members` row. PKCE not supported for invites (different browser issue); use standard invite flow. |
+| Pending invitation status in user list | Admins see who hasn't yet accepted their invite — prevents "did they get my email?" confusion | LOW | Supabase `auth.users` exposes `invited_at` and `confirmed_at`. Query: `invited_at IS NOT NULL AND confirmed_at IS NULL` → status "Pending". Build into the user management list view. |
+| User management UI (per-org admin panel) | Admins manage their org's users entirely from within the app — no Supabase Dashboard access needed | MEDIUM | List members with status (Active/Pending/Inactive), invite button, role dropdown, deactivate/delete actions. Scoped strictly to current org. Standard SaaS pattern; absence is notable to any admin evaluating the product. |
+| Role change without forced re-login | When admin changes a user's role, it takes effect at next JWT refresh (within 1 hour) without forcing the affected user to log out | MEDIUM | Custom access token hook re-reads `organization_members` on every token refresh. No stale role claims persist beyond the JWT TTL. For immediate enforcement: admin can also update `users.is_active=false` temporarily to force re-authentication. |
+| Org switcher with JWT refresh on switch | Users managing multiple orgs can switch context without losing their session | MEDIUM | On org switch in `OrgSwitcher`: call `supabase.auth.refreshSession()` to trigger re-execution of the custom access token hook with the new `org_id` claim. Existing `OrgSwitcher` UI component preserved; adapt to call refresh. |
+| Contractor access without Supabase Auth account | External contractors use the custom magic-link system and never need a Supabase Auth user — preserving the zero-friction contractor portal | LOW | After `validateContractorAccess()` passes on the custom token, use service role client (`createServiceClient()`) for all contractor data queries. Never call `supabase.auth.signIn*` for contractors. Avoids polluting `auth.users` with thousands of one-time partner contacts. |
+| Audit log of auth events | Swiss compliance and dispute resolution: who logged in when, what role they had | LOW | Supabase already logs `last_sign_in_at`. Extend existing `audit_log` table with auth events: login, logout, invite sent, role changed, user deactivated. Use Supabase Auth hooks or post-login middleware. |
 
 ### Anti-Features (Commonly Requested, Often Problematic)
 
-Features that seem good but create problems.
-
 | Feature | Why Requested | Why Problematic | Alternative |
 |---------|---------------|-----------------|-------------|
-| Global Search Across All Mandates | "Find anything fast" | Privacy violation - user shouldn't see data from mandates they don't access. Mandate switching is intentional context boundary. | Mandate-scoped search only. Fuzzy search within active mandate context. |
-| Automatic Mandate Switching Based on URL | "Deep links should auto-switch" | Confusing - user clicks link, suddenly in different mandate without realizing. Security risk. | Interstitial: "This link is for Mandate X. Switch to view?" |
-| Owner-Editable Project Data | "Empower owners to update directly" | Breaks audit trail. Owners lack context for internal workflows. Creates version conflicts. | Owner comments/questions only. Manager updates data, owner sees live read-only view. |
-| Flat "All Properties" List | "Simpler than hierarchy" | Doesn't match Swiss legal structure. Mandates are distinct legal entities. Mixing = accounting/compliance nightmare. | Always mandate-scoped. Clear hierarchy enforced. |
-| Shared Templates Across Mandates | "Reuse work order templates everywhere" | Template customization per mandate is common (different contractors, standards, pricing). Shared = version chaos. | Templates library per mandate. Option to copy template to another mandate (not share). |
-| Real-Time Collaboration (Google Docs style) | "Multiple users editing same record" | Low ROI for property mgmt use case. Rare that 2+ users edit same task simultaneously. Adds conflict resolution complexity. | Optimistic locking with "last save wins" warning. Audit log shows who changed what. |
+| Per-user permission overrides (beyond role) | "User X needs read-only costs but is otherwise a property_manager" | Creates a combinatorial explosion of permission states. 5 roles × N users × M resources = unmanageable audit surface. One wrong flag = security regression. Industry consensus: per-user overrides are where RBAC systems fail. | Stick to 5 defined roles. If a genuine gap exists, add a 6th role (`readonly_accounting` etc.). Never per-user permission overrides. |
+| SSO / OAuth (Google, Microsoft Entra) for internal users | "KEWA uses Microsoft 365" | Massive added complexity: PKCE flows, provider token management, account linking when email changes, session lifecycle differences, provider-side admin dependency. Not needed to launch SaaS. Supabase SSO support requires Pro plan. | Email/password is sufficient for initial SaaS go-to-market. Defer SSO to v6+ when an enterprise customer specifically requires it as a contract condition. |
+| User self-registration for internal roles | "Can a new employee sign themselves up?" | Property management firms control their staff roster tightly. Self-registration bypasses organizational control. Creates orphaned accounts with no org membership. | Invitation-only for all internal roles (admin, property_manager, accounting, hauswart). Tenants and contractors use separate self-service entry points. |
+| Global super-admin role across all orgs (app-level) | "We need one account to manage all customer orgs" | Violates tenant isolation. A compromised super-admin account exposes all customer data. Undermines the RLS model. Also: Supabase Dashboard + service role key already provides ops access. | Use Supabase Dashboard for ops tasks. If an internal tooling admin panel is needed later, scope it separately with its own auth — not as an in-app role. |
+| Granular resource-level permissions (sub-org filtering) | "This property_manager can only see Liegenschaft A, not B" | RLS operates at org level. Sub-org filtering is a UI/query-layer concern, not an auth concern. Adding it to RLS doubles policy complexity and adds mandatory joins to every query. | Implement building/property filters in UI and query layer using existing BuildingContext. Keep RLS at org level only. |
+| MFA enforcement for all users | "Security requires TOTP for everyone" | Supabase MFA is in beta as of 2025. Mobile-first janitors on construction sites cannot reliably use TOTP apps. Mandatory MFA increases support burden and reduces adoption. | Offer MFA as opt-in for admin roles via Supabase's `enroll` API when Supabase MFA is stable. Not in v5.0 scope. |
+| Migrating contractors to Supabase Auth accounts | "Unify all auth through Supabase" | Contractors have no ongoing relationship — they work one job, disappear. Creating `auth.users` rows for them is noise. The custom magic-link system is richer (revocation, status-aware expiry, re-issue on new work order) than what Supabase's OTP provides. | Keep contractor auth on the custom `magic_link_tokens` table. Use service role client for data access after token validation. Zero behavior change for contractors. |
+| Simultaneous support of both old custom JWT and new Supabase session | "Gradual migration, keep both working" | The RLS layer cannot serve two auth mechanisms simultaneously without massive conditional complexity in every policy. Route-level dual-auth means every middleware branch doubles. | Hard cutover. Migrate all internal users to Supabase Auth first (one migration event), then switch the middleware, then rewrite RLS policies. PIN/custom JWT code can be deleted the same day. |
+
+---
 
 ## Feature Dependencies
 
 ```
-[Organization/Verwaltung Switcher]
-    └──requires──> [Mandate-Scoped Data Isolation]
-                       └──requires──> [Role-Based Permissions per Mandate]
+[Supabase Auth Sessions via @supabase/ssr]
+    └──requires──> [Migrate middleware to auth.getUser()]
+    └──requires──> [Replace custom 'session' cookie with Supabase sb-* cookies]
+    └──requires──> [Create Supabase Auth accounts for existing internal users]
+    └──enables──> [Custom Access Token Hook]
+    └──enables──> [Email Invitation Flow]
+    └──enables──> [User Management UI]
 
-[STWE Features]
-    └──requires──> [Property Hierarchy (Liegenschaft → Gebäude → Einheit)]
-    └──requires──> [Owner Financial Reporting]
-    └──enhances──> [Unit Condition Tracking] (show per owner)
+[Custom Access Token Hook]
+    └──requires──> [organization_members populated with correct role_id per user/org]
+    └──requires──> [Supabase Auth Sessions] (hook only fires during Supabase token issuance)
+    └──enables──> [RLS via auth.uid() + JWT claims]
+    └──enables──> [Org Switcher with JWT refresh]
 
-[Cross-Mandate Portfolio View]
-    └──requires──> [Organization/Verwaltung Switcher]
-    └──requires──> [Multi-Property Dashboard]
+[RLS via auth.uid() + JWT claims — 248 policies]
+    └──requires──> [Custom Access Token Hook] (JWT must contain org_id claim first)
+    └──requires──> [Supabase Auth Sessions] (auth.uid() is null without Supabase session)
+    └──unblocks──> [Drop users.role column]
+    └──unblocks──> [Remove ALLOWED_ROLES from 34 API routes]
 
-[Owner Self-Service Portal]
-    └──requires──> [Role-Based Owner vs Manager Views]
-    └──requires──> [Owner Financial Reporting]
-    └──enhances──> [Digital Twin/Unit Condition Tracking]
+[34 API Routes ALLOWED_ROLES Migration]
+    └──requires──> [Supabase Auth Sessions] (need auth.uid() available in API routes)
+    └──requires──> [organization_members populated]
+    └──unblocks──> [Drop users.role column]
 
-[Multi-Language Support]
-    └──enhances──> [Owner Portal] (required for Romandie, Ticino)
-    └──conflicts──> [AI Voice Transcription] (already out-of-scope for Swiss-German dialect)
+[Drop users.role column]
+    └──requires──> [All 248 RLS policies migrated]
+    └──requires──> [All 34 API routes migrated]
+    └──requires──> [No code references to users.role]
 
-[Property → Building Drill-Down]
-    └──requires──> [Terminology Fix: Liegenschaft vs Gebäude]
+[Email Invitation Flow]
+    └──requires──> [Supabase Auth Sessions] (inviteUserByEmail uses Supabase Admin API)
+    └──requires──> [User Management UI] (trigger for invite action)
+    └──requires──> [on-signup hook or trigger] (to create organization_members row from invite metadata)
+
+[User Management UI]
+    └──requires──> [Supabase Auth Sessions]
+    └──requires──> [organization_members populated]
+    └──enhances──> [Email Invitation Flow]
+    └──enhances──> [Pending Invite Status]
+
+[Contractor Magic-Link — Preserved]
+    ──no dependency──> [Supabase Auth Sessions] (bypasses Supabase Auth entirely)
+    ──conflict with──> [Migrating contractors to Supabase Auth users] (anti-feature; avoid)
+
+[visible_to_imeri Removal]
+    └──requires──> [RLS via auth.uid() + JWT claims] (data isolation handled by RLS, making the filter redundant)
+    ──no other dependencies──>
 ```
 
 ### Dependency Notes
 
-- **Organization Switcher requires Mandate-Scoped Data Isolation:** Cannot switch contexts if data isn't properly isolated. Security-critical dependency.
-- **STWE requires Property Hierarchy:** Condominium ownership is unit-level. Must have Liegenschaft → Gebäude → Einheit structure clear.
-- **Owner Portal enhances Digital Twin:** Existing unit condition tracking becomes powerful when owners can see their units live.
-- **Multi-Language conflicts with Dialect Transcription:** Already decided against Swiss-German voice-to-text (v2.0 REQUIREMENTS.md line 196). Don't add standard German if expectation is dialect support.
+- **Custom access token hook requires organization_members populated first.** The hook reads the membership table at JWT issuance. If a migrated user has no membership row, their token has no `org_id` claim and RLS returns empty sets across the app. Seeding membership rows must precede the hook activation.
+- **248 RLS rewrites cannot start until the hook is live.** Rewriting a policy to use `auth.jwt()->>'org_id'` while the claim is absent results in broken access for all users. Sequence: hook live → validate claim appears in JWT → rewrite policies batch by batch.
+- **Contractor magic-link has zero dependency on Supabase Auth.** The two systems are fully orthogonal. This is a design strength: contractors never touch `auth.users`, and the custom token table handles all their access control needs with richer semantics than Supabase's OTP provides.
+- **Org switching requires explicit JWT refresh.** Supabase JWTs are issued with claims at sign-in time. When a user switches the active org in `OrgSwitcher`, the JWT still carries the previous org's claims until natural expiry (default: 1 hour). Call `supabase.auth.refreshSession()` immediately on org switch to re-trigger the custom access token hook with the new org context.
+- **Migration of existing PIN users to Supabase Auth must happen before switching middleware.** Use `auth.admin.createUser()` to create Supabase Auth accounts for the existing 2 internal users, link their `auth.users.id` to the `users` table, insert their `organization_members` rows, then cut over. A migration script should do this atomically before deployment.
 
-## MVP Definition (v3.0 Multi-Tenant Foundation)
+---
 
-### Launch With (v3.0)
+## MVP Definition
 
-Minimum viable SaaS multi-tenant product — what's needed to support multiple clients/mandates.
+### Launch With — v5.0 Core (What this milestone must deliver)
 
-- [x] **Organization/Verwaltung Switcher** — Cannot be multi-tenant without it. Blocks all mandate features.
-- [x] **Mandate Management (CRUD)** — Create, archive mandates. Assign properties to mandates.
-- [x] **Mandate-Scoped Data Isolation** — Security fundamental. All existing data (projects, tasks, invoices) scoped to mandate.
-- [x] **Property Hierarchy Terminology Fix** — Clarify Liegenschaft (property parcel) vs Gebäude (building). Fix UI labels, schema comments.
-- [x] **Role-Based Permissions per Mandate** — User can be admin in Mandate A, viewer in Mandate B.
-- [ ] **Navigation Redesign** — Breadcrumbs: Verwaltung → Mandat → Liegenschaft → Gebäude → Einheit. Remove footer redundancy.
-- [ ] **STWE Basic Fields (UI)** — Expose existing STWE fields: unit owner name, ownership %, special assessments. No voting/assembly features yet.
+These are the items that complete the migration. Without them, the system still runs on the legacy auth model.
 
-### Add After Validation (v3.1)
+- [ ] **Supabase Auth sessions for internal users (email/password)** — replaces PIN login; enables multi-org SaaS onboarding
+- [ ] **Supabase SSR middleware** — replaces `validateSession()` in middleware.ts; `auth.getUser()` on every protected request
+- [ ] **Custom access token hook** — injects `org_id` + `role` into JWT; the keystone for all subsequent RLS rewrites
+- [ ] **248 RLS policies rewritten to `auth.uid()` + JWT claims** — the `set_config/current_setting` pattern is incompatible with Supabase Auth
+- [ ] **34 API routes migrated from `ALLOWED_ROLES`** — drop `role='kewa'` placeholder, use `organization_members` membership check
+- [ ] **Tenant login via Supabase OTP (magic-link)** — replaces `bcrypt` email+password for tenants; simpler for mobile-first
+- [ ] **Contractor custom magic-link preserved** — no behavior change; validate custom token → service role client; contractors never get Supabase Auth accounts
+- [ ] **`users.role` column dropped** — final confirmation that global role model is gone
+- [ ] **`visible_to_imeri` logic removed** — 4 routes cleaned up
 
-Features to add once core multi-tenant is working and validated with 2-3 mandates.
+### Add After Validation — v5.x (Once core auth is stable)
 
-- [ ] **Cross-Mandate Portfolio Dashboard** — Aggregate view for users managing multiple mandates. Useful once >3 mandates.
-- [ ] **Owner Self-Service Portal** — Owners login, see their units/costs read-only. Validation trigger: KEWA has owners asking "what's the status?"
-- [ ] **Organization User Invites** — Invite colleagues to specific mandates. Needed when KEWA hires second property manager.
-- [ ] **Mandate-Level Templates** — Copy template libraries per mandate (not shared). Trigger: KEWA managing mandates with different contractors.
-- [ ] **Owner Financial Reporting (Basic)** — Auto-generate PDF statement per owner: costs incurred, unit condition. Trigger: first STWE property.
+Trigger: at least one new customer org has been onboarded end-to-end.
 
-### Future Consideration (v3.2+)
+- [ ] **User Management UI (per-org admin panel)** — list members, invite, deactivate, change role; required before selling to new orgs
+- [ ] **Email invitation flow** — `inviteUserByEmail()` with role metadata; on-signup hook creates `organization_members` row
+- [ ] **Pending invite status tracking** — show Pending/Active/Inactive in user list; trivial once invitation flow exists
+- [ ] **Auth event audit log** — login, logout, invite sent, role changed; trigger: first compliance question from a customer
 
-Features to defer until product-market fit with multiple clients.
+### Future Consideration — v6+
 
-- [ ] **Multi-Language (French, Italian)** — Required for Romandie/Ticino expansion. Not needed for initial Zurich-area mandates. Trigger: first French-speaking client.
-- [ ] **STWE Advanced (Voting, Assemblies)** — Assembly minutes, vote tracking, quorum. Complex, low ROI until managing multiple STWE properties. Trigger: >5 STWE properties.
-- [ ] **Mobile Owner App (Native)** — PWA sufficient for now. Native app = higher perceived legitimacy but 3x dev cost. Trigger: owner feedback "PWA feels wrong."
-- [ ] **Advanced RBAC (Custom Roles)** — Current roles (admin, manager, accounting, tenant, contractor) sufficient. Custom roles = complexity. Trigger: client needs unusual permission combo.
-- [ ] **Audit Log Viewer (UI)** — Logs exist (NFR-01), no UI to browse. Trigger: compliance audit or dispute requiring timeline reconstruction.
+Trigger: enterprise customer contract requires it, or explicit user research drives prioritization.
+
+- [ ] **SSO / OAuth (Microsoft Entra, Google Workspace)** — Supabase Pro plan required; needed when enterprise customer insists; major complexity increase
+- [ ] **MFA (opt-in for admin roles)** — when Supabase MFA is stable and not beta; useful for admin-role security hardening
+- [ ] **Owner portal login** — `owners.user_id` FK already exists in schema; trigger: property owners request direct access
+
+---
 
 ## Feature Prioritization Matrix
 
-| Feature | User Value | Implementation Cost | Priority | Depends On |
-|---------|------------|---------------------|----------|------------|
-| Mandate-Scoped Data Isolation | HIGH | HIGH | P1 | - |
-| Organization/Verwaltung Switcher | HIGH | MEDIUM | P1 | Data Isolation |
-| Mandate Management (CRUD) | HIGH | LOW | P1 | - |
-| Property Hierarchy Terminology Fix | HIGH | LOW | P1 | - |
-| Role-Based Permissions per Mandate | HIGH | MEDIUM | P1 | Data Isolation |
-| Navigation Redesign (Breadcrumbs) | MEDIUM | MEDIUM | P1 | Terminology Fix |
-| STWE Basic Fields (UI) | MEDIUM | LOW | P1 | Property Hierarchy |
-| Cross-Mandate Portfolio Dashboard | MEDIUM | MEDIUM | P2 | Mandate Switcher |
-| Owner Self-Service Portal | HIGH | MEDIUM | P2 | RBAC, STWE |
-| Organization User Invites | MEDIUM | MEDIUM | P2 | RBAC |
-| Mandate-Level Templates | LOW | LOW | P2 | Mandate CRUD |
-| Owner Financial Reporting (Basic) | MEDIUM | MEDIUM | P2 | STWE, Owner Portal |
-| Multi-Language (FR, IT) | MEDIUM | HIGH | P3 | i18n framework |
-| STWE Advanced (Voting) | LOW | HIGH | P3 | STWE Basic |
-| Mobile Owner App (Native) | LOW | HIGH | P3 | Owner Portal |
-| Custom Roles (Advanced RBAC) | LOW | HIGH | P3 | RBAC |
-| Audit Log Viewer (UI) | LOW | LOW | P3 | - |
+| Feature | User Value | Implementation Cost | Priority |
+|---------|------------|---------------------|----------|
+| Supabase Auth sessions + SSR middleware | HIGH | HIGH | P1 |
+| Custom access token hook (JWT claims) | HIGH | MEDIUM | P1 |
+| 248 RLS policy rewrite | HIGH | HIGH | P1 |
+| Email/password login for internal users | HIGH | LOW | P1 |
+| Tenant magic-link (Supabase OTP) | MEDIUM | LOW | P1 |
+| Contractor custom magic-link preserved | HIGH | LOW | P1 |
+| 34 API routes ALLOWED_ROLES migration | MEDIUM | MEDIUM | P1 |
+| users.role column drop | MEDIUM | LOW | P1 |
+| visible_to_imeri removal | LOW | LOW | P1 |
+| User Management UI | HIGH | MEDIUM | P2 |
+| Email invitation flow | HIGH | MEDIUM | P2 |
+| Pending invite status | MEDIUM | LOW | P2 |
+| Auth event audit log | MEDIUM | LOW | P2 |
+| SSO / OAuth providers | MEDIUM | HIGH | P3 |
+| MFA (opt-in) | LOW | MEDIUM | P3 |
+| Owner portal login | LOW | LOW | P3 |
 
 **Priority key:**
-- P1: Must have for v3.0 launch (multi-tenant foundation)
-- P2: Should have for v3.1 (validation/polish)
-- P3: Nice to have for v3.2+ (future consideration)
+- P1: Must have for v5.0 milestone completion
+- P2: Should have in v5.x once core is validated
+- P3: Future milestone; no commitment in v5.0
 
-## Competitor Feature Analysis
+---
 
-| Feature | Fairwalter | Rimo R5 / ImmoTop2 | GARAIO REM | KeWa Approach |
-|---------|------------|-------------------|------------|---------------|
-| Multi-Tenant Architecture | Yes (SaaS, per-client instances implied) | Yes (enterprise, flexible deployment) | Yes (online help, multi-property) | Yes - mandate = tenant boundary |
-| Mandate Management | Property master data sync via API | Integrated ecosystem, comprehensive mgmt tasks | Condominium ownership support | Verwaltungsmandat = first-class entity |
-| Property Hierarchy | Centralized property/lease management | Not detailed in sources | Not detailed in sources | Verwaltung → Mandat → Eigentümer → Liegenschaft → Gebäude → Einheit |
-| STWE Support | Not mentioned | ImmoTop2: integrated accounting for STWE | Comprehensive functions for STWE | Fields exist, need UI for unit owners, special assessments |
-| Owner Portal | Not mentioned | Not mentioned | Not mentioned | **Differentiator:** Live read-only dashboard for owners |
-| Renovation/Project Mgmt | Inventory tracking (condition/repairs) | Not primary focus (accounting-centric) | Not mentioned | **Differentiator:** Full renovation ops integrated with STWE |
-| External Contractor Integration | Assign tasks to service providers | Not detailed | Not mentioned | **Differentiator:** Magic-link portal, no login required |
-| Financial Reporting | Automated debtor/creditor, chart of accounts | Integrated accounting | Not detailed | CSV export (current), owner statements (planned P2) |
-| Document Management | AI-powered tagging, search | Digital storage, automated workflows | Instructional videos, help center | Media entity, audit log (current) |
-| Mobile Support | Not mentioned | Not mentioned | Not mentioned | **Differentiator:** PWA with offline sync |
+## Implementation Notes (v5.0 Specific)
 
-**Our Competitive Position:**
-- **Strength:** Renovation operations + STWE in one platform (competitors separate these)
-- **Strength:** External contractor magic-link portal (simpler than forced logins)
-- **Strength:** Digital twin / auto condition tracking
-- **Gap:** Multi-language (competitors serve all CH language regions)
-- **Gap:** Integrated accounting (we export CSV; they have full GL)
-- **Parity:** Multi-tenant, mandate management, property hierarchy
+### The PgBouncer Resolution
+
+The current `set_config` approach was chosen in v4.0 specifically because PIN auth has no JWT claims, and `set_config` works with PgBouncer transaction pooling. With Supabase Auth, every request carries a JWT. The `auth.uid()` and `auth.jwt()` functions read from the JWT directly — no `set_config` needed, and no PgBouncer concern. This is the definitive resolution of the blockers noted in STATE.md.
+
+### Hard Cutover vs Gradual Migration
+
+Do not attempt to run both the legacy `session` cookie and Supabase `sb-*` cookies simultaneously. The RLS layer cannot serve both in one policy. Strategy: create Supabase Auth accounts for all existing users in one migration script, validate the hook and policies in staging, then do a single production deployment that cuts over both the middleware and the DB policies at once. Deploy after business hours on a low-traffic window.
+
+### JWT Clock Skew and Org Switching
+
+After org switch: the current JWT still carries the old `org_id` claim until natural expiry (1 hour by default). Mitigation in `OrgSwitcher`: call `await supabase.auth.refreshSession()` immediately after the user selects a new org. This forces re-execution of the custom access token hook, which reads the new active org from `organization_members` and issues a fresh JWT with updated claims.
+
+### Contractor Access — No Change in Behavior
+
+Contractors never see a login screen. Flow remains: receive email with magic-link URL → click → `validateContractorAccess()` validates custom token → server creates response using service role client scoped to the contractor's work orders. Do not change this flow. The only code change needed: ensure the service role client path is not accidentally routed through the new Supabase Auth middleware.
+
+### PIN User Migration Path
+
+Two existing internal users have `pin_hash` on their `users` row. Migration script:
+1. `supabase.auth.admin.createUser({ email, password: temporaryPassword, email_confirm: true })`
+2. Insert `organization_members` row with correct `role_id` for each user's org
+3. Update `users.id` or add `auth_user_id` FK to link the rows
+4. Send password-reset email so users set their own password
+5. After both users confirm login via email/password, drop `pin_hash` column in the cleanup migration
+
+---
 
 ## Sources
 
-**SaaS Multi-Tenancy & UI Patterns:**
-- [Multi-Tenant Architecture - SaaS App Design Best Practices](https://relevant.software/blog/multi-tenant-architecture/)
-- [SaaS and Multitenant Solution Architecture - Azure](https://learn.microsoft.com/en-us/azure/architecture/guide/saas-multitenant-solution-architecture/)
-- [Building Multi-Tenant Apps Using Clerk's Organization - ZenStack](https://zenstack.dev/blog/clerk-multitenancy)
-- [Designing a layout structure for SaaS products - Medium](https://medium.com/design-bootcamp/designing-a-layout-structure-for-saas-products-best-practices-d370211fb0d1)
-
-**Swiss Property Management:**
-- [Immobiliensoftware Schweiz – ImmoTop2, Rimo R5 & Fairwalter](https://www.wwimmo.ch/produkte/)
-- [5 Immobilien ERP-Systeme, die Sie kennen sollten - emonitor](https://emonitor.ch/5-immobilien-erp-systeme-die-sie-kennen-sollten/)
-- [The property management contract (rental management) - Esther Lauber](https://www.esther-lauber.ch/index.php/en/leases-for-flats/39-useful-information-on-real-estate-in-geneva/253-the-property-management-contract-rental-management)
-
-**STWE (Stockwerkeigentum):**
-- [Neowise / Verwaltung von Stockwerkeigentum](https://neowise.ch/einblicke/news/verwaltung-von-stockwerkeigentum-entdecken-sie-die-neue-funktion/)
-- [Special Assessments in Florida Condominium Associations - Ferrer Law Group](https://www.ferrerlawgroup.com/special-assessments-in-florida-condominium-associations-legal-requirements-and-owner-challenges/)
-- [HOA Special Assessment Rules - Community Associations Law](https://communityassociations.law/article/budgets-reserves-and-the-ohio-requirement-for-an-annual-ownership-vote-if-reserve-funding-is-to-be-waived-the-special-assessment-problem/)
-
-**Navigation & UX:**
-- [Navigation UX: Pattern Types and Tips - Userpilot](https://userpilot.com/blog/navigation-ux/)
-- [PatternFly Navigation Design Guidelines](https://www.patternfly.org/components/navigation/design-guidelines/)
-- [Hierarchy drill-down – amCharts 5](https://www.amcharts.com/docs/v5/charts/hierarchy/hierarchy-drill-down/)
-- [Feature Update | New Breadcrumb Options - Rentec Direct](https://www.rentecdirect.com/blog/feature-update-breadcrumb-options/)
-
-**Owner vs Manager Views:**
-- [Hostfully - Owner Portal](https://www.hostfully.com/pmp-features/owner-portal/)
-- [Top Property Management Dashboards for 2025 - Second Nature](https://www.secondnature.com/blog/property-management-dashboard)
-- [Property Management Dashboard Power BI - Global Data 365](https://globaldata365.com/property-management-dashboard/)
+- [Supabase Custom Access Token Hook](https://supabase.com/docs/guides/auth/auth-hooks/custom-access-token-hook) — HIGH confidence
+- [Supabase Custom Claims & RBAC](https://supabase.com/docs/guides/database/postgres/custom-claims-and-role-based-access-control-rbac) — HIGH confidence
+- [Supabase JWT Claims Reference](https://supabase.com/docs/guides/auth/jwt-fields) — HIGH confidence
+- [Supabase inviteUserByEmail](https://supabase.com/docs/reference/javascript/auth-admin-inviteuserbyemail) — HIGH confidence
+- [Supabase SSR Next.js setup](https://supabase.com/docs/guides/auth/server-side/nextjs) — HIGH confidence
+- [Supabase Password-based Auth](https://supabase.com/docs/guides/auth/passwords) — HIGH confidence
+- [Supabase Passwordless / OTP](https://supabase.com/docs/guides/auth/auth-email-passwordless) — HIGH confidence
+- [WorkOS: Multi-tenant RBAC design](https://workos.com/blog/how-to-design-multi-tenant-rbac-saas) — MEDIUM confidence
+- [Auth0: Demystifying Multi-Tenancy in B2B SaaS](https://auth0.com/blog/demystifying-multi-tenancy-in-b2b-saas/) — MEDIUM confidence
+- [Permit.io: Best practices for multi-tenant authorization](https://www.permit.io/blog/best-practices-for-multi-tenant-authorization) — MEDIUM confidence
+- [WorkOS: Complete guide to user management for B2B SaaS](https://workos.com/blog/user-management-for-b2b-saas) — MEDIUM confidence
+- [Existing codebase: src/lib/auth.ts, session.ts, permissions.ts, magic-link.ts] — HIGH confidence (read directly)
+- [Existing schema: 022_rbac.sql, 023_users_auth.sql, 073_org_foundation.sql, 076_rls_helpers.sql] — HIGH confidence (read directly)
 
 ---
-*Feature research for: KeWa App v3.0 Multi-Tenant Property Management*
-*Researched: 2026-02-18*
-*Confidence: MEDIUM (verified with multiple sources, some Swiss-specific details from general context)*
+*Feature research for: v5.0 Unified Auth & RBAC — Multi-tenant Supabase Auth migration*
+*Researched: 2026-02-19*

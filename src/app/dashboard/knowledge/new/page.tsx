@@ -3,6 +3,7 @@
 import { useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
+import { DashboardBreadcrumbs } from '@/components/navigation/DashboardBreadcrumbs'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { TemplateSelector, getTemplateContent } from '@/components/knowledge/TemplateSelector'
@@ -134,6 +135,7 @@ export default function NewArticlePage() {
 
   return (
     <div className="space-y-4 pb-24">
+      <DashboardBreadcrumbs />
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { DashboardBreadcrumbs } from '@/components/navigation/DashboardBreadcrumbs'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { NotificationItem } from '@/components/notifications/NotificationItem'
@@ -31,15 +32,23 @@ export default function NotificationsPage() {
   const [offset, setOffset] = useState(0)
   const limit = 20
 
-  // Get userId from session
+  // Get userId from session API (PIN auth doesn't create Supabase auth session)
   useEffect(() => {
     async function getUser() {
-      const supabase = createClient()
-      const {
-        data: { user },
-      } = await supabase.auth.getUser()
-      if (user) {
-        setUserId(user.id)
+      try {
+        const response = await fetch('/api/auth/session')
+        if (response.ok) {
+          const data = await response.json()
+          if (data.authenticated && data.userId) {
+            setUserId(data.userId)
+          } else {
+            setLoading(false)
+          }
+        } else {
+          setLoading(false)
+        }
+      } catch {
+        setLoading(false)
       }
     }
     getUser()
@@ -222,6 +231,7 @@ export default function NotificationsPage() {
 
   return (
     <div className="container mx-auto p-6 max-w-4xl">
+      <DashboardBreadcrumbs />
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Benachrichtigungen</h1>

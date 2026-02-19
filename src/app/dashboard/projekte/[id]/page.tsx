@@ -16,6 +16,7 @@
 import { cookies } from 'next/headers'
 import Link from 'next/link'
 import { redirect, notFound } from 'next/navigation'
+import { DashboardBreadcrumbs } from '@/components/navigation/DashboardBreadcrumbs'
 import { createPublicClient } from '@/lib/supabase/with-org'
 import { validateSession, SESSION_COOKIE_NAME } from '@/lib/session'
 import type { Role } from '@/types'
@@ -158,24 +159,7 @@ export default async function ProjectDetailPage({ params }: PageProps) {
 
   return (
     <div className="space-y-6 pb-20">
-      {/* Breadcrumb */}
-      <nav className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-        <Link
-          href="/dashboard"
-          className="hover:text-gray-700 dark:hover:text-gray-300"
-        >
-          Dashboard
-        </Link>
-        <span>/</span>
-        <Link
-          href="/dashboard/projekte"
-          className="hover:text-gray-700 dark:hover:text-gray-300"
-        >
-          Projekte
-        </Link>
-        <span>/</span>
-        <span className="text-gray-900 dark:text-gray-100">{project.name}</span>
-      </nav>
+      <DashboardBreadcrumbs />
 
       {/* Project Header Card */}
       <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-4 sm:p-6">

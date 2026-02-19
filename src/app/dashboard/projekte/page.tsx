@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
+import { DashboardBreadcrumbs } from '@/components/navigation/DashboardBreadcrumbs'
 import { Card, CardContent } from '@/components/ui/card'
 import { ProjectCard } from '@/components/projects/ProjectCard'
 import { useBuilding } from '@/contexts/BuildingContext'
@@ -187,6 +188,7 @@ export default function ProjektePage() {
 
   return (
     <div className="space-y-4 pb-20">
+      <DashboardBreadcrumbs />
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>

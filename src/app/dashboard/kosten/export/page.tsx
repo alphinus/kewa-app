@@ -8,6 +8,7 @@
  * Phase 10-05: CSV Export for Accounting (COST-06)
  */
 
+import { DashboardBreadcrumbs } from '@/components/navigation/DashboardBreadcrumbs'
 import { createPublicClient } from '@/lib/supabase/with-org'
 import { Card, CardContent } from '@/components/ui/card'
 import { ExportForm } from './ExportForm'
@@ -26,6 +27,7 @@ export default async function KostenExportPage() {
 
   return (
     <div className="space-y-6 pb-20">
+      <DashboardBreadcrumbs />
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">

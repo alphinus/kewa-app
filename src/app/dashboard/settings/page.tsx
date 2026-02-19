@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
+import { DashboardBreadcrumbs } from '@/components/navigation/DashboardBreadcrumbs'
 import { Button } from '@/components/ui/button'
 import { useInstallPrompt } from '@/hooks/useInstallPrompt'
 // =============================================
@@ -125,6 +126,7 @@ export default function SettingsPage() {
 
   return (
     <div className="space-y-6 pb-20">
+      <DashboardBreadcrumbs />
       {/* Page header */}
       <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
         Einstellungen
@@ -259,7 +261,7 @@ export default function SettingsPage() {
           <div className="flex justify-between items-center">
             <span className="text-gray-600 dark:text-gray-400">Version</span>
             <span className="font-medium text-gray-900 dark:text-gray-100">
-              2.1.0
+              4.0.0
             </span>
           </div>
           <div className="flex justify-between items-center">

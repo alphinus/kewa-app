@@ -10,29 +10,13 @@
  */
 
 import Link from 'next/link'
+import { DashboardBreadcrumbs } from '@/components/navigation/DashboardBreadcrumbs'
 import { InspectionForm } from '@/components/inspections/InspectionForm'
 
 export default function NeueAbnahmePage() {
   return (
     <div className="p-4 pb-20 sm:p-6 max-w-4xl mx-auto">
-      {/* Breadcrumb */}
-      <nav className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mb-6">
-        <Link
-          href="/dashboard"
-          className="hover:text-gray-700 dark:hover:text-gray-300"
-        >
-          Dashboard
-        </Link>
-        <span>/</span>
-        <Link
-          href="/dashboard/abnahmen"
-          className="hover:text-gray-700 dark:hover:text-gray-300"
-        >
-          Abnahmen
-        </Link>
-        <span>/</span>
-        <span className="text-gray-900 dark:text-gray-100">Neu</span>
-      </nav>
+      <DashboardBreadcrumbs />
 
       {/* Header */}
       <div className="mb-6">

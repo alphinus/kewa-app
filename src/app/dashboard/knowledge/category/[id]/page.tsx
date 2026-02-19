@@ -15,6 +15,7 @@
 import { cookies } from 'next/headers'
 import Link from 'next/link'
 import { redirect, notFound } from 'next/navigation'
+import { DashboardBreadcrumbs } from '@/components/navigation/DashboardBreadcrumbs'
 import { createPublicClient } from '@/lib/supabase/with-org'
 import { validateSessionWithRBAC, SESSION_COOKIE_NAME } from '@/lib/session'
 import { CategoryTree } from '@/components/knowledge/CategoryTree'
@@ -185,35 +186,7 @@ export default async function CategoryPage({ params }: PageProps) {
 
       {/* Main content */}
       <main className="flex-1 min-w-0 space-y-6">
-        {/* Breadcrumb */}
-        <nav className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-          <Link
-            href="/dashboard"
-            className="hover:text-gray-700 dark:hover:text-gray-300"
-          >
-            Dashboard
-          </Link>
-          <ChevronRight className="w-4 h-4" />
-          <Link
-            href="/dashboard/knowledge"
-            className="hover:text-gray-700 dark:hover:text-gray-300"
-          >
-            Wissensdatenbank
-          </Link>
-          <ChevronRight className="w-4 h-4" />
-          {parentName && (
-            <>
-              <Link
-                href={`/dashboard/knowledge/category/${category.parent_id}`}
-                className="hover:text-gray-700 dark:hover:text-gray-300"
-              >
-                {parentName}
-              </Link>
-              <ChevronRight className="w-4 h-4" />
-            </>
-          )}
-          <span className="text-gray-900 dark:text-gray-100">{category.name}</span>
-        </nav>
+        <DashboardBreadcrumbs />
 
         {/* Search bar */}
         <SearchBar className="max-w-xl" />

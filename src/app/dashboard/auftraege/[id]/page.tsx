@@ -22,6 +22,7 @@ import Link from 'next/link'
 import { WorkOrderSendDialog } from '@/components/work-orders/WorkOrderSendDialog'
 import type { WorkOrderWithRelations, WorkOrderSendResponse } from '@/types/work-order'
 import type { WorkOrderStatus } from '@/types'
+import { DashboardBreadcrumbs } from '@/components/navigation/DashboardBreadcrumbs'
 import { cacheEntityOnView } from '@/lib/db/operations'
 import { useOfflineEntity } from '@/hooks/useOfflineEntity'
 import { StalenessIndicator } from '@/components/StalenessIndicator'
@@ -248,24 +249,7 @@ export default function WorkOrderDetailPage({ params }: PageProps) {
 
   return (
     <div className="space-y-6 pb-20">
-      {/* Breadcrumb */}
-      <nav className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-        <Link
-          href="/dashboard"
-          className="hover:text-gray-700 dark:hover:text-gray-300"
-        >
-          Dashboard
-        </Link>
-        <span>/</span>
-        <Link
-          href="/dashboard/auftraege"
-          className="hover:text-gray-700 dark:hover:text-gray-300"
-        >
-          Arbeitsaufträge
-        </Link>
-        <span>/</span>
-        <span className="text-gray-900 dark:text-gray-100">{workOrder.title}</span>
-      </nav>
+      <DashboardBreadcrumbs />
 
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">

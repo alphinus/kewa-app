@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { DashboardBreadcrumbs } from '@/components/navigation/DashboardBreadcrumbs'
 import { Button } from '@/components/ui/button'
 import { usePush } from '@/contexts/PushContext'
 import type {
@@ -171,6 +172,7 @@ export default function NotificationSettingsPage() {
 
   return (
     <div className="space-y-6 pb-20">
+      <DashboardBreadcrumbs />
       {/* Page Header */}
       <div>
         <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">

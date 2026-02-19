@@ -13,6 +13,7 @@
 import { cookies } from 'next/headers'
 import Link from 'next/link'
 import { redirect, notFound } from 'next/navigation'
+import { DashboardBreadcrumbs } from '@/components/navigation/DashboardBreadcrumbs'
 import { UnitInvestmentCard } from '@/components/costs/UnitInvestmentCard'
 import { UnitConditionSummary } from '@/components/units/UnitConditionSummary'
 import { RoomConditionGrid } from '@/components/units/RoomConditionGrid'
@@ -125,24 +126,7 @@ export default async function UnitInvestmentDetailPage({ params }: PageProps) {
 
   return (
     <div className="space-y-6 pb-20">
-      {/* Breadcrumb */}
-      <nav className="flex items-center gap-2 text-sm text-gray-500">
-        <Link
-          href="/dashboard/kosten"
-          className="hover:text-gray-700 dark:hover:text-gray-300"
-        >
-          Kosten
-        </Link>
-        <span>/</span>
-        <Link
-          href="/dashboard/kosten/wohnungen"
-          className="hover:text-gray-700 dark:hover:text-gray-300"
-        >
-          Wohnungen
-        </Link>
-        <span>/</span>
-        <span className="text-gray-900 dark:text-gray-100">{costSummary.unit_name}</span>
-      </nav>
+      <DashboardBreadcrumbs />
 
       {/* Unit Investment Card (full variant) */}
       <UnitInvestmentCard

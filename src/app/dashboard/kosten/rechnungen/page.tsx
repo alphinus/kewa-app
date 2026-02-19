@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { DashboardBreadcrumbs } from '@/components/navigation/DashboardBreadcrumbs'
 import { createPublicClient } from '@/lib/supabase/with-org'
 import { Card, CardContent } from '@/components/ui/card'
 import { InvoiceList } from '@/components/costs/InvoiceList'
@@ -52,6 +53,7 @@ export default async function RechnungenPage() {
 
   return (
     <div className="space-y-6 pb-20">
+      <DashboardBreadcrumbs />
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>

@@ -11,6 +11,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { DashboardBreadcrumbs } from '@/components/navigation/DashboardBreadcrumbs'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -273,6 +274,7 @@ export default function LieferantenPage() {
 
   return (
     <div className="p-4 pb-20 sm:p-6 max-w-6xl mx-auto">
+      <DashboardBreadcrumbs />
       {/* Header */}
       <div className="mb-6">
         <div className="flex items-center justify-between mb-2">

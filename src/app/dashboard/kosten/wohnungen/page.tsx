@@ -12,6 +12,7 @@
 import { cookies, headers } from 'next/headers'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
+import { DashboardBreadcrumbs } from '@/components/navigation/DashboardBreadcrumbs'
 import { InvestmentOverview } from '@/components/costs/InvestmentOverview'
 import {
   getAllUnitCosts,
@@ -50,17 +51,7 @@ export default async function WohnungenInvestmentPage() {
 
   return (
     <div className="space-y-6 pb-20">
-      {/* Breadcrumb */}
-      <nav className="flex items-center gap-2 text-sm text-gray-500">
-        <Link
-          href="/dashboard/kosten"
-          className="hover:text-gray-700 dark:hover:text-gray-300"
-        >
-          Kosten
-        </Link>
-        <span>/</span>
-        <span className="text-gray-900 dark:text-gray-100">Wohnungen</span>
-      </nav>
+      <DashboardBreadcrumbs />
 
       {/* Header */}
       <div>

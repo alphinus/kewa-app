@@ -9,6 +9,7 @@
 
 import { useState, useEffect } from 'react'
 import dynamic from 'next/dynamic'
+import { DashboardBreadcrumbs } from '@/components/navigation/DashboardBreadcrumbs'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import {
@@ -108,6 +109,7 @@ export default function ConsumptionAnalyticsPage() {
 
   return (
     <div className="space-y-6">
+      <DashboardBreadcrumbs />
       <div>
         <h1 className="text-3xl font-bold">Saisonaler Verbrauch</h1>
         <p className="text-gray-600 mt-1">

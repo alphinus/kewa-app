@@ -11,6 +11,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { DashboardBreadcrumbs } from '@/components/navigation/DashboardBreadcrumbs'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { ReorderAlertList } from '@/components/suppliers/ReorderAlertList'
@@ -123,6 +124,7 @@ export default function InventoryOverviewPage() {
 
   return (
     <div className="p-6 space-y-6">
+      <DashboardBreadcrumbs />
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>

@@ -1,289 +1,328 @@
 # Pitfalls Research
 
-**Domain:** Retrofitting Multi-Tenancy (Supabase RLS) to Existing Property Management App
-**Researched:** 2026-02-18
-**Confidence:** HIGH
+**Domain:** Migrating Custom PIN Auth to Supabase Auth with RLS Policy Rewrite in Multi-Tenant Production App
+**Researched:** 2026-02-19
+**Confidence:** HIGH (verified against Supabase official docs, GitHub issues, production post-mortems)
+
+---
 
 ## Critical Pitfalls
 
-### Pitfall 1: Enabling RLS Without Policies (Empty Results)
+### Pitfall 1: Cookie Name Collision Between Legacy Session and Supabase Auth Session
 
 **What goes wrong:**
-You enable RLS on a production table but forget to create policies. Every query returns empty results. Your application appears completely broken, but there are no error messages because empty results are valid responses. Users panic, production is down, and debugging is difficult because the database is technically working.
+The existing system uses a custom cookie named `session` (set by `createSession()` in `lib/auth.ts`). Supabase Auth SSR uses cookies named `sb-[project-ref]-auth-token.0` (and `.1`, `.2` for chunked tokens). During the cutover, both cookies exist simultaneously. Middleware reads the `session` cookie first, finds a valid (but legacy) JWT, and considers the user authenticated — even though Supabase Auth has no corresponding session. The Supabase client gets confused: `auth.getUser()` returns null because no Supabase Auth session exists, but the middleware passes the request through. RLS policies using `auth.uid()` return NULL, and all tenant data appears empty.
 
 **Why it happens:**
-RLS enablement and policy creation are two separate operations. Developers test in the SQL Editor (which runs as postgres superuser and bypasses RLS), see expected results, deploy, and then real users through the Supabase client see nothing. The SQL Editor does not warn about missing policies.
+The codebase has two parallel auth systems in middleware (`validateSession` reads the custom cookie; `createClient()` reads Supabase Auth cookies). During migration, a user authenticated via the old system hits routes where RLS policies have already been switched to `auth.uid()`. Their custom JWT has no corresponding entry in `auth.users`, so `auth.uid()` returns NULL.
 
 **How to avoid:**
-- ALWAYS pair `ALTER TABLE ... ENABLE ROW LEVEL SECURITY` with at least one policy in the same migration file
-- NEVER test RLS policies in the SQL Editor — always test through the Supabase client SDK with actual user authentication
-- Use role simulation technique: `SET LOCAL ROLE authenticated; SET LOCAL request.jwt.claims TO '{"sub":"user-id"}';` for SQL-level testing
-- Enforce migration template that requires policy creation before RLS enablement
-- Create "allow all authenticated" policies initially, then tighten them incrementally
+- Complete the `auth.users` user migration (import existing users into `auth.users`) BEFORE switching any RLS policy to use `auth.uid()`
+- Run both auth systems simultaneously: old cookie validates the session; Supabase Auth session is created fresh at first login under the new system
+- Use a feature flag to determine which RLS pattern a given table uses during migration — never mix within a single table
+- During the cutover window, maintain old `set_config` patterns on tables where users may still have legacy sessions
 
 **Warning signs:**
-- Migration file has `ALTER TABLE ... ENABLE ROW LEVEL SECURITY` without matching `CREATE POLICY` statements
-- Testing exclusively in SQL Editor instead of through API
-- "Works locally but not in production" reports
-- Queries returning `[]` with no error messages
+- `auth.uid()` returning NULL in RLS policies for authenticated users
+- Dashboard data appears empty after RLS migration but no errors thrown
+- `supabase.auth.getUser()` returns `null` in middleware despite valid legacy cookie
+- Users report logging in successfully but seeing no data
 
 **Phase to address:**
-Phase 1 (Schema Migration) — RLS enablement and initial policies must be atomic
+Auth foundation phase — user import into `auth.users` must be complete before ANY RLS policy switches to `auth.uid()`
 
 ---
 
-### Pitfall 2: Application-Layer Queries Breaking with RLS Context
+### Pitfall 2: users Table in public Schema vs auth.users — Trigger Causes "Database Error Saving New User"
 
 **What goes wrong:**
-You have 750+ files with ~561 occurrences of Building/Property/Liegenschaft references. Many queries use direct database access through Server Components (`createClient()` from `@/lib/supabase/server`). When RLS is enabled, `auth.uid()` returns NULL in Server Components because the Supabase client doesn't have the user session context, breaking every query.
+The existing `public.users` table (62 tables reference it) must be kept in sync with `auth.users`. The natural solution is a trigger: `AFTER INSERT ON auth.users → insert into public.users`. In production, this causes the error "Database error saving new user" for every signup attempt, even when the trigger logic looks correct. All new user creation — Magic Link sends, tenant registrations, contractor invites — silently fails.
 
 **Why it happens:**
-Server Components don't automatically pass authentication context to Supabase. The `createServerClient()` helper uses the `anon` key, and RLS policies with `auth.uid()` expect a valid JWT. Without explicit session forwarding, `auth.uid()` evaluates to NULL and all policies fail.
+`supabase_auth_admin` (the role that inserts into `auth.users`) does not have `INSERT` permission on `public.users` by default. The trigger function needs `SECURITY DEFINER` to execute with `postgres` role privileges — but using `SECURITY DEFINER` on a dashboard-created function inherits full `postgres` privileges, which is an over-grant. Additionally, if `public.users` has RLS enabled and no policy allows `supabase_auth_admin` to insert, the trigger fails silently.
 
 **How to avoid:**
-- Audit ALL Server Components that call Supabase (currently minimal: 7 files with direct `.from()` calls)
-- Server Components MUST use session from cookies: `createClient()` helper already implements this via `@supabase/ssr`
-- For service-role access (admin operations), create separate client: `createServiceRoleClient()` with explicit bypass
-- Test every Server Component route with RLS enabled BEFORE production deployment
-- Create migration checklist: verify each Server Component query works with RLS
-- Consider moving complex queries to API routes with explicit session handling
+- Write the auth-to-public sync trigger function as `SECURITY DEFINER` owned by `postgres`
+- Explicitly REVOKE execute from `authenticated` and `anon` on the trigger function
+- If `public.users` has RLS, add a policy that allows the trigger function's role to INSERT
+- Verify the trigger in the Supabase Dashboard → Database → Triggers before deploying
+- Test user creation end-to-end in staging (not SQL Editor — use the actual signup flow) before enabling in production
+- Check Auth Logs and Postgres Logs in the Supabase Dashboard when any signup fails — the exact constraint or trigger error is logged there
 
 **Warning signs:**
-- Server Component queries returning empty arrays after RLS enablement
-- `auth.uid()` debugging shows NULL in logs
-- Dashboard/heatmap components show no data
-- API routes work but Server Component pages break
+- Magic Link send fails silently or returns 500 from Supabase Auth
+- New contractor users aren't appearing in `public.users` after Magic Link verification
+- Tenant registration completes on frontend but `public.users` has no record
+- "Database error saving new user" in Supabase Auth logs
 
 **Phase to address:**
-Phase 2 (RLS Context Validation) — After schema migration, before data migration
+User migration phase — test trigger in staging with real Magic Link flow before production deployment
 
 ---
 
-### Pitfall 3: Missing organization_id Indexes (Performance Cliff)
+### Pitfall 3: JWT Claims Staleness — Role Changes Don't Take Effect Until Re-login
 
 **What goes wrong:**
-You add `organization_id` to all 68 tables and create RLS policies like `organization_id = current_setting('app.current_organization_id')`. On 10K rows, queries take 50ms instead of 2ms. On 100K+ rows (realistic for multi-tenant SaaS after 2 years), queries timeout. Every dashboard, every list view, every heatmap becomes unusable.
+A user's org-based role is changed (e.g., from `property_manager` to `accounting`). The admin sees the change in `organization_members`. But the user's existing Supabase Auth JWT still contains the old role claim because JWT claims are baked into the token at issue time and remain valid until the token expires. The user continues to access resources at their old permission level for up to 1 hour (the default Supabase Auth access token lifetime).
 
 **Why it happens:**
-A policy with `organization_id = X` triggers a sequential scan on the entire table if `organization_id` is not indexed. RLS policies execute on EVERY query, so a missing index becomes a critical performance bottleneck. Most tutorials focus on adding the column but forget the index.
+Supabase Auth JWTs are signed tokens — they cannot be invalidated once issued without revoking the entire session. The custom access token hook runs when the token is issued (at login and refresh), not continuously. A role change in `organization_members` is not an event that triggers token re-issue.
 
 **How to avoid:**
-- Create composite indexes BEFORE enabling RLS: `CREATE INDEX idx_tablename_org_id ON tablename(organization_id)`
-- For multi-column filters (common in dashboards), create composite indexes: `CREATE INDEX idx_projects_org_status ON projects(organization_id, status)`
-- Use PostgreSQL's `EXPLAIN ANALYZE` with RLS policies to verify index usage
-- Measure query performance with realistic data volumes (>10K rows per tenant)
-- Add indexes in the SAME migration that adds `organization_id` columns
-- Monitor query performance in production with Supabase dashboard metrics
+- For time-sensitive role revocation (e.g., fired employee), use `supabase.auth.admin.signOut(userId, 'global')` via service role to force re-login
+- Design a hybrid approach: JWT claims for read-heavy permission checks (performance), DB lookup for write operations that must be current
+- For the RBAC pattern in this app: put the `organization_id` in JWT claims (low-sensitivity, rarely changes), but check `organization_members.role` directly in DB for sensitive write operations
+- Document that role changes take effect within 1 hour (at next token refresh) unless forced re-login
 
 **Warning signs:**
-- `EXPLAIN ANALYZE` shows "Seq Scan" instead of "Index Scan" on RLS-filtered queries
-- Query times >100ms for simple list views
-- Dashboard heatmap loads slowly or times out
-- Database CPU usage spikes after RLS enablement
+- Demoted user still has access to admin routes for up to 1 hour
+- Role change in admin panel doesn't immediately restrict access
+- Test: change user role, don't log out, try to access restricted resource — succeeds for up to 1 hour
 
 **Phase to address:**
-Phase 1 (Schema Migration) — Indexes must be created atomically with `organization_id` columns
+RBAC phase — design JWT claims to contain only slowly-changing, low-risk data; rely on DB membership check for critical write authorization
 
 ---
 
-### Pitfall 4: Foreign Key Cascades Breaking Multi-Tenant Isolation
+### Pitfall 4: user_metadata Is User-Writable — Never Use in RLS Policies
 
 **What goes wrong:**
-You add `organization_id` to all tables but don't update foreign key constraints to include it. A cascade delete from `properties` bypasses RLS and deletes `units` across ALL organizations because the cascade operates at the postgres superuser level, not the application role level. Data loss across tenant boundaries.
+You add organization roles to `auth.users.raw_user_meta_data` (user_metadata) for convenience, then write RLS policies like `(auth.jwt() -> 'user_metadata' ->> 'role') = 'admin'`. A malicious user calls `supabase.auth.updateUser({ data: { role: 'admin' } })` from the browser — Supabase allows this because `user_metadata` is user-writable. They now have admin access in every RLS policy that trusts `user_metadata`.
 
 **Why it happens:**
-PostgreSQL foreign key cascades (ON DELETE CASCADE) run with elevated privileges and bypass RLS policies. In multi-tenant schemas, foreign keys that include `organization_id` in both referencing and referenced tables add an extra layer of protection, preventing references from crossing tenants. Without this, cascades are dangerous.
+Supabase distinguishes `user_metadata` (user-writable, in `raw_user_meta_data`) from `app_metadata` (server-only, in `raw_app_meta_data`). Many tutorials and examples use `user_metadata` for simplicity without flagging the security boundary. The Supabase `updateUser()` client method writes directly to `user_metadata`.
 
 **How to avoid:**
-- Make primary keys compound: `PRIMARY KEY (id, organization_id)`
-- Update all foreign keys to include `organization_id`: `FOREIGN KEY (parent_id, organization_id) REFERENCES parent(id, organization_id)`
-- This REQUIRES modifying 68 tables — expensive but prevents cross-tenant data corruption
-- Consider using `ON DELETE NO ACTION` instead of `CASCADE` in multi-tenant context
-- Add database-level CHECK constraints: `CHECK (organization_id = parent_organization_id)` where applicable
-- Test cascade behavior with multi-organization test data BEFORE production
+- NEVER store authorization data (roles, org memberships, permissions) in `user_metadata` / `raw_user_meta_data`
+- Store role claims in `app_metadata` / `raw_app_meta_data` — writable only via the service role key (server-side only)
+- Better pattern for this app: use the Custom Access Token Hook to read from `organization_members` table and inject claims into the JWT — the hook runs server-side and cannot be spoofed by clients
+- In RLS policies, reference `(auth.jwt() -> 'app_metadata' ->> 'org_role')` if using metadata, or better, use `auth.uid()` with a lookup to `organization_members`
 
 **Warning signs:**
-- Foreign keys reference only `id`, not `(id, organization_id)`
-- Primary keys are single-column `id` instead of compound `(id, organization_id)`
-- No cross-tenant deletion tests in test suite
-- Cascade deletes happen faster than expected (bypassing RLS)
+- Organization role stored in `raw_user_meta_data` column
+- RLS policies referencing `auth.jwt() -> 'user_metadata'`
+- Any policy readable by non-admins that can be bypassed by calling `supabase.auth.updateUser()`
 
 **Phase to address:**
-Phase 1 (Schema Migration) — Foreign key structure must be updated atomically with `organization_id` addition
+Auth foundation phase — decide on claims strategy (app_metadata vs custom hook) before writing any RLS policy
 
 ---
 
-### Pitfall 5: Data Migration Without Zero-Downtime Strategy
+### Pitfall 5: PgBouncer Transaction Mode Breaks auth.uid() — set_config is Dead in JWT World
 
 **What goes wrong:**
-You have existing production data (KEWA AG). You add `organization_id NOT NULL` to 68 tables in a single migration. The migration locks tables, fails on NOT NULL constraint (no default value), and production is down for 15+ minutes while you rollback and debug. Users lose trust.
+The current system uses `set_config('app.current_organization_id', ..., true)` (transaction-scoped) which works correctly with PgBouncer in transaction pooling mode. When migrating to JWT-based `auth.uid()`, developers assume the same transaction-level settings work. They don't. The Supabase REST API (PostgREST) sets `request.jwt.claims` and `request.jwt.claim.sub` at the request level using `SET LOCAL`. In PgBouncer transaction mode, these settings are scoped to a single database transaction. If a request spans multiple transactions (or if a custom function calls `set_config` with `is_local=false`), the JWT context leaks to other connections. Conversely, `auth.uid()` evaluating to NULL happens when the PostgREST request context isn't established before the query runs.
 
 **Why it happens:**
-Adding a NOT NULL column requires backfilling ALL existing rows. On large tables (projects, tasks, audit_logs with 10K+ rows), this takes time and acquires exclusive locks. Zero downtime migrations require phased approach: add nullable column, backfill data, add NOT NULL constraint.
+PgBouncer in transaction mode resets all session-level settings between connections. PostgREST sets `SET LOCAL request.jwt.claims = '...'` within each transaction — this is transaction-scoped and therefore PgBouncer-safe. But any custom code that calls `set_config(..., false)` (session-scoped) contaminates the PgBouncer pool — that setting persists to the next tenant's request on the same connection.
 
 **How to avoid:**
-- Phase 1: Add `organization_id UUID` (nullable) to all tables
-- Phase 2: Backfill existing data: `UPDATE table SET organization_id = 'kewa-org-id' WHERE organization_id IS NULL`
-- Phase 3: Add NOT NULL constraint: `ALTER TABLE table ALTER COLUMN organization_id SET NOT NULL`
-- Phase 4: Enable RLS with policies
-- Run backfill in small batches (1000 rows at a time) to avoid long-running transactions
-- Use snapshot plus CDC (Change Data Capture) for large tables
-- Test migration on production-sized dataset in staging environment
-- Have rollback scripts ready for each phase
+- After migration, NEVER call `set_config` with `is_local=false` for anything auth-related
+- The existing `set_org_context` RPC already uses `is_local=true` — keep this during the transition period
+- After full JWT migration, `set_org_context` calls in API routes can be removed (org isolation comes from `auth.uid()` + `organization_members` join)
+- Verify PgBouncer compatibility: test that `auth.uid()` returns the correct value under load (multiple concurrent users from different orgs)
+- Keep `is_local=true` for any remaining `set_config` calls during the hybrid migration period
 
 **Warning signs:**
-- Migration adds NOT NULL column in single operation
-- No batch processing for backfill operations
-- Migration locks tables for >30 seconds
-- No staging environment testing with realistic data volumes
-- No rollback plan documented
+- `auth.uid()` returning wrong user ID (another user's ID) under concurrent load
+- Intermittent RLS failures where a user sees another org's data briefly
+- `auth.uid()` returning NULL for authenticated users on some requests but not others
+- Performance regression: many `auth.uid()` calls without `(select auth.uid())` optimization cause per-row function evaluation
 
 **Phase to address:**
-Phase 3 (Data Migration) — Must use phased approach across multiple deployments
+RLS migration phase — validate PgBouncer behavior in staging under concurrent multi-tenant load before production cutover
 
 ---
 
-### Pitfall 6: Terminology Refactoring Breaks Generated Code
+### Pitfall 6: Missing initPlan Optimization Makes auth.uid() 1000x Slower Than set_config
 
 **What goes wrong:**
-You have 561 occurrences of Liegenschaft/Gebäude/Building/Property across 81 files. You use find-and-replace to standardize terminology. This breaks: import statements when files are renamed, type definitions that reference old names, database column references in queries, generated TypeScript types from Supabase schema, and creates a slow, error-prone loop of fixing call sites.
+The current `current_organization_id()` function is called once per transaction, and RLS policies use it efficiently. When rewriting 248 policies to use `auth.uid()`, the naive pattern `WHERE organization_id IN (SELECT organization_id FROM organization_members WHERE user_id = auth.uid())` evaluates `auth.uid()` on every row. On tables with 50K+ rows (audit_log, media, notifications), this causes query times to balloon from 2ms to 11,000ms — a 5,500x slowdown. Production dashboards time out.
 
 **Why it happens:**
-Refactoring isn't just find-and-replace at scale — it's a graph traversal problem across your codebase's semantic structure. When you rename a function, changes cascade through every call site, type definitions, imports/exports, tests, and documentation. Simple text replacement breaks these relationships.
+PostgreSQL evaluates `auth.uid()` as a function call per-row in RLS policies unless wrapped in a subquery that triggers the optimizer's `initPlan` (plan-time caching). The Supabase performance docs show this reduces execution from 11,000ms to 10ms in their test cases. The `set_config`/`current_setting` pattern was inherently cached (one setting per transaction), but `auth.uid()` without the wrapping is not.
 
 **How to avoid:**
-- Use AST-based refactoring tools (TypeScript Language Server, VSCode F2 rename)
-- Refactor types FIRST, then let TypeScript errors guide code changes
-- Update Supabase schema types: `npx supabase gen types typescript` after database changes
-- Create type aliases during transition: `type Liegenschaft = Property` for gradual migration
-- Update one component tree at a time (e.g., all dashboard components, then all forms)
-- Run full test suite after EACH refactoring step
-- Avoid bulk file renames — keep file names stable, change internal references
-- Use IDE "Find All References" before renaming
+- ALWAYS write JWT-based RLS policies using the cached pattern:
+  ```sql
+  -- WRONG (evaluates per-row):
+  organization_id IN (SELECT om.organization_id FROM organization_members om WHERE om.user_id = auth.uid())
+
+  -- CORRECT (evaluates once via initPlan):
+  organization_id IN (SELECT om.organization_id FROM organization_members om WHERE om.user_id = (SELECT auth.uid()))
+  ```
+- Apply this pattern to ALL 248 policies being rewritten
+- Add composite indexes on `(organization_id, user_id)` in `organization_members` — the subquery in every RLS policy will hammer this table
+- Run `EXPLAIN ANALYZE` on representative queries from each module after policy rewrite to verify `initPlan` is being used
+- Performance-test with realistic data volumes (10K+ rows per table) before production cutover
 
 **Warning signs:**
-- Planning to use sed/awk/find-replace for refactoring
-- No TypeScript strict mode (catches broken references)
-- Renaming files before updating imports
-- Changing database columns and code types simultaneously
-- No test coverage to catch broken references
+- `EXPLAIN ANALYZE` shows `Function Scan` or sequential evaluation of `auth.uid()` per row
+- Dashboard queries exceeding 500ms after RLS rewrite
+- `organization_members` table showing high sequential scan rates in Supabase Performance Advisor
+- Policy written as `auth.uid() = user_id` without the `(SELECT ...)` wrapper
 
 **Phase to address:**
-Phase 4 (Terminology Cleanup) — After data model is stable, before navigation redesign
+RLS migration phase — establish the correct policy template BEFORE writing any of the 248 policies; verify with EXPLAIN ANALYZE
 
 ---
 
-### Pitfall 7: Navigation Redesign Breaks User Mental Models
+### Pitfall 7: 34 API Routes Check Legacy ALLOWED_ROLES Pattern — Breaks When users.role Is Dropped
 
 **What goes wrong:**
-You redesign the footer navigation (8 items → fewer with drill-down) without user testing. Users can't find previously top-level features (Lieferanten, Kosten, Einheiten). Support tickets spike. Users revert to old URLs, which now 404. Productivity drops because navigation requires 2+ clicks instead of 1.
+34 API routes check `const userRole = request.headers.get('x-user-role')` and validate against `ALLOWED_ROLES: Role[] = ['kewa', 'imeri']`. Once `users.role` is dropped and the middleware switches to org-based roles, `x-user-role` will contain values like `'admin'` or `'property_manager'` instead of `'kewa'` or `'imeri'`. Every one of these 34 routes will return 403 for all internal users. The app breaks completely at the moment `users.role` is dropped — not gradually.
 
 **Why it happens:**
-Navigation accounts for 30-40% of mobile usability problems. Users develop muscle memory for existing navigation. Drill-down navigation (replacing current menu with child items) minimizes scrolling but frustrates users who frequently move between levels. The Priority+ pattern (showing primary items directly, overflow in "more" menu) works better for existing apps with established user habits.
+The legacy role values ('kewa', 'imeri') are hardcoded into the `ValidatedSession` type and the middleware header. The ALLOWED_ROLES pattern is a string comparison against these values. The new RBAC system uses role names from the `roles` table ('admin', 'property_manager', 'accounting', etc.), which don't match 'kewa' or 'imeri'.
 
 **How to avoid:**
-- Conduct navigation audit: which features are accessed most frequently by KEWA/Imeri?
-- Use analytics (if available) or user interviews to understand access patterns
-- Keep high-frequency features at top level (likely: Projekte, Aufgaben, Liegenschaft, Kosten)
-- Use drill-down ONLY for related feature groups (e.g., Admin → Properties, Partners, Templates)
-- Implement feature flags for gradual rollout: old nav → new nav → validate → commit
-- Preserve old URLs with redirects for bookmarked pages
-- Add "Favorites" or "Recent" section to reduce navigation depth
-- Test with actual users (KEWA AG, Imeri) before full deployment
+- Migrate ALL 34 routes BEFORE dropping `users.role` column — this must be sequential, not parallel
+- The safe migration order: (1) add `x-user-role-name` header in middleware (done), (2) rewrite ALLOWED_ROLES checks to use permissions or role-name checks, (3) verify all 34 routes work with new role names, (4) drop `users.role` column
+- Grep for `ALLOWED_ROLES` and `x-user-role` to find all affected routes: exactly 34 files confirmed
+- Use `x-user-permissions` header (comma-separated permission codes) for fine-grained checks instead of role comparison
+- Test route by route with real sessions after rewrite — do not batch-deploy all 34 at once
 
 **Warning signs:**
-- No user research on current navigation usage patterns
-- Drill-down used for unrelated features
-- No analytics on feature access frequency
-- Navigation redesign bundled with data model changes (too many variables)
-- No rollback plan if users reject new navigation
+- Any route containing `const ALLOWED_ROLES` or `ALLOWED_ROLES.includes(userRole)`
+- API routes returning 403 for internal admin users after milestone deployment
+- `x-user-role` header containing 'kewa' or 'imeri' instead of 'admin' or 'property_manager'
 
 **Phase to address:**
-Phase 5 (Navigation Redesign) — After data model and terminology are stable
+API cleanup phase — complete before the `users.role` column is dropped; cannot be deferred
 
 ---
 
-### Pitfall 8: RLS Policy Testing With Service Role Client
+### Pitfall 8: Magic Link Contractors Need Supabase Auth Entry — But Current Flow Creates public.users Without auth.users
 
 **What goes wrong:**
-You create RLS policies and test them using a Supabase client with the service role key. Policies appear to work (queries return data). You deploy to production and users see empty results. The service role key ALWAYS bypasses RLS, so your tests were invalid.
+The current Magic Link flow (see `magic-link/verify/route.ts`) creates a `public.users` record if the contractor doesn't exist, using the legacy custom auth session. After migrating to Supabase Auth, Magic Link must instead create an entry in `auth.users` (or use Supabase's built-in OTP/Magic Link). If the flow is partially migrated — Supabase Auth issues the JWT but `public.users` doesn't exist — RLS policies that join `organization_members` on `user_id` (pointing to `public.users.id`) will find no matching row and return empty data for the contractor's work order.
 
 **Why it happens:**
-A Supabase client with the Authorization header set to the service role API key will ALWAYS bypass RLS. This is by design for admin operations. SSR clients share the user session from cookies, and the user session overrides the default API key. Testing with service role gives false confidence.
+The system has two user identity systems: `auth.users` (Supabase, UUID from JWT `sub` claim) and `public.users` (custom, UUID from legacy system). The ID spaces are currently independent. When Supabase Auth issues a JWT, `auth.uid()` returns `auth.users.id` — which is a different UUID than the `public.users.id` that `organization_members.user_id` points to.
 
 **How to avoid:**
-- NEVER test RLS policies with service role client
-- Create separate test users for each role (kewa, imeri, tenant, contractor)
-- Test through actual authentication flow: login → get session → query with session
-- Use Supabase Auth helpers for Next.js to get proper user session
-- Create integration tests that authenticate as different users and verify data isolation
-- Test cross-tenant isolation: User A cannot see User B's data
-- Use role simulation in SQL for policy debugging: `SET LOCAL ROLE authenticated; SET LOCAL request.jwt.claims TO '{"sub":"user-id"}';`
+- Import ALL existing public.users into auth.users, mapping IDs explicitly (use admin.createUser with the custom user ID where possible, or maintain an ID mapping table)
+- After import, `public.users.id` must equal `auth.users.id` for every user — verify this with a query: `SELECT p.id FROM public.users p LEFT JOIN auth.users a ON p.id = a.id WHERE a.id IS NULL`
+- For the Magic Link flow: switch to Supabase Auth's built-in OTP/Magic Link (`signInWithOtp()`), which creates the auth.users entry automatically
+- The contractor portal's `set_org_context` call must remain until RLS migration is complete (contractors are still identified by `organization_members.user_id`)
 
 **Warning signs:**
-- Test suite uses `SUPABASE_SERVICE_ROLE_KEY` for RLS policy tests
-- No multi-user authentication in test setup
-- Tests pass but production users see empty results
-- No cross-tenant isolation tests
+- `auth.uid()` returning a UUID that doesn't match any `organization_members.user_id`
+- Contractor portal shows empty work orders after Supabase Auth migration
+- `SELECT COUNT(*) FROM public.users p LEFT JOIN auth.users a ON p.id = a.id WHERE a.id IS NULL` returns > 0
 
 **Phase to address:**
-Phase 2 (RLS Context Validation) — Create proper test infrastructure before enabling RLS
+User migration phase — ID mapping must be verified before any auth cutover
 
 ---
 
-### Pitfall 9: STWE Field Addition Without Workflow Isolation
+### Pitfall 9: Custom Access Token Hook Needs supabase_auth_admin GRANT — Missing This Breaks All Logins
 
 **What goes wrong:**
-You add STWE fields (Wertquote, Eigentumsperiode) to the properties table. Rental-only workflows (existing KEWA properties) break because forms now require these fields. Validation errors appear on property edit forms. Users confused by irrelevant fields.
+You implement the Custom Access Token Hook to inject `organization_id` and `org_role` into the JWT by querying `organization_members`. The hook function exists in the database. You enable it in the Supabase Dashboard. Every login attempt returns a generic auth error. All users are locked out of the system.
 
 **Why it happens:**
-STWE (Stockwerkeigentum - condominium ownership) is a different property management model than rental (Mietverwaltung). Adding fields for future STWE support without workflow isolation makes the UI confusing and breaks existing flows that shouldn't care about ownership quotas.
+`supabase_auth_admin` (the role that runs auth operations) does not have execute permission on functions in the `public` schema by default. The hook silently fails without the explicit GRANT. Additionally, if `organization_members` has RLS enabled, `supabase_auth_admin` cannot query it (no policy allows it). The auth system fails to issue any JWT.
 
 **How to avoid:**
-- Add STWE fields as NULLABLE in database: `wertquote DECIMAL(5,2) NULL`, `eigentumsperiode DATERANGE NULL`
-- Add `property_type` enum: `'rental' | 'stwe'` to properties table
-- Hide STWE fields in UI when `property_type = 'rental'`
-- Create separate form variants: `PropertyFormRental` vs `PropertyFormSTWE`
-- Validation rules conditional on `property_type`
-- Seed existing properties as `property_type = 'rental'`
-- Document STWE fields in schema comments for future implementation
+The hook migration requires these SQL commands in the same migration:
+```sql
+-- Grant execute to auth system
+GRANT EXECUTE ON FUNCTION public.custom_access_token_hook TO supabase_auth_admin;
+GRANT USAGE ON SCHEMA public TO supabase_auth_admin;
+
+-- Lock down from client APIs
+REVOKE EXECUTE ON FUNCTION public.custom_access_token_hook FROM authenticated, anon;
+
+-- If organization_members has RLS, allow auth admin to read it
+CREATE POLICY "auth_admin_read" ON organization_members
+  FOR SELECT TO supabase_auth_admin USING (true);
+```
+- Test the hook in a staging environment with a test user BEFORE enabling in production
+- The hook must be idempotent and handle NULL (user has no org membership yet) gracefully — don't throw, return default empty claims
 
 **Warning signs:**
-- STWE fields added as NOT NULL
-- No `property_type` discriminator field
-- Single form component for all property types
-- No conditional validation based on property type
-- Users see irrelevant fields in rental workflows
+- Auth hook enabled in dashboard but login returns 500 or generic auth error
+- No visible error message — check Supabase Auth logs (Dashboard → Logs → Auth Logs)
+- `supabase_auth_admin` not listed in `\du` output for the hook function's ACL
+- Users who aren't in `organization_members` cannot log in at all
 
 **Phase to address:**
-Phase 1 (Schema Migration) — Add fields with proper nullability and discriminators
+Auth foundation phase — test hook with staging credentials before enabling on production project
 
 ---
 
-### Pitfall 10: Inadequate WITH CHECK Clauses in RLS Policies
+### Pitfall 10: RLS Policies on organization_members Itself Create Bootstrap Deadlock
 
 **What goes wrong:**
-You create an INSERT policy for projects without `WITH CHECK (organization_id = current_setting('app.current_organization_id'))`. Users can insert projects with ANY `organization_id`, effectively creating data in other tenants. An UPDATE policy without WITH CHECK lets users change `organization_id`, stealing ownership of records.
+You add RESTRICTIVE RLS policies to `organization_members` requiring `auth.uid()` to match a row in... `organization_members`. The Custom Access Token Hook also queries `organization_members` to build the JWT. During a user's first login (after being invited but before their token is issued), `auth.uid()` is not yet set (the JWT hasn't been issued yet), so the hook can't read `organization_members`, can't build the JWT claims, and the user is permanently locked out. New user invitation is broken.
 
 **Why it happens:**
-RLS has two separate checks: USING (for reads/updates on existing rows) and WITH CHECK (for inserts/updates of new values). Developers often focus on USING (preventing access to other tenants' data) and forget WITH CHECK (preventing creation/modification with wrong tenant ID).
+Self-referential RLS on the membership table creates a chicken-and-egg problem: you need to be authenticated (have a JWT) to read your membership, but you need your membership to get a valid JWT. The auth hook runs without an authenticated Supabase session — it queries the database directly, but is blocked by RLS.
 
 **How to avoid:**
-- ALWAYS include WITH CHECK on INSERT/UPDATE policies
-- WITH CHECK should mirror USING clause for consistency
-- Template for INSERT: `CREATE POLICY insert_policy ON table FOR INSERT WITH CHECK (organization_id = current_setting('app.current_organization_id'))`
-- Template for UPDATE: `CREATE POLICY update_policy ON table FOR UPDATE USING (organization_id = current_setting(...)) WITH CHECK (organization_id = current_setting(...))`
-- Test policy with malicious insert: try to insert row with different `organization_id`
-- Code review checklist: every INSERT/UPDATE policy has WITH CHECK
+- The `organization_members` table should use PERMISSIVE policies for `supabase_auth_admin` (for the hook), or be read by the hook using a SECURITY DEFINER function that bypasses RLS
+- Simplest safe pattern: write the hook function as SECURITY DEFINER with `postgres` ownership — it can read `organization_members` directly without RLS applying
+- Alternative: disable RLS on `organization_members` and rely on application-layer access control (the table is only queried server-side)
+- If RLS IS needed on `organization_members`, add an explicit bypass policy for the service role
 
 **Warning signs:**
-- Policies have USING but no WITH CHECK
-- Can insert records with arbitrary `organization_id` values
-- UPDATE allows changing `organization_id` field
-- No tests for cross-tenant insertion attempts
+- First login for newly invited user fails
+- Hook function returns empty claims for all users (hook can't read organization_members)
+- Circular dependency: RLS policy on organization_members references auth.uid() and auth.uid() depends on querying organization_members
 
 **Phase to address:**
-Phase 1 (Schema Migration) — All policies must have proper WITH CHECK clauses
+Auth foundation phase — design the hook and RLS on membership table together; test with brand-new users who have no session
+
+---
+
+### Pitfall 11: JWT Cookie Chunking Breaks Next.js Middleware When Custom Claims Are Too Large
+
+**What goes wrong:**
+You add per-org role claims to the JWT via the custom access token hook. Each user belongs to one org (current state), so claims are small. But when permissions array is included (14 permission codes, each ~30 chars), or if you later add multiple org memberships, the JWT exceeds 4KB. Supabase SSR automatically splits the auth cookie into chunks (`sb-[ref]-auth-token.0`, `.1`, `.2`). In Next.js middleware, `request.cookies.get('sb-[ref]-auth-token')` returns undefined because the cookie was chunked. The middleware falls through to the unauthenticated path. All users appear logged out.
+
+**Why it happens:**
+Browser cookies have a 4KB per-cookie size limit. The `@supabase/ssr` package handles chunking automatically. But code that directly reads the cookie by exact name (instead of using `supabase.auth.getSession()`) breaks because it doesn't know about chunked cookies. Also, HTTP headers have a max size (typically 8KB for Nginx, 32KB for Cloudflare/Vercel) — if the JWT itself is too large, requests fail at the infrastructure level.
+
+**How to avoid:**
+- Keep JWT claims minimal: `org_id` (UUID, 36 chars) and `org_role` (short string) only — do NOT include full permissions array in JWT
+- Look up permissions from the DB for each request (or cache in Redis) rather than embedding in JWT
+- Use the Custom Access Token Hook's "slim claims" feature: only include claims needed for RLS evaluation
+- NEVER read Supabase auth cookies directly — always use `supabase.auth.getUser()` or `supabase.auth.getClaims()` which handle chunking transparently
+- Test with realistic claim sizes in staging; measure cookie size: `console.log(JSON.stringify(session.access_token).length)`
+
+**Warning signs:**
+- Middleware returning 401 for authenticated users in production but not locally
+- Cookie inspector shows `sb-[ref]-auth-token.0` and `.1` present but not `.` (unchunked)
+- JWT payload size > 3KB (base64-encoded token > ~4KB)
+- "Header too large" errors in Vercel or Nginx logs
+
+**Phase to address:**
+Auth foundation phase — design JWT payload size BEFORE implementing the custom hook; validate in staging
+
+---
+
+### Pitfall 12: Tenant Portal Has a Separate Session (portal_session Cookie) — Separate Migration Path Required
+
+**What goes wrong:**
+The tenant portal uses a separate `portal_session` cookie (see `lib/portal/session.ts`), completely independent from the internal `session` cookie. When migrating internal users to Supabase Auth, the portal session is not migrated. After the migration, `portal_session` continues to work for tenants. But if you also enable Supabase RLS changes that affect tenant-facing tables (like `tenant_tickets` or `units`), and the new RLS policies check `auth.uid()` instead of `set_config`, tenants cannot access their own data — their portal_session has no corresponding Supabase Auth session, so `auth.uid()` returns NULL.
+
+**Why it happens:**
+Two independent auth systems serve different user populations. The migration plan typically focuses on the primary (internal) system. Tenant portal auth is an afterthought. But the same 248 RLS policies govern both — if even one tenant-visible table switches to `auth.uid()` before tenants are migrated to Supabase Auth, that table becomes inaccessible to tenants.
+
+**How to avoid:**
+- Audit which RLS policies affect tenant-visible tables: `units`, `rooms`, `tenant_tickets`, `tenancies`, `notifications`
+- Defer switching tenant-visible table RLS to `auth.uid()` until tenants are also migrated to Supabase Auth (email/password flow)
+- Or: maintain `set_config` dual-path: if `auth.uid()` is NULL, fall back to `current_setting('app.current_organization_id', true)` in the USING clause
+- The migration order MUST be: internal users first → verify → tenant users → verify → drop legacy auth
+
+**Warning signs:**
+- Tenant portal shows empty unit/ticket data after RLS migration
+- `portal_session` cookie present but `auth.uid()` returns NULL in Postgres logs
+- Tenants reporting "no data" while internal users see their data correctly
+
+**Phase to address:**
+RLS migration phase — explicitly track which tables serve tenants and which serve internal users; migrate in two waves
 
 ---
 
@@ -293,14 +332,16 @@ Shortcuts that seem reasonable but create long-term problems.
 
 | Shortcut | Immediate Benefit | Long-term Cost | When Acceptable |
 |----------|-------------------|----------------|-----------------|
-| Skip composite foreign keys | Faster migration, simpler schema | Cross-tenant cascade deletes, data corruption risk | NEVER in multi-tenant |
-| Add organization_id as nullable indefinitely | No immediate backfill required | Missing tenant isolation, inconsistent data | Only during phased migration (max 1 week) |
-| Single "allow all" RLS policy | Easier initial testing | No actual tenant isolation, security risk | Only in development, never production |
-| Test RLS in SQL Editor only | Fast iteration on policy syntax | Policies don't work in production (Editor bypasses RLS) | NEVER — always test via client |
-| Global `SET ROLE` for session context | Simpler than per-request context | Connection pool contamination, cross-user data leakage | NEVER — use `SET LOCAL` in transactions |
-| Skip zero-downtime migration | Single deployment, simpler plan | Production downtime, user trust loss | Only on pre-production environments |
-| Find-replace for terminology | Appears fast | Breaks imports, types, generated code | NEVER — use AST-based refactoring |
-| Bundle data model + navigation changes | Fewer deployments | Too many variables, harder debugging | NEVER — separate concerns |
+| Keep ALLOWED_ROLES check alongside new permissions check | Backward compat during migration | Two auth systems in 34 routes forever; confusing code | Only during migration window (max 2 weeks) |
+| Store org_role in user_metadata instead of app_metadata | Easier to read | Users can self-elevate permissions; security hole | NEVER |
+| Use `auth.uid()` without `(SELECT auth.uid())` wrapper in RLS | Shorter policy SQL | 1000x query performance regression on large tables | NEVER in production |
+| Include full permissions array in JWT claims | No DB lookup per request | JWT too large → cookie chunking → auth breaks | NEVER |
+| Skip user ID mapping between public.users and auth.users | Faster user import | auth.uid() doesn't match organization_members.user_id | NEVER |
+| Test auth hook with SQL Editor | Easy syntax validation | Editor doesn't replicate supabase_auth_admin context; hooks appear to work but fail in prod | NEVER for functional testing |
+| Migrate all 248 policies in one migration file | One deployment | Any failure rolls back ALL policy changes; debugging nightmare | NEVER — migrate by module |
+| Drop users.role column before migrating all 34 routes | Clean schema faster | All 34 ALLOWED_ROLES routes return 403 immediately | NEVER — column drop is last step |
+
+---
 
 ## Integration Gotchas
 
@@ -308,11 +349,16 @@ Common mistakes when connecting to external services.
 
 | Integration | Common Mistake | Correct Approach |
 |-------------|----------------|------------------|
-| Supabase Auth in Server Components | Using `createBrowserClient()` in Server Components | Use `createServerClient()` from `@supabase/ssr` with cookie handling |
-| RLS with Next.js SSR | Not forwarding user session to Supabase client | Use `createServerClient()` with proper cookie helpers |
-| Service Role Access | Using service role key for regular queries | Reserve service role for admin operations only, create separate client |
-| Storage RLS Policies | Database RLS ≠ Storage RLS, must configure both | Create Storage policies matching database RLS structure |
-| Session Context Setting | Using `SET ROLE` globally in connection pool | Use `SET LOCAL` inside transactions to prevent leak |
+| Supabase Auth + Next.js middleware | Using `getSession()` server-side (trusts local state) | Use `getUser()` or `getClaims()` — makes network call to validate JWT |
+| Custom Access Token Hook | Creating as SECURITY DEFINER from Dashboard | Create as regular function, GRANT EXECUTE to supabase_auth_admin explicitly |
+| Auth hook + organization_members RLS | RLS blocks supabase_auth_admin from reading membership | Hook function must bypass RLS (SECURITY DEFINER or explicit policy) |
+| PgBouncer + JWT claims | Using `set_config(..., false)` (session-scoped) | Always `set_config(..., true)` (transaction-scoped) or rely entirely on JWT |
+| Supabase Auth + public.users trigger | No SECURITY DEFINER on trigger function | Function needs SECURITY DEFINER so supabase_auth_admin can execute it |
+| Supabase Auth Magic Link | Creating public.users manually without auth.users entry | Use Supabase's `signInWithOtp()` which creates both automatically |
+| Cookie-based session → Supabase Auth cookies | Reading auth cookie by name directly | Use `supabase.auth.getUser()` which handles cookie chunking transparently |
+| JWT size + Vercel | Putting permissions array in JWT | Keep JWT minimal; look up permissions from DB or Redis per request |
+
+---
 
 ## Performance Traps
 
@@ -320,11 +366,13 @@ Patterns that work at small scale but fail as usage grows.
 
 | Trap | Symptoms | Prevention | When It Breaks |
 |------|----------|------------|----------------|
-| Missing organization_id indexes | Slow queries, high CPU | Create indexes BEFORE enabling RLS | >10K rows per table |
-| Sequential scan on RLS policies | Query timeouts on dashboards | Use `EXPLAIN ANALYZE` to verify index usage | >50K rows per table |
-| N+1 queries with RLS overhead | Dashboard loads 20+ seconds | Batch queries, use joins, cache results | >5 properties with >100 units each |
-| Unbatched backfill migrations | Table locks, migration timeouts | Backfill in 1000-row batches with commits | >10K rows to migrate |
-| Cross-tenant eager loading | Loading all tenants' data in memory | Scope queries to current organization immediately | >10 organizations |
+| `auth.uid()` without `(SELECT auth.uid())` in RLS | Dashboard loads >10s; query timeouts | Always use `(SELECT auth.uid())` wrapper in policy USING clause | >10K rows per table |
+| Subquery in RLS without index on join column | High organization_members sequential scan rate | Index `organization_members(user_id, organization_id)` | >100 org members |
+| Auth hook queries organization_members per login without index | Slow login times under load | Index `organization_members(user_id)` | >1000 concurrent users |
+| Per-request DB lookup for permissions (no cache) | API routes slow due to extra DB roundtrip | Cache permissions in Redis (Upstash) keyed by `auth.uid()` + TTL | >50 concurrent requests |
+| Full JWT re-issue on every request via middleware | Auth server rate limited | Use `getClaims()` (validates JWT signature locally) not `getUser()` (network call) | >100 requests/minute |
+
+---
 
 ## Security Mistakes
 
@@ -332,40 +380,46 @@ Domain-specific security issues beyond general web security.
 
 | Mistake | Risk | Prevention |
 |---------|------|------------|
-| Missing WITH CHECK in RLS policies | Users can create data in other tenants | Every INSERT/UPDATE policy needs WITH CHECK clause |
-| Testing with service role key | RLS bypass, policies untested | Test with actual user sessions via auth flow |
-| Foreign keys without organization_id | Cascade deletes cross tenant boundaries | Use compound foreign keys including organization_id |
-| Global session context (`SET ROLE`) | Connection pool contamination, data leakage | Use `SET LOCAL` in transactions only |
-| No cross-tenant isolation tests | Silent multi-tenant data leakage | Test that User A cannot access User B's data |
-| RLS on database but not Storage | File uploads accessible across tenants | Configure Storage RLS policies matching database |
+| user_metadata in RLS policies | Users grant themselves any role/permission | ONLY use app_metadata or custom hook claims in RLS |
+| `auth.uid()` without org membership check | User from Org A can read Org B's data if they know IDs | Always combine `auth.uid()` with `organization_id` from `organization_members` |
+| Missing `WITH CHECK` on migrated INSERT/UPDATE policies | Users can insert data with arbitrary org_id | Every INSERT/UPDATE policy needs `WITH CHECK (organization_id IN (SELECT...))` |
+| Contractor access after auth migration without org scoping | Contractors can see all orgs' data | Contractor JWTs must contain `org_id` claim, verified in RLS |
+| Legacy session cookie active after Supabase Auth migration | Two valid auth systems simultaneously; inconsistent RLS enforcement | Explicit cookie expiry / forced re-login at cutover |
+| `supabase_auth_admin` over-granted via SECURITY DEFINER | Hook function has postgres-level access; escalation risk | Minimal GRANT pattern instead of SECURITY DEFINER |
+| Skipping REVOKE on hook function | Clients can call auth hook function directly via Supabase APIs | Always REVOKE EXECUTE from authenticated and anon |
+
+---
 
 ## UX Pitfalls
 
-Common user experience mistakes in this domain.
+Common user experience mistakes during auth migration.
 
 | Pitfall | User Impact | Better Approach |
 |---------|-------------|-----------------|
-| Drill-down navigation for unrelated features | Users lose context, navigation becomes tedious | Use drill-down only for parent-child relationships |
-| Removing top-level access to frequent features | Productivity drops, frustration increases | Keep high-frequency features (Projekte, Aufgaben) at top level |
-| STWE fields visible in rental workflows | Confusion, validation errors on irrelevant fields | Conditional UI based on property_type discriminator |
-| Navigation redesign without user testing | Users can't find features, support tickets spike | Test with actual users (KEWA, Imeri) before rollout |
-| Breaking existing URLs during refactoring | Bookmarks fail, 404 errors | Implement redirects for old URLs |
-| Empty results with no explanation (RLS failure) | Users think app is broken | Add explicit "no data" states, RLS error detection |
+| Force-logout all users at migration cutover | All 2 internal users + all contractors/tenants lose sessions simultaneously | Migrate in waves; force internal users first, then contractors, then tenants |
+| Magic Link email templates change unexpectedly | Contractors confused by new email format | Keep Supabase Auth Magic Link template identical to existing email; test before cutover |
+| PIN auth removed before Supabase Auth is working | Internal users locked out | Keep PIN auth working in parallel until Supabase email/password auth is tested |
+| Tenant portal breaks mid-migration | Tenants can't file tickets | Defer tenant RLS migration until internal migration is stable |
+| Password reset flow absent at launch | Internal users forget new Supabase Auth password, no self-service reset | Implement reset-password flow before removing PIN auth |
+
+---
 
 ## "Looks Done But Isn't" Checklist
 
 Things that appear complete but are missing critical pieces.
 
-- [ ] **RLS Enabled:** Often missing policies — verify at least one policy exists per table before enablement
-- [ ] **organization_id Column Added:** Often missing indexes — verify `CREATE INDEX idx_table_org_id` exists
-- [ ] **RLS Policies Created:** Often missing WITH CHECK — verify INSERT/UPDATE policies have WITH CHECK clause
-- [ ] **Server Component Updated:** Often missing session context — verify auth session forwarded to createClient()
-- [ ] **Foreign Keys Updated:** Often missing organization_id — verify compound foreign keys (id, organization_id)
-- [ ] **Data Backfilled:** Often incomplete — verify ALL rows have organization_id set (no NULLs)
-- [ ] **Terminology Refactored:** Often breaks types — verify `npx supabase gen types typescript` run after schema changes
-- [ ] **Navigation Redesigned:** Often missing redirects — verify old URLs redirect to new locations
-- [ ] **STWE Fields Added:** Often missing property_type discriminator — verify conditional UI based on property type
-- [ ] **Multi-Tenant Tests:** Often missing cross-tenant isolation — verify User A cannot access User B's data
+- [ ] **auth.users import complete:** Verify every `public.users` record has a matching `auth.users` entry — `SELECT p.id FROM public.users p LEFT JOIN auth.users a ON p.id = a.id WHERE a.id IS NULL` must return 0 rows
+- [ ] **Custom Access Token Hook:** Check GRANT and REVOKE SQL are in the migration, not just the function definition — test with an actual login in staging
+- [ ] **RLS policy performance:** Every `auth.uid()` call in policies is wrapped as `(SELECT auth.uid())` — verify with `EXPLAIN ANALYZE` on at least one query per module
+- [ ] **WITH CHECK on INSERT/UPDATE policies:** Every migrated INSERT/UPDATE policy has `WITH CHECK` clause — grep for policies without it
+- [ ] **organization_members indexes:** `(user_id)` and `(user_id, organization_id)` indexes exist before policies are active — check with `\d organization_members`
+- [ ] **Tenant portal migration:** Tenant-visible tables still use `set_config` path until tenants have Supabase Auth sessions — verify no tenant table uses `auth.uid()` prematurely
+- [ ] **34 ALLOWED_ROLES routes:** All routes migrated to permission-based checks BEFORE `users.role` column is dropped — grep for `ALLOWED_ROLES` must return 0 results
+- [ ] **users.role drop deferred:** Column is NOT dropped until step 5 of the plan (after all 34 routes migrated and tested)
+- [ ] **Cookie collision test:** After migration, old `session` cookie is deleted/ignored; verify middleware doesn't accept old cookie format
+- [ ] **Magic Link contractor flow:** End-to-end test: send Magic Link → click link → contractor portal loads with correct work order — in staging with new auth system
+
+---
 
 ## Recovery Strategies
 
@@ -373,14 +427,17 @@ When pitfalls occur despite prevention, how to recover.
 
 | Pitfall | Recovery Cost | Recovery Steps |
 |---------|---------------|----------------|
-| RLS enabled without policies | MEDIUM | 1. Disable RLS immediately: `ALTER TABLE ... DISABLE ROW LEVEL SECURITY` 2. Create policies 3. Test with client 4. Re-enable RLS |
-| Missing organization_id indexes | LOW | 1. Create indexes: `CREATE INDEX CONCURRENTLY` (no table lock) 2. Verify with EXPLAIN ANALYZE 3. Monitor performance |
-| Foreign key cascades cross tenant | HIGH | 1. Restore from backup (data loss) 2. Update FK constraints to compound 3. Add tests 4. Migrate again |
-| Backfill migration timeout | MEDIUM | 1. Rollback migration 2. Split into batched operations 3. Deploy in phases 4. Re-run |
-| Terminology refactor breaks types | LOW | 1. Run `npx supabase gen types typescript` 2. Fix TypeScript errors 3. Run tests 4. Deploy |
-| Navigation redesign rejected by users | MEDIUM | 1. Feature flag to old navigation 2. Gather feedback 3. Iterate design 4. Gradual rollout |
-| Service role RLS testing false confidence | MEDIUM | 1. Create proper test users 2. Rewrite tests with auth flow 3. Re-validate all policies |
-| Missing WITH CHECK in policies | HIGH | 1. Audit all policies 2. Add WITH CHECK clauses 3. Test malicious inserts 4. Verify no cross-tenant data created |
+| Cookie name collision → users see no data | MEDIUM | 1. Revert RLS policies to set_config pattern, 2. Force-expire old session cookies, 3. Re-migrate in correct order |
+| "Database error saving new user" on trigger | LOW | 1. Check Supabase Auth Logs for exact error, 2. Fix SECURITY DEFINER + GRANT, 3. Re-test with staging user |
+| JWT claims staleness after role change | LOW | 1. Call `admin.signOut(userId, 'global')` to force re-login, 2. Document in runbook |
+| user_metadata in RLS → privilege escalation | HIGH | 1. Immediately rewrite affected policies, 2. Audit all user_metadata values for tampering, 3. Force-rotate all sessions |
+| auth.uid() performance regression | MEDIUM | 1. Rewrite policies with `(SELECT auth.uid())` wrapper, 2. `CREATE INDEX CONCURRENTLY` on organization_members(user_id), 3. Monitor with EXPLAIN ANALYZE |
+| 34 ALLOWED_ROLES routes broken after role drop | HIGH | 1. Restore users.role column from backup, 2. Migrate all 34 routes, 3. Re-drop column |
+| Custom Hook breaks all logins | HIGH | 1. Disable hook in Supabase Dashboard immediately, 2. Fix GRANT/REVOKE, 3. Re-enable with test |
+| Tenant portal broken by premature RLS change | MEDIUM | 1. Revert tenant-visible table policies to dual-path, 2. Complete tenant Supabase Auth migration, 3. Switch policies |
+| JWT too large → middleware auth failure | MEDIUM | 1. Remove permissions array from hook, 2. Force-refresh all sessions, 3. Use DB lookup for permissions |
+
+---
 
 ## Pitfall-to-Phase Mapping
 
@@ -388,53 +445,49 @@ How roadmap phases should address these pitfalls.
 
 | Pitfall | Prevention Phase | Verification |
 |---------|------------------|--------------|
-| Pitfall 1: RLS without policies | Phase 1: Schema Migration | Run test queries via client SDK, verify non-empty results |
-| Pitfall 2: Server Components without context | Phase 2: RLS Context Validation | Load each Server Component route, verify data appears |
-| Pitfall 3: Missing organization_id indexes | Phase 1: Schema Migration | Run EXPLAIN ANALYZE, verify Index Scan not Seq Scan |
-| Pitfall 4: Foreign key cascades | Phase 1: Schema Migration | Verify compound foreign keys exist, test cross-tenant delete |
-| Pitfall 5: Non-zero-downtime migration | Phase 3: Data Migration | Deploy to staging, measure lock duration < 30s |
-| Pitfall 6: Terminology refactor breaks code | Phase 4: Terminology Cleanup | Run TypeScript build, all tests pass |
-| Pitfall 7: Navigation redesign breaks UX | Phase 5: Navigation Redesign | User testing with KEWA/Imeri, feature flag rollout |
-| Pitfall 8: Service role RLS testing | Phase 2: RLS Context Validation | Tests use actual user sessions, no service role key |
-| Pitfall 9: STWE fields break rental workflows | Phase 1: Schema Migration | Verify property_type discriminator, conditional UI |
-| Pitfall 10: Missing WITH CHECK | Phase 1: Schema Migration | Test malicious insert with different organization_id |
+| Cookie name collision (Pitfall 1) | Phase A: Auth Foundation | Middleware test: old `session` cookie is rejected after cutover |
+| Trigger "database error saving new user" (Pitfall 2) | Phase A: Auth Foundation | Test new user invite flow end-to-end in staging |
+| JWT claims staleness (Pitfall 3) | Phase B: RBAC Design | Documented behavior: role changes take effect at next refresh |
+| user_metadata in RLS (Pitfall 4) | Phase A: Auth Foundation | grep for `user_metadata` in all RLS policies = 0 results |
+| PgBouncer + auth.uid() (Pitfall 5) | Phase C: RLS Migration | Concurrent load test: 10 users from 2 orgs, no cross-tenant data leakage |
+| Missing initPlan optimization (Pitfall 6) | Phase C: RLS Migration | EXPLAIN ANALYZE shows initPlan on all auth.uid() calls |
+| 34 ALLOWED_ROLES routes (Pitfall 7) | Phase D: API Cleanup | grep for `ALLOWED_ROLES` = 0 results; all routes return 200 for internal users |
+| Magic Link without auth.users entry (Pitfall 8) | Phase A: Auth Foundation | Zero-row result: `public.users LEFT JOIN auth.users WHERE a.id IS NULL` |
+| Hook missing GRANT (Pitfall 9) | Phase A: Auth Foundation | Login succeeds for test user in staging after hook enabled |
+| Membership table RLS deadlock (Pitfall 10) | Phase B: RBAC Design | New user invite flow completes without error |
+| JWT cookie chunking (Pitfall 11) | Phase A: Auth Foundation | Cookie inspector shows single unchunked auth token; size < 3KB |
+| Tenant portal separate migration path (Pitfall 12) | Phase C: RLS Migration | Tenant can access tickets and unit during internal user migration |
+
+---
 
 ## Sources
 
-### Supabase RLS and Migration
-- [Supabase Row Level Security (RLS): Complete Guide (2026)](https://designrevision.com/blog/supabase-row-level-security)
-- [Best Practices for Supabase](https://www.leanware.co/insights/supabase-best-practices)
+### Supabase Auth Documentation
+- [Custom Access Token Hook | Supabase Docs](https://supabase.com/docs/guides/auth/auth-hooks/custom-access-token-hook)
+- [Auth Hooks | Supabase Docs](https://supabase.com/docs/guides/auth/auth-hooks)
+- [JWT Claims Reference | Supabase Docs](https://supabase.com/docs/guides/auth/jwt-fields)
+- [Custom Claims & Role-based Access Control (RBAC) | Supabase Docs](https://supabase.com/docs/guides/database/postgres/custom-claims-and-role-based-access-control-rbac)
+- [User sessions | Supabase Docs](https://supabase.com/docs/guides/auth/sessions)
+- [Setting up Server-Side Auth for Next.js | Supabase Docs](https://supabase.com/docs/guides/auth/server-side/nextjs)
+
+### RLS Performance and Security
+- [RLS Performance and Best Practices | Supabase Docs](https://supabase.com/docs/guides/troubleshooting/rls-performance-and-best-practices-Z5Jjwv)
 - [Row Level Security | Supabase Docs](https://supabase.com/docs/guides/database/postgres/row-level-security)
-- [Hardening the Data API | Supabase Docs](https://supabase.com/docs/guides/database/hardening-data-api)
-- [Enable RLS by default on all new tables · supabase · Discussion #21747](https://github.com/orgs/supabase/discussions/21747)
-- [Use Supabase Auth with Next.js | Supabase Docs](https://supabase.com/docs/guides/auth/quickstarts/nextjs)
-- [Server-Side Issue: Row Level security auth.uid() check doesn't work · supabase · Discussion #6592](https://github.com/orgs/supabase/discussions/6592)
+- [RLS references user_metadata — Splinter Security Linter](https://supabase.github.io/splinter/0015_rls_references_user_metadata/)
 
-### Multi-Tenant Architecture
-- [Multi-Tenant Database Architecture Patterns Explained](https://www.bytebase.com/blog/multi-tenant-database-architecture-patterns-explained/)
-- [Designing Your Postgres Database for Multi-tenancy | Crunchy Data Blog](https://www.crunchydata.com/blog/designing-your-postgres-database-for-multi-tenancy)
-- [Multi-Tenant Schema Migration — Citus Docs](https://docs.citusdata.com/en/v7.4/develop/migration_mt_schema.html)
-- [How to Implement PostgreSQL Row Level Security for Multi-Tenant SaaS](https://www.techbuddies.io/2026/01/01/how-to-implement-postgresql-row-level-security-for-multi-tenant-saas/)
-- [PostgreSQL Row-level Security (RLS) Limitations and Alternatives](https://www.bytebase.com/blog/postgres-row-level-security-limitations-and-alternatives/)
+### Troubleshooting References
+- [Database error saving new user | Supabase Docs](https://supabase.com/docs/guides/troubleshooting/database-error-saving-new-user-RU_EwB)
+- [Errors when creating / updating / deleting users | Supabase Docs](https://supabase.com/docs/guides/troubleshooting/dashboard-errors-when-managing-users-N1ls4A)
+- [Next.js Supabase Auth troubleshooting | Supabase Docs](https://supabase.com/docs/guides/troubleshooting/how-do-you-troubleshoot-nextjs---supabase-auth-issues-riMCZV)
+- [Auth token cookie chunk size issue · GitHub supabase/auth-helpers #707](https://github.com/supabase/auth-helpers/issues/707)
+- [JWT maximum size? · GitHub supabase Discussion #12057](https://github.com/supabase/supabase/issues/1176)
+- [Some JWTs exceed Cloudflare/Nginx header size limits · GitHub supabase/auth #1754](https://github.com/supabase/auth/issues/1754)
 
-### Zero-Downtime Migrations
-- [How do you plan zero-downtime data migrations and backfills?](https://www.designgurus.io/answers/detail/how-do-you-plan-zerodowntime-data-migrations-and-backfills)
-- [3 Best Practices For Zero-Downtime Database Migrations | LaunchDarkly](https://launchdarkly.com/blog/3-best-practices-for-zero-downtime-database-migrations/)
-- [Database Migration Strategies for Zero-Downtime Deployments](https://www.deployhq.com/blog/database-migration-strategies-for-zero-downtime-deployments-a-step-by-step-guide)
-- [Database Migrations at Scale: Zero-Downtime Strategies](https://medium.com/@sohail_saifii/database-migrations-at-scale-zero-downtime-strategies-b72be4833519)
-
-### Code Refactoring
-- [How to Refactor Complex Codebases – A Practical Guide for Devs](https://www.freecodecamp.org/news/how-to-refactor-complex-codebases)
-- [Code Refactoring: When to Refactor and How to Avoid Mistakes](https://www.tembo.io/blog/code-refactoring)
-- [Refactoring made right: how program analysis makes AI agents safe and reliable](https://kiro.dev/blog/refactoring-made-right/)
-- [Codebase Refactoring (with help from Go)](https://go.dev/talks/2016/refactor.article)
-
-### Navigation UX
-- [10 modern footer UX patterns for 2026](https://www.eleken.co/blog-posts/footer-ux)
-- [Mobile Navigation UX Best Practices, Patterns & Examples (2026)](https://www.designstudiouiux.com/blog/mobile-navigation-ux/)
-- [Mobile Navigation Patterns That Work in 2026](https://phone-simulator.com/blog/mobile-navigation-patterns-in-2026)
-- [Designing Navigation for Mobile: Design Patterns and Best Practices](https://www.smashingmagazine.com/2022/11/navigation-design-mobile-ux/)
+### Migration References
+- [Migrate from Auth0 to Supabase Auth | Supabase Docs](https://supabase.com/docs/guides/platform/migrating-to-supabase/auth0)
+- [supabase-community/supabase-custom-claims](https://github.com/supabase-community/supabase-custom-claims)
+- [auth.signIn() with magic link creates users in auth.users · Issue #1176](https://github.com/supabase/supabase/issues/1176)
 
 ---
-*Pitfalls research for: Retrofitting Multi-Tenancy (Supabase RLS) to Existing Property Management App*
-*Researched: 2026-02-18*
+*Pitfalls research for: Migrating Custom PIN Auth to Supabase Auth with RLS Policy Rewrite in Multi-Tenant Production App*
+*Researched: 2026-02-19*

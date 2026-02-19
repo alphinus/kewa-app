@@ -11,6 +11,7 @@
 
 import { Suspense } from 'react'
 import Link from 'next/link'
+import { DashboardBreadcrumbs } from '@/components/navigation/DashboardBreadcrumbs'
 import { createPublicClient } from '@/lib/supabase/with-org'
 import { BudgetSummaryCards } from '@/components/change-orders/BudgetSummaryCards'
 import { LazyBudgetImpactChart } from '@/components/change-orders/LazyBudgetImpactChart'
@@ -95,22 +96,7 @@ export default async function ProjectChangeOrdersPage({ params }: PageProps) {
 
   return (
     <div className="p-8 space-y-8">
-      {/* Breadcrumb */}
-      <div className="flex items-center text-sm text-gray-500">
-        <Link href="/dashboard" className="hover:text-gray-700">
-          Dashboard
-        </Link>
-        <ChevronRight className="w-4 h-4 mx-2" />
-        <Link href="/dashboard/projekte" className="hover:text-gray-700">
-          Projekte
-        </Link>
-        <ChevronRight className="w-4 h-4 mx-2" />
-        <Link href={`/dashboard/projekte/${id}`} className="hover:text-gray-700">
-          {data.project_name}
-        </Link>
-        <ChevronRight className="w-4 h-4 mx-2" />
-        <span className="text-gray-900">Änderungsaufträge</span>
-      </div>
+      <DashboardBreadcrumbs />
 
       {/* Page Header */}
       <div className="flex items-center justify-between">

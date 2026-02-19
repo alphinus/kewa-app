@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, Suspense } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { DashboardBreadcrumbs } from '@/components/navigation/DashboardBreadcrumbs'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { ArticleCard } from '@/components/knowledge/ArticleViewer'
@@ -164,19 +165,7 @@ function KnowledgePageContent() {
 
       {/* Main content */}
       <main className="flex-1 min-w-0 space-y-4">
-        {/* Breadcrumb */}
-        <nav className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-          <Link
-            href="/dashboard"
-            className="hover:text-gray-700 dark:hover:text-gray-300"
-          >
-            Dashboard
-          </Link>
-          <span>/</span>
-          <span className="text-gray-900 dark:text-gray-100">
-            Wissensdatenbank
-          </span>
-        </nav>
+        <DashboardBreadcrumbs />
 
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">

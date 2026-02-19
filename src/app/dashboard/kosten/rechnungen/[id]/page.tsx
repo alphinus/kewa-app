@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
+import { DashboardBreadcrumbs } from '@/components/navigation/DashboardBreadcrumbs'
 import { getInvoiceWithRelations } from '@/lib/costs/invoice-queries'
 import { InvoiceDetail } from '@/components/costs/InvoiceDetail'
 
@@ -48,8 +49,8 @@ export default async function InvoiceDetailPage({ params }: PageProps) {
   }
 
   return (
-    <div className="pb-20">
-      <Breadcrumb invoiceNumber={invoice.invoice_number} />
+    <div className="space-y-6 pb-20">
+      <DashboardBreadcrumbs />
       <InvoiceDetail invoice={invoice} />
     </div>
   )

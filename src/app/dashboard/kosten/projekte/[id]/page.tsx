@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import { DashboardBreadcrumbs } from '@/components/navigation/DashboardBreadcrumbs'
 import { createPublicClient } from '@/lib/supabase/with-org'
 import { getProjectCostBreakdown } from '@/lib/costs/project-cost-queries'
 import { ProjectCostDashboard } from '@/components/costs/ProjectCostDashboard'
@@ -33,26 +34,7 @@ export default async function ProjectCostPage({ params }: Props) {
 
   return (
     <div className="space-y-6 pb-20">
-      {/* Breadcrumb */}
-      <nav className="flex items-center text-sm text-gray-500 dark:text-gray-400">
-        <Link
-          href="/dashboard/kosten"
-          className="hover:text-gray-900 dark:hover:text-gray-100"
-        >
-          Kosten
-        </Link>
-        <span className="mx-2">/</span>
-        <Link
-          href="/dashboard/kosten"
-          className="hover:text-gray-900 dark:hover:text-gray-100"
-        >
-          Projekte
-        </Link>
-        <span className="mx-2">/</span>
-        <span className="text-gray-900 dark:text-gray-100 font-medium">
-          {data.project.name}
-        </span>
-      </nav>
+      <DashboardBreadcrumbs />
 
       {/* Project Cost Dashboard */}
       <ProjectCostDashboard data={data} />

@@ -12,6 +12,7 @@
 
 import { useSearchParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { DashboardBreadcrumbs } from '@/components/navigation/DashboardBreadcrumbs'
 import { Card, CardContent } from '@/components/ui/card'
 import { InvoiceForm } from '@/components/costs/InvoiceForm'
 import type { Invoice } from '@/types/database'
@@ -35,17 +36,7 @@ export default function NeueRechnungPage() {
 
   return (
     <div className="space-y-6 pb-20">
-      {/* Breadcrumb */}
-      <nav className="flex items-center gap-2 text-sm text-gray-500">
-        <Link
-          href="/dashboard/kosten/rechnungen"
-          className="hover:text-gray-700 dark:hover:text-gray-300"
-        >
-          Rechnungen
-        </Link>
-        <span>/</span>
-        <span className="text-gray-900 dark:text-gray-100">Neu erfassen</span>
-      </nav>
+      <DashboardBreadcrumbs />
 
       {/* Header */}
       <div>

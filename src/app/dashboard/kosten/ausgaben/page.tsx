@@ -12,6 +12,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { DashboardBreadcrumbs } from '@/components/navigation/DashboardBreadcrumbs'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { ExpenseList } from '@/components/costs/ExpenseList'
@@ -84,6 +85,7 @@ export default function AusgabenPage() {
 
   return (
     <div className="space-y-6 pb-20">
+      <DashboardBreadcrumbs />
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>

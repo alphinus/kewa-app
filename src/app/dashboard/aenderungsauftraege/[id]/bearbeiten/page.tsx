@@ -12,6 +12,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { DashboardBreadcrumbs } from '@/components/navigation/DashboardBreadcrumbs'
 import { ChangeOrderForm } from '@/components/change-orders/ChangeOrderForm'
 import type { ChangeOrder } from '@/types/change-orders'
 
@@ -125,31 +126,7 @@ export default function BearbeitenAenderungsauftragPage({ params }: PageProps) {
 
   return (
     <div className="p-4 pb-20 sm:p-6 max-w-4xl mx-auto">
-      {/* Breadcrumb */}
-      <nav className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mb-6">
-        <Link
-          href="/dashboard"
-          className="hover:text-gray-700 dark:hover:text-gray-300"
-        >
-          Dashboard
-        </Link>
-        <span>/</span>
-        <Link
-          href="/dashboard/aenderungsauftraege"
-          className="hover:text-gray-700 dark:hover:text-gray-300"
-        >
-          Änderungsaufträge
-        </Link>
-        <span>/</span>
-        <Link
-          href={`/dashboard/aenderungsauftraege/${id}`}
-          className="hover:text-gray-700 dark:hover:text-gray-300"
-        >
-          {changeOrder.co_number}
-        </Link>
-        <span>/</span>
-        <span className="text-gray-900 dark:text-gray-100">Bearbeiten</span>
-      </nav>
+      <DashboardBreadcrumbs />
 
       {/* Header */}
       <div className="mb-6">

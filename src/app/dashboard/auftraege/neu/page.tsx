@@ -14,6 +14,7 @@
 import { Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
+import { DashboardBreadcrumbs } from '@/components/navigation/DashboardBreadcrumbs'
 import { WorkOrderForm } from '@/components/work-orders/WorkOrderForm'
 import type { WorkOrderWithRelations } from '@/types/work-order'
 
@@ -77,24 +78,7 @@ function LoadingState() {
 export default function CreateWorkOrderPage() {
   return (
     <div className="space-y-6 pb-20">
-      {/* Breadcrumb */}
-      <nav className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-        <Link
-          href="/dashboard"
-          className="hover:text-gray-700 dark:hover:text-gray-300"
-        >
-          Dashboard
-        </Link>
-        <span>/</span>
-        <Link
-          href="/dashboard/auftraege"
-          className="hover:text-gray-700 dark:hover:text-gray-300"
-        >
-          Arbeitsaufträge
-        </Link>
-        <span>/</span>
-        <span className="text-gray-900 dark:text-gray-100">Neuer Auftrag</span>
-      </nav>
+      <DashboardBreadcrumbs />
 
       {/* Page header */}
       <div>

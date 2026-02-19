@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { DashboardBreadcrumbs } from '@/components/navigation/DashboardBreadcrumbs'
 import { createPublicClient } from '@/lib/supabase/with-org'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { formatCHF } from '@/lib/costs/formatters'
@@ -90,6 +91,7 @@ export default async function KostenOverviewPage() {
 
   return (
     <div className="space-y-6 pb-20">
+      <DashboardBreadcrumbs />
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>

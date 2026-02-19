@@ -12,6 +12,7 @@ import { CompleteTaskModal } from '@/components/tasks/CompleteTaskModal'
 import { TaskForm } from '@/components/tasks/TaskForm'
 import type { TaskWithProject, TaskPhotoWithUrl, PhotosResponse, TaskAudioWithUrl, AudiosResponse } from '@/types/database'
 import type { Priority, Role } from '@/types'
+import { DashboardBreadcrumbs } from '@/components/navigation/DashboardBreadcrumbs'
 import { cacheEntityOnView } from '@/lib/db/operations'
 import { useOfflineEntity } from '@/hooks/useOfflineEntity'
 import { StalenessIndicator } from '@/components/StalenessIndicator'
@@ -327,6 +328,7 @@ export default function TaskDetailPage() {
 
   return (
     <div className="space-y-4 pb-40 relative">
+      <DashboardBreadcrumbs />
       {/* Back button */}
       <button
         onClick={() => router.back()}

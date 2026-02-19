@@ -11,6 +11,7 @@
 
 import { useState, useEffect, use } from 'react'
 import Link from 'next/link'
+import { DashboardBreadcrumbs } from '@/components/navigation/DashboardBreadcrumbs'
 import { Card, CardHeader, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { PurchaseOrderStatusBadge } from '@/components/suppliers/PurchaseOrderStatusBadge'
@@ -259,31 +260,7 @@ export default function BestellungDetailPage({ params }: PageProps) {
 
   return (
     <div className="p-4 pb-20 sm:p-6 max-w-4xl mx-auto space-y-6">
-      {/* Breadcrumb */}
-      <nav className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-        <Link
-          href="/dashboard"
-          className="hover:text-gray-700 dark:hover:text-gray-300"
-        >
-          Dashboard
-        </Link>
-        <span>/</span>
-        <Link
-          href="/dashboard/lieferanten"
-          className="hover:text-gray-700 dark:hover:text-gray-300"
-        >
-          Lieferanten
-        </Link>
-        <span>/</span>
-        <Link
-          href="/dashboard/lieferanten/bestellungen"
-          className="hover:text-gray-700 dark:hover:text-gray-300"
-        >
-          Bestellungen
-        </Link>
-        <span>/</span>
-        <span className="text-gray-900 dark:text-gray-100">{purchaseOrder.order_number}</span>
-      </nav>
+      <DashboardBreadcrumbs />
 
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">

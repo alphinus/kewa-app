@@ -45,3 +45,24 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+.env*.local
+
+# temporary migration scripts and tokens
+scripts/.token.tmp
+scripts/apply-migrations*.mjs
+scripts/fix-remaining.mjs
+scripts/apply-rls.mjs
+scripts/add-wo-number.mjs
+scripts/backfill-wo-number.mjs
+scripts/fix-audit-trigger.mjs
+scripts/get-supabase-token.ps1
+
+# playwright MCP logs
+.playwright-mcp/
+
+# supabase CLI internal state
+supabase/.temp/
+
+# temporary screenshots
+*.png
+!public/**/*.png

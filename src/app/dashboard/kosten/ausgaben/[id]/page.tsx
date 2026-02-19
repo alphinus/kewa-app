@@ -11,6 +11,7 @@
 
 import { use } from 'react'
 import Link from 'next/link'
+import { DashboardBreadcrumbs } from '@/components/navigation/DashboardBreadcrumbs'
 import { ExpenseDetail } from '@/components/costs/ExpenseDetail'
 
 interface ExpenseDetailPageProps {
@@ -24,17 +25,7 @@ export default function ExpenseDetailPage({ params }: ExpenseDetailPageProps) {
 
   return (
     <div className="space-y-6 pb-20">
-      {/* Breadcrumb */}
-      <nav className="flex items-center gap-2 text-sm text-gray-500">
-        <Link
-          href="/dashboard/kosten/ausgaben"
-          className="hover:text-gray-700 dark:hover:text-gray-300"
-        >
-          Ausgaben
-        </Link>
-        <span>/</span>
-        <span className="text-gray-900 dark:text-gray-100">Details</span>
-      </nav>
+      <DashboardBreadcrumbs />
 
       {/* Expense Detail Component */}
       <ExpenseDetail expenseId={id} />
